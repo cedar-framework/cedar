@@ -1,0 +1,175 @@
+#include <algorithm>
+
+#include "boxmg-common.h"
+
+#include "kernel/halo.h"
+#include "kernel/mpi/factory.h"
+#include "solver/mpi/boxmg.h"
+#include "solver/boxmg.h"
+
+using namespace boxmg;
+using namespace boxmg::bmg2d;
+using namespace boxmg::bmg2d::solver::mpi;
+
+BoxMG::BoxMG(core::mpi::StencilOp&& fop) : comm(fop.grid().comm)
+{
+	kreg = kernel::mpi::factory::from_config(conf);
+	fop.set_registry(kreg);
+
+	levels.emplace_back(std::move(fop), inter::mpi::ProlongOp());
+
+	auto num_levels = BoxMG::compute_num_levels(levels[0].A);
+	log::debug << "Using a " << num_levels << " level heirarchy" << std::endl;
+	levels.reserve(num_levels);
+	levels.back().A.grid().grow(num_levels);
+	for (auto i: range(num_levels-1)) {
+		add_level(levels.back().A, num_levels);
+		levels[i].R.associate(&levels[i].P);
+		levels[i].P.fine_op = &levels[i].A;
+		levels[i].R.set_registry(kreg);
+		levels[i].P.set_registry(kreg);
+	}
+
+	auto kernels = kernel_registry();
+	kernels->halo_setup(levels[0].A.grid(), &halo_ctx);
+	levels[0].A.halo_ctx = halo_ctx;
+	kernels->halo_stencil_exchange(levels[0].A);
+
+	for (auto i: range(num_levels)) {
+		levels[i].A.halo_ctx = halo_ctx;
+		if (i != num_levels-1) {
+			levels[i].P.halo_ctx = halo_ctx;
+			core::RelaxStencil SOR(levels[i].A.stencil().shape(0), levels[i].A.stencil().shape(1));
+			levels[i].SOR = std::move(SOR);
+			int kf = num_levels - i;
+			kernels->setup_interp(kf,kf-1,num_levels,
+			                     levels[i].A, levels[i+1].A,
+			                     levels[i].P);
+			kernels->galerkin_prod(kf, kf-1, num_levels, levels[i].P, levels[i].A, levels[i+1].A);
+			kernels->setup_relax(levels[i].A,  levels[i].SOR);
+			int nrelax_pre = conf.get<int>("solver.cycle.nrelax-pre", 2);
+			int nrelax_post = conf.get<int>("solver.cycle.nrelax-post", 1);
+			levels[i].presmoother = [&,i,nrelax_pre,kernels](const core::DiscreteOp &A, core::GridFunc &x, const core::GridFunc &b) {
+				const core::StencilOp & av = dynamic_cast<const core::StencilOp &>(A);
+				for (auto j : range(nrelax_pre)) {
+					(void)j;
+					kernels->relax(av, x, b, levels[i].SOR, cycle::Dir::DOWN);
+				}
+			};
+			levels[i].postsmoother = [&,i,nrelax_post,kernels](const core::DiscreteOp &A, core::GridFunc &x, const core::GridFunc&b) {
+
+				const core::StencilOp & av = dynamic_cast<const core::StencilOp &>(A);
+				for (auto j: range(nrelax_post)) {
+					(void)j;
+					kernels->relax(av, x, b, levels[i].SOR, cycle::Dir::UP);
+				}
+			};
+		}
+	}
+
+	auto & cop = levels.back().A;
+	std::shared_ptr<solver::BoxMG> cg_bmg;
+	kernels->setup_cg_boxmg(cop, &cg_bmg);
+
+	coarse_solver = [&,cg_bmg,kernels](const core::DiscreteOp &A, core::mpi::GridFunc &x, const core::mpi::GridFunc &b) {
+		const core::mpi::StencilOp &av = dynamic_cast<const core::mpi::StencilOp&>(A);
+		auto &b_rw = const_cast<core::mpi::GridFunc&>(b);
+		b_rw.halo_ctx = av.halo_ctx;
+		kernels->solve_cg_boxmg(*cg_bmg, x, b);
+		core::mpi::GridFunc residual = av.residual(x,b);
+		log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
+	};
+}
+
+
+void BoxMG::add_level(core::mpi::StencilOp & fop, int num_levels)
+{
+	int kc = num_levels - levels.size() - 1;
+
+	core::mpi::GridTopo & fgrid = fop.grid();
+	auto cgrid = std::make_shared<core::mpi::GridTopo>(fgrid.get_igrd(), kc, num_levels);
+	cgrid->comm = fgrid.comm;
+
+	len_t NLxg = fgrid.nlocal(0) - 2;
+	len_t NLyg = fgrid.nlocal(1) - 2;
+	len_t NGxg = (fgrid.nglobal(0) - 1) / 2 + 2;
+	len_t NGyg = (fgrid.nglobal(1) - 1) / 2 + 2;
+
+	cgrid->nglobal(0) = NGxg;
+	cgrid->nglobal(1) = NGyg;
+
+	if ((fgrid.is(0) % 2) == 1) {
+		cgrid->is(0) = (fgrid.is(0) + 1) / 2;
+		NLxg = (NLxg + 1) / 2;
+	} else {
+		cgrid->is(0) = fgrid.is(0)/2 + 1;
+		if (NLxg % 2 == 1) NLxg = (NLxg-1)/2;
+		else NLxg = (NLxg+1)/2;
+	}
+
+
+	if (fgrid.is(1) % 2 == 1) {
+		cgrid->is(1) = (fgrid.is(1)+1) / 2;
+		NLyg = (NLyg+1) / 2;
+	} else {
+		cgrid->is(1) = fgrid.is(1) / 2 + 1;
+		if (NLyg % 2 == 1) NLyg = (NLyg - 1) / 2;
+		else NLyg = (NLyg+1)/2;
+	}
+
+	cgrid->nlocal(0) = NLxg + 2;
+	cgrid->nlocal(1) = NLyg + 2;
+
+	cgrid->nproc(0) = fgrid.nproc(0);
+	cgrid->nproc(1) = fgrid.nproc(1);
+	cgrid->coord(0) = fgrid.coord(0);
+	cgrid->coord(1) = fgrid.coord(1);
+
+
+	auto cop = core::mpi::StencilOp(cgrid);
+	levels.back().P = inter::mpi::ProlongOp(cgrid);
+
+	cop.set_registry(kreg);
+
+	levels.emplace_back(std::move(cop),inter::mpi::ProlongOp());
+}
+
+
+int BoxMG::compute_num_levels(core::mpi::StencilOp & fop)
+{
+	int ng;
+	auto min_coarse = conf.get<len_t>("solver.min_coarse", 3);
+
+	auto kernels = kernel_registry();
+
+	kernels->setup_nog(fop.grid(), min_coarse, &ng);
+
+	return ng;
+}
+
+
+std::shared_ptr<kernel::Registry> BoxMG::kernel_registry()
+{
+	return std::static_pointer_cast<kernel::Registry>(kreg);
+}
+
+
+// core::GridFunc BoxMG::solve(const core::GridFunc & b)
+// {
+// 	core::GridFunc x = core::GridFunc::zeros(b.shape(0),b.shape(1));
+// 	int maxiter = config::get<int>("solver.max-iter", 10);
+// 	real_t tol = config::get<real_t>("solver.tol", 1e-8);
+// 	core::GridFunc res0 = levels[0].A.residual(x,b);
+
+// 	real_t res0_l2 = res0.template lp_norm<2>();
+// 	log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
+// 	for (auto i: range(maxiter)) {
+// 		ncycle(0, x, b);
+// 		core::GridFunc res = levels[0].A.residual(x,b);
+// 		real_t res_l2 = res.template lp_norm<2>();
+// 		real_t rel_l2 = res_l2 / res0_l2;
+// 		log::status << "Iteration " << i << " relative l2 norm: " << rel_l2 << std::endl;
+// 		if (rel_l2 < tol) break;
+// 	}
+// 	return x;
+// }

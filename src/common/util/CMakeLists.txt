@@ -11,6 +11,6 @@ set(util_HEADERS
 
 set(util_SOURCES
   grid.cc
-  kenrel_registry.cc
+  kernel_registry.cc
   log.cc
   PARENT_SCOPE)

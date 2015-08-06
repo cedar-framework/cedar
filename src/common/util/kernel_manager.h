@@ -6,8 +6,8 @@
 #include <map>
 #include <exception>
 
-#include "common/kernel.h"
-#include "common/log.h"
+#include "kernel.h"
+#include "log.h"
 
 namespace boxmg {
 

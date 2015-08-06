@@ -1,0 +1,25 @@
+set(core_HEADERS
+  array.h
+  discrete_op.h
+  grid_stencil.h
+  grid_func.h
+  stencil.h
+  stencil_op.h
+  types.h
+  boundary_iterator.h
+  mpi/grid_topo.h
+  mpi/grid_func.h
+  mpi/stencil_op.h
+  PARENT_SCOPE)
+
+set(core_SOURCES
+  grid_stencil.cc
+  boundary_iterator.cc
+  grid_func.cc
+  relax_stencil.cc
+  stencil.cc
+  stencil_op.cc
+  mpi/grid_func.cc
+  mpi/stencil_op.cc
+  mpi/grid_topo.cc
+  PARENT_SCOPE)

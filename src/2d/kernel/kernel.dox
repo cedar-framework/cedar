@@ -1,0 +1,9 @@
+/**
+@namespace boxmg::bmg2d::kernel
+@brief 2D kernel management, wrappers, and implmentations
+
+Library for managing 2D kernels.  Includes system provided kernels and
+wrappers while allowing for the registration of user defined kernels.
+Registered kernels may be selected at runtime using the configuration
+file.
+*/

@@ -1,7 +1,7 @@
 #ifndef BOXMG_UTIL_GRID_H
 #define BOXMG_UTIL_GRID_H
 
-#include "common/types.h"
+#include "types.h"
 
 namespace boxmg
 {

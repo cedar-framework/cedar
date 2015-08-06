@@ -1,0 +1,7 @@
+/**
+@namespace boxmg::bmg2d::core
+@brief 2D core data structures and types
+
+Library containing fundamental types and datastructures
+in 2D.
+*/
