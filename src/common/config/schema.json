@@ -1,0 +1,22 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Configururation Items",
+    "type": "object",
+    "properties":
+    {
+		"kernel":
+		{
+			"type": "object",
+			"required": ["residual"]
+		},
+		"log_level":
+		{
+			"type": "array",
+			"items":
+			{
+				"type": "string",
+				"pattern": "error|status|info|warn"
+			}
+		}
+	}
+}
