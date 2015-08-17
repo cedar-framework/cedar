@@ -21,6 +21,20 @@ GridFunc GridFunc::zeros_like(const GridFunc &like)
 }
 
 
+GridFunc GridFunc::ones_like(const GridFunc &like)
+{
+	GridFunc ret(like.grid_ptr());
+
+	for (auto j: ret.grange(1)) {
+		for (auto i: ret.grange(0)) {
+			ret(i,j) = 1.0;
+		}
+	}
+
+	return ret;
+}
+
+
 GridFunc & GridFunc::operator-=(const GridFunc &rhs)
 {
 	for (auto j: this->range(1)) {

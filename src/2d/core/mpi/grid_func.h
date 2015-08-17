@@ -22,6 +22,7 @@ public:
 	topo_ptr grid_ptr() const { return grid_; }
 	void *halo_ctx;
 	static GridFunc zeros_like(const GridFunc &likeable);
+	static GridFunc ones_like(const GridFunc &likeable);
 	template<int p> real_t lp_norm() const;
 	real_t inf_norm() const;
 	GridFunc & operator-=(const GridFunc & rhs);

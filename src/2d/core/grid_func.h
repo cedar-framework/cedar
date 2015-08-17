@@ -21,6 +21,7 @@ namespace boxmg { namespace bmg2d { namespace core {
 		static GridFunc ones(len_t nx, len_t ny);
 		static GridFunc zeros(len_t nx, len_t ny);
 		static GridFunc zeros_like(const GridFunc &likeable);
+		static GridFunc ones_like(const GridFunc &likeable);
 		virtual real_t inf_norm() const;
 		template<int p> real_t lp_norm() const;
 		GridFunc & operator+=(iadd_t interp_add_package);

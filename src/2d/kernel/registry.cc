@@ -85,6 +85,15 @@ void Registry::halo_exchange(core::mpi::GridFunc & f)
 }
 
 
+void Registry::halo_exchange(const core::mpi::GridFunc & f, void *halo_ctx)
+{
+	auto & fd = const_cast<core::mpi::GridFunc&>(f);
+	fd.halo_ctx = halo_ctx;
+	active.run(name::halo_exchange,
+	           static_cast<core::mpi::GridFunc&>(fd));
+}
+
+
 void Registry::halo_stencil_exchange(core::mpi::StencilOp & so)
 {
 	active.run(name::halo_stencil_exchange,

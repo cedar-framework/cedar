@@ -50,6 +50,20 @@ GridFunc GridFunc::zeros_like(const GridFunc &like)
 }
 
 
+GridFunc GridFunc::ones_like(const GridFunc &like)
+{
+	GridFunc ret(like.shape(0), like.shape(1));
+
+	for (auto j: ret.grange(1)) {
+		for (auto i: ret.grange(0)) {
+			ret(i,j) = 1.0;
+		}
+	}
+
+	return ret;
+}
+
+
 GridFunc & GridFunc::operator+=(iadd_t package)
 {
 	auto kernels = std::get<0>(package).get_registry();

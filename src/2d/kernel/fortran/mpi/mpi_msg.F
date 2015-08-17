@@ -90,7 +90,7 @@ c
       
       MSG_BLOCKING = 1
 
-#ifndef DEBUG
+#ifndef MSG_DEBUG
       call MPI_initialized(flag, ierror)
       if(.not.flag) call MPI_init(ierror)   
 c
@@ -133,7 +133,7 @@ c        a parent communicator has been specified
       include 'geom_param_fort.h'
       include 'mpi_param_fort.h'
       integer ierror, MyProc
-#ifndef DEBUG
+#ifndef MSG_DEBUG
       call MPI_COMM_RANK(MSG_COMM, MyProc, ierror)
       MSG_myproc = MyProc + 1
 #else
@@ -150,7 +150,7 @@ c        a parent communicator has been specified
       include 'geom_param_fort.h'
       include 'mpi_param_fort.h'
       integer ierror, NumProc
-#ifndef DEBUG
+#ifndef MSG_DEBUG
       call MPI_COMM_SIZE(MSG_COMM, NumProc, ierror)
 #else
       print *,' Debugging: enter NumProc:'
@@ -192,7 +192,7 @@ c        a parent communicator has been specified
       include 'geom_param_fort.h'
       include 'mpi_param_fort.h'
       integer ierror
-#ifndef DEBUG
+#ifndef MSG_DEBUG
       call MPI_BARRIER(MSG_COMM, ierror)
       call MPI_COMM_FREE(MSG_COMM, ierror)
 #endif
@@ -421,7 +421,7 @@ c
                if(OutSegmentSize.gt.0) then
                   if(index(OutSegmentStart).ge.0) then
 c     noncontiguous memory segment: give the buffer's address
-#ifndef DEBUG
+#ifndef MSG_DEBUG
                      call MPI_send_init(y, OutSegmentSize, 
      *                    FLOAT_PRECISION, 
      *                    proc(iproc)-1, ptrn, MSG_COMM,
@@ -430,7 +430,7 @@ c     noncontiguous memory segment: give the buffer's address
 #endif
                   else
 c     contiguous memory segment: give the data address
-#ifndef DEBUG
+#ifndef MSG_DEBUG
                      call MPI_send_init(x(-index(OutSegmentStart)),
      *                    OutSegmentSize, 
      *                    FLOAT_PRECISION,
@@ -445,7 +445,7 @@ c     contiguous memory segment: give the data address
                if(InSegmentSize.gt.0) then
                   if(index(InSegmentStart).ge.0) then
 c     noncontiguous memory segment: give the buffer's address
-#ifndef DEBUG
+#ifndef MSG_DEBUG
                      call MPI_recv_init(y(MSGSegment(ptrn)), 
      *                    InSegmentSize, 
      *                    FLOAT_PRECISION,
@@ -455,7 +455,7 @@ c     noncontiguous memory segment: give the buffer's address
 #endif
                   else
 c     contiguous memory segment: give the data address
-#ifndef DEBUG
+#ifndef MSG_DEBUG
                      call MPI_recv_init(x(-index(InSegmentStart)),
      *                    InSegmentSize, 
      *                    FLOAT_PRECISION,
@@ -479,7 +479,7 @@ c     send all the messages out one by one
 c     gather the outgoing data in the outgoing buffer
                   call MSG_tbdx_gather(x, y, iproc, ipr, index)
 c     start sending the outgoing data to iproc
-#ifndef DEBUG
+#ifndef MSG_DEBUG
                   call MPI_start(MSG_sendid(iproc,ptrn), ierr)
                   if(ierr.ne.MPI_SUCCESS) return
                   call MPI_wait(MSG_sendid(iproc,ptrn),SendStatus,ierr)
@@ -496,7 +496,7 @@ c
                   OutSegmentSize = ipr(2*iproc) - ipr(2*iproc-1)
                   InSegmentSize = ipr(2*iproc+1) - ipr(2*iproc)
 c     start receiving the incoming data from iproc
-#ifndef DEBUG
+#ifndef MSG_DEBUG
                   if(InSegmentSize.gt.0) then
                      call MPI_start(MSG_recvid(iproc,ptrn), ierr)
                      if(ierr.ne.MPI_SUCCESS) return
@@ -506,14 +506,14 @@ c     start receiving the incoming data from iproc
 c     gather the outgoing data in the outgoing buffer
                      call MSG_tbdx_gather(x, y, iproc, ipr, index)
 c     start sending the outgoing data to iproc
-#ifndef DEBUG
+#ifndef MSG_DEBUG
                      call MPI_start(MSG_sendid(iproc,ptrn), ierr)
                      if(ierr.ne.MPI_SUCCESS) return
 #endif
                   endif 
                   if(InSegmentSize.gt.0) then
 c     wait for the incoming data to be received
-#ifndef DEBUG
+#ifndef MSG_DEBUG
                      call MPI_wait(MSG_recvid(iproc,ptrn), 
      &                    RecvStatus, ierr)
                      if(ierr.ne.MPI_SUCCESS) return
@@ -523,7 +523,7 @@ c     place the incoming data into the local array
      &                    iproc, ipr, index)
                   endif
 c     wait for the outgoing data to be sent
-#ifndef DEBUG
+#ifndef MSG_DEBUG
                   if(OutSegmentSize.gt.0) then 
                      call MPI_wait(MSG_sendid(iproc,ptrn), 
      &                    SendStatus, ierr)
@@ -536,7 +536,7 @@ c     wait for the outgoing data to be sent
             OutSegmentSize = ipr(2*iproc) - ipr(2*iproc-1)
             InSegmentSize = ipr(2*iproc+1) - ipr(2*iproc)
 c     start receiving the incoming data from nproc  
-#ifndef DEBUG
+#ifndef MSG_DEBUG
             if(InSegmentSize.gt.0) then 
                call MPI_start(MSG_recvid(iproc,ptrn), ierr)
                if(ierr.ne.MPI_SUCCESS) return
@@ -546,7 +546,7 @@ c     start receiving the incoming data from nproc
 c     gather the outgoing data in the outgoing buffer
                call MSG_tbdx_gather(x, y, iproc, ipr, index)
 c     start sending the outgoing data to nproc
-#ifndef DEBUG
+#ifndef MSG_DEBUG
                call MPI_start(MSG_sendid(iproc,ptrn), ierr)
                if(ierr.ne.MPI_SUCCESS) return
 #endif
@@ -587,7 +587,7 @@ c     local variables
       IF ( MSG_BLOCKING .eq. 0 ) THEN
          
          if(nproc.eq.0) return
-#ifndef DEBUG
+#ifndef MSG_DEBUG
          do ii=1,nproc
             if(MSG_sendid(ii,ptrn).ne.0) then
                call MPI_request_free(MSG_sendid(ii,ptrn), ierr)
@@ -663,7 +663,7 @@ c
             do iproc = 1, nproc
                InSegmentSize = ipr(2*iproc+1) - ipr(2*iproc)
                if(InSegmentSize.gt.0) then
-#ifndef DEBUG
+#ifndef MSG_DEBUG
                   call MPI_start(MSG_recvid(iproc,ptrn), ierr)
                   if(ierr.ne.MPI_SUCCESS) return
                   call MPI_wait(MSG_recvid(iproc,ptrn),RecvStatus,ierr)
@@ -686,14 +686,14 @@ c     neighbors list is completed and
 c     reset the channels for the next transaction 
 c     
             if(InSegmentSize.gt.0) then
-#ifndef DEBUG
+#ifndef MSG_DEBUG
                call MPI_wait(MSG_recvid(nproc,ptrn), RecvStatus, ierr)
                if(ierr.ne.MPI_SUCCESS) return
 #endif
                call MSG_tbdx_scatter(x, y(MSGSegment(ptrn)), 
      &              nproc, ipr, index)
             endif
-#ifndef DEBUG
+#ifndef MSG_DEBUG
             if(OutSegmentSize.gt.0) then
                call MPI_wait(MSG_sendid(nproc,ptrn), SendStatus, ierr)
                if(ierr.ne.MPI_SUCCESS) return
@@ -821,7 +821,7 @@ c
          MyInSize = MyInSize + ipr(2*iproc+1) - ipr(2*iproc) 
       enddo  
       if(MyHaloSize.gt.MyInSize) LocType = 1 
-#ifndef DEBUG
+#ifndef MSG_DEBUG
       call MPI_Allreduce(LocType, GlobalType, 1, MPI_INTEGER,
      *                   MPI_MAX, MSG_COMM, ierr)
 #else        

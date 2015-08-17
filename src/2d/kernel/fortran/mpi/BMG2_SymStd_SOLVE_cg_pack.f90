@@ -269,8 +269,8 @@
             WRITE(*,*) ' NLx_ws = ', NLx_ws
             WRITE(*,*) ' NLy_ws = ', NLy_ws
             WRITE(*,*)
-            WRITE(*,*) ' NLx_ws = ', NLx_ws
-            WRITE(*,*) ' NLy_ws = ', NLy_ws
+            WRITE(*,*) ' LocArr(1) = ', LocArrSize(1,Proc_ws)
+            WRITE(*,*) ' LocArr(2) = ', LocArrSize(2,Proc_ws)
          ENDIF
 
          ProcI_ws = ProcCoord(1,Proc_ws)

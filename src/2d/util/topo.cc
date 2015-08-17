@@ -26,6 +26,10 @@ core::mpi::topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny)
 	grid->coord(0) = grid->coord(1);
 	grid->coord(1) = tmp;
 
+	tmp = grid->nproc(0);
+	grid->nproc(0) = grid->nproc(1);
+	grid->nproc(1) = tmp;
+
 	grid->is(0) = grid->coord(0) * nx + 1;
 	grid->nlocal(0) = nx;
 	grid->is(1) = grid->coord(1) * ny + 1;

@@ -53,6 +53,7 @@ public:
 	void halo_setup(core::mpi::GridTopo &topo,
 	                void **halo_ctx);
 	void halo_exchange(core::mpi::GridFunc &f);
+	void halo_exchange(const core::mpi::GridFunc &f, void *halo_ctx);
 	void halo_stencil_exchange(core::mpi::StencilOp & so);
 	void setup_cg_boxmg(const core::StencilOp & so,
 	                    std::shared_ptr<solver::BoxMG> *solver);

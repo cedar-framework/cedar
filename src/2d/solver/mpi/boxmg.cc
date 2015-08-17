@@ -154,22 +154,9 @@ std::shared_ptr<kernel::Registry> BoxMG::kernel_registry()
 }
 
 
-// core::GridFunc BoxMG::solve(const core::GridFunc & b)
-// {
-// 	core::GridFunc x = core::GridFunc::zeros(b.shape(0),b.shape(1));
-// 	int maxiter = config::get<int>("solver.max-iter", 10);
-// 	real_t tol = config::get<real_t>("solver.tol", 1e-8);
-// 	core::GridFunc res0 = levels[0].A.residual(x,b);
-
-// 	real_t res0_l2 = res0.template lp_norm<2>();
-// 	log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
-// 	for (auto i: range(maxiter)) {
-// 		ncycle(0, x, b);
-// 		core::GridFunc res = levels[0].A.residual(x,b);
-// 		real_t res_l2 = res.template lp_norm<2>();
-// 		real_t rel_l2 = res_l2 / res0_l2;
-// 		log::status << "Iteration " << i << " relative l2 norm: " << rel_l2 << std::endl;
-// 		if (rel_l2 < tol) break;
-// 	}
-// 	return x;
-// }
+core::mpi::GridFunc BoxMG::solve(const core::mpi::GridFunc & b)
+{
+	auto kernels = kernel_registry();
+	kernels->halo_exchange(b, halo_ctx);
+	return MultiLevel<BoxMGLevel,core::mpi::GridFunc>::solve(b);
+}

@@ -32,7 +32,7 @@ public:
 	void add_level(core::mpi::StencilOp& fop, int num_levels);
 	MPI_Comm comm;
 	std::shared_ptr<kernel::Registry> kernel_registry();
-	/* virtual core::GridFunc solve(const core::GridFunc &b); */
+	virtual core::mpi::GridFunc solve(const core::mpi::GridFunc &b);
 
 private:
 	core::GridFunc ABD;

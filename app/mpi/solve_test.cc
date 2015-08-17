@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 			b(i,j) = 8*(pi*pi)*sin(2*pi*x)*sin(2*pi*y) * h2;
 			x += hx;
 		}
-		y+= hx;
+		y += hy;
 	}
 
 	if (util::mpi::has_boundary(so.grid(), Dir::N))
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 			exact_sol(i,j) = sin(2*pi*x) * sin(2*pi*y);
 			x += hx;
 		}
-		y+= hx;
+		y+= hy;
 	}
 
 	auto diff = exact_sol - sol;
