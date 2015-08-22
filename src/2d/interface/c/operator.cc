@@ -16,11 +16,18 @@ extern "C"
 	}
 
 
-	void bmg2_operator_test(bmg2_operator op)
+	void bmg2_operator_set(bmg2_operator op, unsigned int nvals, grid_coord coords[], double vals[])
 	{
 		using namespace boxmg;
+		using namespace boxmg::bmg2d::core;
 
-		log::error << "Test Error" << std::endl;
+		GridStencil & sten = reinterpret_cast<mpi::StencilOp*>(op)->stencil();
+
+		for (auto i: range(nvals)) {
+			sten(static_cast<len_t>(coords[i].i),
+			     static_cast<len_t>(coords[i].j),
+			     static_cast<Dir>(coords[i].dir)) = vals[i];
+		}
 	}
 
 

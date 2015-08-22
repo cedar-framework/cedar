@@ -6,6 +6,7 @@ set(core_HEADERS
   stencil.h
   stencil_op.h
   types.h
+  base_types.h
   boundary_iterator.h
   mpi/grid_topo.h
   mpi/grid_func.h
