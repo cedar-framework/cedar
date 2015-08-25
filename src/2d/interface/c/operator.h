@@ -1,6 +1,8 @@
 #ifndef BOXMG_2D_INTERFACE_OPERATOR_H
 #define BOXMG_2D_INTERFACE_OPERATOR_H
 
+#include "topo.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -16,7 +18,7 @@ typedef struct {
 	bmg2_dir dir;
 } grid_coord;
 
-bmg2_operator bmg2_operator_create(unsigned int nx, unsigned int ny);
+bmg2_operator bmg2_operator_create(bmg2_topo topo);
 
 void bmg2_operator_set(bmg2_operator, unsigned int nvals, grid_coord coords[], double vals[]);
 
