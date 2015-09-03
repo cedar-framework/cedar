@@ -12,11 +12,12 @@ extern "C"
 		using namespace boxmg::bmg2d;
 		using namespace boxmg::bmg2d::core;
 
-		auto grid = *(reinterpret_cast<std::shared_ptr<mpi::GridTopo>*>(topo));
+		auto & grid = *(reinterpret_cast<std::shared_ptr<mpi::GridTopo>*>(topo));
 
 		mpi::StencilOp *sop = new mpi::StencilOp(grid);
 		auto & sten = sop->stencil();
 		sten.five_pt() = true;
+
 		return reinterpret_cast<bmg2_operator>(sop);
 	}
 
@@ -26,13 +27,17 @@ extern "C"
 		using namespace boxmg;
 		using namespace boxmg::bmg2d::core;
 
-		GridStencil & sten = reinterpret_cast<mpi::StencilOp*>(op)->stencil();
+		auto & sten = reinterpret_cast<mpi::StencilOp*>(op)->stencil();
+		auto & grid = reinterpret_cast<mpi::StencilOp*>(op)->grid();
 
 		for (auto i: range(nvals)) {
-			sten(static_cast<len_t>(coords[i].i),
-			     static_cast<len_t>(coords[i].j),
+			len_t ci = static_cast<len_t>(coords[i].i - grid.is(0) + 2);
+			len_t cj = static_cast<len_t>(coords[i].j - grid.is(1) + 2);
+			// if (coords[i].dir == 0)
+			// log::error << ci << " " << cj << " -> " << coords[i].dir << " => " << vals[i]<< std::endl;
+			sten(static_cast<len_t>(ci),
+			     static_cast<len_t>(cj),
 			     static_cast<Dir>(coords[i].dir)) = vals[i];
-			log::error << coords[i].i << " " << coords[i].j << " -> " << coords[i].dir << std::endl;
 		}
 	}
 

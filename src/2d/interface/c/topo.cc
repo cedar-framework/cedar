@@ -41,8 +41,6 @@ extern "C"
 			grid->is(1) += nly[j];
 		}
 
-		grid->is(0)++; grid->is(1)++;
-
 		grid->nglobal(0) = ngx + 2;
 		grid->nglobal(1) = ngy + 2;
 
