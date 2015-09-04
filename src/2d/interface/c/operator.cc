@@ -46,11 +46,16 @@ extern "C"
 	{
 		using namespace boxmg::bmg2d::core;
 
+		// begin debug
+		int rank;
+		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 		std::ofstream ofile;
 
-		ofile.open("op.txt", std::ios::out | std::ios::trunc | std::ios::binary);
+		ofile.open("op" + std::to_string(rank) + ".txt", std::ios::out | std::ios::trunc | std::ios::binary);
 		ofile << *(reinterpret_cast<mpi::StencilOp*>(op));
 		ofile.close();
+
+		// end debug
 
 		delete reinterpret_cast<mpi::StencilOp*>(op);
 	}

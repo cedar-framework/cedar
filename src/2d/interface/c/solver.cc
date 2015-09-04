@@ -23,11 +23,35 @@ extern "C"
 		using namespace boxmg::bmg2d;
 
 		auto *bmg = reinterpret_cast<solver::mpi::BoxMG*>(op);
-		auto grid = bmg->level(0).A.grid_ptr();
+		auto grid = bmg->level(-1).A.grid_ptr();
 
 		core::mpi::GridFunc rhs(grid);
 
+		int idx = 0;
+		for (auto j : rhs.range(1)) {
+			for (auto i : rhs.range(0)) {
+				rhs(i,j) = b[idx];
+				idx++;
+			}
+		}
+
+		int rank;
+		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		std::ofstream ofile;
+
+		ofile.open("rhs-" + std::to_string(rank) + ".txt", std::ios::out | std::ios::trunc | std::ios::binary);
+		ofile << rhs;
+		ofile.close();
+
 		auto sol = bmg->solve(rhs);
+
+		idx = 0;
+		for (auto j : sol.range(1)) {
+			for (auto i : sol.range(0)) {
+				(*x)[idx] = sol(i,j);
+				idx++;
+			}
+		}
 	}
 
 	void bmg2_solver_destroy(bmg2_solver bmg)
