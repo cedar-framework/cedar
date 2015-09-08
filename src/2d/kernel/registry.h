@@ -60,6 +60,9 @@ public:
 	void solve_cg_boxmg(const solver::BoxMG &bmg,
 	                    core::GridFunc &x,
 	                    const core::GridFunc &b);
+	void matvec(const core::StencilOp & so,
+	            const core::GridFunc &x,
+	            core::GridFunc &b);
 };
 
 }}}

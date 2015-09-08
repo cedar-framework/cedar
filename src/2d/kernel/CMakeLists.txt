@@ -9,6 +9,7 @@ set(kernel_SOURCES
   setup_relax.cc
   relax.cc
   interp.cc
+  matvec.cc
   restrict.cc
   setup_cg_lu.cc
   setup_cg_boxmg.cc
@@ -52,6 +53,7 @@ set(kernel_SOURCES
   fortran/mpi/BMG2_SymStd_residual.f90
   fortran/mpi/BMG2_SymStd_interp_add.f90
   fortran/mpi/BMG2_SymStd_UTILS_update_ghosts.f90
+  fortran/mpi/BMG2_SymStd_UTILS_matvec.f90
   PARENT_SCOPE)
 
 set(kernel_HEADERS

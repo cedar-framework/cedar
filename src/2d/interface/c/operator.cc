@@ -42,6 +42,34 @@ extern "C"
 	}
 
 
+	void bmg2_operator_apply(bmg2_operator op, const double *x, double *b)
+	{
+		using namespace boxmg::bmg2d::core;
+		auto *sop = reinterpret_cast<mpi::StencilOp*>(op);
+		auto grid = sop->grid_ptr();
+
+		mpi::GridFunc xgf(grid);
+		int idx = 0;
+		for (auto j : xgf.range(1)) {
+			for (auto i : xgf.range(0)) {
+				xgf(i,j) = x[idx];
+				idx++;
+			}
+		}
+
+		mpi::GridFunc bgf(grid);
+		sop->apply(xgf, bgf);
+
+		idx = 0;
+		for (auto j : bgf.range(1)) {
+			for (auto i : bgf.range(0)) {
+				b[idx] = bgf(i,j);
+				idx++;
+			}
+		}
+	}
+
+
 	void bmg2_operator_dump(bmg2_operator op)
 	{
 		using namespace boxmg::bmg2d::core;

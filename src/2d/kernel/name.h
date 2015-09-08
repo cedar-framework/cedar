@@ -23,6 +23,7 @@ namespace name {
 	const std::string halo_stencil_exchange("halo stencil exchange");
 	const std::string setup_cg_boxmg("BoxMG coarse grid solve setup");
 	const std::string solve_cg_boxmg("BoxMG coarse grid solver");
+	const std::string matvec("matrix vector multiply");
 }
 
 }}}

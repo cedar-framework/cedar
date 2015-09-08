@@ -18,6 +18,19 @@ std::shared_ptr<boxmg::KernelRegistry> StencilOp::get_registry() const
 }
 
 
+void StencilOp::apply(const GridFunc &x, GridFunc &b) const
+{
+	if (kernels != nullptr) {
+		kernels->run(kernel::name::matvec,
+		             static_cast<const core::StencilOp&>(*this),
+		             x,b);
+	} else {
+		log::error << "Kernel registry for stencil op not set!" << std::endl;
+	}
+
+}
+
+
 void StencilOp::residual(const GridFunc &x, const GridFunc &b, GridFunc & r) const
 {
 	if (kernels != nullptr) {

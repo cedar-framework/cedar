@@ -15,7 +15,7 @@ public:
 StencilOp(len_t nx, len_t ny, bool intergrid) : gs(nx,ny,1,intergrid), kernels(nullptr){}
 StencilOp(len_t nx, len_t ny) : gs(nx,ny), kernels(nullptr) {}
 	real_t * data() { return gs.data(); }
-	virtual void apply(const GridFunc &x, GridFunc &y) const {}
+	virtual void apply(const GridFunc &x, GridFunc &y) const;
 	virtual void residual(const GridFunc &x, const GridFunc &b, GridFunc &r) const;
 	virtual GridFunc residual(const core::GridFunc &x, const core::GridFunc &b) const;
 	virtual void set_registry(std::shared_ptr<KernelRegistry> kreg);

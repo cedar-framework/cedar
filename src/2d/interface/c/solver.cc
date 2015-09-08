@@ -6,19 +6,20 @@
 
 extern "C"
 {
-	bmg2_solver bmg2_solver_create(bmg2_operator op)
+	bmg2_solver bmg2_solver_create(bmg2_operator *op)
 	{
 		using namespace boxmg::bmg2d;
 
-		core::mpi::StencilOp *sop = reinterpret_cast<core::mpi::StencilOp*>(op);
+		core::mpi::StencilOp *sop = reinterpret_cast<core::mpi::StencilOp*>(*op);
 
 		solver::mpi::BoxMG *bmg = new solver::mpi::BoxMG(std::move(*sop));
+		*op = reinterpret_cast<bmg2_operator>(&bmg->level(-1).A);
 
 		return reinterpret_cast<bmg2_solver>(bmg);
 	}
 
 
-	void bmg2_solver_run(bmg2_solver op, double **x, double *b)
+	void bmg2_solver_run(bmg2_solver op, double *x, const double *b)
 	{
 		using namespace boxmg::bmg2d;
 
@@ -45,10 +46,15 @@ extern "C"
 
 		auto sol = bmg->solve(rhs);
 
+		auto &sop = bmg->level(-2).A;
+		ofile.open("op" + std::to_string(grid->coord(0)) + "-" + std::to_string(grid->coord(1)) + ".txt",std::ios::out | std::ios::trunc | std::ios::binary);
+		ofile << sop;
+		ofile.close();
+
 		idx = 0;
 		for (auto j : sol.range(1)) {
 			for (auto i : sol.range(0)) {
-				(*x)[idx] = sol(i,j);
+				x[idx] = sol(i,j);
 				idx++;
 			}
 		}

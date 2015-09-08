@@ -115,3 +115,11 @@ void Registry::solve_cg_boxmg(const solver::BoxMG &cg_solver,
 {
 	active.run(name::solve_cg_boxmg, cg_solver, x, b);
 }
+
+
+void Registry::matvec(const core::StencilOp & so,
+                      const core::GridFunc & x,
+                      core::GridFunc &b)
+{
+	active.run(name::matvec, so, x, b);
+}

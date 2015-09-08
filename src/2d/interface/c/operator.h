@@ -22,6 +22,8 @@ bmg2_operator bmg2_operator_create(bmg2_topo topo);
 
 void bmg2_operator_set(bmg2_operator, unsigned int nvals, grid_coord coords[], double vals[]);
 
+void bmg2_operator_apply(bmg2_operator, const double *x, double *b);
+
 void bmg2_operator_dump(bmg2_operator);
 
 void bmg2_operator_destroy(bmg2_operator);

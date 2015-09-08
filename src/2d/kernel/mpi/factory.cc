@@ -12,6 +12,7 @@
 #include "../setup_nog.h"
 #include "../setup_cg_boxmg.h"
 #include "../halo.h"
+#include "../matvec.h"
 
 #include "factory.h"
 
@@ -146,6 +147,10 @@ namespace factory
 		          core::GridFunc &,
 		          const core::GridFunc &>(impls::solve_cg_boxmg));
 
+		kreg->add(name::matvec, "fortran-msg",
+		          Kernel<const core::StencilOp&,
+		          const core::GridFunc &, core::GridFunc&>(impls::matvec));
+
 
 		// TODO: This could be automatic.
 
@@ -193,6 +198,7 @@ namespace factory
 		kreg->set(name::residual, "fortran-msg");
 		kreg->set(name::setup_cg_boxmg, "fortran-msg");
 		kreg->set(name::solve_cg_boxmg, "fortran-msg");
+		kreg->set(name::matvec, "fortran-msg");
 
 		return kreg;
 	}
