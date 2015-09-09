@@ -10,7 +10,7 @@ namespace impls
 {
 	void matvec(const core::StencilOp & so,
 	            const core::GridFunc & x,
-	            core::GridFunc y);
+	            core::GridFunc & y);
 }
 
 }}}

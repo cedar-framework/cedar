@@ -2,6 +2,7 @@
 
 #include "util/topo.h"
 #include "core/mpi/stencil_op.h"
+#include "kernel/registry.h"
 
 #include "boxmg-common.h"
 
@@ -33,6 +34,8 @@ extern "C"
 		for (auto i: range(nvals)) {
 			len_t ci = static_cast<len_t>(coords[i].i - grid.is(0) + 2);
 			len_t cj = static_cast<len_t>(coords[i].j - grid.is(1) + 2);
+			// boxmg likes positive stencil coefficients
+			if (coords[i].dir != 0) vals[i] = -1*vals[i];
 			// if (coords[i].dir == 0)
 			// log::error << ci << " " << cj << " -> " << coords[i].dir << " => " << vals[i]<< std::endl;
 			sten(static_cast<len_t>(ci),
@@ -44,7 +47,9 @@ extern "C"
 
 	void bmg2_operator_apply(bmg2_operator op, const double *x, double *b)
 	{
+		using namespace boxmg::bmg2d;
 		using namespace boxmg::bmg2d::core;
+		std::shared_ptr<kernel::Registry> kreg;
 		auto *sop = reinterpret_cast<mpi::StencilOp*>(op);
 		auto grid = sop->grid_ptr();
 
@@ -56,6 +61,24 @@ extern "C"
 				idx++;
 			}
 		}
+
+		kreg = std::dynamic_pointer_cast<kernel::Registry>(sop->get_registry());
+		xgf.halo_ctx = sop->halo_ctx;
+		kreg->halo_exchange(xgf);
+
+		// begin debug
+		// idx = 0;
+		// for (auto j : xgf.grange(1)) {
+		// 	for (auto i : xgf.grange(0)) {
+		// 		xgf(i,j) = 3.0;
+		// 		if (grid->coord(0) == 0 and
+		// 		    grid->coord(1) == 0) {
+		// 			printf("%f\n", x[idx]);
+		// 		}
+		// 		idx++;
+		// 	}
+		// }
+		// end debug
 
 		mpi::GridFunc bgf(grid);
 		sop->apply(xgf, bgf);

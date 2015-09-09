@@ -19,7 +19,7 @@ namespace impls
 {
 	void matvec(const core::StencilOp & so,
 	            const core::GridFunc & x,
-	            core::GridFunc b)
+	            core::GridFunc & b)
 	{
 		using namespace boxmg::bmg2d::core;
 		int k, kf, ifd;
