@@ -49,7 +49,7 @@ extern "C"
 	{
 		using namespace boxmg::bmg2d;
 		using namespace boxmg::bmg2d::core;
-		std::shared_ptr<kernel::Registry> kreg;
+
 		auto *sop = reinterpret_cast<mpi::StencilOp*>(op);
 		auto grid = sop->grid_ptr();
 
@@ -62,23 +62,10 @@ extern "C"
 			}
 		}
 
+		std::shared_ptr<kernel::Registry> kreg;
 		kreg = std::dynamic_pointer_cast<kernel::Registry>(sop->get_registry());
 		xgf.halo_ctx = sop->halo_ctx;
 		kreg->halo_exchange(xgf);
-
-		// begin debug
-		// idx = 0;
-		// for (auto j : xgf.grange(1)) {
-		// 	for (auto i : xgf.grange(0)) {
-		// 		xgf(i,j) = 3.0;
-		// 		if (grid->coord(0) == 0 and
-		// 		    grid->coord(1) == 0) {
-		// 			printf("%f\n", x[idx]);
-		// 		}
-		// 		idx++;
-		// 	}
-		// }
-		// end debug
 
 		mpi::GridFunc bgf(grid);
 		sop->apply(xgf, bgf);

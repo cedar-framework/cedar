@@ -36,20 +36,7 @@ extern "C"
 			}
 		}
 
-		int rank;
-		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-		std::ofstream ofile;
-
-		ofile.open("rhs-" + std::to_string(rank) + ".txt", std::ios::out | std::ios::trunc | std::ios::binary);
-		ofile << rhs;
-		ofile.close();
-
 		auto sol = bmg->solve(rhs);
-
-		auto &sop = bmg->level(-2).A;
-		ofile.open("op" + std::to_string(grid->coord(0)) + "-" + std::to_string(grid->coord(1)) + ".txt",std::ios::out | std::ios::trunc | std::ios::binary);
-		ofile << sop;
-		ofile.close();
 
 		idx = 0;
 		for (auto j : sol.range(1)) {
