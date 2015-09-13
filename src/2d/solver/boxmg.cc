@@ -57,15 +57,28 @@ void BoxMG::add_level(core::StencilOp & fop, int num_levels)
 
 	auto cop = core::StencilOp(nxc, nyc);
 	auto P = inter::ProlongOp(nxc, nyc);
-	auto SOR = core::RelaxStencil(nx, ny);
+	std::array<core::RelaxStencil, 2> SOR{{core::RelaxStencil(nx, ny),
+				core::RelaxStencil(nx, ny)}};
 	core::GridStencil & st = cop.stencil();
 
 	log::debug << "Created coarse grid with dimensions: " << st.shape(0)
 	          << ", " << st.shape(1) << std::endl;
 
+	std::string relax_type = conf.get<std::string>("solver.relaxation", "point");
+
 	kernels->setup_interp(kf, kc, num_levels, fop, cop, P);
 	kernels->galerkin_prod(kf, kc, num_levels, P, fop, cop);
-	kernels->setup_relax(fop, SOR);
+
+	if (relax_type == "point")
+		kernels->setup_relax(fop, SOR[0]);
+	else if (relax_type == "line-x")
+		kernels->setup_relax_x(fop, SOR[0]);
+	else if (relax_type == "line-y")
+		kernels->setup_relax_y(fop, SOR[0]);
+	else { // line-xy
+		kernels->setup_relax_x(fop, SOR[0]);
+		kernels->setup_relax_y(fop, SOR[1]);
+	}
 
 	levels.back().P = std::move(P);
 	levels.back().SOR = std::move(SOR);
@@ -73,19 +86,38 @@ void BoxMG::add_level(core::StencilOp & fop, int num_levels)
 	auto lvl = levels.size() - 1;
 	int nrelax_pre = conf.get<int>("solver.cycle.nrelax-pre", 2);
 	int nrelax_post = conf.get<int>("solver.cycle.nrelax-post", 1);
-	levels.back().presmoother = [&,lvl,nrelax_pre,kernels](const core::DiscreteOp &A, core::GridFunc &x, const core::GridFunc&b) {
+
+	levels.back().presmoother = [&,lvl,nrelax_pre,kernels,relax_type](const core::DiscreteOp &A, core::GridFunc &x, const core::GridFunc&b) {
 		const core::StencilOp & av = dynamic_cast<const core::StencilOp &>(A);
 		for (auto i : range(nrelax_pre)) {
 			(void) i;
-			kernels->relax(av, x, b, levels[lvl].SOR, cycle::Dir::DOWN);
+			if (relax_type == "point")
+				kernels->relax(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
+			else if (relax_type == "line-x")
+				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
+			else if (relax_type == "line-y")
+				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
+			else {
+				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
+				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[1], cycle::Dir::DOWN);
+			}
 		}
 	};
-	levels.back().postsmoother = [&,lvl,nrelax_post,kernels](const core::DiscreteOp &A, core::GridFunc &x, const core::GridFunc&b) {
+	levels.back().postsmoother = [&,lvl,nrelax_post,kernels,relax_type](const core::DiscreteOp &A, core::GridFunc &x, const core::GridFunc&b) {
 
 		const core::StencilOp & av = dynamic_cast<const core::StencilOp &>(A);
 		for (auto i: range(nrelax_post)) {
 			(void) i;
-			kernels->relax(av, x, b, levels[lvl].SOR, cycle::Dir::UP);
+			if (relax_type == "point")
+				kernels->relax(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
+			else if (relax_type == "line-x")
+				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
+			else if (relax_type == "line-y")
+				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
+			else {
+				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
+				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[1], cycle::Dir::DOWN);
+			}
 		}
 	};
 

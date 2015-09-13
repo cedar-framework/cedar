@@ -4,12 +4,18 @@
     "type": "object",
     "properties":
     {
-		"kernel":
+		"kernels":
 		{
 			"type": "object",
-			"required": ["residual"]
+			"properties":
+			{
+				"residual": {
+					"type": "string",
+					"pattern": "fortran|c++"
+				}
+			}
 		},
-		"log_level":
+		"log":
 		{
 			"type": "array",
 			"items":
@@ -17,6 +23,30 @@
 				"type": "string",
 				"pattern": "error|status|info|warn"
 			}
-		}
+		},
+		"solver":
+		{
+			"type": "object",
+			"properties":
+			{
+				"cycle":
+				{
+					"type": "object"
+				},
+				"tol"
+				{
+					"type": "integer"
+				},
+				"max-iter":
+				{
+					"type": "integer"
+				},
+				"min-coarse":
+				{
+					"type": "integer"
+				}
+			}
+		},
+		"grid"
 	}
 }

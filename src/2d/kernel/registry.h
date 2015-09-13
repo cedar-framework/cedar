@@ -34,6 +34,12 @@ public:
 	void setup_relax(const core::StencilOp & so,
 	                 core::RelaxStencil & sor);
 
+	void setup_relax_x(const core::StencilOp & so,
+	                   core::RelaxStencil & sor);
+
+	void setup_relax_y(const core::StencilOp & so,
+	                   core::RelaxStencil & sor);
+
 	void setup_cg_lu(const core::StencilOp & so,
 	                 core::GridFunc & ABD);
 
@@ -42,6 +48,18 @@ public:
 	           const core::GridFunc & b,
 	           const core::RelaxStencil & sor,
 	           cycle::Dir cycle_dir);
+
+	void relax_lines_x(const core::StencilOp & so,
+	                   core::GridFunc & x,
+	                   const core::GridFunc & b,
+	                   const core::RelaxStencil & sor,
+	                   cycle::Dir cycle_dir);
+
+	void relax_lines_y(const core::StencilOp & so,
+	                   core::GridFunc & x,
+	                   const core::GridFunc & b,
+	                   const core::RelaxStencil & sor,
+	                   cycle::Dir cycle_dir);
 
 	void solve_cg(core::GridFunc &x,
 	              const core::GridFunc &b,

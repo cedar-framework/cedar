@@ -1,6 +1,8 @@
 #ifndef BOXMG_2D_SOLVER_BOXMG_H
 #define BOXMG_2D_SOLVER_BOXMG_H
 
+#include <array>
+
 #include "multilevel.h"
 #include "core/stencil_op.h"
 #include "core/relax_stencil.h"
@@ -13,11 +15,11 @@ namespace boxmg { namespace bmg2d { namespace solver {
 struct BoxMGLevel : Level
 {
 BoxMGLevel(core::StencilOp&& A, inter::ProlongOp&& P) : /*Level(A,P),*/
-		A(std::move(A)), P(std::move(P)), SOR(core::RelaxStencil()) { R.associate(&P); }
+	A(std::move(A)), P(std::move(P)), SOR({{core::RelaxStencil(), core::RelaxStencil()}}) { R.associate(&P); }
 	core::StencilOp    A;
 	inter::ProlongOp   P;
 	inter::RestrictOp  R;
-	core::RelaxStencil SOR;
+	std::array<core::RelaxStencil, 2> SOR;
 };
 
 class BoxMG : public MultiLevel<BoxMGLevel>

@@ -8,6 +8,12 @@ extern "C" {
 	using namespace boxmg;
 	void BMG2_SymStd_relax_GS(int, real_t*, real_t*, real_t*, real_t*, len_t, len_t,
 	                          int, int, int, int, int, int, int);
+	void BMG2_SymStd_relax_lines_x(int k, real_t *SO, real_t *QF, real_t *Q, real_t *SOR,
+	                               real_t *B, len_t II, len_t JJ, int kf, int ifd,
+	                               int nstencil, int irelax_sym, int updown, int jpn);
+	void BMG2_SymStd_relax_lines_y(int k, real_t *SO, real_t *QF, real_t *Q, real_t *SOR,
+	                               real_t *B, len_t II, len_t JJ, int kf, int ifd,
+	                               int nstencil, int irelax_sym, int updown, int jpn);
 	void MPI_BMG2_SymStd_relax_GS(int k, real_t *SO, real_t *QF, real_t *Q, real_t *SOR,
 	                              len_t II, len_t JJ, int kf, int ifd, int nstncl, int irelax_sym,
 	                              int updown, len_t iGs, len_t jGs, len_t *iWork, len_t NMSGi,
@@ -52,6 +58,87 @@ namespace impls
 		BMG2_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
 		                     so_sten.len(0), so_sten.len(1), kf, ifd, nstencil, nsorv,
 		                     BMG_RELAX_SYM, updown, ibc);
+	}
+
+
+
+	void relax_lines_x(const core::StencilOp & so,
+	                   core::GridFunc & x,
+	                   const core::GridFunc & b,
+	                   const core::RelaxStencil & sor,
+	                   cycle::Dir cycle_dir)
+	{
+		using namespace boxmg::bmg2d::core;
+		int k, kf, ifd;
+		int updown, nsorv, ibc, nstencil;
+
+		const GridStencil &so_sten = so.stencil();
+		StencilOp & sod = const_cast<StencilOp&>(so);
+		core::RelaxStencil & sord = const_cast<core::RelaxStencil&>(sor);
+		core::GridFunc & bd = const_cast<core::GridFunc&>(b);
+
+		// TODO: reuse residual on this level here
+		core::GridFunc res(so_sten.len(0), 1);
+
+		k = kf = 1;
+		if (so_sten.five_pt()) {
+			ifd = 1;
+			nstencil = 3;
+		} else {
+			ifd = 0;
+			nstencil = 5;
+		}
+
+		nsorv = 2;
+
+		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
+		else updown = BMG_DOWN;
+
+		ibc = BMG_BCs_definite;
+
+		BMG2_SymStd_relax_lines_x(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
+		                          so_sten.len(0), so_sten.len(1), kf, ifd, nstencil,
+		                          BMG_RELAX_SYM, updown, ibc);
+	}
+
+
+	void relax_lines_y(const core::StencilOp & so,
+	                   core::GridFunc & x,
+	                   const core::GridFunc & b,
+	                   const core::RelaxStencil & sor,
+	                   cycle::Dir cycle_dir)
+	{
+		using namespace boxmg::bmg2d::core;
+		int k, kf, ifd;
+		int updown, nsorv, ibc, nstencil;
+
+		const GridStencil &so_sten = so.stencil();
+		StencilOp & sod = const_cast<StencilOp&>(so);
+		core::RelaxStencil & sord = const_cast<core::RelaxStencil&>(sor);
+		core::GridFunc & bd = const_cast<core::GridFunc&>(b);
+
+		// TODO: reuse residual on this level here
+		core::GridFunc res(so_sten.len(0), 1);
+
+		k = kf = 1;
+		if (so_sten.five_pt()) {
+			ifd = 1;
+			nstencil = 3;
+		} else {
+			ifd = 0;
+			nstencil = 5;
+		}
+
+		nsorv = 2;
+
+		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
+		else updown = BMG_DOWN;
+
+		ibc = BMG_BCs_definite;
+
+		BMG2_SymStd_relax_lines_y(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
+		                          so_sten.len(0), so_sten.len(1), kf, ifd, nstencil,
+		                          BMG_RELAX_SYM, updown, ibc);
 	}
 
 

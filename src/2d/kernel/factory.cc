@@ -57,6 +57,14 @@ namespace factory
 		         Kernel<const core::StencilOp&,
 		         core::RelaxStencil&>(impls::setup_rbgs_point));
 
+		kreg->add(name::setup_relax_x,"fortran",
+		         Kernel<const core::StencilOp&,
+		         core::RelaxStencil&>(impls::setup_rbgs_x));
+
+		kreg->add(name::setup_relax_y,"fortran",
+		         Kernel<const core::StencilOp&,
+		         core::RelaxStencil&>(impls::setup_rbgs_y));
+
 		kreg->add(name::setup_cg_lu, "fortran",
 		         Kernel<const core::StencilOp&,
 		         core::GridFunc&>(impls::setup_cg_lu));
@@ -67,6 +75,20 @@ namespace factory
 		         const core::GridFunc&,
 		         const core::RelaxStencil&,
 		         cycle::Dir>(impls::relax_rbgs_point));
+
+		kreg->add(name::relax_lines_x, "fortran",
+		         Kernel<const core::StencilOp&,
+		         core::GridFunc&,
+		         const core::GridFunc&,
+		         const core::RelaxStencil&,
+		         cycle::Dir>(impls::relax_lines_x));
+
+		kreg->add(name::relax_lines_y, "fortran",
+		         Kernel<const core::StencilOp&,
+		         core::GridFunc&,
+		         const core::GridFunc&,
+		         const core::RelaxStencil&,
+		         cycle::Dir>(impls::relax_lines_y));
 
 		kreg->add(name::relax, "fortran-msg-rbgs",
 		         Kernel<const core::StencilOp&,
@@ -131,7 +153,6 @@ namespace factory
 		         Kernel<const core::StencilOp&,
 		         core::RelaxStencil&>(impls::mpi_setup_rbgs_point));
 
-
 		// TODO: This could be automatic.
 
 		std::string res_kern = conf.get<std::string>("kernels.residual", "c++");
@@ -160,11 +181,15 @@ namespace factory
 		kreg->set(name::galerkin_prod, galerkin_prod_kern);
 		kreg->set(name::setup_interp, setup_interp_kern);
 		kreg->set(name::setup_relax, setup_relax_kern);
+		kreg->set(name::setup_relax_x, "fortran");
+		kreg->set(name::setup_relax_y, "fortran");
 		kreg->set(name::setup_cg_lu, setup_cg_lu_kern);
 		kreg->set(name::relax, relax_kern);
 		kreg->set(name::restriction, restrict_kern);
 		kreg->set(name::interp_add, interp_kern);
 		kreg->set(name::solve_cg, solve_cg_kern);
+		kreg->set(name::relax_lines_x, "fortran");
+		kreg->set(name::relax_lines_y, "fortran");
 
 		return kreg;
 	}

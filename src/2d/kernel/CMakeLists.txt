@@ -21,11 +21,15 @@ set(kernel_SOURCES
   fortran/BMG2_SymStd_interp_add.f90
   fortran/BMG2_SymStd_restrict.f90
   fortran/BMG2_SymStd_relax_GS.f90
+  fortran/BMG2_SymStd_relax_lines_x.f90
+  fortran/BMG2_SymStd_relax_lines_y.f90
   fortran/interface.cc
   fortran/ModInterface.f90
   fortran/BMG2_SymStd_SETUP_interp_OI.f
   fortran/BMG2_SymStd_SETUP_ITLI_ex.f
   fortran/BMG2_SymStd_SETUP_recip.f
+  fortran/BMG2_SymStd_SETUP_lines_x.f90
+  fortran/BMG2_SymStd_SETUP_lines_y.f90
   fortran/BMG2_SymStd_SETUP_cg_LU.f90
   fortran/BMG2_SymStd_SOLVE_cg.f90
   fortran/util.f90

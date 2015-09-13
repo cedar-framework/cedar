@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <mpi.h>
+#include <array>
 
 #include "../multilevel.h"
 #include "core/mpi/stencil_op.h"
@@ -16,11 +17,11 @@ namespace boxmg { namespace bmg2d { namespace solver { namespace mpi {
 struct BoxMGLevel : Level
 {
 BoxMGLevel(core::mpi::StencilOp&& A, inter::mpi::ProlongOp&& P) : /*Level(A,P),*/
-		A(std::move(A)), P(std::move(P)), SOR(core::RelaxStencil()) { R.associate(&P); }
+	A(std::move(A)), P(std::move(P)), SOR({{core::RelaxStencil(),core::RelaxStencil()}}) { R.associate(&P); }
 	core::mpi::StencilOp    A;
 	inter::mpi::ProlongOp   P;
 	inter::mpi::RestrictOp  R;
-	core::RelaxStencil SOR;
+	std::array<core::RelaxStencil,2> SOR;
 };
 
 class BoxMG : public MultiLevel<BoxMGLevel,core::mpi::GridFunc>

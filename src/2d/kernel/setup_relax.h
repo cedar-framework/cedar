@@ -10,6 +10,10 @@ namespace impls
 {
 	void setup_rbgs_point(const core::StencilOp & so,
 	                      core::RelaxStencil & sor);
+	void setup_rbgs_x(const core::StencilOp & so,
+	                  core::RelaxStencil & sor);
+	void setup_rbgs_y(const core::StencilOp & so,
+	                  core::RelaxStencil & sor);
 	void mpi_setup_rbgs_point(const core::StencilOp & so,
 	                          core::RelaxStencil & sor);
 }

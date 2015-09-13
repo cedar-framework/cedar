@@ -11,9 +11,13 @@ namespace name {
 	const std::string residual("residual");
 	const std::string setup_interp("setup-oi-interp");
 	const std::string galerkin_prod("galerkin-prod");
-	const std::string setup_relax("setup-relaxation");
+	const std::string setup_relax("setup pointwise relaxation");
+	const std::string setup_relax_x("setup x-line relaxation");
+	const std::string setup_relax_y("setup y-line relaxation");
 	const std::string setup_cg_lu("setup-cg-lu");
-	const std::string relax("relaxation");
+	const std::string relax("pointwise relaxation");
+	const std::string relax_lines_x("x-line relaxation");
+	const std::string relax_lines_y("y-line relaxation");
 	const std::string restriction("restriction");
 	const std::string interp_add("interpolate and add");
 	const std::string solve_cg("coarse grid solve");

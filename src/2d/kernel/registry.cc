@@ -38,6 +38,20 @@ void Registry::setup_relax(const core::StencilOp & so,
 }
 
 
+void Registry::setup_relax_x(const core::StencilOp & so,
+                             core::RelaxStencil & sor)
+{
+	active.run(name::setup_relax_x, so, sor);
+}
+
+
+void Registry::setup_relax_y(const core::StencilOp & so,
+                             core::RelaxStencil & sor)
+{
+	active.run(name::setup_relax_y, so, sor);
+}
+
+
 void Registry::setup_cg_lu(const core::StencilOp & so,
                  core::GridFunc & abd)
 {
@@ -51,6 +65,26 @@ void Registry::relax(const core::StencilOp & so,
            cycle::Dir cycle_dir)
 {
 	active.run(name::relax, so, x, b, sor, static_cast<cycle::Dir>(cycle_dir));
+}
+
+
+void Registry::relax_lines_x(const core::StencilOp & so,
+           core::GridFunc & x,
+           const core::GridFunc & b,
+           const core::RelaxStencil & sor,
+           cycle::Dir cycle_dir)
+{
+	active.run(name::relax_lines_x, so, x, b, sor, static_cast<cycle::Dir>(cycle_dir));
+}
+
+
+void Registry::relax_lines_y(const core::StencilOp & so,
+           core::GridFunc & x,
+           const core::GridFunc & b,
+           const core::RelaxStencil & sor,
+           cycle::Dir cycle_dir)
+{
+	active.run(name::relax_lines_y, so, x, b, sor, static_cast<cycle::Dir>(cycle_dir));
 }
 
 
