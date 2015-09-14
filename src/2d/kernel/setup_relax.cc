@@ -1,3 +1,4 @@
+#include "fortran/BMG_parameters_c.h"
 #include "setup_relax.h"
 
 extern "C" {
@@ -36,7 +37,7 @@ namespace impls
 	void setup_rbgs_x(const StencilOp & so,
 	                  RelaxStencil & sor)
 	{
-		int nx, ny, nstencil, nsorv;
+		int nx, ny, nstencil, jpn;
 
 		const GridStencil & so_sten = so.stencil();
 		core::StencilOp & sod = const_cast<core::StencilOp&>(so);
@@ -47,16 +48,16 @@ namespace impls
 		if (so_sten.five_pt()) nstencil = 3;
 		else nstencil = 5;
 
-		nsorv = 2;
+		jpn = BMG_BCs_definite;
 
-		bmg2_symstd_setup_recip(sod.data(), sor.data(), &nx, &ny, &nstencil, &nsorv);
+		BMG2_SymStd_SETUP_lines_x(sod.data(), sor.data(), nx, ny, nstencil, jpn);
 	}
 
 
 	void setup_rbgs_y(const StencilOp & so,
 	                  RelaxStencil & sor)
 	{
-		int nx, ny, nstencil, nsorv;
+		int nx, ny, nstencil, jpn;
 
 		const GridStencil & so_sten = so.stencil();
 		core::StencilOp & sod = const_cast<core::StencilOp&>(so);
@@ -67,9 +68,9 @@ namespace impls
 		if (so_sten.five_pt()) nstencil = 3;
 		else nstencil = 5;
 
-		nsorv = 2;
+		jpn = BMG_BCs_definite;
 
-		bmg2_symstd_setup_recip(sod.data(), sor.data(), &nx, &ny, &nstencil, &nsorv);
+		BMG2_SymStd_SETUP_lines_y(sod.data(), sor.data(), nx, ny, nstencil, jpn);
 	}
 
 

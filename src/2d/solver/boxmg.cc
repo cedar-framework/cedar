@@ -115,8 +115,8 @@ void BoxMG::add_level(core::StencilOp & fop, int num_levels)
 			else if (relax_type == "line-y")
 				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
 			else {
-				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
 				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[1], cycle::Dir::DOWN);
+				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
 			}
 		}
 	};
