@@ -42,9 +42,14 @@ set(kernel_SOURCES
   fortran/mpi/BMG2_SymStd_SETUP_MSGGrid.f90
   fortran/mpi/BMG2_SymStd_SETUP_MSGGridSO.f90
   fortran/mpi/BMG2_SymStd_SETUP_MSG.f90
+  fortran/mpi/BMG2_SymStd_SETUP_LS.f90
+  fortran/mpi/BMG2_SymStd_SETUP_LSGrid.f90
+  fortran/mpi/BMG2_SymStd_SETUP_PtrLS.f90
   fortran/mpi/BMG2_SymStd_SETUP_fine_stencil.f90
   fortran/mpi/BMG2_SymStd_SETUP_interp_OI.f90
   fortran/mpi/BMG2_SymStd_SETUP_recip.f90
+  fortran/mpi/BMG2_SymStd_SETUP_lines_x.f90
+  fortran/mpi/BMG2_SymStd_SETUP_lines_y.f90
   fortran/mpi/BMG2_SymStd_SETUP_cg_boxmg.f90
   fortran/mpi/BMG2_SymStd_COPY_cg_WS_SO.f
   fortran/mpi/BMG2_SymStd_SOLVE_cg_pack.f90
@@ -53,6 +58,11 @@ set(kernel_SOURCES
   fortran/mpi/BMG2_SymStd_COPY_cg_rV_G_L.f
   fortran/mpi/BMG2_SymStd_SETUP_ITLI_ex.f90
   fortran/mpi/BMG2_SymStd_relax_GS.f90
+  fortran/mpi/BMG2_SymStd_relax_lines_x.f90
+  fortran/mpi/BMG2_SymStd_relax_lines_y.f90
+  fortran/mpi/BMG2_SymStd_LineSolve_A.f90
+  fortran/mpi/BMG2_SymStd_LineSolve_B.f90
+  fortran/mpi/BMG2_SymStd_LineSolve_C.f90
   fortran/mpi/BMG2_SymStd_restrict.f90
   fortran/mpi/BMG2_SymStd_residual.f90
   fortran/mpi/BMG2_SymStd_interp_add.f90

@@ -46,22 +46,51 @@ BoxMG::BoxMG(core::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 			                     levels[i].A, levels[i+1].A,
 			                     levels[i].P);
 			kernels->galerkin_prod(kf, kf-1, num_levels, levels[i].P, levels[i].A, levels[i+1].A);
-			kernels->setup_relax(levels[i].A,  levels[i].SOR[0]);
+			auto relax_type = conf.get<std::string>("solver.relaxation", "point");
+
+			if (relax_type == "point")
+				kernels->setup_relax(levels[i].A,  levels[i].SOR[0]);
+			else if (relax_type == "line-x")
+				kernels->setup_relax_x(levels[i].A, levels[i].SOR[0]);
+			else if (relax_type == "line-y")
+				kernels->setup_relax_y(levels[i].A, levels[i].SOR[0]);
+			else {
+				kernels->setup_relax_x(levels[i].A, levels[i].SOR[0]);
+				kernels->setup_relax_y(levels[i].A, levels[i].SOR[1]);
+			}
 			int nrelax_pre = conf.get<int>("solver.cycle.nrelax-pre", 2);
 			int nrelax_post = conf.get<int>("solver.cycle.nrelax-post", 1);
-			levels[i].presmoother = [&,i,nrelax_pre,kernels](const core::DiscreteOp &A, core::GridFunc &x, const core::GridFunc &b) {
+			levels[i].presmoother = [&,i,nrelax_pre,kernels,relax_type](const core::DiscreteOp &A, core::GridFunc &x, const core::GridFunc &b) {
 				const core::StencilOp & av = dynamic_cast<const core::StencilOp &>(A);
 				for (auto j : range(nrelax_pre)) {
 					(void)j;
-					kernels->relax(av, x, b, levels[i].SOR[0], cycle::Dir::DOWN);
+					if (relax_type == "point")
+						kernels->relax(av, x, b, levels[i].SOR[0], cycle::Dir::DOWN);
+					else if (relax_type == "line-x")
+						kernels->relax_lines_x(av, x, b, levels[i].SOR[0], cycle::Dir::DOWN);
+					else if (relax_type == "line-y")
+						kernels->relax_lines_y(av, x, b, levels[i].SOR[0], cycle::Dir::DOWN);
+					else {
+						kernels->relax_lines_x(av, x, b, levels[i].SOR[0], cycle::Dir::DOWN);
+						kernels->relax_lines_y(av, x, b, levels[i].SOR[1], cycle::Dir::DOWN);
+					}
 				}
 			};
-			levels[i].postsmoother = [&,i,nrelax_post,kernels](const core::DiscreteOp &A, core::GridFunc &x, const core::GridFunc&b) {
+			levels[i].postsmoother = [&,i,nrelax_post,kernels,relax_type](const core::DiscreteOp &A, core::GridFunc &x, const core::GridFunc&b) {
 
 				const core::StencilOp & av = dynamic_cast<const core::StencilOp &>(A);
 				for (auto j: range(nrelax_post)) {
 					(void)j;
-					kernels->relax(av, x, b, levels[i].SOR[0], cycle::Dir::UP);
+					if (relax_type == "point")
+						kernels->relax(av, x, b, levels[i].SOR[0], cycle::Dir::UP);
+					else if (relax_type == "line-x")
+						kernels->relax_lines_x(av, x, b, levels[i].SOR[0], cycle::Dir::UP);
+					else if (relax_type == "line-y")
+						kernels->relax_lines_y(av, x, b, levels[i].SOR[0], cycle::Dir::UP);
+					else {
+						kernels->relax_lines_y(av, x, b, levels[i].SOR[1], cycle::Dir::UP);
+						kernels->relax_lines_x(av, x, b, levels[i].SOR[0], cycle::Dir::UP);
+					}
 				}
 			};
 		}

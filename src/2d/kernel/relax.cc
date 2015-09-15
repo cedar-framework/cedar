@@ -1,4 +1,5 @@
 #include "fortran/BMG_parameters_c.h"
+#include "fortran/mpi/BMG_workspace_c.h"
 #include "core/mpi/stencil_op.h"
 
 #include "halo.h"
@@ -18,6 +19,18 @@ extern "C" {
 	                              len_t II, len_t JJ, int kf, int ifd, int nstncl, int irelax_sym,
 	                              int updown, len_t iGs, len_t jGs, len_t *iWork, len_t NMSGi,
 	                              int *pMSG, real_t *msg_buffer, len_t NMSGr, int MPICOMM);
+	void MPI_BMG2_SymStd_relax_lines_x(int k, real_t *SO, real_t *QF, real_t *Q, real_t *SOR,
+	                                   real_t *B, len_t II, len_t JJ, len_t iGs, len_t jGs,
+	                                   int nog, int nstencil, int irelax_sym, int updown,
+	                                   len_t *datadist, len_t *iwork, len_t nmsgi, int *pMSG,
+	                                   real_t *rwork, len_t nmsgr, int mpicomm,
+	                                   int xlinecomm, int ylinecomm);
+	void MPI_BMG2_SymStd_relax_lines_y(int k, real_t *SO, real_t *QF, real_t *Q, real_t *SOR,
+	                                   real_t *B, len_t II, len_t JJ, len_t iGs, len_t jGs,
+	                                   int nog, int nstencil, int irelax_sym, int updown,
+	                                   len_t *datadist, len_t *iwork, len_t nmsgi, int *pMSG,
+	                                   real_t *rwork, len_t nmsgr, int mpicomm,
+	                                   int xlinecomm, int ylinecomm);
 }
 
 namespace boxmg { namespace bmg2d { namespace kernel {
@@ -180,6 +193,106 @@ namespace impls
 		                         updown, topo.is(0), topo.is(1), ctx->msg_geom.data(),
 		                         ctx->msg_geom.size(), ctx->pMSG.data(), ctx->msg_buffer.data(),
 		                         ctx->msg_buffer.size(), fcomm);
+	}
+
+
+	void mpi_relax_lines_x(const core::StencilOp & so,
+	                       core::GridFunc & x,
+	                       const core::GridFunc & b,
+	                       const core::RelaxStencil & sor,
+	                       cycle::Dir cycle_dir)
+	{
+		using namespace boxmg::bmg2d::core;
+		int k, kf, ifd;
+		int updown, nstencil;
+
+		core::mpi::StencilOp & sod = const_cast<core::mpi::StencilOp&>(dynamic_cast<const core::mpi::StencilOp&>(so));
+		core::mpi::GridTopo & topo = sod.grid();
+		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
+		GridStencil & sten = sod.stencil();
+		core::RelaxStencil & sord = const_cast<core::RelaxStencil&>(sor);
+		core::GridFunc & bd = const_cast<core::GridFunc&>(b);
+		// TODO: replace with residual later
+		core::GridFunc res(sten.len(0), sten.len(1));
+
+		k = topo.level()+1;
+		kf = topo.nlevel();
+		if (sten.five_pt()) {
+			ifd = 1;
+			nstencil = 3;
+		} else {
+			ifd = 0;
+			nstencil = 5;
+		}
+
+		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
+		else updown = BMG_DOWN;
+
+		// ibc = BMG_BCs_definite;
+		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+		MPI_Fint xlinecomm = MPI_Comm_c2f(ctx->xlinecomm);
+		MPI_Fint ylinecomm = MPI_Comm_c2f(ctx->ylinecomm);
+
+		boxmg::len_t * xdatadist = &ctx->msg_geom.data()[ctx->pLS(ipL_LS_XDataDist,k-1)-1];
+
+		MPI_BMG2_SymStd_relax_lines_x(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
+		                              sten.len(0), sten.len(1), topo.is(0), topo.is(1),
+		                              kf, nstencil, BMG_RELAX_SYM, updown,
+		                              xdatadist,
+		                              ctx->msg_geom.data(), ctx->msg_geom.size(),
+		                              ctx->pMSG.data(), ctx->msg_buffer.data(),
+		                              ctx->msg_buffer.size(), fcomm,
+		                              xlinecomm, ylinecomm);
+	}
+
+
+	void mpi_relax_lines_y(const core::StencilOp & so,
+	                       core::GridFunc & x,
+	                       const core::GridFunc & b,
+	                       const core::RelaxStencil & sor,
+	                       cycle::Dir cycle_dir)
+	{
+		using namespace boxmg::bmg2d::core;
+		int k, kf, ifd;
+		int updown, nstencil;
+
+		core::mpi::StencilOp & sod = const_cast<core::mpi::StencilOp&>(dynamic_cast<const core::mpi::StencilOp&>(so));
+		core::mpi::GridTopo & topo = sod.grid();
+		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
+		GridStencil & sten = sod.stencil();
+		core::RelaxStencil & sord = const_cast<core::RelaxStencil&>(sor);
+		core::GridFunc & bd = const_cast<core::GridFunc&>(b);
+		// TODO: replace with residual later
+		core::GridFunc res(sten.len(0), sten.len(1));
+
+		k = topo.level()+1;
+		kf = topo.nlevel();
+		if (sten.five_pt()) {
+			ifd = 1;
+			nstencil = 3;
+		} else {
+			ifd = 0;
+			nstencil = 5;
+		}
+
+		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
+		else updown = BMG_DOWN;
+
+		// ibc = BMG_BCs_definite;
+		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+		MPI_Fint xlinecomm = MPI_Comm_c2f(ctx->xlinecomm);
+		MPI_Fint ylinecomm = MPI_Comm_c2f(ctx->ylinecomm);
+
+		boxmg::len_t * ydatadist = &ctx->msg_geom.data()[ctx->pLS(ipL_LS_YDataDist,k-1)-1];
+
+		MPI_BMG2_SymStd_relax_lines_y(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
+		                              sten.len(0), sten.len(1), topo.is(0), topo.is(1),
+		                              kf, nstencil, BMG_RELAX_SYM, updown,
+		                              ydatadist,
+		                              ctx->msg_geom.data(), ctx->msg_geom.size(),
+		                              ctx->pMSG.data(), ctx->msg_buffer.data(),
+		                              ctx->msg_buffer.size(), fcomm,
+		                              xlinecomm, ylinecomm);
 	}
 }
 

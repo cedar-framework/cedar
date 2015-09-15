@@ -7,6 +7,8 @@ extern "C" {
 	void BMG2_SymStd_SETUP_lines_x(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl, int JPN);
 	void BMG2_SymStd_SETUP_lines_y(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl, int JPN);
 	void MPI_BMG2_SymStd_SETUP_recip(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl);
+	void MPI_BMG2_SymStd_SETUP_lines_x(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl);
+	void MPI_BMG2_SymStd_SETUP_lines_y(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl);
 }
 
 
@@ -33,6 +35,7 @@ namespace impls
 
 		bmg2_symstd_setup_recip(sod.data(), sor.data(), &nx, &ny, &nstencil, &nsorv);
 	}
+
 
 	void setup_rbgs_x(const StencilOp & so,
 	                  RelaxStencil & sor)
@@ -90,6 +93,42 @@ namespace impls
 		else nstencil = 5;
 
 		MPI_BMG2_SymStd_SETUP_recip(sod.data(), sor.data(), nx, ny, nstencil);
+	}
+
+
+	void mpi_setup_rbgs_x(const StencilOp & so,
+	                      RelaxStencil & sor)
+	{
+		int nx, ny, nstencil;
+
+		const GridStencil & so_sten = so.stencil();
+		core::StencilOp & sod = const_cast<core::StencilOp&>(so);
+
+		nx = so_sten.len(0);
+		ny = so_sten.len(1);
+
+		if (so_sten.five_pt()) nstencil = 3;
+		else nstencil = 5;
+
+		MPI_BMG2_SymStd_SETUP_lines_x(sod.data(), sor.data(), nx, ny, nstencil);
+	}
+
+
+	void mpi_setup_rbgs_y(const StencilOp & so,
+	                      RelaxStencil & sor)
+	{
+		int nx, ny, nstencil;
+
+		const GridStencil & so_sten = so.stencil();
+		core::StencilOp & sod = const_cast<core::StencilOp&>(so);
+
+		nx = so_sten.len(0);
+		ny = so_sten.len(1);
+
+		if (so_sten.five_pt()) nstencil = 3;
+		else nstencil = 5;
+
+		MPI_BMG2_SymStd_SETUP_lines_y(sod.data(), sor.data(), nx, ny, nstencil);
 	}
 }
 

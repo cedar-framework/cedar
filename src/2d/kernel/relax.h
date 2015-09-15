@@ -32,6 +32,18 @@ namespace impls
 	                          const core::GridFunc & b,
 	                          const core::RelaxStencil & sor,
 	                          cycle::Dir cycle_dir);
+
+	void mpi_relax_lines_x(const core::StencilOp & so,
+	                       core::GridFunc & x,
+	                       const core::GridFunc & b,
+	                       const core::RelaxStencil & sor,
+	                       cycle::Dir cycle_dir);
+
+	void mpi_relax_lines_y(const core::StencilOp & so,
+	                       core::GridFunc & x,
+	                       const core::GridFunc & b,
+	                       const core::RelaxStencil & sor,
+	                       cycle::Dir cycle_dir);
 }
 
 }}}

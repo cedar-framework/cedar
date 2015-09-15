@@ -13,6 +13,7 @@ namespace impls
 	{
 		MsgCtx(core::mpi::GridTopo & topo);
 		core::Array<int,int> pMSG; // these should be int, len_t
+		core::Array<int,int> pLS;
 		core::Array<int,int> pMSGSO;
 		std::vector<len_t> msg_geom;
 		core::Array<int,int> proc_grid;
@@ -24,6 +25,8 @@ namespace impls
 		std::vector<real_t> msg_buffer;
 		int pSI_MSG;
 		int p_NLx_kg, p_NLy_kg;
+		MPI_Comm xlinecomm;
+		MPI_Comm ylinecomm;
 		/* std::vector<len_t> iworkmsg; */
 		/* int *iworkmsg[nmsgi]; */
 		/* int nmsgi; */

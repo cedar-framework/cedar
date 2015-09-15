@@ -13,6 +13,8 @@ extern "C" {
 	                           int nog, int nogm, int nproc, int myproc,
 	                           int* dimx, int *dimy, int *dimxfine, int *dimyfine,
 	                           int *procgrid, int nproci, int nprocj, int mpicomm);
+	void BMG2_SymStd_SETUP_LS(len_t *iWorkMSG, len_t NMSGi, int *pMSG, int *pLS, int *pSI_MSG,
+	                          int *procgrid, int nproci, int nprocj, int nog);
 	void BMG2_SymStd_SETUP_fine_stencil(int kf, real_t *SO, len_t IIF, len_t JJF, int NStncl,
 	                                    len_t *iWork, len_t NMSGi, int *pMSGSO,
 	                                    real_t *msg_buffer, len_t NMSGr, int mpicomm);
@@ -26,6 +28,7 @@ namespace impls
 {
 	MsgCtx::MsgCtx(core::mpi::GridTopo & topo) :
 		pMSG(NBMG_pMSG, topo.nlevel(),0),
+		pLS(NBMG_pLS, topo.nlevel(),0),
 		pMSGSO(NBMG_pMSG, topo.nlevel(),0),
 		proc_grid(topo.nproc(0), topo.nproc(1),0),
 		proc_coord(topo.nproc(0)*topo.nproc(1)*2),
@@ -34,6 +37,10 @@ namespace impls
 		dimx(topo.nproc(0), topo.nlevel(),0),
 		dimy(topo.nproc(1), topo.nlevel(),0)
 	{
+		MPI_Comm_split(topo.comm, topo.coord(1), topo.coord(0),
+		               &xlinecomm);
+		MPI_Comm_split(topo.comm, topo.coord(0), topo.coord(1),
+		               &ylinecomm);
 		len_t NLx = topo.nlocal(0) - 2;
 		len_t NLy = topo.nlocal(1) - 2;
 		// !
@@ -119,6 +126,11 @@ namespace impls
 		                      ctx->dimxfine.data(), ctx->dimyfine.data(),
 		                      ctx->proc_grid.data(), topo.nproc(0), topo.nproc(1),
 		                      fcomm);
+
+		BMG2_SymStd_SETUP_LS(ctx->msg_geom.data(), ctx->msg_geom.size(),
+		                     ctx->pMSG.data(), ctx->pLS.data(), &ctx->pSI_MSG,
+		                     ctx->proc_grid.data(), topo.nproc(0), topo.nproc(1),
+		                     topo.nlevel());
 
 		*msg_ctx = (void*) ctx;
 	}

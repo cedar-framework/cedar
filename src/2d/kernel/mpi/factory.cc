@@ -82,6 +82,20 @@ namespace factory
 		         const core::RelaxStencil&,
 		         cycle::Dir>(impls::mpi_relax_rbgs_point));
 
+		kreg->add(name::relax_lines_x, "fortran-msg",
+		         Kernel<const core::StencilOp&,
+		         core::GridFunc&,
+		         const core::GridFunc&,
+		         const core::RelaxStencil&,
+		         cycle::Dir>(impls::mpi_relax_lines_x));
+
+		kreg->add(name::relax_lines_y, "fortran-msg",
+		         Kernel<const core::StencilOp&,
+		         core::GridFunc&,
+		         const core::GridFunc&,
+		         const core::RelaxStencil&,
+		         cycle::Dir>(impls::mpi_relax_lines_y));
+
 		kreg->add(name::restriction, "fortran",
 		         Kernel<const inter::RestrictOp&,
 		         const core::GridFunc&,
@@ -138,6 +152,14 @@ namespace factory
 		         Kernel<const core::StencilOp&,
 		         core::RelaxStencil&>(impls::mpi_setup_rbgs_point));
 
+		kreg->add(name::setup_relax_x, "fortran-msg",
+		         Kernel<const core::StencilOp&,
+		         core::RelaxStencil&>(impls::mpi_setup_rbgs_x));
+
+		kreg->add(name::setup_relax_y, "fortran-msg",
+		         Kernel<const core::StencilOp&,
+		         core::RelaxStencil&>(impls::mpi_setup_rbgs_y));
+
 		kreg->add(name::setup_cg_boxmg, "fortran-msg",
 		          Kernel<const core::StencilOp &,
 		          std::shared_ptr<solver::BoxMG>*>(impls::setup_cg_boxmg));
@@ -192,7 +214,11 @@ namespace factory
 		kreg->set(name::setup_interp, "fortran-msg");
 		kreg->set(name::galerkin_prod, "fortran-msg");
 		kreg->set(name::setup_relax, "fortran-msg-rbgs-point");
+		kreg->set(name::setup_relax_x, "fortran-msg");
+		kreg->set(name::setup_relax_y, "fortran-msg");
 		kreg->set(name::relax, "fortran-msg-rbgs");
+		kreg->set(name::relax_lines_x, "fortran-msg");
+		kreg->set(name::relax_lines_y, "fortran-msg");
 		kreg->set(name::restriction, "fortran-msg");
 		kreg->set(name::interp_add, "fortran-msg");
 		kreg->set(name::residual, "fortran-msg");
