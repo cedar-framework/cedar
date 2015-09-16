@@ -13,7 +13,9 @@ int main(int argc, char *argv[])
 	using namespace boxmg::bmg2d;
 	using namespace boxmg::bmg2d::core;
 
-	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, NULL);
+	int provided;
+
+	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
 
 	auto nx = config::get<len_t>("grid.nx", 9);
 	auto ny = config::get<len_t>("grid.ny", 9);

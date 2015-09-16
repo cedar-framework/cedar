@@ -54,7 +54,7 @@
 !
       integer(len_t), VALUE :: Nx, Ny
       integer(c_int), VALUE :: NStncl, JPN
-      real(real_t) :: SO(Nx,Ny,NStncl), SOR(Nx,Ny,2)
+      real(real_t) :: SO(Nx,Ny,NStncl), SOR(Ny,Nx,2)
 
 ! ----------------------------
 !     Local Declarations
