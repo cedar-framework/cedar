@@ -95,13 +95,20 @@ namespace impls
 			}
 		}
 
-		// check these
-		for (auto j : range(topo.nproc(1))) {
-			dimyfine[j] = topo.nlocal(1) - 2;
+		if (topo.dimyfine.size() > 0) {
+			dimyfine = topo.dimyfine;
+		} else {
+			for (auto j : range(topo.nproc(1))) {
+				dimyfine[j] = topo.nlocal(1) - 2;
+			}
 		}
 
-		for (auto i : range(topo.nproc(0))) {
-			dimxfine[i] = topo.nlocal(0) - 2;
+		if (topo.dimxfine.size() > 0) {
+			dimxfine = topo.dimxfine;
+		} else {
+			for (auto i : range(topo.nproc(0))) {
+				dimxfine[i] = topo.nlocal(0) - 2;
+			}
 		}
 	}
 

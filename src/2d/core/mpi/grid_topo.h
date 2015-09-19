@@ -39,6 +39,8 @@ public:
 	igrd_t igrd_ptr() { return igrd; }
 
 	MPI_Comm comm;
+	std::vector<int> dimxfine;
+	std::vector<int> dimyfine;
 
 private:
 	igrd_t igrd;

@@ -47,6 +47,21 @@ extern "C"
 		grid->nlocal(0) = nlx[grid->coord(0)] + 2;
 		grid->nlocal(1) = nly[grid->coord(1)] + 2;
 
+		grid->dimxfine.resize(nprocx);
+		grid->dimyfine.resize(nprocy);
+		for (auto i: range(nprocx)) {
+			grid->dimxfine[i] = nlx[i];
+		}
+
+		for (auto j: range(nprocy)) {
+			grid->dimyfine[j] = nly[j];
+		}
+
+	// printf("%d %d -> %u %u : %u %u ==== %u %u\n", grid->coord(0), grid->coord(1),
+	//        grid->nlocal(0), grid->nlocal(1),
+	//        grid->nglobal(0), grid->nglobal(1),
+	//        grid->is(0), grid->is(1));
+
 		grid_ptr = new std::shared_ptr<core::mpi::GridTopo>(std::move(grid));
 		return reinterpret_cast<bmg2_topo>(grid_ptr);
 	}

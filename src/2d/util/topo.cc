@@ -41,6 +41,11 @@ core::mpi::topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny)
 	grid->nlocal(0) += 2;
 	grid->nlocal(1) += 2;
 
+	// printf("%d %d -> %u %u : %u %u ==== %u %u\n", grid->coord(0), grid->coord(1),
+	//        grid->nlocal(0), grid->nlocal(1),
+	//        grid->nglobal(0), grid->nglobal(1),
+	//        grid->is(0), grid->is(1));
+
 	return grid;
 }
 
