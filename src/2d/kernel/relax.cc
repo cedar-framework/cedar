@@ -79,6 +79,7 @@ namespace impls
 	                   core::GridFunc & x,
 	                   const core::GridFunc & b,
 	                   const core::RelaxStencil & sor,
+	                   core::GridFunc & res,
 	                   cycle::Dir cycle_dir)
 	{
 		using namespace boxmg::bmg2d::core;
@@ -89,9 +90,6 @@ namespace impls
 		StencilOp & sod = const_cast<StencilOp&>(so);
 		core::RelaxStencil & sord = const_cast<core::RelaxStencil&>(sor);
 		core::GridFunc & bd = const_cast<core::GridFunc&>(b);
-
-		// TODO: reuse residual on this level here
-		core::GridFunc res(so_sten.len(0), 1);
 
 		k = kf = 1;
 		if (so_sten.five_pt()) {
@@ -119,6 +117,7 @@ namespace impls
 	                   core::GridFunc & x,
 	                   const core::GridFunc & b,
 	                   const core::RelaxStencil & sor,
+	                   core::GridFunc & res,
 	                   cycle::Dir cycle_dir)
 	{
 		using namespace boxmg::bmg2d::core;
@@ -129,9 +128,6 @@ namespace impls
 		StencilOp & sod = const_cast<StencilOp&>(so);
 		core::RelaxStencil & sord = const_cast<core::RelaxStencil&>(sor);
 		core::GridFunc & bd = const_cast<core::GridFunc&>(b);
-
-		// TODO: reuse residual on this level here
-		core::GridFunc res(so_sten.len(1)*2, 1);
 
 		k = kf = 1;
 		if (so_sten.five_pt()) {
@@ -200,6 +196,7 @@ namespace impls
 	                       core::GridFunc & x,
 	                       const core::GridFunc & b,
 	                       const core::RelaxStencil & sor,
+	                       core::GridFunc & res,
 	                       cycle::Dir cycle_dir)
 	{
 		using namespace boxmg::bmg2d::core;
@@ -212,8 +209,6 @@ namespace impls
 		GridStencil & sten = sod.stencil();
 		core::RelaxStencil & sord = const_cast<core::RelaxStencil&>(sor);
 		core::GridFunc & bd = const_cast<core::GridFunc&>(b);
-		// TODO: replace with residual later
-		core::GridFunc res(sten.len(0), sten.len(1));
 
 		k = topo.level()+1;
 		kf = topo.nlevel();
@@ -250,6 +245,7 @@ namespace impls
 	                       core::GridFunc & x,
 	                       const core::GridFunc & b,
 	                       const core::RelaxStencil & sor,
+	                       core::GridFunc & res,
 	                       cycle::Dir cycle_dir)
 	{
 		using namespace boxmg::bmg2d::core;
@@ -262,8 +258,6 @@ namespace impls
 		GridStencil & sten = sod.stencil();
 		core::RelaxStencil & sord = const_cast<core::RelaxStencil&>(sor);
 		core::GridFunc & bd = const_cast<core::GridFunc&>(b);
-		// TODO: replace with residual later
-		core::GridFunc res(sten.len(0), sten.len(1));
 
 		k = topo.level()+1;
 		kf = topo.nlevel();

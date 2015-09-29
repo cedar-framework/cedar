@@ -100,12 +100,12 @@ void BoxMG::add_level(core::StencilOp & fop, int num_levels)
 			if (relax_type == "point")
 				kernels->relax(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
 			else if (relax_type == "line-x")
-				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
+				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], levels[lvl].res, cycle::Dir::DOWN);
 			else if (relax_type == "line-y")
-				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
+				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[0], levels[lvl].res, cycle::Dir::DOWN);
 			else {
-				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
-				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[1], cycle::Dir::DOWN);
+				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], levels[lvl].res, cycle::Dir::DOWN);
+				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[1], levels[lvl].res, cycle::Dir::DOWN);
 			}
 		}
 	};
@@ -117,12 +117,12 @@ void BoxMG::add_level(core::StencilOp & fop, int num_levels)
 			if (relax_type == "point")
 				kernels->relax(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
 			else if (relax_type == "line-x")
-				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
+				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], levels[lvl].res, cycle::Dir::DOWN);
 			else if (relax_type == "line-y")
-				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
+				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[0], levels[lvl].res, cycle::Dir::DOWN);
 			else {
-				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[1], cycle::Dir::DOWN);
-				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
+				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[1], levels[lvl].res, cycle::Dir::DOWN);
+				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], levels[lvl].res, cycle::Dir::DOWN);
 			}
 		}
 	};

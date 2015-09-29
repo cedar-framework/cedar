@@ -81,6 +81,7 @@ namespace factory
 		         core::GridFunc&,
 		         const core::GridFunc&,
 		         const core::RelaxStencil&,
+		          core::GridFunc&,
 		         cycle::Dir>(impls::relax_lines_x));
 
 		kreg->add(name::relax_lines_y, "fortran",
@@ -88,6 +89,7 @@ namespace factory
 		         core::GridFunc&,
 		         const core::GridFunc&,
 		         const core::RelaxStencil&,
+		          core::GridFunc&,
 		         cycle::Dir>(impls::relax_lines_y));
 
 		kreg->add(name::relax, "fortran-msg-rbgs",

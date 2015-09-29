@@ -72,9 +72,10 @@ void Registry::relax_lines_x(const core::StencilOp & so,
            core::GridFunc & x,
            const core::GridFunc & b,
            const core::RelaxStencil & sor,
+           core::GridFunc &res,
            cycle::Dir cycle_dir)
 {
-	active.run(name::relax_lines_x, so, x, b, sor, static_cast<cycle::Dir>(cycle_dir));
+	active.run(name::relax_lines_x, so, x, b, sor, res, static_cast<cycle::Dir>(cycle_dir));
 }
 
 
@@ -82,9 +83,10 @@ void Registry::relax_lines_y(const core::StencilOp & so,
            core::GridFunc & x,
            const core::GridFunc & b,
            const core::RelaxStencil & sor,
+           core::GridFunc &res,
            cycle::Dir cycle_dir)
 {
-	active.run(name::relax_lines_y, so, x, b, sor, static_cast<cycle::Dir>(cycle_dir));
+	active.run(name::relax_lines_y, so, x, b, sor, res, static_cast<cycle::Dir>(cycle_dir));
 }
 
 

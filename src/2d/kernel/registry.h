@@ -53,12 +53,14 @@ public:
 	                   core::GridFunc & x,
 	                   const core::GridFunc & b,
 	                   const core::RelaxStencil & sor,
+	                   core::GridFunc &res,
 	                   cycle::Dir cycle_dir);
 
 	void relax_lines_y(const core::StencilOp & so,
 	                   core::GridFunc & x,
 	                   const core::GridFunc & b,
 	                   const core::RelaxStencil & sor,
+	                   core::GridFunc &res,
 	                   cycle::Dir cycle_dir);
 
 	void solve_cg(core::GridFunc &x,
