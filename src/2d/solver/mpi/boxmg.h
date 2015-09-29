@@ -37,6 +37,7 @@ public:
 	MPI_Comm comm;
 	std::shared_ptr<kernel::Registry> kernel_registry();
 	virtual core::mpi::GridFunc solve(const core::mpi::GridFunc &b);
+	virtual void solve(const core::mpi::GridFunc &b, core::mpi::GridFunc &x);
 
 private:
 	core::GridFunc ABD;

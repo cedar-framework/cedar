@@ -194,3 +194,11 @@ core::mpi::GridFunc BoxMG::solve(const core::mpi::GridFunc & b)
 	kernels->halo_exchange(b, halo_ctx);
 	return MultiLevel<BoxMGLevel,core::mpi::GridFunc>::solve(b);
 }
+
+
+void BoxMG::solve(const core::mpi::GridFunc & b, core::mpi::GridFunc & x)
+{
+	auto kernels = kernel_registry();
+	kernels->halo_exchange(b, halo_ctx);
+	return MultiLevel<BoxMGLevel,core::mpi::GridFunc>::solve(b, x);
+}

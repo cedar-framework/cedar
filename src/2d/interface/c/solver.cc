@@ -13,6 +13,7 @@ extern "C"
 		core::mpi::StencilOp *sop = reinterpret_cast<core::mpi::StencilOp*>(*op);
 
 		solver::mpi::BoxMG *bmg = new solver::mpi::BoxMG(std::move(*sop));
+		bmg->level(-1).x = core::mpi::GridFunc::zeros_like(bmg->level(-1).res);
 		*op = reinterpret_cast<bmg2_operator>(&bmg->level(-1).A);
 
 		return reinterpret_cast<bmg2_solver>(bmg);
@@ -36,7 +37,8 @@ extern "C"
 			}
 		}
 
-		auto sol = bmg->solve(rhs);
+		auto & sol = bmg->level(-1).x;
+		bmg->solve(rhs, sol);
 
 		idx = 0;
 		for (auto j : sol.range(1)) {

@@ -105,6 +105,24 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 		return x;
 	}
 
+
+	virtual void solve(const GridFunc & b, GridFunc & x)
+	{
+		int maxiter = config::get<int>("solver.max-iter", 10);
+		real_t tol = config::get<real_t>("solver.tol", 1e-8);
+		levels[0].A.residual(x,b,levels[0].res);
+		real_t res0_l2 = levels[0].res.template lp_norm<2>();
+		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
+		for (auto i: range(maxiter)) {
+			ncycle(0, x, b);
+			levels[0].A.residual(x,b,levels[0].res);
+			real_t res_l2 = levels[0].res.template lp_norm<2>();
+			real_t rel_l2 = res_l2 / res0_l2;
+			log::status << "Iteration " << i << " relative l2 norm: " << rel_l2 << std::endl;
+			if (rel_l2 < tol) break;
+		}
+	}
+
 protected:
 	std::vector<LevelType> levels;
 	std::function<void(const core::DiscreteOp & A, GridFunc &x, const GridFunc &b)> coarse_solver;
