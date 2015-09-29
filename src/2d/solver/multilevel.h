@@ -64,7 +64,7 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 		auto & coarse_b = levels[lvl+1].b;
 		auto & coarse_x = levels[lvl+1].x;
 		levels[lvl].R.apply(residual, coarse_b);
-		coarse_x.scale(0.0);
+		coarse_x.set(0.0);
 
 		if (lvl == levels.size() - 2) {
 			coarse_solver(levels[levels.size()-1].A, coarse_x, coarse_b);

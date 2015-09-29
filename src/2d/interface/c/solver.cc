@@ -14,6 +14,7 @@ extern "C"
 
 		solver::mpi::BoxMG *bmg = new solver::mpi::BoxMG(std::move(*sop));
 		bmg->level(-1).x = core::mpi::GridFunc::zeros_like(bmg->level(-1).res);
+		bmg->level(-1).b = core::mpi::GridFunc::zeros_like(bmg->level(-1).res);
 		*op = reinterpret_cast<bmg2_operator>(&bmg->level(-1).A);
 
 		return reinterpret_cast<bmg2_solver>(bmg);
@@ -27,7 +28,7 @@ extern "C"
 		auto *bmg = reinterpret_cast<solver::mpi::BoxMG*>(op);
 		auto grid = bmg->level(-1).A.grid_ptr();
 
-		core::mpi::GridFunc rhs(grid);
+		auto & rhs = bmg->level(-1).b;
 
 		int idx = 0;
 		for (auto j : rhs.range(1)) {

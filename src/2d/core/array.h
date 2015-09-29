@@ -137,6 +137,15 @@ public:
 		}
 	}
 
+	void set(D v)
+	{
+		for (auto j: grange_[1]) {
+			for (auto i: grange_[0]) {
+				(*this)(i,j) = v;
+			}
+		}
+	}
+
 	AlignedVector<D> & vec() { return data_; }
 
 	friend std::ostream& operator<< <> (std::ostream& os, const Array<S,D>& obj);
