@@ -39,6 +39,7 @@ extern "C"
 		}
 
 		auto & sol = bmg->level(-1).x;
+		sol.set(0.0);
 		bmg->solve(rhs, sol);
 
 		idx = 0;
