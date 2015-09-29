@@ -14,6 +14,7 @@ class GridFunc : public ::boxmg::bmg2d::core::GridFunc
 public:
 	/* template<typename... ArgTypes> */
 	/* 	GridFunc(ArgTypes&&... args) : ::boxmg::bmg2d::core::GridFunc(std::forward<decltype(args)>(args)...) {} */
+	GridFunc(){};
 	GridFunc(topo_ptr grid);
 
 	MPI_Comm comm;

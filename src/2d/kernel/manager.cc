@@ -91,7 +91,8 @@ void Manager::init_reg()
 	(*avail)[name::solve_cg].add("fortran",
 	                             Kernel<core::GridFunc&,
 	                             const core::GridFunc&,
-	                             const core::GridFunc&>(impls::fortran_solve_cg));
+	                             const core::GridFunc&,
+	                             real_t*>(impls::fortran_solve_cg));
 	(*avail)[name::setup_nog].add("fortran",
 	                              Kernel<core::mpi::GridTopo&,
 	                              len_t, int*>(impls::fortran_setup_nog));

@@ -10,7 +10,8 @@ namespace impls
 {
 	void fortran_solve_cg(core::GridFunc & x,
 	                      const core::GridFunc & b,
-	                      const core::GridFunc & ABD);
+	                      const core::GridFunc & ABD,
+	                      real_t *bbd);
 
 	void solve_cg_boxmg(const solver::BoxMG & cg_solver,
 	                    core::GridFunc &x,

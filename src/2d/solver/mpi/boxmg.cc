@@ -36,6 +36,11 @@ BoxMG::BoxMG(core::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 	kernels->halo_stencil_exchange(levels[0].A);
 
 	for (auto i: range(num_levels)) {
+		levels[i].res = core::mpi::GridFunc(levels[i].A.grid_ptr());
+		if (i) {
+			levels[i].x = core::mpi::GridFunc(levels[i].A.grid_ptr());
+			levels[i].b = core::mpi::GridFunc(levels[i].A.grid_ptr());
+		}
 		levels[i].A.halo_ctx = halo_ctx;
 		if (i != num_levels-1) {
 			levels[i].P.halo_ctx = halo_ctx;

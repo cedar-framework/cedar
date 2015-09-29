@@ -15,6 +15,10 @@ BoxMG::BoxMG(core::StencilOp&& fop)
 	kreg = kernel::factory::from_config(conf);
 	levels.emplace_back(std::move(fop), inter::ProlongOp());
 	levels.back().A.set_registry(kreg);
+	{
+		core::GridStencil & fsten = levels.back().A.stencil();
+		levels.back().res = core::GridFunc(fsten.shape(0), fsten.shape(1));
+	}
 
 	auto num_levels = BoxMG::compute_num_levels(levels[0].A);
 	log::debug << "Using a " << num_levels << " level heirarchy" << std::endl;
@@ -34,11 +38,13 @@ BoxMG::BoxMG(core::StencilOp&& fop)
 	auto nxc = cop_sten.shape(0);
 	auto nyc = cop_sten.shape(1);
 	ABD = core::GridFunc(nxc+2, nxc*nyc, 0);
+	bbd = new real_t[ABD.len(1)];
 	kernels->setup_cg_lu(cop, ABD);
 	coarse_solver = [&,kernels](const core::DiscreteOp &A, core::GridFunc &x, const core::GridFunc &b) {
-		kernels->solve_cg(x, b, ABD);
+		kernels->solve_cg(x, b, ABD, bbd);
 		const core::StencilOp &av = dynamic_cast<const core::StencilOp&>(A);
-		core::GridFunc residual = av.residual(x,b);
+		core::GridFunc & residual = levels[levels.size()-1].res;
+		av.residual(x,b,residual);
 		log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
 	};
 }
@@ -124,6 +130,9 @@ void BoxMG::add_level(core::StencilOp & fop, int num_levels)
 	cop.set_registry(kreg);
 
 	levels.emplace_back(std::move(cop),inter::ProlongOp());
+	levels.back().x = core::GridFunc(nxc, nyc);
+	levels.back().res = core::GridFunc(nxc, nyc);
+	levels.back().b = core::GridFunc(nxc, nyc);
 }
 
 

@@ -28,7 +28,8 @@ namespace impls
 {
 	void fortran_solve_cg(core::GridFunc & x,
 	                      const core::GridFunc & b,
-	                      const core::GridFunc & ABD)
+	                      const core::GridFunc & ABD,
+	                      real_t *bbd)
 	{
 		using namespace boxmg::bmg2d::core;
 
@@ -39,12 +40,9 @@ namespace impls
 
 
 		ibc = BMG_BCs_definite;
-		real_t *bbd = new real_t[ABD.len(1)];
 
 		BMG2_SymStd_SOLVE_cg(x.data(), bd.data(), x.len(0), x.len(1),
 		                    abd_data.data(), &bbd[0], ABD.len(0), ABD.len(1), ibc);
-
-		delete[] bbd;
 	}
 
 

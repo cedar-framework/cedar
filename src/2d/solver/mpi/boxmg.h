@@ -18,6 +18,9 @@ struct BoxMGLevel : Level
 {
 BoxMGLevel(core::mpi::StencilOp&& A, inter::mpi::ProlongOp&& P) : /*Level(A,P),*/
 	A(std::move(A)), P(std::move(P)), SOR({{core::RelaxStencil(),core::RelaxStencil()}}) { R.associate(&P); }
+	core::mpi::GridFunc     x;
+	core::mpi::GridFunc     b;
+	core::mpi::GridFunc     res;
 	core::mpi::StencilOp    A;
 	inter::mpi::ProlongOp   P;
 	inter::mpi::RestrictOp  R;

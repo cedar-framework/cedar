@@ -89,10 +89,11 @@ void Registry::relax_lines_y(const core::StencilOp & so,
 
 
 void Registry::solve_cg(core::GridFunc &x,
-              const core::GridFunc &b,
-              const core::GridFunc &ABD)
+                        const core::GridFunc &b,
+                        const core::GridFunc &ABD,
+                        real_t *bbd)
 {
-	active.run(name::solve_cg, x, b, ABD);
+	active.run(name::solve_cg, x, b, ABD, static_cast<real_t*>(bbd));
 }
 
 void Registry::setup_nog(core::mpi::GridTopo &topo,

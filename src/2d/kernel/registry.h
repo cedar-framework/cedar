@@ -63,7 +63,8 @@ public:
 
 	void solve_cg(core::GridFunc &x,
 	              const core::GridFunc &b,
-	              const core::GridFunc &ABD);
+	              const core::GridFunc &ABD,
+	              real_t *bbd);
 
 	void setup_nog(core::mpi::GridTopo &topo,
 	               len_t min_coarse, int *nog);

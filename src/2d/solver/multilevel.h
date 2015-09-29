@@ -55,13 +55,16 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 
 		levels[lvl].presmoother(A, x, b);
 
-		auto residual = A.residual(x,b);
+		GridFunc & residual = levels[lvl].res;
+		A.residual(x, b, residual);
 
-		levels[lvl].P.residual = &residual;
+		levels[lvl].P.residual = &levels[lvl].res;
 		log_residual(lvl, residual);
 
-		auto coarse_b = levels[lvl].R * residual;
-		auto coarse_x = GridFunc::zeros_like(coarse_b);
+		auto & coarse_b = levels[lvl+1].b;
+		auto & coarse_x = levels[lvl+1].x;
+		levels[lvl].R.apply(residual, coarse_b);
+		coarse_x.scale(0.0);
 
 		if (lvl == levels.size() - 2) {
 			coarse_solver(levels[levels.size()-1].A, coarse_x, coarse_b);
@@ -88,13 +91,13 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 		GridFunc x = GridFunc::zeros_like(b);
 		int maxiter = config::get<int>("solver.max-iter", 10);
 		real_t tol = config::get<real_t>("solver.tol", 1e-8);
-		GridFunc res0 = levels[0].A.residual(x,b);
-		real_t res0_l2 = res0.template lp_norm<2>();
+		levels[0].A.residual(x,b,levels[0].res);
+		real_t res0_l2 = levels[0].res.template lp_norm<2>();
 		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
 		for (auto i: range(maxiter)) {
 			ncycle(0, x, b);
-			GridFunc res = levels[0].A.residual(x,b);
-			real_t res_l2 = res.template lp_norm<2>();
+			levels[0].A.residual(x,b,levels[0].res);
+			real_t res_l2 = levels[0].res.template lp_norm<2>();
 			real_t rel_l2 = res_l2 / res0_l2;
 			log::status << "Iteration " << i << " relative l2 norm: " << rel_l2 << std::endl;
 			if (rel_l2 < tol) break;

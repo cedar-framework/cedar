@@ -120,9 +120,10 @@ namespace factory
 		         core::GridFunc&>(impls::mpi_fortran_interp));
 
 		kreg->add(name::solve_cg, "fortran",
-		         Kernel<core::GridFunc&,
-		         const core::GridFunc&,
-		         const core::GridFunc&>(impls::fortran_solve_cg));
+		          Kernel<core::GridFunc&,
+		          const core::GridFunc&,
+		          const core::GridFunc&,
+		          real_t*>(impls::fortran_solve_cg));
 
 		kreg->add(name::setup_nog, "fortran",
 		         Kernel<core::mpi::GridTopo&,

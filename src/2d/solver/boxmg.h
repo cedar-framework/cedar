@@ -19,6 +19,9 @@ BoxMGLevel(core::StencilOp&& A, inter::ProlongOp&& P) : /*Level(A,P),*/
 	core::StencilOp    A;
 	inter::ProlongOp   P;
 	inter::RestrictOp  R;
+	core::GridFunc     x;
+	core::GridFunc     res;
+	core::GridFunc     b;
 	std::array<core::RelaxStencil, 2> SOR;
 };
 
@@ -26,13 +29,14 @@ class BoxMG : public MultiLevel<BoxMGLevel>
 {
 public:
 	BoxMG(core::StencilOp&& fop);
-	~BoxMG() {};
+	~BoxMG() {delete[] bbd;};
 	int compute_num_levels(core::StencilOp & fop);
 	void add_level(core::StencilOp& fop, int num_levels);
 	std::shared_ptr<kernel::Registry> kernel_registry();
 
 private:
 	core::GridFunc ABD;
+	real_t *bbd;
 };
 
 }}}
