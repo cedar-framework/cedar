@@ -68,6 +68,10 @@ namespace factory
 		         Kernel<const core::StencilOp&,
 		         core::GridFunc&>(impls::setup_cg_lu));
 
+		kreg->add(name::setup_cg_lu, "fortran-msg",
+		         Kernel<const core::StencilOp&,
+		         core::GridFunc&>(impls::mpi_setup_cg_lu));
+
 		kreg->add(name::relax, "fortran-rbgs",
 		         Kernel<const core::StencilOp&,
 		         core::GridFunc&,
@@ -126,6 +130,12 @@ namespace factory
 		          const core::GridFunc&,
 		          real_t*>(impls::fortran_solve_cg));
 
+		kreg->add(name::solve_cg, "fortran-msg",
+		          Kernel<core::GridFunc&,
+		          const core::GridFunc&,
+		          const core::GridFunc&,
+		          real_t*>(impls::mpi_solve_cg_lu));
+
 		kreg->add(name::setup_nog, "fortran",
 		         Kernel<core::mpi::GridTopo&,
 		         len_t, int*>(impls::fortran_setup_nog));
@@ -183,11 +193,11 @@ namespace factory
 		std::string setup_interp_kern = conf.get<std::string>("kernels.setup-interp", "fortran");
 		std::string galerkin_prod_kern = conf.get<std::string>("kernels.galerkin-prod", "fortran-ex");
 		std::string setup_relax_kern = conf.get<std::string>("kernels.setup-relax", "fortran-rbgs-point");
-		std::string setup_cg_lu_kern = conf.get<std::string>("kernels.setup-cg-lu", "fortran");
+		std::string setup_cg_lu_kern = conf.get<std::string>("kernels.setup-cg-lu", "fortran-msg");
 		std::string relax_kern = conf.get<std::string>("kernels.relax", "fortran-rbgs");
 		std::string restrict_kern = conf.get<std::string>("kernels.restrict", "fortran");
 		std::string interp_kern = conf.get<std::string>("kernels.interp-add", "fortran");
-		std::string solve_cg_kern = conf.get<std::string>("kernels.solve-cg", "fortran");
+		std::string solve_cg_kern = conf.get<std::string>("kernels.solve-cg", "fortran-msg");
 		std::string halo_setup_kern = conf.get<std::string>("kernels.halo-setup", "fortran-msg");
 		std::string halo_exchange_kern = conf.get<std::string>("kernels.halo-exchange", "fortran-msg");
 

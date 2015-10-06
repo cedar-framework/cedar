@@ -10,6 +10,10 @@ namespace impls
 {
 	void setup_cg_lu(const core::StencilOp & so,
 	                 core::GridFunc & ABD);
+
+	void mpi_setup_cg_lu(const core::StencilOp & so,
+	                     core::GridFunc & ABD);
+
 }
 
 }}}

@@ -13,6 +13,13 @@ namespace impls
 	                      const core::GridFunc & ABD,
 	                      real_t *bbd);
 
+
+	void mpi_solve_cg_lu(core::GridFunc &x,
+	                     const core::GridFunc &b,
+	                     const core::GridFunc & ABD,
+	                     real_t *bbd);
+
+
 	void solve_cg_boxmg(const solver::BoxMG & cg_solver,
 	                    core::GridFunc &x,
 	                    const core::GridFunc &b);

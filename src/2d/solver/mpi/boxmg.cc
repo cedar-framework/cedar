@@ -102,14 +102,34 @@ BoxMG::BoxMG(core::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 	}
 
 	auto & cop = levels.back().A;
+	{
+		std::string cg_solver_str = conf.get<std::string>("solver.cg-solver", "LU");
+		if (cg_solver_str == "LU")
+			cg_solver_lu = true;
+		else
+			cg_solver_lu = false;
+	}
+
 	std::shared_ptr<solver::BoxMG> cg_bmg;
-	kernels->setup_cg_boxmg(cop, &cg_bmg);
+	if (cg_solver_lu) {
+		auto & coarse_topo = cop.grid();
+		auto nxc = coarse_topo.nglobal(0);
+		auto nyc = coarse_topo.nglobal(1);
+		ABD = core::GridFunc(nxc+2, nxc*nyc);
+		bbd = new real_t[ABD.len(1)];
+		kernels->setup_cg_lu(cop, ABD);
+	} else {
+		kernels->setup_cg_boxmg(cop, &cg_bmg);
+	}
 
 	coarse_solver = [&,cg_bmg,kernels](const core::DiscreteOp &A, core::mpi::GridFunc &x, const core::mpi::GridFunc &b) {
 		const core::mpi::StencilOp &av = dynamic_cast<const core::mpi::StencilOp&>(A);
 		auto &b_rw = const_cast<core::mpi::GridFunc&>(b);
 		b_rw.halo_ctx = av.halo_ctx;
-		kernels->solve_cg_boxmg(*cg_bmg, x, b);
+		if (cg_solver_lu)
+			kernels->solve_cg(x, b, ABD, bbd);
+		else
+			kernels->solve_cg_boxmg(*cg_bmg, x, b);
 		core::mpi::GridFunc residual = av.residual(x,b);
 		log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
 	};

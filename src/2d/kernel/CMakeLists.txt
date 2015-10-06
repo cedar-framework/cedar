@@ -68,6 +68,8 @@ set(kernel_SOURCES
   fortran/mpi/BMG2_SymStd_interp_add.f90
   fortran/mpi/BMG2_SymStd_UTILS_update_ghosts.f90
   fortran/mpi/BMG2_SymStd_UTILS_matvec.f90
+  fortran/mpi/BMG2_SymStd_SETUP_cg_LU.f90
+  fortran/mpi/BMG2_SymStd_SOLVE_cg_LU.f90
   PARENT_SCOPE)
 
 set(kernel_HEADERS

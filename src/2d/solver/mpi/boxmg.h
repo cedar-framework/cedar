@@ -31,7 +31,7 @@ class BoxMG : public MultiLevel<BoxMGLevel,core::mpi::GridFunc>
 {
 public:
 	BoxMG(core::mpi::StencilOp&& fop);
-	~BoxMG() {};
+	~BoxMG() {if (cg_solver_lu) delete[] bbd;};
 	int compute_num_levels(core::mpi::StencilOp & fop);
 	void add_level(core::mpi::StencilOp& fop, int num_levels);
 	MPI_Comm comm;
@@ -41,6 +41,8 @@ public:
 
 private:
 	core::GridFunc ABD;
+	bool cg_solver_lu;
+	real_t *bbd;
 	void *halo_ctx;
 };
 

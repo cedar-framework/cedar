@@ -44,6 +44,11 @@
 				"min-coarse":
 				{
 					"type": "integer"
+				},
+				"cg-solver":
+				{
+					"type": "string",
+					"pattern": "boxmg|LU"
 				}
 			}
 		},

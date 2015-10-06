@@ -10,6 +10,13 @@
 extern "C" {
 	using namespace boxmg;
 	void BMG2_SymStd_SOLVE_cg(real_t*, real_t*, len_t, len_t, real_t*, real_t*, len_t, len_t, int);
+	void BMG2_SymStd_SOLVE_cg_LU(real_t *Q, real_t *QF, len_t II, len_t JJ,
+	                             real_t *abd, real_t *bbd,
+	                             len_t nabd1, len_t nabd2, int nog,
+	                             int nproci, int nprocj, int nproc, int myproc,
+	                             int *proc_grid, int *proc_coord, len_t *loc_arr_size,
+	                             len_t *msg_geom, len_t NMSGi, int *pMSG,
+	                             real_t *msg_buffer, len_t NMSGr, int MPICOMM);
 	void BMG2_SymStd_SOLVE_cg_pack(real_t *qf_ser, real_t *qf,
 	                               len_t ii, len_t jj, len_t NGx, len_t NGy, len_t igs, len_t jgs,
 	                               int nproci, int nprocj, int nproc, int myproc,
@@ -96,6 +103,42 @@ namespace impls
 		                            ctx->proc_coord.data(), fcomm);
 
 	}
+
+
+	void mpi_solve_cg_lu(core::GridFunc &x,
+	                     const core::GridFunc &b,
+	                     const core::GridFunc & ABD,
+	                     real_t *bbd)
+	{
+		int rank;
+
+		core::mpi::GridFunc & b_par = const_cast<core::mpi::GridFunc&>(dynamic_cast<const core::mpi::GridFunc&>(b));
+		core::mpi::GridFunc & x_par = dynamic_cast<core::mpi::GridFunc&>(x);
+		core::GridFunc & abd_data = const_cast<core::GridFunc&>(ABD);
+
+		core::mpi::GridTopo & topo = b_par.grid();
+		MsgCtx *ctx = (MsgCtx*) b_par.halo_ctx;
+
+
+		MPI_Comm_rank(topo.comm, &rank);
+		rank++; // 1 based indexing
+
+		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+
+		len_t local_arr_ptr = ctx->pMSG(ipL_MSG_LocalArraySize,0) - 1;  // 1 vs 0 based indexing
+		BMG2_SymStd_SOLVE_cg_LU(x_par.data(), b_par.data(), x_par.len(0), x_par.len(1),
+		                        abd_data.data(), bbd, abd_data.len(0), abd_data.len(1),
+		                        topo.nlevel(),
+		                        topo.nproc(0), topo.nproc(1), topo.nproc(), rank,
+		                        ctx->proc_grid.data(), ctx->proc_coord.data(),
+		                        &ctx->msg_geom.data()[local_arr_ptr],
+		                        ctx->msg_geom.data(), ctx->msg_geom.size(),
+		                        ctx->pMSG.data(), ctx->msg_buffer.data(),
+		                        ctx->msg_buffer.size(), fcomm);
+
+
+	}
+
 }
 
 }}}
