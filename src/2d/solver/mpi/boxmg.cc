@@ -192,7 +192,7 @@ void BoxMG::add_level(core::mpi::StencilOp & fop, int num_levels)
 int BoxMG::compute_num_levels(core::mpi::StencilOp & fop)
 {
 	int ng;
-	auto min_coarse = conf.get<len_t>("solver.min_coarse", 3);
+	auto min_coarse = conf.get<len_t>("solver.min-coarse", 3);
 
 	auto kernels = kernel_registry();
 

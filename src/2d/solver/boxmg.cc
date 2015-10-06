@@ -140,7 +140,7 @@ int BoxMG::compute_num_levels(core::StencilOp & fop)
 {
 	float nxc, nyc;
 	int ng = 0;
-	int min_coarse = conf.get<int>("solver.min_coarse", 3);
+	int min_coarse = conf.get<int>("solver.min-coarse", 3);
 	core::GridStencil & sten = fop.stencil();
 
 	auto nx = sten.shape(0);
