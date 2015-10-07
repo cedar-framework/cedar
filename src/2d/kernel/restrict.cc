@@ -45,7 +45,9 @@ namespace impls
 		auto & Rd = const_cast<inter::RestrictOp&>(R);
 		inter::ProlongOp & ser_P = Rd.getP();
 		inter::mpi::ProlongOp & P = dynamic_cast<inter::mpi::ProlongOp&>(ser_P);
+		auto & fine_par = dynamic_cast<const core::mpi::GridFunc&>(fine);
 		core::mpi::GridTopo & topo = P.grid();
+		const core::mpi::GridTopo & fine_topo = fine_par.grid();
 		MsgCtx *ctx = (MsgCtx*) P.halo_ctx;
 		auto & fined = const_cast<core::GridFunc&>(fine);
 
@@ -58,7 +60,7 @@ namespace impls
 		                         fined.data(), coarse.data(), P.data(),
 		                         fined.len(0), fined.len(1),
 		                         coarse.len(0), coarse.len(1),
-		                         topo.is(0), topo.is(1),
+		                         fine_topo.is(0), fine_topo.is(1),
 		                         ctx->msg_geom.data(), ctx->msg_geom.size(),
 		                         ctx->pMSG.data(), ctx->msg_buffer.data(),
 		                         ctx->msg_buffer.size(), fcomm);

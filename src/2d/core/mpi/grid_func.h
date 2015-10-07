@@ -6,6 +6,7 @@
 
 #include "core/grid_func.h"
 #include "grid_topo.h"
+#include <iostream>
 
 namespace boxmg { namespace bmg2d { namespace core { namespace mpi {
 
@@ -28,6 +29,7 @@ public:
 	real_t inf_norm() const;
 	GridFunc & operator-=(const GridFunc & rhs);
 	friend GridFunc operator-(GridFunc lhs, const GridFunc &rhs) { return lhs -= rhs; }
+	friend std::ostream& operator<< (std::ostream& os, const GridFunc &obj);
 
 protected:
 	topo_ptr grid_;

@@ -55,3 +55,26 @@ boxmg::real_t GridFunc::inf_norm() const
 
 	return mval;
 }
+
+namespace boxmg { namespace bmg2d { namespace core { namespace mpi {
+std::ostream & operator<< (std::ostream &os, const GridFunc & obj)
+{
+	auto & topo = obj.grid();
+	auto iGs = topo.is(0);
+	auto jGs = topo.is(1);
+	auto NGx = topo.nglobal(0);
+	unsigned int width = 4;
+
+	os << std::setprecision(7);
+
+	for (auto j: obj.range(1)) {
+		for (auto i: obj.range(0)) {
+			os << std::setw(width) << (jGs+j-2)*NGx + iGs+i-2 << " "
+			   << std::setw(width) << iGs + i << ", " << std::setw(width) << jGs + j << ", "
+			   << std::scientific << obj(i,j) << '\n';
+		}
+	}
+
+	return os;
+}
+}}}}
