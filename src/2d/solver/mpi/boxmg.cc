@@ -13,6 +13,11 @@ using namespace boxmg::bmg2d::solver::mpi;
 
 BoxMG::BoxMG(core::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 {
+	double starttime, endtime;
+	if (log::timer.active()) {
+		starttime = MPI_Wtime();
+	}
+
 	kreg = kernel::mpi::factory::from_config(conf);
 	fop.set_registry(kreg);
 
@@ -133,6 +138,11 @@ BoxMG::BoxMG(core::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 		core::mpi::GridFunc residual = av.residual(x,b);
 		log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
 	};
+
+	if (log::timer.active()) {
+		endtime = MPI_Wtime();
+		log::timer << "Setup time: " << (endtime - starttime) << std::endl;
+	}
 }
 
 

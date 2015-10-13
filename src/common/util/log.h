@@ -66,6 +66,7 @@ extern LevelLogger error;
 extern LevelLogger info;
 extern LevelLogger status;
 extern LevelLogger debug;
+extern LevelLogger timer;
 
 }}
 #endif

@@ -12,6 +12,7 @@ LevelLogger status("status", Color::Modifier(Color::FG_DEFAULT));
 LevelLogger info("info", Color::Modifier(Color::FG_DEFAULT));
 LevelLogger error("error", Color::Modifier(Color::FG_RED), std::cerr);
 LevelLogger debug("debug", Color::Modifier(Color::FG_MAGENTA));
+LevelLogger timer("timer", Color::Modifier(Color::FG_DEFAULT));
 
 MPI_Comm comm = MPI_COMM_WORLD;
 std::string header_msg = "";
@@ -31,7 +32,7 @@ void set_header_msg(std::string msg)
 void init()
 {
 	log_level = std::make_unique<lmap_t>();
-	std::vector<std::string> levels{"status", "info", "error", "memory", "debug"};
+	std::vector<std::string> levels{"status", "info", "error", "memory", "debug", "timer"};
 
 	int count = 0;
 	for (auto lvl : levels) {

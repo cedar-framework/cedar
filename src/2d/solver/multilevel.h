@@ -94,6 +94,12 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 		levels[0].A.residual(x,b,levels[0].res);
 		real_t res0_l2 = levels[0].res.template lp_norm<2>();
 		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
+
+		double starttime, endtime;
+		if (log::timer.active()) {
+			starttime = MPI_Wtime();
+		}
+
 		for (auto i: range(maxiter)) {
 			ncycle(0, x, b);
 			levels[0].A.residual(x,b,levels[0].res);
@@ -102,6 +108,12 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 			log::status << "Iteration " << i << " relative l2 norm: " << rel_l2 << std::endl;
 			if (rel_l2 < tol) break;
 		}
+
+		if (log::timer.active()) {
+			endtime = MPI_Wtime();
+			log::timer << "Solve time: " << (endtime - starttime) << std::endl;
+		}
+
 		return x;
 	}
 
@@ -113,6 +125,12 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 		levels[0].A.residual(x,b,levels[0].res);
 		real_t res0_l2 = levels[0].res.template lp_norm<2>();
 		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
+
+		double starttime, endtime;
+		if (log::timer.active()) {
+			starttime = MPI_Wtime();
+		}
+
 		for (auto i: range(maxiter)) {
 			ncycle(0, x, b);
 			levels[0].A.residual(x,b,levels[0].res);
@@ -120,6 +138,11 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 			real_t rel_l2 = res_l2 / res0_l2;
 			log::status << "Iteration " << i << " relative l2 norm: " << rel_l2 << std::endl;
 			if (rel_l2 < tol) break;
+		}
+
+		if (log::timer.active()) {
+			endtime = MPI_Wtime();
+			log::timer << "Solve time: " << (endtime - starttime) << std::endl;
 		}
 	}
 
