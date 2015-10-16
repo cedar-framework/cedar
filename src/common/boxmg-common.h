@@ -10,6 +10,7 @@
 #include "boxmg-common/util/kernel_manager.h"
 #include "boxmg-common/util/kernel_registry.h"
 #include "boxmg-common/util/log.h"
+#include "boxmg-common/util/timer.h"
 #include "boxmg-common/util/types.h"
 
 #endif // boxmg_common_h

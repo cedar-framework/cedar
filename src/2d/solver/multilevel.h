@@ -1,6 +1,7 @@
 #ifndef BOXMG_2D_SOLVER_MULTILEVEL_H
 #define BOXMG_2D_SOLVER_MULTILEVEL_H
 
+#include "boxmg-common.h"
 #include "level.h"
 #include "core/grid_func.h"
 
@@ -95,10 +96,8 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 		real_t res0_l2 = levels[0].res.template lp_norm<2>();
 		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
 
-		double starttime, endtime;
-		if (log::timer.active()) {
-			starttime = MPI_Wtime();
-		}
+		Timer solve_timer("Solve");
+		solve_timer.begin();
 
 		for (auto i: range(maxiter)) {
 			ncycle(0, x, b);
@@ -109,10 +108,7 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 			if (rel_l2 < tol) break;
 		}
 
-		if (log::timer.active()) {
-			endtime = MPI_Wtime();
-			log::timer << "Solve time: " << (endtime - starttime) << std::endl;
-		}
+		solve_timer.end();
 
 		return x;
 	}
@@ -126,10 +122,8 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 		real_t res0_l2 = levels[0].res.template lp_norm<2>();
 		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
 
-		double starttime, endtime;
-		if (log::timer.active()) {
-			starttime = MPI_Wtime();
-		}
+		Timer solve_timer("Solve");
+		solve_timer.begin();
 
 		for (auto i: range(maxiter)) {
 			ncycle(0, x, b);
@@ -140,10 +134,7 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 			if (rel_l2 < tol) break;
 		}
 
-		if (log::timer.active()) {
-			endtime = MPI_Wtime();
-			log::timer << "Solve time: " << (endtime - starttime) << std::endl;
-		}
+		solve_timer.end();
 	}
 
 protected:

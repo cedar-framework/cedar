@@ -7,6 +7,7 @@
 #include <exception>
 
 #include "kernel.h"
+#include "timer.h"
 #include "log.h"
 
 namespace boxmg {
@@ -44,7 +45,12 @@ public:
 			Kernel<Args...> *c = dynamic_cast<Kernel<Args...>*>(it->second.get());
 			if (c) {
 				log::debug << "Running kernel: " << kname << std::endl;
+				Timer kern_timer(kname);
+				if (log::debug.active())
+					kern_timer.begin();
 				(*c)(std::forward<decltype(args)>(args)...);
+				if (log::debug.active())
+					kern_timer.end();
 			} else {
 				std::string msg("Incorrect arguments for kernel: " + kname);
 				log::error << msg << std::endl;
