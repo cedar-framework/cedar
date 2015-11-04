@@ -2,7 +2,6 @@
 
 #include "boxmg-common.h"
 
-#include "kernel/calls.h"
 #include "kernel/factory.h"
 #include "solver/boxmg.h"
 

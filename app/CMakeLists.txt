@@ -1,6 +1,4 @@
 include_directories(${CMAKE_BINARY_DIR}/include ${CMAKE_BINARY_DIR}/include/boxmg-common ${CMAKE_BINARY_DIR}/include/boxmg-2d)
-add_executable(kern-test kerntest/test.cpp)
-target_link_libraries(kern-test boxmg-2d boxmg-common ${boxmg-examples_LINKER_FLAGS})
 add_executable(setup-test setup/setup_test.cc)
 target_link_libraries(setup-test boxmg-2d boxmg-common ${boxmg-examples_LINKER_FLAGS})
 add_executable(solve-test solve/solve_test.cc)

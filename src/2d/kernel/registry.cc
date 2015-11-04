@@ -1,4 +1,3 @@
-#include "kernel/manager.h"
 #include "kernel/name.h"
 
 #include "registry.h"

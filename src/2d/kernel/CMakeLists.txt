@@ -1,8 +1,6 @@
 set(kernel_SOURCES
-  manager.cc
   registry.cc
   residual.cc
-  calls.cc
   factory.cc
   mpi/factory.cc
   setup_interp.cc
@@ -73,10 +71,8 @@ set(kernel_SOURCES
   PARENT_SCOPE)
 
 set(kernel_HEADERS
-  manager.h
   name.h
   residual.h
-  calls.h
   factory.h
   registry.h
   mpi/factory.h
