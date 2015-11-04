@@ -8,7 +8,7 @@ else()
   message(FATAL_ERROR "C++11 compatible compiler not found")
 endif()
 
-FIND_PACKAGE(Boost 1.44 REQUIRED COMPONENTS system filesystem)
+FIND_PACKAGE(Boost 1.44 REQUIRED COMPONENTS system filesystem python)
 include_directories(${Boost_INCLUDE_DIR})
 
 FIND_PACKAGE(BLAS REQUIRED)
