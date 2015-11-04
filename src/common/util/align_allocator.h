@@ -84,7 +84,7 @@ public:
 		void *pv;
 		int ret = posix_memalign(&pv, Alignment, n*sizeof(T));
 
-		boxmg::log::memory << "Allocated (" << n << " B): " << pv << std::endl;
+		boxmg::log::memory << "Allocated (" << n*sizeof(T) << " B): " << pv << std::endl;
 
 		if (ret != 0)
 		{
