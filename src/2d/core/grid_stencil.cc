@@ -2,7 +2,7 @@
 
 #include "grid_stencil.h"
 
-using namespace boxmg::bmg2d::core;
+using namespace boxmg::bmg2d;
 
 
 GridStencil::GridStencil(len_t nx, len_t ny, unsigned int nghosts, bool intergrid, bool symmetric, bool five_pt): Array(nx,ny,nghosts,false), symmetric(not intergrid and symmetric), five_pt_(five_pt)

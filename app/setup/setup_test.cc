@@ -9,7 +9,6 @@ int main(int argc, char *argv[])
 {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
-	using namespace boxmg::bmg2d::core;
 
 	len_t nx = 5;
 	len_t ny = nx;

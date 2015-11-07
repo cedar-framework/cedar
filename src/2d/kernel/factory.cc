@@ -24,137 +24,137 @@ namespace factory
 
 
 		kreg->add(name::residual, "fortran",
-		         Kernel<const core::StencilOp &,
-		         const core::GridFunc &,
-		         const core::GridFunc &,
-		         core::GridFunc&>(impls::residual_fortran));
+		         Kernel<const StencilOp &,
+		         const GridFunc &,
+		         const GridFunc &,
+		         GridFunc&>(impls::residual_fortran));
 
 		kreg->add(name::residual, "fortran-msg",
-		         Kernel<const core::StencilOp &,
-		         const core::GridFunc &,
-		         const core::GridFunc &,
-		         core::GridFunc&>(impls::mpi_residual_fortran));
+		         Kernel<const StencilOp &,
+		         const GridFunc &,
+		         const GridFunc &,
+		         GridFunc&>(impls::mpi_residual_fortran));
 
 		kreg->add(name::residual,"c++",
-		         Kernel<const core::StencilOp &,
-		         const core::GridFunc &,
-		         const core::GridFunc &,
-		         core::GridFunc&>(impls::residual));
+		         Kernel<const StencilOp &,
+		         const GridFunc &,
+		         const GridFunc &,
+		         GridFunc&>(impls::residual));
 
 		kreg->add(name::setup_interp, "fortran",
 		         Kernel<int, int , int,
-		         const core::StencilOp &,
-		         const core::StencilOp &,
+		         const StencilOp &,
+		         const StencilOp &,
 		         inter::ProlongOp &>(impls::setup_interp));
 
 		kreg->add(name::galerkin_prod, "fortran-ex",
 		         Kernel<int,int,int,
 		         const inter::ProlongOp&,
-		         const core::StencilOp&,
-		         core::StencilOp&>(impls::galerkin_prod));
+		         const StencilOp&,
+		         StencilOp&>(impls::galerkin_prod));
 
 		kreg->add(name::setup_relax,"fortran-rbgs-point",
-		         Kernel<const core::StencilOp&,
-		         core::RelaxStencil&>(impls::setup_rbgs_point));
+		         Kernel<const StencilOp&,
+		         RelaxStencil&>(impls::setup_rbgs_point));
 
 		kreg->add(name::setup_relax_x,"fortran",
-		         Kernel<const core::StencilOp&,
-		         core::RelaxStencil&>(impls::setup_rbgs_x));
+		         Kernel<const StencilOp&,
+		         RelaxStencil&>(impls::setup_rbgs_x));
 
 		kreg->add(name::setup_relax_y,"fortran",
-		         Kernel<const core::StencilOp&,
-		         core::RelaxStencil&>(impls::setup_rbgs_y));
+		         Kernel<const StencilOp&,
+		         RelaxStencil&>(impls::setup_rbgs_y));
 
 		kreg->add(name::setup_cg_lu, "fortran",
-		         Kernel<const core::StencilOp&,
-		         core::GridFunc&>(impls::setup_cg_lu));
+		         Kernel<const StencilOp&,
+		         GridFunc&>(impls::setup_cg_lu));
 
 		kreg->add(name::relax, "fortran-rbgs",
-		         Kernel<const core::StencilOp&,
-		         core::GridFunc&,
-		         const core::GridFunc&,
-		         const core::RelaxStencil&,
+		         Kernel<const StencilOp&,
+		         GridFunc&,
+		         const GridFunc&,
+		         const RelaxStencil&,
 		         cycle::Dir>(impls::relax_rbgs_point));
 
 		kreg->add(name::relax_lines_x, "fortran",
-		         Kernel<const core::StencilOp&,
-		         core::GridFunc&,
-		         const core::GridFunc&,
-		         const core::RelaxStencil&,
-		          core::GridFunc&,
+		         Kernel<const StencilOp&,
+		         GridFunc&,
+		         const GridFunc&,
+		         const RelaxStencil&,
+		          GridFunc&,
 		         cycle::Dir>(impls::relax_lines_x));
 
 		kreg->add(name::relax_lines_y, "fortran",
-		         Kernel<const core::StencilOp&,
-		         core::GridFunc&,
-		         const core::GridFunc&,
-		         const core::RelaxStencil&,
-		          core::GridFunc&,
+		         Kernel<const StencilOp&,
+		         GridFunc&,
+		         const GridFunc&,
+		         const RelaxStencil&,
+		          GridFunc&,
 		         cycle::Dir>(impls::relax_lines_y));
 
 		kreg->add(name::relax, "fortran-msg-rbgs",
-		         Kernel<const core::StencilOp&,
-		         core::GridFunc&,
-		         const core::GridFunc&,
-		         const core::RelaxStencil&,
+		         Kernel<const StencilOp&,
+		         GridFunc&,
+		         const GridFunc&,
+		         const RelaxStencil&,
 		         cycle::Dir>(impls::mpi_relax_rbgs_point));
 
 		kreg->add(name::restriction, "fortran",
 		         Kernel<const inter::RestrictOp&,
-		         const core::GridFunc&,
-		         core::GridFunc&>(impls::fortran_restrict));
+		         const GridFunc&,
+		         GridFunc&>(impls::fortran_restrict));
 
 		kreg->add(name::restriction, "fortran-msg",
 		         Kernel<const inter::RestrictOp&,
-		         const core::GridFunc&,
-		         core::GridFunc&>(impls::mpi_fortran_restrict));
+		         const GridFunc&,
+		         GridFunc&>(impls::mpi_fortran_restrict));
 
 		kreg->add(name::interp_add,"fortran",
 		         Kernel<const inter::ProlongOp&,
-		         const core::GridFunc&,
-		         const core::GridFunc&,
-		         core::GridFunc&>(impls::fortran_interp));
+		         const GridFunc&,
+		         const GridFunc&,
+		         GridFunc&>(impls::fortran_interp));
 
 		kreg->add(name::interp_add, "fortran-msg",
 		         Kernel<const inter::ProlongOp&,
-		         const core::GridFunc&,
-		         const core::GridFunc&,
-		         core::GridFunc&>(impls::mpi_fortran_interp));
+		         const GridFunc&,
+		         const GridFunc&,
+		         GridFunc&>(impls::mpi_fortran_interp));
 
 		kreg->add(name::solve_cg, "fortran",
-		          Kernel<core::GridFunc&,
-		          const core::GridFunc&,
-		          const core::GridFunc&,
+		          Kernel<GridFunc&,
+		          const GridFunc&,
+		          const GridFunc&,
 		          real_t*>(impls::fortran_solve_cg));
 
 		kreg->add(name::setup_nog, "fortran",
-		         Kernel<core::mpi::GridTopo&,
+		         Kernel<mpi::GridTopo&,
 		         len_t, int*>(impls::fortran_setup_nog));
 
 		kreg->add(name::halo_setup, "fortran-msg",
-		         Kernel<core::mpi::GridTopo&,void**>(impls::setup_msg));
+		         Kernel<mpi::GridTopo&,void**>(impls::setup_msg));
 
 		kreg->add(name::halo_exchange, "fortran-msg",
-		         Kernel<core::mpi::GridFunc&>(impls::msg_exchange));
+		         Kernel<mpi::GridFunc&>(impls::msg_exchange));
 
 		kreg->add(name::halo_stencil_exchange, "fortran-msg",
-		         Kernel<core::mpi::StencilOp&>(impls::msg_stencil_exchange));
+		         Kernel<mpi::StencilOp&>(impls::msg_stencil_exchange));
 
 		kreg->add(name::setup_interp, "fortran-msg",
 		         Kernel<int,int,int,
-		         const core::StencilOp&,
-		         const core::StencilOp&,
+		         const StencilOp&,
+		         const StencilOp&,
 		         inter::ProlongOp&>(impls::mpi_setup_interp));
 
 		kreg->add(name::galerkin_prod, "fortran-msg",
 		         Kernel<int,int,int,
 		         const inter::ProlongOp&,
-		         const core::StencilOp&,
-		         core::StencilOp&>(impls::mpi_galerkin_prod));
+		         const StencilOp&,
+		         StencilOp&>(impls::mpi_galerkin_prod));
 
 		kreg->add(name::setup_relax, "fortran-msg-rbgs-point",
-		         Kernel<const core::StencilOp&,
-		         core::RelaxStencil&>(impls::mpi_setup_rbgs_point));
+		         Kernel<const StencilOp&,
+		         RelaxStencil&>(impls::mpi_setup_rbgs_point));
 
 		// TODO: This could be automatic.
 

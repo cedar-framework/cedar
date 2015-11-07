@@ -2,7 +2,7 @@
 
 using namespace boxmg::bmg2d::inter::mpi;
 
-ProlongOp::ProlongOp(core::mpi::topo_ptr topo) : inter::ProlongOp(topo->nlocal(0)-2,
+ProlongOp::ProlongOp(bmg2d::mpi::topo_ptr topo) : inter::ProlongOp(topo->nlocal(0)-2,
                                                              topo->nlocal(1)-2),
                                             grid_(topo)
 {

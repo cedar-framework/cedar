@@ -11,15 +11,15 @@ class ProlongOp : public inter::ProlongOp
 {
 public:
 	ProlongOp() {};
-	ProlongOp(core::mpi::topo_ptr grid);
+	ProlongOp(bmg2d::mpi::topo_ptr grid);
 	void *halo_ctx;
-	core::mpi::GridTopo & grid() { return *grid_; }
-	const core::mpi::GridTopo & grid() const { return *grid_; }
-	core::mpi::topo_ptr grid_ptr() const { return grid_; }
+	bmg2d::mpi::GridTopo & grid() { return *grid_; }
+	const bmg2d::mpi::GridTopo & grid() const { return *grid_; }
+	bmg2d::mpi::topo_ptr grid_ptr() const { return grid_; }
 	friend std::ostream & operator<< (std::ostream &os, const ProlongOp & P);
 
 private:
-	core::mpi::topo_ptr grid_;
+	bmg2d::mpi::topo_ptr grid_;
 };
 
 }}}}

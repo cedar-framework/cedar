@@ -20,9 +20,9 @@ extern "C"
 
 		MPI_Comm_rank(comm, &rank);
 
-		std::shared_ptr<core::mpi::GridTopo> *grid_ptr;
+		std::shared_ptr<mpi::GridTopo> *grid_ptr;
 		auto igrd = std::make_shared<std::vector<len_t>>(NBMG_pIGRD);
-		auto grid = std::make_shared<core::mpi::GridTopo>(igrd, 0, 1);
+		auto grid = std::make_shared<mpi::GridTopo>(igrd, 0, 1);
 
 		grid->comm = comm;
 
@@ -62,7 +62,7 @@ extern "C"
 	//        grid->nglobal(0), grid->nglobal(1),
 	//        grid->is(0), grid->is(1));
 
-		grid_ptr = new std::shared_ptr<core::mpi::GridTopo>(std::move(grid));
+		grid_ptr = new std::shared_ptr<mpi::GridTopo>(std::move(grid));
 		return reinterpret_cast<bmg2_topo>(grid_ptr);
 	}
 }

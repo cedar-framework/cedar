@@ -11,7 +11,6 @@ extern "C"
 	bmg2_operator bmg2_operator_create(bmg2_topo topo)
 	{
 		using namespace boxmg::bmg2d;
-		using namespace boxmg::bmg2d::core;
 
 		auto & grid = *(reinterpret_cast<std::shared_ptr<mpi::GridTopo>*>(topo));
 
@@ -26,7 +25,7 @@ extern "C"
 	void bmg2_operator_set(bmg2_operator op, unsigned int nvals, grid_coord coords[], double vals[])
 	{
 		using namespace boxmg;
-		using namespace boxmg::bmg2d::core;
+		using namespace boxmg::bmg2d;
 
 		auto & sten = reinterpret_cast<mpi::StencilOp*>(op)->stencil();
 		auto & grid = reinterpret_cast<mpi::StencilOp*>(op)->grid();
@@ -48,7 +47,6 @@ extern "C"
 	void bmg2_operator_apply(bmg2_operator op, const double *x, double *b)
 	{
 		using namespace boxmg::bmg2d;
-		using namespace boxmg::bmg2d::core;
 
 		auto *sop = reinterpret_cast<mpi::StencilOp*>(op);
 		auto grid = sop->grid_ptr();
@@ -82,7 +80,7 @@ extern "C"
 
 	void bmg2_operator_dump(bmg2_operator op)
 	{
-		using namespace boxmg::bmg2d::core;
+		using namespace boxmg::bmg2d;
 		std::ofstream ofile;
 
 		auto &grid = reinterpret_cast<mpi::StencilOp*>(op)->grid();
@@ -96,7 +94,7 @@ extern "C"
 
 	void bmg2_operator_destroy(bmg2_operator op)
 	{
-		using namespace boxmg::bmg2d::core;
+		using namespace boxmg::bmg2d;
 
 		delete reinterpret_cast<mpi::StencilOp*>(op);
 	}

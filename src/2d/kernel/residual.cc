@@ -22,8 +22,8 @@ namespace impls
 {
 	using namespace boxmg::bmg2d;
 
-	void residual(const core::StencilOp & A, const core::GridFunc & x,
-				  const core::GridFunc & b, core::GridFunc &r)
+	void residual(const StencilOp & A, const GridFunc & x,
+				  const GridFunc & b, GridFunc &r)
 	{
 		using namespace boxmg::bmg2d::core;
 
@@ -45,8 +45,8 @@ namespace impls
 		}
 	}
 
-	void residual_fortran(const core::StencilOp &A, const core::GridFunc &x,
-						  const core::GridFunc &b, core::GridFunc &r)
+	void residual_fortran(const StencilOp &A, const GridFunc &x,
+						  const GridFunc &b, GridFunc &r)
 	{
 		int k = 0;
 		int kf = 0;
@@ -59,9 +59,9 @@ namespace impls
 		len_t ii = r.len(0);
 		len_t jj = r.len(1);
 
-		core::StencilOp &Ad = const_cast<core::StencilOp&>(A);
-		core::GridFunc &xd = const_cast<core::GridFunc&>(x);
-		core::GridFunc &bd = const_cast<core::GridFunc&>(b);
+		StencilOp &Ad = const_cast<StencilOp&>(A);
+		GridFunc &xd = const_cast<GridFunc&>(x);
+		GridFunc &bd = const_cast<GridFunc&>(b);
 		using namespace boxmg::bmg2d::core;
 
 		BMG2_SymStd_residual(&k, Ad.data(), bd.data(), xd.data(), r.data(), &ii, &jj,
@@ -70,15 +70,15 @@ namespace impls
 	}
 
 
-	void mpi_residual_fortran(const core::StencilOp &A, const core::GridFunc &x,
-	                          const core::GridFunc &b, core::GridFunc &r)
+	void mpi_residual_fortran(const StencilOp &A, const GridFunc &x,
+	                          const GridFunc &b, GridFunc &r)
 	{
 		int k, kf, nog, ifd, nstencil;
-		auto & Ad = const_cast<core::StencilOp &>(A);
-		auto & xd = const_cast<core::GridFunc&>(x);
-		auto & bd = const_cast<core::GridFunc&>(b);
-		auto & mpi_Ad = dynamic_cast<core::mpi::StencilOp&>(Ad);
-		core::mpi::GridTopo & topo = mpi_Ad.grid();
+		auto & Ad = const_cast<StencilOp &>(A);
+		auto & xd = const_cast<GridFunc&>(x);
+		auto & bd = const_cast<GridFunc&>(b);
+		auto & mpi_Ad = dynamic_cast<mpi::StencilOp&>(Ad);
+		mpi::GridTopo & topo = mpi_Ad.grid();
 		MsgCtx *ctx = (MsgCtx*) mpi_Ad.halo_ctx;
 
 		if (Ad.stencil().five_pt()) {

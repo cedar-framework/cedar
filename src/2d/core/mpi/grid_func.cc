@@ -1,10 +1,9 @@
 #include "grid_func.h"
 
-using namespace boxmg::bmg2d;
-using namespace boxmg::bmg2d::core::mpi;
+using namespace boxmg::bmg2d::mpi;
 
 GridFunc::GridFunc(topo_ptr grid) :
-	::boxmg::bmg2d::core::GridFunc(grid->nlocal(0)-2,grid->nlocal(1)-2), comm(grid->comm), grid_(grid) {}
+	::boxmg::bmg2d::GridFunc(grid->nlocal(0)-2,grid->nlocal(1)-2), comm(grid->comm), grid_(grid) {}
 
 
 GridFunc GridFunc::zeros_like(const GridFunc &like)
@@ -49,14 +48,14 @@ GridFunc & GridFunc::operator-=(const GridFunc &rhs)
 
 boxmg::real_t GridFunc::inf_norm() const
 {
-	auto mval = core::GridFunc::inf_norm();
+	auto mval = bmg2d::GridFunc::inf_norm();
 
 	MPI_Allreduce(MPI_IN_PLACE, &mval, 1, MPI_DOUBLE, MPI_MAX, grid_->comm);
 
 	return mval;
 }
 
-namespace boxmg { namespace bmg2d { namespace core { namespace mpi {
+namespace boxmg { namespace bmg2d { namespace mpi {
 std::ostream & operator<< (std::ostream &os, const GridFunc & obj)
 {
 	auto & topo = obj.grid();
@@ -77,4 +76,4 @@ std::ostream & operator<< (std::ostream &os, const GridFunc & obj)
 
 	return os;
 }
-}}}}
+}}}

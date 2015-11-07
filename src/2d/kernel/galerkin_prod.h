@@ -11,14 +11,14 @@ namespace impls
 {
 	void galerkin_prod(int kf, int kc, int nog,
 	                   const inter::ProlongOp & P,
-	                   const core::StencilOp & fop,
-	                   core::StencilOp & cop);
+	                   const StencilOp & fop,
+	                   StencilOp & cop);
 
 
 	void mpi_galerkin_prod(int kf, int kc, int nog,
 	                       const inter::ProlongOp & P,
-	                       const core::StencilOp & fop,
-	                       core::StencilOp & cop);
+	                       const StencilOp & fop,
+	                       StencilOp & cop);
 }
 
 }}}

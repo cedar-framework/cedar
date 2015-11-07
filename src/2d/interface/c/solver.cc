@@ -10,11 +10,11 @@ extern "C"
 	{
 		using namespace boxmg::bmg2d;
 
-		core::mpi::StencilOp *sop = reinterpret_cast<core::mpi::StencilOp*>(*op);
+		mpi::StencilOp *sop = reinterpret_cast<mpi::StencilOp*>(*op);
 
 		solver::mpi::BoxMG *bmg = new solver::mpi::BoxMG(std::move(*sop));
-		bmg->level(-1).x = core::mpi::GridFunc::zeros_like(bmg->level(-1).res);
-		bmg->level(-1).b = core::mpi::GridFunc::zeros_like(bmg->level(-1).res);
+		bmg->level(-1).x = mpi::GridFunc::zeros_like(bmg->level(-1).res);
+		bmg->level(-1).b = mpi::GridFunc::zeros_like(bmg->level(-1).res);
 		*op = reinterpret_cast<bmg2_operator>(&bmg->level(-1).A);
 
 		return reinterpret_cast<bmg2_solver>(bmg);

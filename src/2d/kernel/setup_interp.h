@@ -12,12 +12,12 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 namespace impls
 {
 	void setup_interp(int kf, int kc, int nog,
-	                  const core::StencilOp & fop,
-	                  const core::StencilOp & cop,
+	                  const StencilOp & fop,
+	                  const StencilOp & cop,
 	                  inter::ProlongOp & P);
 	void mpi_setup_interp(int kf, int kc, int nog,
-	                      const core::StencilOp & fop,
-	                      const core::StencilOp & cop,
+	                      const StencilOp & fop,
+	                      const StencilOp & cop,
 	                      inter::ProlongOp & P);
 }
 

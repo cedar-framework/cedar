@@ -1,6 +1,6 @@
 #include "relax_stencil.h"
 
-using namespace boxmg::bmg2d::core;
+using namespace boxmg::bmg2d;
 
 RelaxStencil::RelaxStencil(len_t nx, len_t ny, unsigned int nghosts) : Array(nx,ny,nghosts,false)
 {

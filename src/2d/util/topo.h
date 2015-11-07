@@ -7,7 +7,7 @@
 
 namespace boxmg { namespace bmg2d { namespace util {
 
-core::mpi::topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny);
+			bmg2d::mpi::topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny);
 
 }}}
 #endif

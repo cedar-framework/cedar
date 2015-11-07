@@ -9,44 +9,44 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-	void relax_rbgs_point(const core::StencilOp & so,
-	                      core::GridFunc & x,
-	                      const core::GridFunc & b,
-	                      const core::RelaxStencil & sor,
+	void relax_rbgs_point(const StencilOp & so,
+	                      GridFunc & x,
+	                      const GridFunc & b,
+	                      const RelaxStencil & sor,
 	                      cycle::Dir cycle_dir);
 
-	void relax_lines_x(const core::StencilOp & so,
-	                   core::GridFunc & x,
-	                   const core::GridFunc & b,
-	                   const core::RelaxStencil & sor,
-	                   core::GridFunc & res,
+	void relax_lines_x(const StencilOp & so,
+	                   GridFunc & x,
+	                   const GridFunc & b,
+	                   const RelaxStencil & sor,
+	                   GridFunc & res,
 	                   cycle::Dir cycle_dir);
 
-	void relax_lines_y(const core::StencilOp & so,
-	                   core::GridFunc & x,
-	                   const core::GridFunc & b,
-	                   const core::RelaxStencil & sor,
-	                   core::GridFunc & res,
+	void relax_lines_y(const StencilOp & so,
+	                   GridFunc & x,
+	                   const GridFunc & b,
+	                   const RelaxStencil & sor,
+	                   GridFunc & res,
 	                   cycle::Dir cycle_dir);
 
-	void mpi_relax_rbgs_point(const core::StencilOp & so,
-	                          core::GridFunc & x,
-	                          const core::GridFunc & b,
-	                          const core::RelaxStencil & sor,
+	void mpi_relax_rbgs_point(const StencilOp & so,
+	                          GridFunc & x,
+	                          const GridFunc & b,
+	                          const RelaxStencil & sor,
 	                          cycle::Dir cycle_dir);
 
-	void mpi_relax_lines_x(const core::StencilOp & so,
-	                       core::GridFunc & x,
-	                       const core::GridFunc & b,
-	                       const core::RelaxStencil & sor,
-	                       core::GridFunc & res,
+	void mpi_relax_lines_x(const StencilOp & so,
+	                       GridFunc & x,
+	                       const GridFunc & b,
+	                       const RelaxStencil & sor,
+	                       GridFunc & res,
 	                       cycle::Dir cycle_dir);
 
-	void mpi_relax_lines_y(const core::StencilOp & so,
-	                       core::GridFunc & x,
-	                       const core::GridFunc & b,
-	                       const core::RelaxStencil & sor,
-	                       core::GridFunc & res,
+	void mpi_relax_lines_y(const StencilOp & so,
+	                       GridFunc & x,
+	                       const GridFunc & b,
+	                       const RelaxStencil & sor,
+	                       GridFunc & res,
 	                       cycle::Dir cycle_dir);
 }
 

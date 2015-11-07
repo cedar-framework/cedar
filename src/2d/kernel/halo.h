@@ -11,17 +11,17 @@ namespace impls
 {
 	struct MsgCtx
 	{
-		MsgCtx(core::mpi::GridTopo & topo);
-		core::Array<int,int> pMSG; // these should be int, len_t
-		core::Array<int,int> pLS;
-		core::Array<int,int> pMSGSO;
+		MsgCtx(mpi::GridTopo & topo);
+		Array<int,int> pMSG; // these should be int, len_t
+		Array<int,int> pLS;
+		Array<int,int> pMSGSO;
 		std::vector<len_t> msg_geom;
-		core::Array<int,int> proc_grid;
+		Array<int,int> proc_grid;
 		std::vector<int> proc_coord;
 		std::vector<int> dimxfine;
 		std::vector<int> dimyfine;
-		core::Array<int,int> dimx;
-		core::Array<int,int> dimy;
+		Array<int,int> dimx;
+		Array<int,int> dimy;
 		std::vector<real_t> msg_buffer;
 		int pSI_MSG;
 		int p_NLx_kg, p_NLy_kg;
@@ -35,9 +35,9 @@ namespace impls
 		/* int nmsgr; */
 	};
 
-	void setup_msg(core::mpi::GridTopo &topo, void **msg_ctx);
-	void msg_exchange(core::mpi::GridFunc & f);
-	void msg_stencil_exchange(core::mpi::StencilOp & so);
+	void setup_msg(mpi::GridTopo &topo, void **msg_ctx);
+	void msg_exchange(mpi::GridFunc & f);
+	void msg_stencil_exchange(mpi::StencilOp & so);
 }
 }}}
 

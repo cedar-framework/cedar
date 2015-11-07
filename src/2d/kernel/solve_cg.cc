@@ -33,17 +33,17 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-	void fortran_solve_cg(core::GridFunc & x,
-	                      const core::GridFunc & b,
-	                      const core::GridFunc & ABD,
+	void fortran_solve_cg(GridFunc & x,
+	                      const GridFunc & b,
+	                      const GridFunc & ABD,
 	                      real_t *bbd)
 	{
 		using namespace boxmg::bmg2d::core;
 
 		int ibc;
 
-		core::GridFunc & bd = const_cast<core::GridFunc&>(b);
-		core::GridFunc & abd_data = const_cast<core::GridFunc&>(ABD);
+		GridFunc & bd = const_cast<GridFunc&>(b);
+		GridFunc & abd_data = const_cast<GridFunc&>(ABD);
 
 
 		ibc = BMG_BCs_definite;
@@ -54,16 +54,16 @@ namespace impls
 
 
 	void solve_cg_boxmg(const solver::BoxMG &cg_solver,
-	                    core::GridFunc &x,
-	                    const core::GridFunc &b)
+	                    GridFunc &x,
+	                    const GridFunc &b)
 	{
 		int rank;
 
-		core::mpi::GridFunc & b_par = const_cast<core::mpi::GridFunc&>(dynamic_cast<const core::mpi::GridFunc&>(b));
-		core::mpi::GridFunc & x_par = dynamic_cast<core::mpi::GridFunc&>(x);
+		mpi::GridFunc & b_par = const_cast<mpi::GridFunc&>(dynamic_cast<const mpi::GridFunc&>(b));
+		mpi::GridFunc & x_par = dynamic_cast<mpi::GridFunc&>(x);
 		auto &coarse_solver = const_cast<solver::BoxMG&>(cg_solver);
 
-		core::mpi::GridTopo & topo = b_par.grid();
+		mpi::GridTopo & topo = b_par.grid();
 		MsgCtx *ctx = (MsgCtx*) b_par.halo_ctx;
 
 
@@ -74,7 +74,7 @@ namespace impls
 
 		len_t local_arr_ptr = ctx->pMSG(ipL_MSG_LocalArraySize,0) - 1;  // 1 vs 0 based indexing
 
-		core::GridFunc bser(topo.nglobal(0) - 2, topo.nglobal(1) - 2);
+		GridFunc bser(topo.nglobal(0) - 2, topo.nglobal(1) - 2);
 		BMG2_SymStd_SOLVE_cg_pack(bser.data(), b_par.data(),
 		                          b.len(0), b.len(1),
 		                          topo.nglobal(0), topo.nglobal(1),
@@ -105,18 +105,18 @@ namespace impls
 	}
 
 
-	void mpi_solve_cg_lu(core::GridFunc &x,
-	                     const core::GridFunc &b,
-	                     const core::GridFunc & ABD,
+	void mpi_solve_cg_lu(GridFunc &x,
+	                     const GridFunc &b,
+	                     const GridFunc & ABD,
 	                     real_t *bbd)
 	{
 		int rank;
 
-		core::mpi::GridFunc & b_par = const_cast<core::mpi::GridFunc&>(dynamic_cast<const core::mpi::GridFunc&>(b));
-		core::mpi::GridFunc & x_par = dynamic_cast<core::mpi::GridFunc&>(x);
-		core::GridFunc & abd_data = const_cast<core::GridFunc&>(ABD);
+		mpi::GridFunc & b_par = const_cast<mpi::GridFunc&>(dynamic_cast<const mpi::GridFunc&>(b));
+		mpi::GridFunc & x_par = dynamic_cast<mpi::GridFunc&>(x);
+		GridFunc & abd_data = const_cast<GridFunc&>(ABD);
 
-		core::mpi::GridTopo & topo = b_par.grid();
+		mpi::GridTopo & topo = b_par.grid();
 		MsgCtx *ctx = (MsgCtx*) b_par.halo_ctx;
 
 

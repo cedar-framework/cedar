@@ -7,12 +7,12 @@
 #include "core/stencil_op.h"
 #include "core/mpi/grid_func.h"
 
-namespace boxmg { namespace bmg2d { namespace core { namespace mpi {
+namespace boxmg { namespace bmg2d { namespace mpi {
 
-class StencilOp : public core::StencilOp
+class StencilOp : public bmg2d::StencilOp
 {
 public:
-	using core::StencilOp::residual;
+	using bmg2d::StencilOp::residual;
 	StencilOp() {}
 	StencilOp(topo_ptr grid);
 	MPI_Comm comm;
@@ -28,6 +28,6 @@ protected:
 	topo_ptr grid_;
 };
 
-}}}}
+}}}
 
 #endif

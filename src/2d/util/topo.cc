@@ -4,14 +4,14 @@
 
 namespace boxmg { namespace bmg2d { namespace util {
 
-core::mpi::topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny)
+bmg2d::mpi::topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny)
 {
 	int rank, size;
 	int periodic[3];
 
 	auto igrd = std::make_shared<std::vector<len_t>>(NBMG_pIGRD);
 
-	auto grid = std::make_shared<core::mpi::GridTopo>(igrd, 0, 1);
+	auto grid = std::make_shared<bmg2d::mpi::GridTopo>(igrd, 0, 1);
 
 	periodic[0] = periodic[1] = periodic[2] = 0;
 

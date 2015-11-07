@@ -3,7 +3,6 @@ set(core_HEADERS
   discrete_op.h
   grid_stencil.h
   grid_func.h
-  stencil.h
   stencil_op.h
   types.h
   base_types.h
@@ -18,7 +17,6 @@ set(core_SOURCES
   boundary_iterator.cc
   grid_func.cc
   relax_stencil.cc
-  stencil.cc
   stencil_op.cc
   mpi/grid_func.cc
   mpi/stencil_op.cc

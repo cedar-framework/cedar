@@ -10,7 +10,7 @@ class ProlongOp;
 }}}
 
 
-namespace boxmg { namespace bmg2d { namespace core {
+namespace boxmg { namespace bmg2d {
 
 	class GridFunc : public Array<len_t, real_t>
 	{
@@ -39,6 +39,6 @@ namespace boxmg { namespace bmg2d { namespace core {
 		return std::pow(result, 1./p);
 	}
 
-}}}
+}}
 
 #endif

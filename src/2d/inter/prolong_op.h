@@ -12,8 +12,8 @@
 
 namespace boxmg { namespace bmg2d { namespace inter {
 
-using iadd_pack = std::tuple<const ProlongOp&, const core::GridFunc &, const core::GridFunc&>;
-class ProlongOp : public core::StencilOp
+using iadd_pack = std::tuple<const ProlongOp&, const GridFunc &, const GridFunc&>;
+class ProlongOp : public StencilOp
 {
 
 public:
@@ -29,9 +29,9 @@ public:
 		*this = std::move(P);
 	}
 	friend std::ostream & operator<< (std::ostream &os, const ProlongOp & P);
-	friend iadd_pack operator*(const ProlongOp&, const core::GridFunc&);
-	core::StencilOp * fine_op;
-	core::GridFunc *residual;
+	friend iadd_pack operator*(const ProlongOp&, const GridFunc&);
+	StencilOp * fine_op;
+	GridFunc *residual;
 };
 
 }}}

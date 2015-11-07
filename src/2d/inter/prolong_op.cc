@@ -51,11 +51,11 @@ std::ostream & operator<< (std::ostream &os, const ProlongOp &P)
 }
 
 
-iadd_pack operator*(const ProlongOp & P, const core::GridFunc & coarse)
+iadd_pack operator*(const ProlongOp & P, const GridFunc & coarse)
 {
 	return std::make_tuple<std::reference_wrapper<const ProlongOp>,
-	                       std::reference_wrapper<const core::GridFunc>,
-	                       std::reference_wrapper<const core::GridFunc>>(P,coarse,*(P.residual));
+	                       std::reference_wrapper<const GridFunc>,
+	                       std::reference_wrapper<const GridFunc>>(P,coarse,*(P.residual));
 }
 
 

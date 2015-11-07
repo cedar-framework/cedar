@@ -1,10 +1,10 @@
 #include "stencil_op.h"
 
-using namespace boxmg::bmg2d;
-using namespace boxmg::bmg2d::core::mpi;
+using namespace boxmg;
+using namespace boxmg::bmg2d::mpi;
 
 StencilOp::StencilOp(topo_ptr grd) :
-	core::StencilOp(grd->nlocal(0)-2, grd->nlocal(1)-2),
+	bmg2d::StencilOp(grd->nlocal(0)-2, grd->nlocal(1)-2),
 	comm(grd->comm), grid_(grd)
 {
 	gs.stride(1)++;
@@ -15,7 +15,7 @@ StencilOp::StencilOp(topo_ptr grd) :
 GridFunc StencilOp::residual(const GridFunc &x, const GridFunc &b) const
 {
 	auto r = GridFunc(x.grid_ptr());
-	core::StencilOp::residual(x,b,r);
+	bmg2d::StencilOp::residual(x,b,r);
 
 	return r;
 }
@@ -23,11 +23,11 @@ GridFunc StencilOp::residual(const GridFunc &x, const GridFunc &b) const
 
 void StencilOp::residual(const GridFunc &x, const GridFunc &b, GridFunc &r) const
 {
-	core::StencilOp::residual(x,b,r);
+	bmg2d::StencilOp::residual(x,b,r);
 }
 
 
-namespace boxmg { namespace bmg2d { namespace core { namespace mpi {
+namespace boxmg { namespace bmg2d { namespace mpi {
 
 std::ostream & operator<< (std::ostream & os, const StencilOp &op)
 {
@@ -73,4 +73,4 @@ std::ostream & operator<< (std::ostream & os, const StencilOp &op)
 	return os;
 }
 
-}}}}
+}}}

@@ -16,14 +16,14 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-	using namespace boxmg::bmg2d::core;
+	using namespace boxmg::bmg2d;
 	void setup_rbgs_point(const StencilOp & so,
 	                      RelaxStencil & sor)
 	{
 		int nx, ny, nstencil, nsorv;
 
 		const GridStencil & so_sten = so.stencil();
-		core::StencilOp & sod = const_cast<core::StencilOp&>(so);
+		StencilOp & sod = const_cast<StencilOp&>(so);
 
 		nx = so_sten.len(0);
 		ny = so_sten.len(1);
@@ -43,7 +43,7 @@ namespace impls
 		int nx, ny, nstencil, jpn;
 
 		const GridStencil & so_sten = so.stencil();
-		core::StencilOp & sod = const_cast<core::StencilOp&>(so);
+		StencilOp & sod = const_cast<StencilOp&>(so);
 
 		nx = so_sten.len(0);
 		ny = so_sten.len(1);
@@ -63,7 +63,7 @@ namespace impls
 		int nx, ny, nstencil, jpn;
 
 		const GridStencil & so_sten = so.stencil();
-		core::StencilOp & sod = const_cast<core::StencilOp&>(so);
+		StencilOp & sod = const_cast<StencilOp&>(so);
 
 		nx = so_sten.len(0);
 		ny = so_sten.len(1);
@@ -84,7 +84,7 @@ namespace impls
 		int nx, ny, nstencil;
 
 		const GridStencil & so_sten = so.stencil();
-		core::StencilOp & sod = const_cast<core::StencilOp&>(so);
+		StencilOp & sod = const_cast<StencilOp&>(so);
 
 		nx = so_sten.len(0);
 		ny = so_sten.len(1);
@@ -102,7 +102,7 @@ namespace impls
 		int nx, ny, nstencil;
 
 		const GridStencil & so_sten = so.stencil();
-		core::StencilOp & sod = const_cast<core::StencilOp&>(so);
+		StencilOp & sod = const_cast<StencilOp&>(so);
 
 		nx = so_sten.len(0);
 		ny = so_sten.len(1);
@@ -120,7 +120,7 @@ namespace impls
 		int nx, ny, nstencil;
 
 		const GridStencil & so_sten = so.stencil();
-		core::StencilOp & sod = const_cast<core::StencilOp&>(so);
+		StencilOp & sod = const_cast<StencilOp&>(so);
 
 		nx = so_sten.len(0);
 		ny = so_sten.len(1);

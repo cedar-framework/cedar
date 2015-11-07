@@ -1,6 +1,7 @@
 #ifndef boxmg_common_h
 #define boxmg_common_h
 
+#include "boxmg-common/core/array.h"
 #include "boxmg-common/config/reader.h"
 #include "boxmg-common/cycle/types.h"
 #include "boxmg-common/util/align_allocator.h"

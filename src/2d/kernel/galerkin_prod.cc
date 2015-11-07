@@ -26,8 +26,8 @@ namespace impls
 
 	void galerkin_prod(int kf, int kc, int nog,
 	                   const inter::ProlongOp & P,
-	                   const core::StencilOp & fop,
-	                   core::StencilOp & cop)
+	                   const StencilOp & fop,
+	                   StencilOp & cop)
 	{
 		using namespace boxmg::bmg2d::core;
 		int iif, jjf, iic, jjc, ifd;
@@ -35,7 +35,7 @@ namespace impls
 
 		const GridStencil &fsten = fop.stencil();
 		GridStencil & csten = cop.stencil();
-		core::StencilOp &fopd = const_cast<core::StencilOp&>(fop);
+		StencilOp &fopd = const_cast<StencilOp&>(fop);
 		inter::ProlongOp &Pd = const_cast<inter::ProlongOp&>(P);
 
 		iif = fsten.len(0);
@@ -61,16 +61,16 @@ namespace impls
 
 	void mpi_galerkin_prod(int kf, int kc, int nog,
 	                       const inter::ProlongOp & P,
-	                       const core::StencilOp & fop,
-	                       core::StencilOp & cop)
+	                       const StencilOp & fop,
+	                       StencilOp & cop)
 	{
 		int ifd, nstencil;
 		inter::mpi::ProlongOp & Pd = const_cast<inter::mpi::ProlongOp&>(dynamic_cast<const inter::mpi::ProlongOp&>(P));
-		core::mpi::StencilOp & fopd = const_cast<core::mpi::StencilOp&>(dynamic_cast<const core::mpi::StencilOp&>(fop));
-		core::mpi::StencilOp & copd = dynamic_cast<core::mpi::StencilOp&>(cop);
-		core::mpi::GridTopo & topo = fopd.grid();
-		core::GridStencil & fsten = fopd.stencil();
-		core::GridStencil & csten = copd.stencil();
+		mpi::StencilOp & fopd = const_cast<mpi::StencilOp&>(dynamic_cast<const mpi::StencilOp&>(fop));
+		mpi::StencilOp & copd = dynamic_cast<mpi::StencilOp&>(cop);
+		mpi::GridTopo & topo = fopd.grid();
+		GridStencil & fsten = fopd.stencil();
+		GridStencil & csten = copd.stencil();
 		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
 
 		if (fsten.five_pt()) {

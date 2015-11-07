@@ -3,7 +3,7 @@
 #include "kernel/name.h"
 #include "stencil_op.h"
 
-using namespace boxmg::bmg2d::core;
+using namespace boxmg::bmg2d;
 
 
 void StencilOp::set_registry(std::shared_ptr<KernelRegistry> kreg)
@@ -22,7 +22,7 @@ void StencilOp::apply(const GridFunc &x, GridFunc &b) const
 {
 	if (kernels != nullptr) {
 		kernels->run(kernel::name::matvec,
-		             static_cast<const core::StencilOp&>(*this),
+		             static_cast<const StencilOp&>(*this),
 		             x,b);
 	} else {
 		log::error << "Kernel registry for stencil op not set!" << std::endl;
@@ -35,7 +35,7 @@ void StencilOp::residual(const GridFunc &x, const GridFunc &b, GridFunc & r) con
 {
 	if (kernels != nullptr) {
 		kernels->run(kernel::name::residual,
-		             static_cast<const core::StencilOp&>(*this),
+		             static_cast<const StencilOp&>(*this),
 		             x,b,r);
 	} else {
 		log::error << "Kernel registry for stencil op not set!" << std::endl;
@@ -52,7 +52,7 @@ GridFunc StencilOp::residual(const GridFunc &x, const GridFunc &b) const
 }
 
 
-namespace boxmg { namespace bmg2d { namespace core {
+namespace boxmg { namespace bmg2d {
 
 std::ostream & operator<< (std::ostream & os, const StencilOp &op)
 {
@@ -94,4 +94,4 @@ std::ostream & operator<< (std::ostream & os, const StencilOp &op)
 	return os;
 }
 
-}}}
+}}

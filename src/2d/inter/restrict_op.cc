@@ -19,7 +19,7 @@ void RestrictOp::set_registry(std::shared_ptr<KernelRegistry> kreg)
 }
 
 
-void RestrictOp::apply(const core::GridFunc &x, core::GridFunc &y) const
+void RestrictOp::apply(const GridFunc &x, GridFunc &y) const
 {
 	if (kernels != nullptr) {
 		kernels->run(kernel::name::restriction,
@@ -31,12 +31,12 @@ void RestrictOp::apply(const core::GridFunc &x, core::GridFunc &y) const
 }
 
 
-core::GridFunc operator*(const RestrictOp & R, const core::GridFunc &x)
+GridFunc operator*(const RestrictOp & R, const GridFunc &x)
 {
 	auto & P = R.getP();
 	auto & Psten = P.stencil();
 
-	core::GridFunc y(Psten.shape(0), Psten.shape(1));
+	GridFunc y(Psten.shape(0), Psten.shape(1));
 	R.apply(x,y);
 
 	return y;

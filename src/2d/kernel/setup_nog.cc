@@ -13,7 +13,7 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-	using namespace boxmg::bmg2d::core;
+	using namespace boxmg::bmg2d;
 	void fortran_setup_nog(mpi::GridTopo & topo, len_t min_coarse, int *nog)
 	{
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);

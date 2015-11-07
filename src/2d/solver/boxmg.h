@@ -14,28 +14,28 @@ namespace boxmg { namespace bmg2d { namespace solver {
 
 struct BoxMGLevel : Level
 {
-BoxMGLevel(core::StencilOp&& A, inter::ProlongOp&& P) : /*Level(A,P),*/
-	A(std::move(A)), P(std::move(P)), SOR({{core::RelaxStencil(), core::RelaxStencil()}}) { R.associate(&P); }
-	core::StencilOp    A;
+BoxMGLevel(StencilOp&& A, inter::ProlongOp&& P) : /*Level(A,P),*/
+	A(std::move(A)), P(std::move(P)), SOR({{RelaxStencil(), RelaxStencil()}}) { R.associate(&P); }
+	StencilOp    A;
 	inter::ProlongOp   P;
 	inter::RestrictOp  R;
-	core::GridFunc     x;
-	core::GridFunc     res;
-	core::GridFunc     b;
-	std::array<core::RelaxStencil, 2> SOR;
+	GridFunc     x;
+	GridFunc     res;
+	GridFunc     b;
+	std::array<RelaxStencil, 2> SOR;
 };
 
 class BoxMG : public MultiLevel<BoxMGLevel>
 {
 public:
-	BoxMG(core::StencilOp&& fop);
+	BoxMG(StencilOp&& fop);
 	~BoxMG() {delete[] bbd;};
-	int compute_num_levels(core::StencilOp & fop);
-	void add_level(core::StencilOp& fop, int num_levels);
+	int compute_num_levels(StencilOp & fop);
+	void add_level(StencilOp& fop, int num_levels);
 	std::shared_ptr<kernel::Registry> kernel_registry();
 
 private:
-	core::GridFunc ABD;
+	GridFunc ABD;
 	real_t *bbd;
 };
 

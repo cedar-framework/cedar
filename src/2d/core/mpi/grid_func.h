@@ -8,9 +8,9 @@
 #include "grid_topo.h"
 #include <iostream>
 
-namespace boxmg { namespace bmg2d { namespace core { namespace mpi {
+namespace boxmg { namespace bmg2d { namespace mpi {
 
-class GridFunc : public ::boxmg::bmg2d::core::GridFunc
+class GridFunc : public ::boxmg::bmg2d::GridFunc
 {
 public:
 	/* template<typename... ArgTypes> */
@@ -51,6 +51,6 @@ template<int p> real_t GridFunc::lp_norm() const
 	return std::pow(result, 1./p);
 }
 
-}}}}
+}}}
 
 #endif

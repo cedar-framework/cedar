@@ -11,7 +11,7 @@ using namespace boxmg;
 using namespace boxmg::bmg2d;
 using namespace boxmg::bmg2d::solver::mpi;
 
-BoxMG::BoxMG(core::mpi::StencilOp&& fop) : comm(fop.grid().comm)
+BoxMG::BoxMG(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 {
 	Timer setup_timer("Setup");
 	setup_timer.begin();
@@ -39,15 +39,15 @@ BoxMG::BoxMG(core::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 	kernels->halo_stencil_exchange(levels[0].A);
 
 	for (auto i: range(num_levels)) {
-		levels[i].res = core::mpi::GridFunc(levels[i].A.grid_ptr());
+		levels[i].res = bmg2d::mpi::GridFunc(levels[i].A.grid_ptr());
 		if (i) {
-			levels[i].x = core::mpi::GridFunc(levels[i].A.grid_ptr());
-			levels[i].b = core::mpi::GridFunc(levels[i].A.grid_ptr());
+			levels[i].x = bmg2d::mpi::GridFunc(levels[i].A.grid_ptr());
+			levels[i].b = bmg2d::mpi::GridFunc(levels[i].A.grid_ptr());
 		}
 		levels[i].A.halo_ctx = halo_ctx;
 		if (i != num_levels-1) {
 			levels[i].P.halo_ctx = halo_ctx;
-			std::array<core::RelaxStencil,2> SOR{{core::RelaxStencil(levels[i].A.stencil().shape(0), levels[i].A.stencil().shape(1)),core::RelaxStencil(levels[i].A.stencil().shape(0), levels[i].A.stencil().shape(1))}};
+			std::array<bmg2d::RelaxStencil,2> SOR{{bmg2d::RelaxStencil(levels[i].A.stencil().shape(0), levels[i].A.stencil().shape(1)),bmg2d::RelaxStencil(levels[i].A.stencil().shape(0), levels[i].A.stencil().shape(1))}};
 			levels[i].SOR = std::move(SOR);
 			int kf = num_levels - i;
 			kernels->setup_interp(kf,kf-1,num_levels,
@@ -68,8 +68,8 @@ BoxMG::BoxMG(core::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 			}
 			int nrelax_pre = conf.get<int>("solver.cycle.nrelax-pre", 2);
 			int nrelax_post = conf.get<int>("solver.cycle.nrelax-post", 1);
-			levels[i].presmoother = [&,i,nrelax_pre,kernels,relax_type](const core::DiscreteOp &A, core::GridFunc &x, const core::GridFunc &b) {
-				const core::StencilOp & av = dynamic_cast<const core::StencilOp &>(A);
+			levels[i].presmoother = [&,i,nrelax_pre,kernels,relax_type](const bmg2d::DiscreteOp &A, bmg2d::GridFunc &x, const bmg2d::GridFunc &b) {
+				const bmg2d::StencilOp & av = dynamic_cast<const bmg2d::StencilOp &>(A);
 				for (auto j : range(nrelax_pre)) {
 					(void)j;
 					if (relax_type == "point")
@@ -84,9 +84,9 @@ BoxMG::BoxMG(core::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 					}
 				}
 			};
-			levels[i].postsmoother = [&,i,nrelax_post,kernels,relax_type](const core::DiscreteOp &A, core::GridFunc &x, const core::GridFunc&b) {
+			levels[i].postsmoother = [&,i,nrelax_post,kernels,relax_type](const bmg2d::DiscreteOp &A, bmg2d::GridFunc &x, const bmg2d::GridFunc&b) {
 
-				const core::StencilOp & av = dynamic_cast<const core::StencilOp &>(A);
+				const bmg2d::StencilOp & av = dynamic_cast<const bmg2d::StencilOp &>(A);
 				for (auto j: range(nrelax_post)) {
 					(void)j;
 					if (relax_type == "point")
@@ -118,22 +118,22 @@ BoxMG::BoxMG(core::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 		auto & coarse_topo = cop.grid();
 		auto nxc = coarse_topo.nglobal(0);
 		auto nyc = coarse_topo.nglobal(1);
-		ABD = core::GridFunc(nxc+2, nxc*nyc);
+		ABD = bmg2d::GridFunc(nxc+2, nxc*nyc);
 		bbd = new real_t[ABD.len(1)];
 		kernels->setup_cg_lu(cop, ABD);
 	} else {
 		kernels->setup_cg_boxmg(cop, &cg_bmg);
 	}
 
-	coarse_solver = [&,cg_bmg,kernels](const core::DiscreteOp &A, core::mpi::GridFunc &x, const core::mpi::GridFunc &b) {
-		const core::mpi::StencilOp &av = dynamic_cast<const core::mpi::StencilOp&>(A);
-		auto &b_rw = const_cast<core::mpi::GridFunc&>(b);
+	coarse_solver = [&,cg_bmg,kernels](const bmg2d::DiscreteOp &A, bmg2d::mpi::GridFunc &x, const bmg2d::mpi::GridFunc &b) {
+		const bmg2d::mpi::StencilOp &av = dynamic_cast<const bmg2d::mpi::StencilOp&>(A);
+		auto &b_rw = const_cast<bmg2d::mpi::GridFunc&>(b);
 		b_rw.halo_ctx = av.halo_ctx;
 		if (cg_solver_lu)
 			kernels->solve_cg(x, b, ABD, bbd);
 		else
 			kernels->solve_cg_boxmg(*cg_bmg, x, b);
-		core::mpi::GridFunc residual = av.residual(x,b);
+		bmg2d::mpi::GridFunc residual = av.residual(x,b);
 		log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
 	};
 
@@ -141,12 +141,12 @@ BoxMG::BoxMG(core::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 }
 
 
-void BoxMG::add_level(core::mpi::StencilOp & fop, int num_levels)
+void BoxMG::add_level(bmg2d::mpi::StencilOp & fop, int num_levels)
 {
 	int kc = num_levels - levels.size() - 1;
 
-	core::mpi::GridTopo & fgrid = fop.grid();
-	auto cgrid = std::make_shared<core::mpi::GridTopo>(fgrid.get_igrd(), kc, num_levels);
+	bmg2d::mpi::GridTopo & fgrid = fop.grid();
+	auto cgrid = std::make_shared<bmg2d::mpi::GridTopo>(fgrid.get_igrd(), kc, num_levels);
 	cgrid->comm = fgrid.comm;
 
 	len_t NLxg = fgrid.nlocal(0) - 2;
@@ -185,7 +185,7 @@ void BoxMG::add_level(core::mpi::StencilOp & fop, int num_levels)
 	cgrid->coord(1) = fgrid.coord(1);
 
 
-	auto cop = core::mpi::StencilOp(cgrid);
+	auto cop = bmg2d::mpi::StencilOp(cgrid);
 	levels.back().P = inter::mpi::ProlongOp(cgrid);
 
 	cop.set_registry(kreg);
@@ -194,7 +194,7 @@ void BoxMG::add_level(core::mpi::StencilOp & fop, int num_levels)
 }
 
 
-int BoxMG::compute_num_levels(core::mpi::StencilOp & fop)
+int BoxMG::compute_num_levels(bmg2d::mpi::StencilOp & fop)
 {
 	int ng;
 	auto min_coarse = conf.get<len_t>("solver.min-coarse", 3);
@@ -213,17 +213,17 @@ std::shared_ptr<kernel::Registry> BoxMG::kernel_registry()
 }
 
 
-core::mpi::GridFunc BoxMG::solve(const core::mpi::GridFunc & b)
+bmg2d::mpi::GridFunc BoxMG::solve(const bmg2d::mpi::GridFunc & b)
 {
 	auto kernels = kernel_registry();
 	kernels->halo_exchange(b, halo_ctx);
-	return MultiLevel<BoxMGLevel,core::mpi::GridFunc>::solve(b);
+	return MultiLevel<BoxMGLevel,bmg2d::mpi::GridFunc>::solve(b);
 }
 
 
-void BoxMG::solve(const core::mpi::GridFunc & b, core::mpi::GridFunc & x)
+void BoxMG::solve(const bmg2d::mpi::GridFunc & b, bmg2d::mpi::GridFunc & x)
 {
 	auto kernels = kernel_registry();
 	kernels->halo_exchange(b, halo_ctx);
-	return MultiLevel<BoxMGLevel,core::mpi::GridFunc>::solve(b, x);
+	return MultiLevel<BoxMGLevel,bmg2d::mpi::GridFunc>::solve(b, x);
 }

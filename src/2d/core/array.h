@@ -9,7 +9,7 @@
 
 #include "boxmg-common.h"
 
-namespace boxmg { namespace bmg2d { namespace core {
+namespace boxmg { namespace bmg2d {
 
 template<typename S,typename D> class Array;
 template<typename S, typename D> std::ostream & operator<< (std::ostream &os, const Array<S,D> & obj);
@@ -205,6 +205,6 @@ void Array<S,D>::check_bounds(S i, S j) const
 	assert(i >=0 and j >=0 and i < len_[0] and j < len_[1]);
 }
 
-}}}
+}}
 
 #endif

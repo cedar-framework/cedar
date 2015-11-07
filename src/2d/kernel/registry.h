@@ -23,67 +23,67 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 class Registry : public KernelRegistry
 {
 public:
-	void setup_interp(int kf, int kc, int nog, const core::StencilOp & fop,
-	                  const core::StencilOp &cop, inter::ProlongOp & P);
+	void setup_interp(int kf, int kc, int nog, const StencilOp & fop,
+	                  const StencilOp &cop, inter::ProlongOp & P);
 
 	void galerkin_prod(int kf, int kc, int nog,
 	                   const inter::ProlongOp & P,
-	                   const core::StencilOp & fop,
-	                   core::StencilOp & cop);
+	                   const StencilOp & fop,
+	                   StencilOp & cop);
 
-	void setup_relax(const core::StencilOp & so,
-	                 core::RelaxStencil & sor);
+	void setup_relax(const StencilOp & so,
+	                 RelaxStencil & sor);
 
-	void setup_relax_x(const core::StencilOp & so,
-	                   core::RelaxStencil & sor);
+	void setup_relax_x(const StencilOp & so,
+	                   RelaxStencil & sor);
 
-	void setup_relax_y(const core::StencilOp & so,
-	                   core::RelaxStencil & sor);
+	void setup_relax_y(const StencilOp & so,
+	                   RelaxStencil & sor);
 
-	void setup_cg_lu(const core::StencilOp & so,
-	                 core::GridFunc & ABD);
+	void setup_cg_lu(const StencilOp & so,
+	                 GridFunc & ABD);
 
-	void relax(const core::StencilOp & so,
-	           core::GridFunc & x,
-	           const core::GridFunc & b,
-	           const core::RelaxStencil & sor,
+	void relax(const StencilOp & so,
+	           GridFunc & x,
+	           const GridFunc & b,
+	           const RelaxStencil & sor,
 	           cycle::Dir cycle_dir);
 
-	void relax_lines_x(const core::StencilOp & so,
-	                   core::GridFunc & x,
-	                   const core::GridFunc & b,
-	                   const core::RelaxStencil & sor,
-	                   core::GridFunc &res,
+	void relax_lines_x(const StencilOp & so,
+	                   GridFunc & x,
+	                   const GridFunc & b,
+	                   const RelaxStencil & sor,
+	                   GridFunc &res,
 	                   cycle::Dir cycle_dir);
 
-	void relax_lines_y(const core::StencilOp & so,
-	                   core::GridFunc & x,
-	                   const core::GridFunc & b,
-	                   const core::RelaxStencil & sor,
-	                   core::GridFunc &res,
+	void relax_lines_y(const StencilOp & so,
+	                   GridFunc & x,
+	                   const GridFunc & b,
+	                   const RelaxStencil & sor,
+	                   GridFunc &res,
 	                   cycle::Dir cycle_dir);
 
-	void solve_cg(core::GridFunc &x,
-	              const core::GridFunc &b,
-	              const core::GridFunc &ABD,
+	void solve_cg(GridFunc &x,
+	              const GridFunc &b,
+	              const GridFunc &ABD,
 	              real_t *bbd);
 
-	void setup_nog(core::mpi::GridTopo &topo,
+	void setup_nog(mpi::GridTopo &topo,
 	               len_t min_coarse, int *nog);
 
-	void halo_setup(core::mpi::GridTopo &topo,
+	void halo_setup(mpi::GridTopo &topo,
 	                void **halo_ctx);
-	void halo_exchange(core::mpi::GridFunc &f);
-	void halo_exchange(const core::mpi::GridFunc &f, void *halo_ctx);
-	void halo_stencil_exchange(core::mpi::StencilOp & so);
-	void setup_cg_boxmg(const core::StencilOp & so,
+	void halo_exchange(mpi::GridFunc &f);
+	void halo_exchange(const mpi::GridFunc &f, void *halo_ctx);
+	void halo_stencil_exchange(mpi::StencilOp & so);
+	void setup_cg_boxmg(const StencilOp & so,
 	                    std::shared_ptr<solver::BoxMG> *solver);
 	void solve_cg_boxmg(const solver::BoxMG &bmg,
-	                    core::GridFunc &x,
-	                    const core::GridFunc &b);
-	void matvec(const core::StencilOp & so,
-	            const core::GridFunc &x,
-	            core::GridFunc &b);
+	                    GridFunc &x,
+	                    const GridFunc &b);
+	void matvec(const StencilOp & so,
+	            const GridFunc &x,
+	            GridFunc &b);
 };
 
 }}}

@@ -3,7 +3,7 @@
 
 #include "grid_func.h"
 
-namespace boxmg { namespace bmg2d { namespace core {
+namespace boxmg { namespace bmg2d {
 
 class DiscreteOp
 {
@@ -15,6 +15,6 @@ public:
 };
 
 
-}}}
+}}
 
 #endif

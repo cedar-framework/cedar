@@ -6,9 +6,9 @@
 #include "core/grid_stencil.h"
 #include "core/mpi/grid_topo.h"
 
-namespace boxmg { namespace bmg2d { namespace core { namespace mpi {
+namespace boxmg { namespace bmg2d { namespace mpi {
 
-class GridStencil : public core::GridStencil
+class GridStencil : public bmg2d::GridStencil
 {
 public:
 	GridStencil();
@@ -21,6 +21,6 @@ private:
 	GridTopo grid_;
 };
 
-}}}}
+}}}
 
 #endif

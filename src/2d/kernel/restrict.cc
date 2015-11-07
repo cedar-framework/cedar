@@ -21,13 +21,13 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 namespace impls
 {
 	void fortran_restrict(const inter::RestrictOp & R,
-	                      const core::GridFunc & fine,
-	                      core::GridFunc & coarse)
+	                      const GridFunc & fine,
+	                      GridFunc & coarse)
 	{
 		using namespace boxmg::bmg2d;
 		int ibc;
 
-		auto & fined = const_cast<core::GridFunc&>(fine);
+		auto & fined = const_cast<GridFunc&>(fine);
 		auto & Rd = const_cast<inter::RestrictOp&>(R);
 		inter::ProlongOp & P = Rd.getP();
 		ibc = BMG_BCs_definite;
@@ -38,18 +38,18 @@ namespace impls
 	}
 
 	void mpi_fortran_restrict(const inter::RestrictOp & R,
-	                          const core::GridFunc & fine,
-	                          core::GridFunc & coarse)
+	                          const GridFunc & fine,
+	                          GridFunc & coarse)
 	{
 		int kf, kc, nog;
 		auto & Rd = const_cast<inter::RestrictOp&>(R);
 		inter::ProlongOp & ser_P = Rd.getP();
 		inter::mpi::ProlongOp & P = dynamic_cast<inter::mpi::ProlongOp&>(ser_P);
-		auto & fine_par = dynamic_cast<const core::mpi::GridFunc&>(fine);
-		core::mpi::GridTopo & topo = P.grid();
-		const core::mpi::GridTopo & fine_topo = fine_par.grid();
+		auto & fine_par = dynamic_cast<const mpi::GridFunc&>(fine);
+		mpi::GridTopo & topo = P.grid();
+		const mpi::GridTopo & fine_topo = fine_par.grid();
 		MsgCtx *ctx = (MsgCtx*) P.halo_ctx;
-		auto & fined = const_cast<core::GridFunc&>(fine);
+		auto & fined = const_cast<GridFunc&>(fine);
 
 		nog = kf = topo.nlevel();
 		kc = topo.level();

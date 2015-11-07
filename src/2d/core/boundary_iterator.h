@@ -6,7 +6,7 @@
 #include "boxmg-common.h"
 #include "types.h"
 
-namespace boxmg { namespace bmg2d { namespace core {
+namespace boxmg { namespace bmg2d {
 
 class GridStencil;
 
@@ -45,5 +45,5 @@ private:
 	iterator end_;
 };
 
-}}}
+}}
 #endif

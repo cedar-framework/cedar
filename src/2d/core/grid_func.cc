@@ -5,7 +5,7 @@
 
 #include "grid_func.h"
 
-using namespace boxmg::bmg2d::core;
+using namespace boxmg::bmg2d;
 
 
 GridFunc GridFunc::ones(len_t nx, len_t ny)

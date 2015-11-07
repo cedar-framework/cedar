@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
 	auto sol = bmg.solve(b);
 
-	core::mpi::GridFunc exact_sol(sol.grid_ptr());
+	bmg2d::mpi::GridFunc exact_sol(sol.grid_ptr());
 
 	y = sol.grid().is(1)*hy;
 	for (auto j: exact_sol.range(1)) {
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 		y+= hy;
 	}
 
-	auto diff = exact_sol - sol;
+	bmg2d::mpi::GridFunc diff = exact_sol - sol;
 
 	log::status << "Solution norm: " << diff.inf_norm() << std::endl;
 

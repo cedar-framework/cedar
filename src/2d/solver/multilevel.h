@@ -8,7 +8,7 @@
 
 namespace boxmg { namespace bmg2d { namespace solver {
 
-template <class LevelType,class GridFunc=core::GridFunc>
+template <class LevelType,class GridFunc=GridFunc>
 class MultiLevel
 {
 
@@ -139,7 +139,7 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 
 protected:
 	std::vector<LevelType> levels;
-	std::function<void(const core::DiscreteOp & A, GridFunc &x, const GridFunc &b)> coarse_solver;
+	std::function<void(const DiscreteOp & A, GridFunc &x, const GridFunc &b)> coarse_solver;
 	config::Reader conf;
 	std::shared_ptr<KernelRegistry> kreg;
 };

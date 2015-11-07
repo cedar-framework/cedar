@@ -37,10 +37,10 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-	void relax_rbgs_point(const core::StencilOp & so,
-	                      core::GridFunc & x,
-	                      const core::GridFunc & b,
-	                      const core::RelaxStencil & sor,
+	void relax_rbgs_point(const StencilOp & so,
+	                      GridFunc & x,
+	                      const GridFunc & b,
+	                      const RelaxStencil & sor,
 	                      cycle::Dir cycle_dir)
 	{
 		using namespace boxmg::bmg2d::core;
@@ -49,8 +49,8 @@ namespace impls
 
 		const GridStencil &so_sten = so.stencil();
 		StencilOp & sod = const_cast<StencilOp&>(so);
-		core::RelaxStencil & sord = const_cast<core::RelaxStencil&>(sor);
-		core::GridFunc & bd = const_cast<core::GridFunc&>(b);
+		RelaxStencil & sord = const_cast<RelaxStencil&>(sor);
+		GridFunc & bd = const_cast<GridFunc&>(b);
 
 		k = kf = 1;
 		if (so_sten.five_pt()) {
@@ -75,11 +75,11 @@ namespace impls
 
 
 
-	void relax_lines_x(const core::StencilOp & so,
-	                   core::GridFunc & x,
-	                   const core::GridFunc & b,
-	                   const core::RelaxStencil & sor,
-	                   core::GridFunc & res,
+	void relax_lines_x(const StencilOp & so,
+	                   GridFunc & x,
+	                   const GridFunc & b,
+	                   const RelaxStencil & sor,
+	                   GridFunc & res,
 	                   cycle::Dir cycle_dir)
 	{
 		using namespace boxmg::bmg2d::core;
@@ -88,8 +88,8 @@ namespace impls
 
 		const GridStencil &so_sten = so.stencil();
 		StencilOp & sod = const_cast<StencilOp&>(so);
-		core::RelaxStencil & sord = const_cast<core::RelaxStencil&>(sor);
-		core::GridFunc & bd = const_cast<core::GridFunc&>(b);
+		RelaxStencil & sord = const_cast<RelaxStencil&>(sor);
+		GridFunc & bd = const_cast<GridFunc&>(b);
 
 		k = kf = 1;
 		if (so_sten.five_pt()) {
@@ -113,11 +113,11 @@ namespace impls
 	}
 
 
-	void relax_lines_y(const core::StencilOp & so,
-	                   core::GridFunc & x,
-	                   const core::GridFunc & b,
-	                   const core::RelaxStencil & sor,
-	                   core::GridFunc & res,
+	void relax_lines_y(const StencilOp & so,
+	                   GridFunc & x,
+	                   const GridFunc & b,
+	                   const RelaxStencil & sor,
+	                   GridFunc & res,
 	                   cycle::Dir cycle_dir)
 	{
 		using namespace boxmg::bmg2d::core;
@@ -126,8 +126,8 @@ namespace impls
 
 		const GridStencil &so_sten = so.stencil();
 		StencilOp & sod = const_cast<StencilOp&>(so);
-		core::RelaxStencil & sord = const_cast<core::RelaxStencil&>(sor);
-		core::GridFunc & bd = const_cast<core::GridFunc&>(b);
+		RelaxStencil & sord = const_cast<RelaxStencil&>(sor);
+		GridFunc & bd = const_cast<GridFunc&>(b);
 
 		k = kf = 1;
 		if (so_sten.five_pt()) {
@@ -151,22 +151,22 @@ namespace impls
 	}
 
 
-	void mpi_relax_rbgs_point(const core::StencilOp & so,
-	                          core::GridFunc & x,
-	                          const core::GridFunc & b,
-	                          const core::RelaxStencil & sor,
+	void mpi_relax_rbgs_point(const StencilOp & so,
+	                          GridFunc & x,
+	                          const GridFunc & b,
+	                          const RelaxStencil & sor,
 	                          cycle::Dir cycle_dir)
 	{
 		using namespace boxmg::bmg2d::core;
 		int k, kf, ifd;
 		int updown, nstencil;
 
-		core::mpi::StencilOp & sod = const_cast<core::mpi::StencilOp&>(dynamic_cast<const core::mpi::StencilOp&>(so));
-		core::mpi::GridTopo & topo = sod.grid();
+		mpi::StencilOp & sod = const_cast<mpi::StencilOp&>(dynamic_cast<const mpi::StencilOp&>(so));
+		mpi::GridTopo & topo = sod.grid();
 		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
 		GridStencil & sten = sod.stencil();
-		core::RelaxStencil & sord = const_cast<core::RelaxStencil&>(sor);
-		core::GridFunc & bd = const_cast<core::GridFunc&>(b);
+		RelaxStencil & sord = const_cast<RelaxStencil&>(sor);
+		GridFunc & bd = const_cast<GridFunc&>(b);
 
 		k = topo.level()+1;
 		kf = topo.nlevel();
@@ -192,23 +192,23 @@ namespace impls
 	}
 
 
-	void mpi_relax_lines_x(const core::StencilOp & so,
-	                       core::GridFunc & x,
-	                       const core::GridFunc & b,
-	                       const core::RelaxStencil & sor,
-	                       core::GridFunc & res,
+	void mpi_relax_lines_x(const StencilOp & so,
+	                       GridFunc & x,
+	                       const GridFunc & b,
+	                       const RelaxStencil & sor,
+	                       GridFunc & res,
 	                       cycle::Dir cycle_dir)
 	{
 		using namespace boxmg::bmg2d::core;
 		int k, kf, ifd;
 		int updown, nstencil;
 
-		core::mpi::StencilOp & sod = const_cast<core::mpi::StencilOp&>(dynamic_cast<const core::mpi::StencilOp&>(so));
-		core::mpi::GridTopo & topo = sod.grid();
+		mpi::StencilOp & sod = const_cast<mpi::StencilOp&>(dynamic_cast<const mpi::StencilOp&>(so));
+		mpi::GridTopo & topo = sod.grid();
 		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
 		GridStencil & sten = sod.stencil();
-		core::RelaxStencil & sord = const_cast<core::RelaxStencil&>(sor);
-		core::GridFunc & bd = const_cast<core::GridFunc&>(b);
+		RelaxStencil & sord = const_cast<RelaxStencil&>(sor);
+		GridFunc & bd = const_cast<GridFunc&>(b);
 
 		k = topo.level()+1;
 		kf = topo.nlevel();
@@ -241,23 +241,23 @@ namespace impls
 	}
 
 
-	void mpi_relax_lines_y(const core::StencilOp & so,
-	                       core::GridFunc & x,
-	                       const core::GridFunc & b,
-	                       const core::RelaxStencil & sor,
-	                       core::GridFunc & res,
+	void mpi_relax_lines_y(const StencilOp & so,
+	                       GridFunc & x,
+	                       const GridFunc & b,
+	                       const RelaxStencil & sor,
+	                       GridFunc & res,
 	                       cycle::Dir cycle_dir)
 	{
 		using namespace boxmg::bmg2d::core;
 		int k, kf, ifd;
 		int updown, nstencil;
 
-		core::mpi::StencilOp & sod = const_cast<core::mpi::StencilOp&>(dynamic_cast<const core::mpi::StencilOp&>(so));
-		core::mpi::GridTopo & topo = sod.grid();
+		mpi::StencilOp & sod = const_cast<mpi::StencilOp&>(dynamic_cast<const mpi::StencilOp&>(so));
+		mpi::GridTopo & topo = sod.grid();
 		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
 		GridStencil & sten = sod.stencil();
-		core::RelaxStencil & sord = const_cast<core::RelaxStencil&>(sor);
-		core::GridFunc & bd = const_cast<core::GridFunc&>(b);
+		RelaxStencil & sord = const_cast<RelaxStencil&>(sor);
+		GridFunc & bd = const_cast<GridFunc&>(b);
 
 		k = topo.level()+1;
 		kf = topo.nlevel();

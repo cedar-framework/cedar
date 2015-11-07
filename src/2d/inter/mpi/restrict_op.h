@@ -9,7 +9,7 @@ namespace boxmg { namespace bmg2d { namespace inter { namespace mpi {
 class RestrictOp : public inter::RestrictOp
 {
 public:
-	friend core::mpi::GridFunc operator*(const RestrictOp &R, const core::GridFunc &x);
+	friend bmg2d::mpi::GridFunc operator*(const RestrictOp &R, const GridFunc &x);
 };
 
 }}}}

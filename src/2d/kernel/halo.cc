@@ -26,7 +26,7 @@ extern "C" {
 namespace boxmg { namespace bmg2d { namespace kernel {
 namespace impls
 {
-	MsgCtx::MsgCtx(core::mpi::GridTopo & topo) :
+	MsgCtx::MsgCtx(mpi::GridTopo & topo) :
 		pMSG(NBMG_pMSG, topo.nlevel(),0),
 		pLS(NBMG_pLS, topo.nlevel(),0),
 		pMSGSO(NBMG_pMSG, topo.nlevel(),0),
@@ -74,7 +74,7 @@ namespace impls
 		p_NLx_kg = 1;
 		p_NLy_kg = p_NLx_kg + topo.nproc(0)*topo.nlevel();
 		pSI_MSG = p_NLy_kg + topo.nproc(1)*topo.nlevel();
-		core::mpi::GridTopo cg_topo(topo.igrd_ptr(), 0, topo.nlevel());
+		mpi::GridTopo cg_topo(topo.igrd_ptr(), 0, topo.nlevel());
 		len_t NGx_c = cg_topo.nglobal(0) - 2;
 		len_t NGy_c = cg_topo.nglobal(1) - 2;
 		len_t NMSGr = std::max(4*NLy*topo.nproc(0) + 5*NLx,
@@ -113,7 +113,7 @@ namespace impls
 	}
 
 
-	void setup_msg(core::mpi::GridTopo & topo, void **msg_ctx)
+	void setup_msg(mpi::GridTopo & topo, void **msg_ctx)
 	{
 		MsgCtx *ctx = new MsgCtx(topo);
 		int rank;
@@ -143,11 +143,11 @@ namespace impls
 	}
 
 
-	void msg_stencil_exchange(core::mpi::StencilOp & sop)
+	void msg_stencil_exchange(mpi::StencilOp & sop)
 	{
 		MsgCtx *ctx = (MsgCtx*) sop.halo_ctx;
-		core::mpi::GridTopo &topo = sop.grid();
-		core::GridStencil & sten = sop.stencil();
+		mpi::GridTopo &topo = sop.grid();
+		GridStencil & sten = sop.stencil();
 		int nstencil;
 
 		if (sten.five_pt()) {
@@ -166,10 +166,10 @@ namespace impls
 	}
 
 
-	void msg_exchange(core::mpi::GridFunc & f)
+	void msg_exchange(mpi::GridFunc & f)
 	{
 		MsgCtx *ctx = (MsgCtx*) f.halo_ctx;
-		core::mpi::GridTopo &topo = f.grid();
+		mpi::GridTopo &topo = f.grid();
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 

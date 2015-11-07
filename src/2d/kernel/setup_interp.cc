@@ -20,11 +20,11 @@ namespace impls
 	using namespace boxmg::bmg2d;
 
 	void setup_interp(int kf, int kc, int nog,
-	                  const core::StencilOp &fop,
-	                  const core::StencilOp &cop,
+	                  const StencilOp &fop,
+	                  const StencilOp &cop,
 	                  inter::ProlongOp &P)
 	{
-		using namespace boxmg::bmg2d::core;
+		using namespace boxmg::bmg2d;
 		int ifd;
 		int iif, jjf, iic, jjc;
 		int nstencil;
@@ -32,8 +32,8 @@ namespace impls
 
 		const GridStencil &fsten = fop.stencil();
 		const GridStencil &csten = cop.stencil();
-		core::StencilOp &fopd = const_cast<core::StencilOp&>(fop);
-		core::StencilOp &copd = const_cast<core::StencilOp&>(cop);
+		StencilOp &fopd = const_cast<StencilOp&>(fop);
+		StencilOp &copd = const_cast<StencilOp&>(cop);
 
 		P.fine_op = &fopd;
 
@@ -58,17 +58,17 @@ namespace impls
 	}
 
 	void mpi_setup_interp(int kf, int kc, int nog,
-	                      const core::StencilOp & fop,
-	                      const core::StencilOp & cop,
+	                      const StencilOp & fop,
+	                      const StencilOp & cop,
 	                      inter::ProlongOp & P)
 	{
 		int ifd, nstencil;
 
-		core::mpi::StencilOp & fopd = const_cast<core::mpi::StencilOp&>(dynamic_cast<const core::mpi::StencilOp&>(fop));
-		core::mpi::StencilOp & copd = const_cast<core::mpi::StencilOp&>(dynamic_cast<const core::mpi::StencilOp&>(cop));
-		core::GridStencil & fsten = fopd.stencil();
-		core::GridStencil & csten = copd.stencil();
-		core::mpi::GridTopo & topo = fopd.grid();
+		mpi::StencilOp & fopd = const_cast<mpi::StencilOp&>(dynamic_cast<const mpi::StencilOp&>(fop));
+		mpi::StencilOp & copd = const_cast<mpi::StencilOp&>(dynamic_cast<const mpi::StencilOp&>(cop));
+		GridStencil & fsten = fopd.stencil();
+		GridStencil & csten = copd.stencil();
+		mpi::GridTopo & topo = fopd.grid();
 		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
 
 		if (fsten.five_pt()) {

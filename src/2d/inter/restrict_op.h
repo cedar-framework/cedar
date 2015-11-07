@@ -13,7 +13,7 @@
 
 namespace boxmg { namespace bmg2d { namespace inter {
 
-class RestrictOp : public core::DiscreteOp
+class RestrictOp : public DiscreteOp
 {
 
 public:
@@ -24,11 +24,11 @@ RestrictOp(ProlongOp * P) : kernels(nullptr), P(P) {}
 	ProlongOp & getP() { return *P; }
 	const ProlongOp & getP() const { return *P; }
 
-	virtual void apply(const core::GridFunc &x, core::GridFunc &y) const;
-	virtual void residual(const core::GridFunc &x, const core::GridFunc &b, core::GridFunc &r) const{}
+	virtual void apply(const GridFunc &x, GridFunc &y) const;
+	virtual void residual(const GridFunc &x, const GridFunc &b, GridFunc &r) const{}
 	virtual void set_registry(std::shared_ptr<KernelRegistry> kreg);
 	friend std::ostream & operator<< (std::ostream &os, const RestrictOp & R);
-	friend core::GridFunc operator* (const RestrictOp & R, const core::GridFunc &x);
+	friend GridFunc operator* (const RestrictOp & R, const GridFunc &x);
 
 protected:
 	std::shared_ptr<KernelRegistry> kernels;

@@ -11,7 +11,6 @@ int main(int argc, char *argv[])
 {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
-	using namespace boxmg::bmg2d::core;
 
 	const double pi = M_PI;
 
@@ -55,7 +54,7 @@ int main(int argc, char *argv[])
 
 	auto sol = bmg.solve(b);
 
-	core::GridFunc exact_sol(sol.shape(0), sol.shape(1));
+	GridFunc exact_sol(sol.shape(0), sol.shape(1));
 
 	std::ofstream dfile;
 	dfile.open("sol.txt", std::ios::out | std::ios::trunc | std::ios::binary);

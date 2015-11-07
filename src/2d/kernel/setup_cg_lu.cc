@@ -27,7 +27,7 @@ namespace impls
 		int ibc = 0;
 
 		const GridStencil & so_sten = so.stencil();
-		StencilOp & sod = const_cast<core::StencilOp&>(so);
+		StencilOp & sod = const_cast<StencilOp&>(so);
 
 		nx = so_sten.len(0);
 		ny = so_sten.len(1);
@@ -43,13 +43,13 @@ namespace impls
 	}
 
 
-	void mpi_setup_cg_lu(const core::StencilOp & so,
-	                     core::GridFunc & ABD)
+	void mpi_setup_cg_lu(const StencilOp & so,
+	                     GridFunc & ABD)
 	{
-		core::mpi::StencilOp & copd = const_cast<core::mpi::StencilOp&>(dynamic_cast<const core::mpi::StencilOp&>(so));
+		mpi::StencilOp & copd = const_cast<mpi::StencilOp&>(dynamic_cast<const mpi::StencilOp&>(so));
 
-		core::GridStencil & csten = copd.stencil();
-		core::mpi::GridTopo & topo = copd.grid();
+		GridStencil & csten = copd.stencil();
+		mpi::GridTopo & topo = copd.grid();
 		MsgCtx *ctx = (MsgCtx*) copd.halo_ctx;
 		int nstencil;
 

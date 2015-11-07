@@ -3,7 +3,7 @@
 #include "grid_topo.h"
 
 using namespace boxmg;
-using namespace boxmg::bmg2d::core::mpi;
+using namespace boxmg::bmg2d::mpi;
 
 GridTopo::GridTopo() : igrd(nullptr) {}
 

@@ -6,7 +6,7 @@
 
 #include "boxmg-common.h"
 
-namespace boxmg { namespace bmg2d { namespace core { namespace mpi {
+namespace boxmg { namespace bmg2d { namespace mpi {
 
 class GridTopo
 {
@@ -51,6 +51,7 @@ private:
 };
 
 using topo_ptr = std::shared_ptr<GridTopo>;
-}}}}
+
+}}}
 
 #endif

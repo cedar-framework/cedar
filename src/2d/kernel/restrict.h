@@ -11,11 +11,11 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 namespace impls
 {
 	void fortran_restrict(const inter::RestrictOp & so,
-	                      const core::GridFunc & fine,
-	                      core::GridFunc & coarse);
+	                      const GridFunc & fine,
+	                      GridFunc & coarse);
 	void mpi_fortran_restrict(const inter::RestrictOp & so,
-	                          const core::GridFunc & fine,
-	                          core::GridFunc & coarse);
+	                          const GridFunc & fine,
+	                          GridFunc & coarse);
 }
 
 }}}

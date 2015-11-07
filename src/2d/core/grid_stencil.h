@@ -7,7 +7,7 @@
 #include "core/array.h"
 #include "core/boundary_iterator.h"
 
-namespace boxmg { namespace bmg2d { namespace core {
+namespace boxmg { namespace bmg2d {
 
 	class GridStencil : public Array<len_t, real_t>
 	{
@@ -132,6 +132,6 @@ namespace boxmg { namespace bmg2d { namespace core {
 		len_t ostride;
 	};
 
-}}}
+}}
 
 #endif

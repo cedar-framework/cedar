@@ -4,7 +4,7 @@
 #include "core/types.h"
 #include "core/array.h"
 
-namespace boxmg { namespace bmg2d { namespace core {
+namespace boxmg { namespace bmg2d {
 
 
 class RelaxStencil : public Array<len_t, real_t>
@@ -42,6 +42,6 @@ public:
 };
 
 
-}}}
+}}
 
 #endif

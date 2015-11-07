@@ -16,31 +16,31 @@ namespace boxmg { namespace bmg2d { namespace solver { namespace mpi {
 
 struct BoxMGLevel : Level
 {
-BoxMGLevel(core::mpi::StencilOp&& A, inter::mpi::ProlongOp&& P) : /*Level(A,P),*/
-	A(std::move(A)), P(std::move(P)), SOR({{core::RelaxStencil(),core::RelaxStencil()}}) { R.associate(&P); }
-	core::mpi::GridFunc     x;
-	core::mpi::GridFunc     b;
-	core::mpi::GridFunc     res;
-	core::mpi::StencilOp    A;
+BoxMGLevel(bmg2d::mpi::StencilOp&& A, inter::mpi::ProlongOp&& P) : /*Level(A,P),*/
+	A(std::move(A)), P(std::move(P)), SOR({{RelaxStencil(),RelaxStencil()}}) { R.associate(&P); }
+	bmg2d::mpi::GridFunc     x;
+	bmg2d::mpi::GridFunc     b;
+	bmg2d::mpi::GridFunc     res;
+	bmg2d::mpi::StencilOp    A;
 	inter::mpi::ProlongOp   P;
 	inter::mpi::RestrictOp  R;
-	std::array<core::RelaxStencil,2> SOR;
+	std::array<RelaxStencil,2> SOR;
 };
 
-class BoxMG : public MultiLevel<BoxMGLevel,core::mpi::GridFunc>
+class BoxMG : public MultiLevel<BoxMGLevel,bmg2d::mpi::GridFunc>
 {
 public:
-	BoxMG(core::mpi::StencilOp&& fop);
+	BoxMG(bmg2d::mpi::StencilOp&& fop);
 	~BoxMG() {if (cg_solver_lu) delete[] bbd;};
-	int compute_num_levels(core::mpi::StencilOp & fop);
-	void add_level(core::mpi::StencilOp& fop, int num_levels);
+	int compute_num_levels(bmg2d::mpi::StencilOp & fop);
+	void add_level(bmg2d::mpi::StencilOp& fop, int num_levels);
 	MPI_Comm comm;
 	std::shared_ptr<kernel::Registry> kernel_registry();
-	virtual core::mpi::GridFunc solve(const core::mpi::GridFunc &b);
-	virtual void solve(const core::mpi::GridFunc &b, core::mpi::GridFunc &x);
+	virtual bmg2d::mpi::GridFunc solve(const bmg2d::mpi::GridFunc &b);
+	virtual void solve(const bmg2d::mpi::GridFunc &b, bmg2d::mpi::GridFunc &x);
 
 private:
-	core::GridFunc ABD;
+	GridFunc ABD;
 	bool cg_solver_lu;
 	real_t *bbd;
 	void *halo_ctx;

@@ -2,7 +2,7 @@
 
 #include "grid_stencil.h"
 
-using namespace boxmg::bmg2d::core;
+using namespace boxmg::bmg2d;
 
 BoundaryIterator::BoundaryIterator(const GridStencil &s, Dir dir):
 	begin_(s,dir), end_(s,dir)
