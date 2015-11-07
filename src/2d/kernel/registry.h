@@ -13,9 +13,9 @@
 #include "core/mpi/grid_func.h"
 
 
-namespace boxmg { namespace bmg2d { namespace solver {
-			class BoxMG;
-}}}
+namespace boxmg { namespace bmg2d {
+			class solver;
+}}
 
 
 namespace boxmg { namespace bmg2d { namespace kernel {
@@ -77,8 +77,8 @@ public:
 	void halo_exchange(const mpi::GridFunc &f, void *halo_ctx);
 	void halo_stencil_exchange(mpi::StencilOp & so);
 	void setup_cg_boxmg(const StencilOp & so,
-	                    std::shared_ptr<solver::BoxMG> *solver);
-	void solve_cg_boxmg(const solver::BoxMG &bmg,
+	                    std::shared_ptr<solver> *bmg);
+	void solve_cg_boxmg(const solver &bmg,
 	                    GridFunc &x,
 	                    const GridFunc &b);
 	void matvec(const StencilOp & so,

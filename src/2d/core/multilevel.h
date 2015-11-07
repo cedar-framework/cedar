@@ -6,7 +6,7 @@
 #include "core/grid_func.h"
 
 
-namespace boxmg { namespace bmg2d { namespace solver {
+namespace boxmg { namespace bmg2d {
 
 template <class LevelType,class GridFunc=GridFunc>
 class MultiLevel
@@ -144,6 +144,6 @@ protected:
 	std::shared_ptr<KernelRegistry> kreg;
 };
 
-}}}
+}}
 
 #endif

@@ -3,13 +3,12 @@
 #include "boxmg-common.h"
 
 #include "kernel/factory.h"
-#include "solver/boxmg.h"
+#include "core/solver.h"
 
 using namespace boxmg;
 using namespace boxmg::bmg2d;
-using namespace boxmg::bmg2d::solver;
 
-BoxMG::BoxMG(StencilOp&& fop)
+solver::solver(StencilOp&& fop)
 {
 	kreg = kernel::factory::from_config(conf);
 	levels.emplace_back(std::move(fop), inter::ProlongOp());
@@ -19,7 +18,7 @@ BoxMG::BoxMG(StencilOp&& fop)
 		levels.back().res = GridFunc(fsten.shape(0), fsten.shape(1));
 	}
 
-	auto num_levels = BoxMG::compute_num_levels(levels[0].A);
+	auto num_levels = solver::compute_num_levels(levels[0].A);
 	log::debug << "Using a " << num_levels << " level heirarchy" << std::endl;
 	levels.reserve(num_levels);
 	for (auto i: range(num_levels-1)) {
@@ -49,7 +48,7 @@ BoxMG::BoxMG(StencilOp&& fop)
 }
 
 
-void BoxMG::add_level(StencilOp & fop, int num_levels)
+void solver::add_level(StencilOp & fop, int num_levels)
 {
 	GridStencil & sten = fop.stencil();
 	auto kernels = kernel_registry();
@@ -135,7 +134,7 @@ void BoxMG::add_level(StencilOp & fop, int num_levels)
 }
 
 
-int BoxMG::compute_num_levels(StencilOp & fop)
+int solver::compute_num_levels(StencilOp & fop)
 {
 	float nxc, nyc;
 	int ng = 0;
@@ -155,7 +154,7 @@ int BoxMG::compute_num_levels(StencilOp & fop)
 }
 
 
-std::shared_ptr<kernel::Registry> BoxMG::kernel_registry()
+std::shared_ptr<kernel::Registry> solver::kernel_registry()
 {
 	return std::static_pointer_cast<kernel::Registry>(kreg);
 }

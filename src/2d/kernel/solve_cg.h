@@ -2,7 +2,7 @@
 #define BOXMG_2D_KERNEL_SOLVE_CG_H
 
 #include "core/grid_func.h"
-#include "solver/boxmg.h"
+#include "core/solver.h"
 
 namespace boxmg { namespace bmg2d { namespace kernel {
 
@@ -20,7 +20,7 @@ namespace impls
 	                     real_t *bbd);
 
 
-	void solve_cg_boxmg(const solver::BoxMG & cg_solver,
+	void solve_cg_boxmg(const solver & cg_solver,
 	                    GridFunc &x,
 	                    const GridFunc &b);
 

@@ -53,7 +53,7 @@ namespace impls
 	}
 
 
-	void solve_cg_boxmg(const solver::BoxMG &cg_solver,
+	void solve_cg_boxmg(const solver &cg_solver,
 	                    GridFunc &x,
 	                    const GridFunc &b)
 	{
@@ -61,7 +61,7 @@ namespace impls
 
 		mpi::GridFunc & b_par = const_cast<mpi::GridFunc&>(dynamic_cast<const mpi::GridFunc&>(b));
 		mpi::GridFunc & x_par = dynamic_cast<mpi::GridFunc&>(x);
-		auto &coarse_solver = const_cast<solver::BoxMG&>(cg_solver);
+		auto &coarse_solver = const_cast<solver&>(cg_solver);
 
 		mpi::GridTopo & topo = b_par.grid();
 		MsgCtx *ctx = (MsgCtx*) b_par.halo_ctx;

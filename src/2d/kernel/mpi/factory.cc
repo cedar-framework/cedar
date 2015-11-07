@@ -16,9 +16,9 @@
 
 #include "factory.h"
 
-namespace boxmg { namespace bmg2d { namespace solver {
+namespace boxmg { namespace bmg2d {
 			class BoxMG;
-}}}
+}}
 
 namespace boxmg { namespace bmg2d { namespace kernel { namespace mpi {
 
@@ -175,10 +175,10 @@ namespace factory
 
 		kreg->add(name::setup_cg_boxmg, "fortran-msg",
 		          Kernel<const bmg2d::StencilOp &,
-		          std::shared_ptr<solver::BoxMG>*>(impls::setup_cg_boxmg));
+		          std::shared_ptr<solver>*>(impls::setup_cg_boxmg));
 
 		kreg->add(name::solve_cg_boxmg, "fortran-msg",
-		          Kernel<const solver::BoxMG &,
+		          Kernel<const solver &,
 		          bmg2d::GridFunc &,
 		          const bmg2d::GridFunc &>(impls::solve_cg_boxmg));
 

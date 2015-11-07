@@ -5,7 +5,7 @@
 
 #include "core/discrete_op.h"
 
-namespace boxmg { namespace bmg2d { namespace solver {
+namespace boxmg { namespace bmg2d {
 
 struct Level
 {
@@ -18,6 +18,6 @@ struct Level
 	//DiscreteOp & R;
 };
 
-}}}
+}}
 
 #endif

@@ -12,7 +12,7 @@
 #include "inter/mpi/restrict_op.h"
 #include "kernel/registry.h"
 
-namespace boxmg { namespace bmg2d { namespace solver { namespace mpi {
+namespace boxmg { namespace bmg2d { namespace mpi {
 
 struct BoxMGLevel : Level
 {
@@ -27,11 +27,11 @@ BoxMGLevel(bmg2d::mpi::StencilOp&& A, inter::mpi::ProlongOp&& P) : /*Level(A,P),
 	std::array<RelaxStencil,2> SOR;
 };
 
-class BoxMG : public MultiLevel<BoxMGLevel,bmg2d::mpi::GridFunc>
+class solver: public MultiLevel<BoxMGLevel,bmg2d::mpi::GridFunc>
 {
 public:
-	BoxMG(bmg2d::mpi::StencilOp&& fop);
-	~BoxMG() {if (cg_solver_lu) delete[] bbd;};
+	solver(bmg2d::mpi::StencilOp&& fop);
+	~solver() {if (cg_solver_lu) delete[] bbd;};
 	int compute_num_levels(bmg2d::mpi::StencilOp & fop);
 	void add_level(bmg2d::mpi::StencilOp& fop, int num_levels);
 	MPI_Comm comm;
@@ -40,12 +40,12 @@ public:
 	virtual void solve(const bmg2d::mpi::GridFunc &b, bmg2d::mpi::GridFunc &x);
 
 private:
-	GridFunc ABD;
+	bmg2d::GridFunc ABD;
 	bool cg_solver_lu;
 	real_t *bbd;
 	void *halo_ctx;
 };
 
-}}}}
+}}}
 
 #endif

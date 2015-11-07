@@ -4,14 +4,13 @@
 
 #include "kernel/halo.h"
 #include "kernel/mpi/factory.h"
-#include "solver/mpi/boxmg.h"
-#include "solver/boxmg.h"
+#include "core/mpi/solver.h"
+#include "core/solver.h"
 
 using namespace boxmg;
 using namespace boxmg::bmg2d;
-using namespace boxmg::bmg2d::solver::mpi;
 
-BoxMG::BoxMG(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
+mpi::solver::solver(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 {
 	Timer setup_timer("Setup");
 	setup_timer.begin();
@@ -21,7 +20,7 @@ BoxMG::BoxMG(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 
 	levels.emplace_back(std::move(fop), inter::mpi::ProlongOp());
 
-	auto num_levels = BoxMG::compute_num_levels(levels[0].A);
+	auto num_levels = mpi::solver::compute_num_levels(levels[0].A);
 	log::debug << "Using a " << num_levels << " level heirarchy" << std::endl;
 	levels.reserve(num_levels);
 	levels.back().A.grid().grow(num_levels);
@@ -113,7 +112,7 @@ BoxMG::BoxMG(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 			cg_solver_lu = false;
 	}
 
-	std::shared_ptr<solver::BoxMG> cg_bmg;
+	std::shared_ptr<bmg2d::solver> cg_bmg;
 	if (cg_solver_lu) {
 		auto & coarse_topo = cop.grid();
 		auto nxc = coarse_topo.nglobal(0);
@@ -141,7 +140,7 @@ BoxMG::BoxMG(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 }
 
 
-void BoxMG::add_level(bmg2d::mpi::StencilOp & fop, int num_levels)
+void mpi::solver::add_level(bmg2d::mpi::StencilOp & fop, int num_levels)
 {
 	int kc = num_levels - levels.size() - 1;
 
@@ -194,7 +193,7 @@ void BoxMG::add_level(bmg2d::mpi::StencilOp & fop, int num_levels)
 }
 
 
-int BoxMG::compute_num_levels(bmg2d::mpi::StencilOp & fop)
+int mpi::solver::compute_num_levels(bmg2d::mpi::StencilOp & fop)
 {
 	int ng;
 	auto min_coarse = conf.get<len_t>("solver.min-coarse", 3);
@@ -207,13 +206,13 @@ int BoxMG::compute_num_levels(bmg2d::mpi::StencilOp & fop)
 }
 
 
-std::shared_ptr<kernel::Registry> BoxMG::kernel_registry()
+std::shared_ptr<kernel::Registry> mpi::solver::kernel_registry()
 {
 	return std::static_pointer_cast<kernel::Registry>(kreg);
 }
 
 
-bmg2d::mpi::GridFunc BoxMG::solve(const bmg2d::mpi::GridFunc & b)
+bmg2d::mpi::GridFunc mpi::solver::solve(const bmg2d::mpi::GridFunc & b)
 {
 	auto kernels = kernel_registry();
 	kernels->halo_exchange(b, halo_ctx);
@@ -221,7 +220,7 @@ bmg2d::mpi::GridFunc BoxMG::solve(const bmg2d::mpi::GridFunc & b)
 }
 
 
-void BoxMG::solve(const bmg2d::mpi::GridFunc & b, bmg2d::mpi::GridFunc & x)
+void mpi::solver::solve(const bmg2d::mpi::GridFunc & b, bmg2d::mpi::GridFunc & x)
 {
 	auto kernels = kernel_registry();
 	kernels->halo_exchange(b, halo_ctx);

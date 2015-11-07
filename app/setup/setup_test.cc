@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 	for (auto idx: sten.boarder(Dir::E)) sten(idx, Dir::E) = 0;
 	for (auto idx: sten.boarder(Dir::W)) sten(idx, Dir::W) = 0;
 
-	solver::BoxMG bmg(std::move(so));
+	solver bmg(std::move(so));
 
 	std::ofstream rfile;
 	rfile.open("Restrict", std::ios::out | std::ios::trunc | std::ios::binary);

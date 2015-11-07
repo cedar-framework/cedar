@@ -1,16 +1,17 @@
-#ifndef BOXMG_2D_SOLVER_BOXMG_H
-#define BOXMG_2D_SOLVER_BOXMG_H
+#ifndef BOXMG_2D_CORE_SOLVER_H
+#define BOXMG_2D_CORE_SOLVER_H
 
 #include <array>
 
 #include "multilevel.h"
+#include "level.h"
 #include "core/stencil_op.h"
 #include "core/relax_stencil.h"
 #include "inter/prolong_op.h"
 #include "inter/restrict_op.h"
 #include "kernel/registry.h"
 
-namespace boxmg { namespace bmg2d { namespace solver {
+namespace boxmg { namespace bmg2d {
 
 struct BoxMGLevel : Level
 {
@@ -25,11 +26,11 @@ BoxMGLevel(StencilOp&& A, inter::ProlongOp&& P) : /*Level(A,P),*/
 	std::array<RelaxStencil, 2> SOR;
 };
 
-class BoxMG : public MultiLevel<BoxMGLevel>
+class solver: public MultiLevel<BoxMGLevel>
 {
 public:
-	BoxMG(StencilOp&& fop);
-	~BoxMG() {delete[] bbd;};
+	solver(StencilOp&& fop);
+	~solver() {delete[] bbd;};
 	int compute_num_levels(StencilOp & fop);
 	void add_level(StencilOp& fop, int num_levels);
 	std::shared_ptr<kernel::Registry> kernel_registry();
@@ -39,6 +40,6 @@ private:
 	real_t *bbd;
 };
 
-}}}
+}}
 
 #endif

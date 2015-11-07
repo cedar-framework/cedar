@@ -138,14 +138,14 @@ void Registry::halo_stencil_exchange(mpi::StencilOp & so)
 
 
 void Registry::setup_cg_boxmg(const StencilOp & so,
-                              std::shared_ptr<solver::BoxMG> *solver)
+                              std::shared_ptr<solver> *bmg)
 {
 	active.run(name::setup_cg_boxmg, so,
-	           static_cast<std::shared_ptr<solver::BoxMG>*>(solver));
+	           static_cast<std::shared_ptr<solver>*>(bmg));
 }
 
 
-void Registry::solve_cg_boxmg(const solver::BoxMG &cg_solver,
+void Registry::solve_cg_boxmg(const solver &cg_solver,
                               GridFunc &x,
                               const GridFunc &b)
 {

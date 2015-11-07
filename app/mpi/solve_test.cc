@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	if (util::mpi::has_boundary(so.grid(), Dir::W))
 	    for (auto idx: sten.boarder(Dir::W)) sten(idx, Dir::W) = 0;
 
-	solver::mpi::BoxMG bmg(std::move(so));
+	bmg2d::mpi::solver bmg(std::move(so));
 
 	auto sol = bmg.solve(b);
 

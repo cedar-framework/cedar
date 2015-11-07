@@ -1,4 +1,4 @@
-#include "solver/mpi/boxmg.h"
+#include "core/mpi/solver.h"
 #include "core/mpi/stencil_op.h"
 #include "boxmg-common.h"
 
@@ -12,7 +12,7 @@ extern "C"
 
 		mpi::StencilOp *sop = reinterpret_cast<mpi::StencilOp*>(*op);
 
-		solver::mpi::BoxMG *bmg = new solver::mpi::BoxMG(std::move(*sop));
+		mpi::solver *bmg = new mpi::solver(std::move(*sop));
 		bmg->level(-1).x = mpi::GridFunc::zeros_like(bmg->level(-1).res);
 		bmg->level(-1).b = mpi::GridFunc::zeros_like(bmg->level(-1).res);
 		*op = reinterpret_cast<bmg2_operator>(&bmg->level(-1).A);
@@ -25,7 +25,7 @@ extern "C"
 	{
 		using namespace boxmg::bmg2d;
 
-		auto *bmg = reinterpret_cast<solver::mpi::BoxMG*>(op);
+		auto *bmg = reinterpret_cast<mpi::solver*>(op);
 		auto grid = bmg->level(-1).A.grid_ptr();
 
 		auto & rhs = bmg->level(-1).b;
@@ -53,9 +53,9 @@ extern "C"
 
 	void bmg2_solver_destroy(bmg2_solver bmg)
 	{
-		using namespace boxmg::bmg2d::solver;
+		using namespace boxmg::bmg2d;
 
-		delete reinterpret_cast<mpi::BoxMG*>(bmg);
+		delete reinterpret_cast<mpi::solver*>(bmg);
 	}
 
 }

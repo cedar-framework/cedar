@@ -7,6 +7,9 @@ set(core_HEADERS
   types.h
   base_types.h
   boundary_iterator.h
+  solver.h
+  multilevel.h
+  mpi/solver.h
   mpi/grid_topo.h
   mpi/grid_func.h
   mpi/stencil_op.h
@@ -18,6 +21,8 @@ set(core_SOURCES
   grid_func.cc
   relax_stencil.cc
   stencil_op.cc
+  solver.cc
+  mpi/solver.cc
   mpi/grid_func.cc
   mpi/stencil_op.cc
   mpi/grid_topo.cc

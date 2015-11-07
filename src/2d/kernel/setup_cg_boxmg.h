@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "core/stencil_op.h"
-#include "solver/boxmg.h"
+#include "core/solver.h"
 
 
 namespace boxmg { namespace bmg2d { namespace kernel {
@@ -13,7 +13,7 @@ namespace impls
 {
 
 	void setup_cg_boxmg(const StencilOp & so,
-	                    std::shared_ptr<solver::BoxMG> *solver);
+	                    std::shared_ptr<solver> *slv);
 }
 
 }}}
