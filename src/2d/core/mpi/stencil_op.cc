@@ -45,11 +45,11 @@ std::ostream & operator<< (std::ostream & os, const stencil_op &op)
 			for (auto i: sten.range(0)) {
 				os << std::setw(width) << (jGs+j-2)*NGx + iGs+i-2 << " "
 				   << std::setw(width) << iGs + i << ", " << std::setw(width) << jGs + j << ", "
-				   << std::scientific << -sten(i,j,Dir::N)
-				   << std::scientific << -sten(i,j,Dir::W) << " "
-				   << std::scientific <<  sten(i,j,Dir::C)
-				   << std::scientific << -sten(i,j,Dir::E)
-				   << std::scientific << -sten(i,j,Dir::S) << '\n';
+				   << std::scientific << -sten(i,j,dir::N)
+				   << std::scientific << -sten(i,j,dir::W) << " "
+				   << std::scientific <<  sten(i,j,dir::C)
+				   << std::scientific << -sten(i,j,dir::E)
+				   << std::scientific << -sten(i,j,dir::S) << '\n';
 			}
 		}
 	} else {
@@ -57,15 +57,15 @@ std::ostream & operator<< (std::ostream & os, const stencil_op &op)
 			for (auto i: sten.range(0)) {
 				os << std::setw(width) << (jGs+j-2)*NGx + iGs+i-2 << " "
 				   << std::setw(width) << iGs + i << ", " << std::setw(width) << jGs + j << ", "
-				   << std::scientific << -sten(i,j,Dir::NW)
-				   << std::scientific << -sten(i,j,Dir::N)
-				   << std::scientific << -sten(i,j,Dir::NE)
-				   << std::scientific << -sten(i,j,Dir::W) << " "
-				   << std::scientific <<  sten(i,j,Dir::C)
-				   << std::scientific << -sten(i,j,Dir::E)
-				   << std::scientific << -sten(i,j,Dir::SW)
-				   << std::scientific << -sten(i,j,Dir::S)
-				   << std::scientific << -sten(i,j,Dir::SE) << '\n';
+				   << std::scientific << -sten(i,j,dir::NW)
+				   << std::scientific << -sten(i,j,dir::N)
+				   << std::scientific << -sten(i,j,dir::NE)
+				   << std::scientific << -sten(i,j,dir::W) << " "
+				   << std::scientific <<  sten(i,j,dir::C)
+				   << std::scientific << -sten(i,j,dir::E)
+				   << std::scientific << -sten(i,j,dir::SW)
+				   << std::scientific << -sten(i,j,dir::S)
+				   << std::scientific << -sten(i,j,dir::SE) << '\n';
 			}
 		}
 	}

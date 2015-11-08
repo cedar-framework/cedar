@@ -39,7 +39,7 @@ extern "C"
 			// log::error << ci << " " << cj << " -> " << coords[i].dir << " => " << vals[i]<< std::endl;
 			sten(static_cast<len_t>(ci),
 			     static_cast<len_t>(cj),
-			     static_cast<Dir>(coords[i].dir)) = vals[i];
+			     static_cast<dir>(coords[i].dir)) = vals[i];
 		}
 	}
 

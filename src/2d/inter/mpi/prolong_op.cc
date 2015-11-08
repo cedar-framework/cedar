@@ -43,15 +43,15 @@ std::ostream & operator<< (std::ostream &os, const prolong_op &P)
 		for (auto i: sten.range(0)) {
 			os << (jGs+j)*NGx + iGs+i << " "
 			   << iGs + i << ", " <<  jGs + j << ", "
-			   << std::scientific << sten(i,j+1,Dir::SE) << ", "
-			   << std::scientific << sten(i,j+1,Dir::B)  << ", "
-			   << std::scientific << sten(i+1,j+1,Dir::SW) << ", "
-			   << std::scientific << sten(i,j,Dir::R) << ", "
+			   << std::scientific << sten(i,j+1,dir::SE) << ", "
+			   << std::scientific << sten(i,j+1,dir::B)  << ", "
+			   << std::scientific << sten(i+1,j+1,dir::SW) << ", "
+			   << std::scientific << sten(i,j,dir::R) << ", "
 			   << std::scientific << 1.0 << ", "
-			   << std::scientific << sten(i+1,j,Dir::L) << ", "
-			   << std::scientific << sten(i,j,Dir::NE) << ", "
-			   << std::scientific << sten(i,j,Dir::A) << ", "
-			   << std::scientific << sten(i+1,j,Dir::NW) << '\n';
+			   << std::scientific << sten(i+1,j,dir::L) << ", "
+			   << std::scientific << sten(i,j,dir::NE) << ", "
+			   << std::scientific << sten(i,j,dir::A) << ", "
+			   << std::scientific << sten(i+1,j,dir::NW) << '\n';
 		}
 	}
 

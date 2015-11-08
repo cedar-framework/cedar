@@ -32,15 +32,15 @@ namespace impls
 		for (auto j: r.range(1)) {
 			for (auto i: r.range(0)) {
 				r(i,j) = (b(i,j) +
-				          (so(i,j,Dir::W)  * x(i-1, j  ) +
-				           so(i,j,Dir::E)  * x(i+1, j  ) +
-				           so(i,j,Dir::S)  * x(i  , j-1) +
-				           so(i,j,Dir::N)  * x(i  , j+1) +
-						   so(i,j,Dir::SW) * x(i-1, j-1) +
-				           so(i,j,Dir::SE) * x(i+1, j-1) +
-				           so(i,j,Dir::NW) * x(i-1, j+1) +
-				           so(i,j,Dir::NE) * x(i+1, j+1) -
-						   so(i,j,Dir::C)  * x(i  , j)));
+				          (so(i,j,dir::W)  * x(i-1, j  ) +
+				           so(i,j,dir::E)  * x(i+1, j  ) +
+				           so(i,j,dir::S)  * x(i  , j-1) +
+				           so(i,j,dir::N)  * x(i  , j+1) +
+						   so(i,j,dir::SW) * x(i-1, j-1) +
+				           so(i,j,dir::SE) * x(i+1, j-1) +
+				           so(i,j,dir::NW) * x(i-1, j+1) +
+				           so(i,j,dir::NE) * x(i+1, j+1) -
+						   so(i,j,dir::C)  * x(i  , j)));
 			}
 		}
 	}

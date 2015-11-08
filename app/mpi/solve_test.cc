@@ -39,11 +39,11 @@ int main(int argc, char *argv[])
 	for (auto j: sten.range(1)) {
 		real_t x = so.grid().is(0)*hx;
 		for (auto i: sten.range(0)) {
-			sten(i,j,Dir::E) = 1;
-			sten(i,j,Dir::N) = 1;
-			sten(i,j,Dir::C) = 4;
-			sten(i,j,Dir::S) = 1;
-			sten(i,j,Dir::W) = 1;
+			sten(i,j,dir::E) = 1;
+			sten(i,j,dir::N) = 1;
+			sten(i,j,dir::C) = 4;
+			sten(i,j,dir::S) = 1;
+			sten(i,j,dir::W) = 1;
 
 			b(i,j) = 8*(pi*pi)*sin(2*pi*x)*sin(2*pi*y) * h2;
 			x += hx;
@@ -51,14 +51,14 @@ int main(int argc, char *argv[])
 		y += hy;
 	}
 
-	if (util::mpi::has_boundary(so.grid(), Dir::N))
-		for (auto idx: sten.boarder(Dir::N)) sten(idx, Dir::N) = 0;
-	if (util::mpi::has_boundary(so.grid(), Dir::S))
-		for (auto idx: sten.boarder(Dir::S)) sten(idx, Dir::S) = 0;
-	if (util::mpi::has_boundary(so.grid(), Dir::E))
-		for (auto idx: sten.boarder(Dir::E)) sten(idx, Dir::E) = 0;
-	if (util::mpi::has_boundary(so.grid(), Dir::W))
-	    for (auto idx: sten.boarder(Dir::W)) sten(idx, Dir::W) = 0;
+	if (util::mpi::has_boundary(so.grid(), dir::N))
+		for (auto idx: sten.boarder(dir::N)) sten(idx, dir::N) = 0;
+	if (util::mpi::has_boundary(so.grid(), dir::S))
+		for (auto idx: sten.boarder(dir::S)) sten(idx, dir::S) = 0;
+	if (util::mpi::has_boundary(so.grid(), dir::E))
+		for (auto idx: sten.boarder(dir::E)) sten(idx, dir::E) = 0;
+	if (util::mpi::has_boundary(so.grid(), dir::W))
+	    for (auto idx: sten.boarder(dir::W)) sten(idx, dir::W) = 0;
 
 	mpi::solver bmg(std::move(so));
 

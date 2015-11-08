@@ -26,19 +26,19 @@ public:
 		void set(len_t i, len_t j) { idx_[0] = i; idx_[1] = j; }
 
 	protected:
-	iterator(const grid_stencil & sten, Dir dir, i2d start): idx_(start), sten(sten), dir(dir) {}
-	iterator(const grid_stencil &sten, Dir dir): sten(sten), dir(dir) {}
+	iterator(const grid_stencil & sten, dir direction, i2d start): idx_(start), sten(sten), direction(direction) {}
+	iterator(const grid_stencil &sten, dir direction): sten(sten), direction(direction) {}
 
 	private:
 		i2d idx_;
 		const grid_stencil & sten;
-		Dir dir;
+		dir direction;
 	};
 
 	iterator begin() const { return begin_; }
 	iterator end() const { return end_; }
 
-	BoundaryIterator(const grid_stencil & s, Dir dir);
+	BoundaryIterator(const grid_stencil & s, dir dir);
 
 private:
 	iterator begin_;

@@ -16,88 +16,88 @@ namespace boxmg { namespace bmg2d {
 		grid_stencil(len_t nx, len_t ny, unsigned int nghosts=1, bool intergrid=false, bool symmetric=true, bool five_pt=false);
 
 		using Array<len_t,real_t>::index;
-		len_t index(len_t i, len_t j, Dir dir) const
+		len_t index(len_t i, len_t j, dir direction) const
 		{
-			return static_cast<int>(dir)*ostride + i*stride_[0] + j*stride_[1];
+			return static_cast<int>(direction)*ostride + i*stride_[0] + j*stride_[1];
 		}
 
-		len_t index(len_t i, len_t j, inter::Dir dir) const
+		len_t index(len_t i, len_t j, inter::dir direction) const
 		{
-			return static_cast<int>(dir)*ostride + i*stride_[0] + j*stride_[1];
+			return static_cast<int>(direction)*ostride + i*stride_[0] + j*stride_[1];
 		}
 
 
-		real_t & operator()(std::array<len_t,2> idx, Dir dir)
+		real_t & operator()(std::array<len_t,2> idx, dir dir)
 		{
 			return (*this)(idx[0], idx[1], dir);
 		}
 
-		real_t & operator()(len_t i, len_t j, Dir dir)
+		real_t & operator()(len_t i, len_t j, dir direction)
 		{
 			#ifdef DEBUG
 			this->check_bounds(i,j);
 			#endif
-			symmetric_hack(i,j,dir);
+			symmetric_hack(i,j,direction);
 			#ifdef DEBUG
-			return data_.at(index(i,j,dir));
+			return data_.at(index(i,j,direction));
 			#else
-			return data_.data()[index(i,j,dir)];
+			return data_.data()[index(i,j,direction)];
 			#endif
 		}
 
-		real_t & operator()(len_t i, len_t j, inter::Dir dir)
+		real_t & operator()(len_t i, len_t j, inter::dir direction)
 		{
 			#ifdef DEBUG
 			this->check_bounds(i,j);
-			return data_.at(index(i,j,dir));
+			return data_.at(index(i,j,direction));
 			#else
-			return data_.data()[index(i,j,dir)];
+			return data_.data()[index(i,j,direction)];
 			#endif
 		}
 
 
-		real_t operator()(len_t i, len_t j, inter::Dir dir) const
+		real_t operator()(len_t i, len_t j, inter::dir direction) const
 		{
 			#ifdef DEBUG
 			this->check_bounds(i,j);
-			return data_.at(index(i,j,dir));
+			return data_.at(index(i,j,direction));
 			#else
-			return data_.data()[index(i,j,dir)];
+			return data_.data()[index(i,j,direction)];
 			#endif
 		}
 
-		real_t operator()(len_t i, len_t j, Dir dir) const
+		real_t operator()(len_t i, len_t j, dir direction) const
 		{
 			#ifdef DEBUG
 			this->check_bounds(i,j);
 			#endif
 
-			symmetric_hack(i,j,dir);
+			symmetric_hack(i,j,direction);
 
 			#ifdef DEBUG
-			return data_.at(index(i,j,dir));
+			return data_.at(index(i,j,direction));
 			#else
-			return data_.data()[index(i,j,dir)];
+			return data_.data()[index(i,j,direction)];
 			#endif
 		}
 
 
-		const virtual BoundaryIterator boarder(Dir dir) const
+		const virtual BoundaryIterator boarder(dir direction) const
 		{
-			BoundaryIterator ret(*this, dir);
+			BoundaryIterator ret(*this, direction);
 			return ret;
 		}
 
-		void symmetric_hack(len_t &i, len_t &j, Dir &dir) const
+		void symmetric_hack(len_t &i, len_t &j, dir &direction) const
 		{
-			if (symmetric and (dir == Dir::N or dir == Dir::SE or
-							   dir == Dir::NE or dir == Dir::E or
-					           dir == Dir::NW)) {
-				if (dir == Dir::SE) { i++; dir = Dir::NW; }
-				else if (dir == Dir::N) { j++; dir = Dir::S; }
-				else if (dir == Dir::NE) { i++; j++; dir = Dir::SW; }
-				else if (dir == Dir::E) { i++; dir = Dir::W; }
-				else if (dir == Dir::NW) {j++;}
+			if (symmetric and (direction == dir::N or direction == dir::SE or
+							   direction == dir::NE or direction == dir::E or
+					           direction == dir::NW)) {
+				if (direction == dir::SE) { i++; direction = dir::NW; }
+				else if (direction == dir::N) { j++; direction = dir::S; }
+				else if (direction == dir::NE) { i++; j++; direction = dir::SW; }
+				else if (direction == dir::E) { i++; direction = dir::W; }
+				else if (direction == dir::NW) {j++;}
 			}
 		}
 
