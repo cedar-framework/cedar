@@ -8,7 +8,7 @@
 
 namespace boxmg { namespace bmg2d {
 
-class GridStencil;
+class grid_stencil;
 
 using i2d = std::array<len_t, 2>;
 class BoundaryIterator {
@@ -26,19 +26,19 @@ public:
 		void set(len_t i, len_t j) { idx_[0] = i; idx_[1] = j; }
 
 	protected:
-	iterator(const GridStencil & sten, Dir dir, i2d start): idx_(start), sten(sten), dir(dir) {}
-	iterator(const GridStencil &sten, Dir dir): sten(sten), dir(dir) {}
+	iterator(const grid_stencil & sten, Dir dir, i2d start): idx_(start), sten(sten), dir(dir) {}
+	iterator(const grid_stencil &sten, Dir dir): sten(sten), dir(dir) {}
 
 	private:
 		i2d idx_;
-		const GridStencil & sten;
+		const grid_stencil & sten;
 		Dir dir;
 	};
 
 	iterator begin() const { return begin_; }
 	iterator end() const { return end_; }
 
-	BoundaryIterator(const GridStencil & s, Dir dir);
+	BoundaryIterator(const grid_stencil & s, Dir dir);
 
 private:
 	iterator begin_;

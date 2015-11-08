@@ -10,12 +10,12 @@ namespace boxmg { namespace bmg2d {
 struct Level
 {
 	Level() {}
-    /* Level(core::DiscreteOp &A, core::DiscreteOp &P) :A(A),P(P) {} */
-	/* core::DiscreteOp & A; */
-	/* core::DiscreteOp & P; */
-	std::function<void(const DiscreteOp & A, grid_func &x, const grid_func &b)> presmoother;
-	std::function<void(const DiscreteOp & A, grid_func &x, const grid_func &b)> postsmoother;
-	//DiscreteOp & R;
+    /* Level(core::discrete_op &A, core::discrete_op &P) :A(A),P(P) {} */
+	/* core::discrete_op & A; */
+	/* core::discrete_op & P; */
+	std::function<void(const discrete_op & A, grid_func &x, const grid_func &b)> presmoother;
+	std::function<void(const discrete_op & A, grid_func &x, const grid_func &b)> postsmoother;
+	//discrete_op & R;
 };
 
 }}

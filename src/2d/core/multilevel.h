@@ -139,7 +139,7 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 
 protected:
 	std::vector<LevelType> levels;
-	std::function<void(const DiscreteOp & A, grid_func &x, const grid_func &b)> coarse_solver;
+	std::function<void(const discrete_op & A, grid_func &x, const grid_func &b)> coarse_solver;
 	config::Reader conf;
 	std::shared_ptr<KernelRegistry> kreg;
 };

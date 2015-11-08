@@ -7,11 +7,11 @@
 namespace boxmg { namespace bmg2d {
 
 
-class RelaxStencil : public Array<len_t, real_t>
+class relax_stencil : public Array<len_t, real_t>
 {
 public:
-	RelaxStencil() {};
-	RelaxStencil(len_t nx, len_t ny, unsigned int nghosts=1);
+	relax_stencil() {};
+	relax_stencil(len_t nx, len_t ny, unsigned int nghosts=1);
 
 	using Array<len_t,real_t>::index;
 

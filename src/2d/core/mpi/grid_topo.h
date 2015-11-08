@@ -8,13 +8,13 @@
 
 namespace boxmg { namespace bmg2d { namespace mpi {
 
-class GridTopo
+class grid_topo
 {
 
 public:
 	using igrd_t = std::shared_ptr<std::vector<len_t>>;
-	GridTopo();
-	GridTopo(igrd_t grd, int level, int nlevel);
+	grid_topo();
+	grid_topo(igrd_t grd, int level, int nlevel);
 
 	void grow(int nlevels);
 	igrd_t get_igrd() { return igrd; }
@@ -50,7 +50,7 @@ private:
 	std::array<int, 2> coord_;
 };
 
-using topo_ptr = std::shared_ptr<GridTopo>;
+using topo_ptr = std::shared_ptr<grid_topo>;
 
 }}}
 

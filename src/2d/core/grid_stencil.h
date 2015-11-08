@@ -9,11 +9,11 @@
 
 namespace boxmg { namespace bmg2d {
 
-	class GridStencil : public Array<len_t, real_t>
+	class grid_stencil : public Array<len_t, real_t>
 	{
 	public:
-		GridStencil() {};
-		GridStencil(len_t nx, len_t ny, unsigned int nghosts=1, bool intergrid=false, bool symmetric=true, bool five_pt=false);
+		grid_stencil() {};
+		grid_stencil(len_t nx, len_t ny, unsigned int nghosts=1, bool intergrid=false, bool symmetric=true, bool five_pt=false);
 
 		using Array<len_t,real_t>::index;
 		len_t index(len_t i, len_t j, Dir dir) const

@@ -6,7 +6,7 @@
 
 using namespace boxmg::bmg2d::inter;
 
-prolong_op::prolong_op(len_t nx, len_t ny) : StencilOp(nx,ny,true)
+prolong_op::prolong_op(len_t nx, len_t ny) : stencil_op(nx,ny,true)
 {
 }
 

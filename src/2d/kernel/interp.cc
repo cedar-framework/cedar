@@ -60,7 +60,7 @@ namespace impls
 		grid_func & coarsed = const_cast<grid_func&>(coarse);
 		grid_func & res = const_cast<grid_func&>(residual);
 		inter::mpi::prolong_op & mpi_Pd = dynamic_cast<inter::mpi::prolong_op&>(Pd);
-		mpi::GridTopo & topo = mpi_Pd.grid();
+		mpi::grid_topo & topo = mpi_Pd.grid();
 		MsgCtx *ctx = (MsgCtx*) mpi_Pd.halo_ctx;
 
 		if (Pd.stencil().five_pt()) {

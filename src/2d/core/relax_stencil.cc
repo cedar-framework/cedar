@@ -2,7 +2,7 @@
 
 using namespace boxmg::bmg2d;
 
-RelaxStencil::RelaxStencil(len_t nx, len_t ny, unsigned int nghosts) : Array(nx,ny,nghosts,false)
+relax_stencil::relax_stencil(len_t nx, len_t ny, unsigned int nghosts) : Array(nx,ny,nghosts,false)
 {
 	len_t size;
 	nx += nghosts*2;

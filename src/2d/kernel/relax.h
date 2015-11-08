@@ -9,43 +9,43 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-	void relax_rbgs_point(const StencilOp & so,
+	void relax_rbgs_point(const stencil_op & so,
 	                      grid_func & x,
 	                      const grid_func & b,
-	                      const RelaxStencil & sor,
+	                      const relax_stencil & sor,
 	                      cycle::Dir cycle_dir);
 
-	void relax_lines_x(const StencilOp & so,
+	void relax_lines_x(const stencil_op & so,
 	                   grid_func & x,
 	                   const grid_func & b,
-	                   const RelaxStencil & sor,
+	                   const relax_stencil & sor,
 	                   grid_func & res,
 	                   cycle::Dir cycle_dir);
 
-	void relax_lines_y(const StencilOp & so,
+	void relax_lines_y(const stencil_op & so,
 	                   grid_func & x,
 	                   const grid_func & b,
-	                   const RelaxStencil & sor,
+	                   const relax_stencil & sor,
 	                   grid_func & res,
 	                   cycle::Dir cycle_dir);
 
-	void mpi_relax_rbgs_point(const StencilOp & so,
+	void mpi_relax_rbgs_point(const stencil_op & so,
 	                          grid_func & x,
 	                          const grid_func & b,
-	                          const RelaxStencil & sor,
+	                          const relax_stencil & sor,
 	                          cycle::Dir cycle_dir);
 
-	void mpi_relax_lines_x(const StencilOp & so,
+	void mpi_relax_lines_x(const stencil_op & so,
 	                       grid_func & x,
 	                       const grid_func & b,
-	                       const RelaxStencil & sor,
+	                       const relax_stencil & sor,
 	                       grid_func & res,
 	                       cycle::Dir cycle_dir);
 
-	void mpi_relax_lines_y(const StencilOp & so,
+	void mpi_relax_lines_y(const stencil_op & so,
 	                       grid_func & x,
 	                       const grid_func & b,
-	                       const RelaxStencil & sor,
+	                       const relax_stencil & sor,
 	                       grid_func & res,
 	                       cycle::Dir cycle_dir);
 }

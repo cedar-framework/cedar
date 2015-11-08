@@ -6,23 +6,23 @@
 using namespace boxmg::bmg2d;
 
 
-void StencilOp::set_registry(std::shared_ptr<KernelRegistry> kreg)
+void stencil_op::set_registry(std::shared_ptr<KernelRegistry> kreg)
 {
 	kernels = kreg;
 }
 
 
-std::shared_ptr<boxmg::KernelRegistry> StencilOp::get_registry() const
+std::shared_ptr<boxmg::KernelRegistry> stencil_op::get_registry() const
 {
 	return kernels;
 }
 
 
-void StencilOp::apply(const grid_func &x, grid_func &b) const
+void stencil_op::apply(const grid_func &x, grid_func &b) const
 {
 	if (kernels != nullptr) {
 		kernels->run(kernel::name::matvec,
-		             static_cast<const StencilOp&>(*this),
+		             static_cast<const stencil_op&>(*this),
 		             x,b);
 	} else {
 		log::error << "Kernel registry for stencil op not set!" << std::endl;
@@ -31,11 +31,11 @@ void StencilOp::apply(const grid_func &x, grid_func &b) const
 }
 
 
-void StencilOp::residual(const grid_func &x, const grid_func &b, grid_func & r) const
+void stencil_op::residual(const grid_func &x, const grid_func &b, grid_func & r) const
 {
 	if (kernels != nullptr) {
 		kernels->run(kernel::name::residual,
-		             static_cast<const StencilOp&>(*this),
+		             static_cast<const stencil_op&>(*this),
 		             x,b,r);
 	} else {
 		log::error << "Kernel registry for stencil op not set!" << std::endl;
@@ -43,7 +43,7 @@ void StencilOp::residual(const grid_func &x, const grid_func &b, grid_func & r) 
 }
 
 
-grid_func StencilOp::residual(const grid_func &x, const grid_func &b) const
+grid_func stencil_op::residual(const grid_func &x, const grid_func &b) const
 {
 	auto r = grid_func(x.shape(0),x.shape(1));
 	this->residual(x,b,r);
@@ -54,7 +54,7 @@ grid_func StencilOp::residual(const grid_func &x, const grid_func &b) const
 
 namespace boxmg { namespace bmg2d {
 
-std::ostream & operator<< (std::ostream & os, const StencilOp &op)
+std::ostream & operator<< (std::ostream & os, const stencil_op &op)
 {
 	auto sten = op.stencil();
 	unsigned int width = 4;

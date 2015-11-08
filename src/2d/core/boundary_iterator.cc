@@ -4,7 +4,7 @@
 
 using namespace boxmg::bmg2d;
 
-BoundaryIterator::BoundaryIterator(const GridStencil &s, Dir dir):
+BoundaryIterator::BoundaryIterator(const grid_stencil &s, Dir dir):
 	begin_(s,dir), end_(s,dir)
 {
 	if (dir == Dir::S) {

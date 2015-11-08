@@ -13,7 +13,7 @@
 namespace boxmg { namespace bmg2d { namespace inter {
 
 using iadd_pack = std::tuple<const prolong_op&, const grid_func &, const grid_func&>;
-class prolong_op : public StencilOp
+class prolong_op : public stencil_op
 {
 
 public:
@@ -30,7 +30,7 @@ public:
 	}
 	friend std::ostream & operator<< (std::ostream &os, const prolong_op & P);
 	friend iadd_pack operator*(const prolong_op&, const grid_func&);
-	StencilOp * fine_op;
+	stencil_op * fine_op;
 	grid_func *residual;
 };
 

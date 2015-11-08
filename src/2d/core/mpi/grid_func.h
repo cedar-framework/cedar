@@ -19,8 +19,8 @@ public:
 	grid_func(topo_ptr grid);
 
 	MPI_Comm comm;
-	GridTopo & grid() { return *grid_; }
-	const GridTopo & grid() const { return *grid_;}
+	grid_topo & grid() { return *grid_; }
+	const grid_topo & grid() const { return *grid_;}
 	topo_ptr grid_ptr() const { return grid_; }
 	void *halo_ctx;
 	static grid_func zeros_like(const grid_func &likeable);

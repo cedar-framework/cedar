@@ -22,12 +22,12 @@ namespace impls
 {
 	using namespace boxmg::bmg2d;
 
-	void residual(const StencilOp & A, const grid_func & x,
+	void residual(const stencil_op & A, const grid_func & x,
 				  const grid_func & b, grid_func &r)
 	{
 		using namespace boxmg::bmg2d::core;
 
-		const GridStencil &so = A.stencil();
+		const grid_stencil &so = A.stencil();
 
 		for (auto j: r.range(1)) {
 			for (auto i: r.range(0)) {
@@ -45,7 +45,7 @@ namespace impls
 		}
 	}
 
-	void residual_fortran(const StencilOp &A, const grid_func &x,
+	void residual_fortran(const stencil_op &A, const grid_func &x,
 						  const grid_func &b, grid_func &r)
 	{
 		int k = 0;
@@ -59,7 +59,7 @@ namespace impls
 		len_t ii = r.len(0);
 		len_t jj = r.len(1);
 
-		StencilOp &Ad = const_cast<StencilOp&>(A);
+		stencil_op &Ad = const_cast<stencil_op&>(A);
 		grid_func &xd = const_cast<grid_func&>(x);
 		grid_func &bd = const_cast<grid_func&>(b);
 		using namespace boxmg::bmg2d::core;
@@ -70,15 +70,15 @@ namespace impls
 	}
 
 
-	void mpi_residual_fortran(const StencilOp &A, const grid_func &x,
+	void mpi_residual_fortran(const stencil_op &A, const grid_func &x,
 	                          const grid_func &b, grid_func &r)
 	{
 		int k, kf, nog, ifd, nstencil;
-		auto & Ad = const_cast<StencilOp &>(A);
+		auto & Ad = const_cast<stencil_op &>(A);
 		auto & xd = const_cast<grid_func&>(x);
 		auto & bd = const_cast<grid_func&>(b);
-		auto & mpi_Ad = dynamic_cast<mpi::StencilOp&>(Ad);
-		mpi::GridTopo & topo = mpi_Ad.grid();
+		auto & mpi_Ad = dynamic_cast<mpi::stencil_op&>(Ad);
+		mpi::grid_topo & topo = mpi_Ad.grid();
 		MsgCtx *ctx = (MsgCtx*) mpi_Ad.halo_ctx;
 
 		if (Ad.stencil().five_pt()) {

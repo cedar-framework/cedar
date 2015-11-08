@@ -8,17 +8,17 @@
 
 namespace boxmg { namespace bmg2d { namespace mpi {
 
-class GridStencil : public bmg2d::GridStencil
+class grid_stencil : public bmg2d::grid_stencil
 {
 public:
-	GridStencil();
-	GridStencil(MPI_Comm comm, GridTopo&& grid);
-	GridTopo & grid() { return grid_; }
-	const GridTopo & grid() const { return grid_; }
+	grid_stencil();
+	grid_stencil(MPI_Comm comm, grid_topo&& grid);
+	grid_topo & grid() { return grid_; }
+	const grid_topo & grid() const { return grid_; }
 	MPI_Comm comm;
 
 private:
-	GridTopo grid_;
+	grid_topo grid_;
 };
 
 }}}

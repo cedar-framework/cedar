@@ -19,8 +19,8 @@ int main(int argc, char *argv[])
 
 	real_t h2 = (1.0/(nx+1)) * (1.0/(ny+1));
 
-	auto so = StencilOp(nx,ny);
-	GridStencil & sten = so.stencil();
+	auto so = stencil_op(nx,ny);
+	grid_stencil & sten = so.stencil();
 	sten.five_pt() = true;
 
 	grid_func b(nx, ny);

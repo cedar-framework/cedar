@@ -18,7 +18,7 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 namespace impls
 {
 	using namespace boxmg::bmg2d::core;
-	void setup_cg_lu(const StencilOp & so,
+	void setup_cg_lu(const stencil_op & so,
 	                 grid_func & ABD)
 	{
 		len_t nx, ny;
@@ -26,8 +26,8 @@ namespace impls
 		len_t nabd1, nabd2;
 		int ibc = 0;
 
-		const GridStencil & so_sten = so.stencil();
-		StencilOp & sod = const_cast<StencilOp&>(so);
+		const grid_stencil & so_sten = so.stencil();
+		stencil_op & sod = const_cast<stencil_op&>(so);
 
 		nx = so_sten.len(0);
 		ny = so_sten.len(1);
@@ -43,13 +43,13 @@ namespace impls
 	}
 
 
-	void mpi_setup_cg_lu(const StencilOp & so,
+	void mpi_setup_cg_lu(const stencil_op & so,
 	                     grid_func & ABD)
 	{
-		mpi::StencilOp & copd = const_cast<mpi::StencilOp&>(dynamic_cast<const mpi::StencilOp&>(so));
+		mpi::stencil_op & copd = const_cast<mpi::stencil_op&>(dynamic_cast<const mpi::stencil_op&>(so));
 
-		GridStencil & csten = copd.stencil();
-		mpi::GridTopo & topo = copd.grid();
+		grid_stencil & csten = copd.stencil();
+		mpi::grid_topo & topo = copd.grid();
 		MsgCtx *ctx = (MsgCtx*) copd.halo_ctx;
 		int nstencil;
 

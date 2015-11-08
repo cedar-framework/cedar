@@ -10,7 +10,7 @@ extern "C"
 	{
 		using namespace boxmg::bmg2d;
 
-		mpi::StencilOp *sop = reinterpret_cast<mpi::StencilOp*>(*op);
+		mpi::stencil_op *sop = reinterpret_cast<mpi::stencil_op*>(*op);
 
 		mpi::solver *bmg = new mpi::solver(std::move(*sop));
 		bmg->level(-1).x = mpi::grid_func::zeros_like(bmg->level(-1).res);

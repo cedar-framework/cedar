@@ -9,20 +9,20 @@
 
 namespace boxmg { namespace bmg2d { namespace mpi {
 
-class StencilOp : public bmg2d::StencilOp
+class stencil_op : public bmg2d::stencil_op
 {
 public:
-	using bmg2d::StencilOp::residual;
-	StencilOp() {}
-	StencilOp(topo_ptr grid);
+	using bmg2d::stencil_op::residual;
+	stencil_op() {}
+	stencil_op(topo_ptr grid);
 	MPI_Comm comm;
 	topo_ptr grid_ptr() { return grid_; }
-	GridTopo & grid() { return *grid_; }
-	const GridTopo & grid() const { return *grid_; }
+	grid_topo & grid() { return *grid_; }
+	const grid_topo & grid() const { return *grid_; }
 	void *halo_ctx;
 	virtual grid_func residual(const grid_func &x, const grid_func &b) const;
 	virtual void residual(const grid_func &x, const grid_func &b, grid_func &r) const;
-	friend std::ostream & operator<< (std::ostream &os, const StencilOp & op);
+	friend std::ostream & operator<< (std::ostream &os, const stencil_op & op);
 
 protected:
 	topo_ptr grid_;

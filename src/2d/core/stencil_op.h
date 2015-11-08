@@ -7,25 +7,25 @@
 
 namespace boxmg { namespace bmg2d {
 
-class StencilOp : public DiscreteOp
+class stencil_op : public discrete_op
 {
 
 public:
-	StencilOp() {};
-StencilOp(len_t nx, len_t ny, bool intergrid) : gs(nx,ny,1,intergrid), kernels(nullptr){}
-StencilOp(len_t nx, len_t ny) : gs(nx,ny), kernels(nullptr) {}
+	stencil_op() {};
+stencil_op(len_t nx, len_t ny, bool intergrid) : gs(nx,ny,1,intergrid), kernels(nullptr){}
+stencil_op(len_t nx, len_t ny) : gs(nx,ny), kernels(nullptr) {}
 	real_t * data() { return gs.data(); }
 	virtual void apply(const grid_func &x, grid_func &y) const;
 	virtual void residual(const grid_func &x, const grid_func &b, grid_func &r) const;
 	virtual grid_func residual(const grid_func &x, const grid_func &b) const;
 	virtual void set_registry(std::shared_ptr<KernelRegistry> kreg);
 	virtual std::shared_ptr<KernelRegistry> get_registry() const;
-	GridStencil & stencil() { return gs; }
-	const GridStencil & stencil() const { return gs; }
-	friend std::ostream & operator<< (std::ostream &os, const StencilOp & op);
+	grid_stencil & stencil() { return gs; }
+	const grid_stencil & stencil() const { return gs; }
+	friend std::ostream & operator<< (std::ostream &os, const stencil_op & op);
 
 protected:
-	GridStencil gs;
+	grid_stencil gs;
 	std::shared_ptr<KernelRegistry> kernels;
 
 };

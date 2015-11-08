@@ -23,16 +23,16 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-	void setup_cg_boxmg(const StencilOp & so,
+	void setup_cg_boxmg(const stencil_op & so,
 	                    std::shared_ptr<solver> *bmg)
 	{
 		int nstencil, nog, rank;
-		mpi::StencilOp & sod = const_cast<mpi::StencilOp&>(dynamic_cast<const mpi::StencilOp&>(so));
-		mpi::GridTopo & topo = sod.grid();
+		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(dynamic_cast<const mpi::stencil_op&>(so));
+		mpi::grid_topo & topo = sod.grid();
 		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
 		auto & sten = sod.stencil();
 
-		StencilOp so_ser(topo.nglobal(0)-2, topo.nglobal(1)-2);
+		stencil_op so_ser(topo.nglobal(0)-2, topo.nglobal(1)-2);
 
 		if (sten.five_pt()) nstencil = 3;
 		else nstencil = 5;

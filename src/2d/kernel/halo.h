@@ -11,7 +11,7 @@ namespace impls
 {
 	struct MsgCtx
 	{
-		MsgCtx(mpi::GridTopo & topo);
+		MsgCtx(mpi::grid_topo & topo);
 		Array<int,int> pMSG; // these should be int, len_t
 		Array<int,int> pLS;
 		Array<int,int> pMSGSO;
@@ -35,9 +35,9 @@ namespace impls
 		/* int nmsgr; */
 	};
 
-	void setup_msg(mpi::GridTopo &topo, void **msg_ctx);
+	void setup_msg(mpi::grid_topo &topo, void **msg_ctx);
 	void msg_exchange(mpi::grid_func & f);
-	void msg_stencil_exchange(mpi::StencilOp & so);
+	void msg_stencil_exchange(mpi::stencil_op & so);
 }
 }}}
 

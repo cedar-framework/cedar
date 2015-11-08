@@ -13,7 +13,7 @@
 
 namespace boxmg { namespace bmg2d { namespace inter {
 
-class restrict_op : public DiscreteOp
+class restrict_op : public discrete_op
 {
 
 public:

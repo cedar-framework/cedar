@@ -10,7 +10,7 @@
 using namespace boxmg;
 using namespace boxmg::bmg2d;
 
-mpi::solver::solver(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
+mpi::solver::solver(bmg2d::mpi::stencil_op&& fop) : comm(fop.grid().comm)
 {
 	Timer setup_timer("Setup");
 	setup_timer.begin();
@@ -46,7 +46,7 @@ mpi::solver::solver(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 		levels[i].A.halo_ctx = halo_ctx;
 		if (i != num_levels-1) {
 			levels[i].P.halo_ctx = halo_ctx;
-			std::array<bmg2d::RelaxStencil,2> SOR{{bmg2d::RelaxStencil(levels[i].A.stencil().shape(0), levels[i].A.stencil().shape(1)),bmg2d::RelaxStencil(levels[i].A.stencil().shape(0), levels[i].A.stencil().shape(1))}};
+			std::array<bmg2d::relax_stencil,2> SOR{{bmg2d::relax_stencil(levels[i].A.stencil().shape(0), levels[i].A.stencil().shape(1)),bmg2d::relax_stencil(levels[i].A.stencil().shape(0), levels[i].A.stencil().shape(1))}};
 			levels[i].SOR = std::move(SOR);
 			int kf = num_levels - i;
 			kernels->setup_interp(kf,kf-1,num_levels,
@@ -67,8 +67,8 @@ mpi::solver::solver(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 			}
 			int nrelax_pre = conf.get<int>("solver.cycle.nrelax-pre", 2);
 			int nrelax_post = conf.get<int>("solver.cycle.nrelax-post", 1);
-			levels[i].presmoother = [&,i,nrelax_pre,kernels,relax_type](const bmg2d::DiscreteOp &A, bmg2d::grid_func &x, const bmg2d::grid_func &b) {
-				const bmg2d::StencilOp & av = dynamic_cast<const bmg2d::StencilOp &>(A);
+			levels[i].presmoother = [&,i,nrelax_pre,kernels,relax_type](const bmg2d::discrete_op &A, bmg2d::grid_func &x, const bmg2d::grid_func &b) {
+				const bmg2d::stencil_op & av = dynamic_cast<const bmg2d::stencil_op &>(A);
 				for (auto j : range(nrelax_pre)) {
 					(void)j;
 					if (relax_type == "point")
@@ -83,9 +83,9 @@ mpi::solver::solver(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 					}
 				}
 			};
-			levels[i].postsmoother = [&,i,nrelax_post,kernels,relax_type](const bmg2d::DiscreteOp &A, bmg2d::grid_func &x, const bmg2d::grid_func&b) {
+			levels[i].postsmoother = [&,i,nrelax_post,kernels,relax_type](const bmg2d::discrete_op &A, bmg2d::grid_func &x, const bmg2d::grid_func&b) {
 
-				const bmg2d::StencilOp & av = dynamic_cast<const bmg2d::StencilOp &>(A);
+				const bmg2d::stencil_op & av = dynamic_cast<const bmg2d::stencil_op &>(A);
 				for (auto j: range(nrelax_post)) {
 					(void)j;
 					if (relax_type == "point")
@@ -124,8 +124,8 @@ mpi::solver::solver(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 		kernels->setup_cg_boxmg(cop, &cg_bmg);
 	}
 
-	coarse_solver = [&,cg_bmg,kernels](const bmg2d::DiscreteOp &A, bmg2d::mpi::grid_func &x, const bmg2d::mpi::grid_func &b) {
-		const bmg2d::mpi::StencilOp &av = dynamic_cast<const bmg2d::mpi::StencilOp&>(A);
+	coarse_solver = [&,cg_bmg,kernels](const bmg2d::discrete_op &A, bmg2d::mpi::grid_func &x, const bmg2d::mpi::grid_func &b) {
+		const bmg2d::mpi::stencil_op &av = dynamic_cast<const bmg2d::mpi::stencil_op&>(A);
 		auto &b_rw = const_cast<bmg2d::mpi::grid_func&>(b);
 		b_rw.halo_ctx = av.halo_ctx;
 		if (cg_solver_lu)
@@ -140,12 +140,12 @@ mpi::solver::solver(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 }
 
 
-void mpi::solver::add_level(bmg2d::mpi::StencilOp & fop, int num_levels)
+void mpi::solver::add_level(bmg2d::mpi::stencil_op & fop, int num_levels)
 {
 	int kc = num_levels - levels.size() - 1;
 
-	bmg2d::mpi::GridTopo & fgrid = fop.grid();
-	auto cgrid = std::make_shared<bmg2d::mpi::GridTopo>(fgrid.get_igrd(), kc, num_levels);
+	bmg2d::mpi::grid_topo & fgrid = fop.grid();
+	auto cgrid = std::make_shared<bmg2d::mpi::grid_topo>(fgrid.get_igrd(), kc, num_levels);
 	cgrid->comm = fgrid.comm;
 
 	len_t NLxg = fgrid.nlocal(0) - 2;
@@ -184,7 +184,7 @@ void mpi::solver::add_level(bmg2d::mpi::StencilOp & fop, int num_levels)
 	cgrid->coord(1) = fgrid.coord(1);
 
 
-	auto cop = bmg2d::mpi::StencilOp(cgrid);
+	auto cop = bmg2d::mpi::stencil_op(cgrid);
 	levels.back().P = inter::mpi::prolong_op(cgrid);
 
 	cop.set_registry(kreg);
@@ -193,7 +193,7 @@ void mpi::solver::add_level(bmg2d::mpi::StencilOp & fop, int num_levels)
 }
 
 
-int mpi::solver::compute_num_levels(bmg2d::mpi::StencilOp & fop)
+int mpi::solver::compute_num_levels(bmg2d::mpi::stencil_op & fop)
 {
 	int ng;
 	auto min_coarse = conf.get<len_t>("solver.min-coarse", 3);

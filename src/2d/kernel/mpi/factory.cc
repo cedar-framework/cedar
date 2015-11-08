@@ -31,74 +31,74 @@ namespace factory
 
 
 		kreg->add(name::residual, "fortran",
-		         Kernel<const bmg2d::StencilOp &,
+		         Kernel<const bmg2d::stencil_op &,
 		         const bmg2d::grid_func &,
 		         const bmg2d::grid_func &,
 		         bmg2d::grid_func&>(impls::residual_fortran));
 
 		kreg->add(name::residual, "fortran-msg",
-		         Kernel<const bmg2d::StencilOp &,
+		         Kernel<const bmg2d::stencil_op &,
 		         const bmg2d::grid_func &,
 		         const bmg2d::grid_func &,
 		         bmg2d::grid_func&>(impls::mpi_residual_fortran));
 
 		kreg->add(name::residual,"c++",
-		         Kernel<const bmg2d::StencilOp &,
+		         Kernel<const bmg2d::stencil_op &,
 		         const bmg2d::grid_func &,
 		         const bmg2d::grid_func &,
 		         bmg2d::grid_func&>(impls::residual));
 
 		kreg->add(name::setup_interp, "fortran",
 		         Kernel<int, int , int,
-		         const bmg2d::StencilOp &,
-		         const bmg2d::StencilOp &,
+		         const bmg2d::stencil_op &,
+		         const bmg2d::stencil_op &,
 		         inter::prolong_op &>(impls::setup_interp));
 
 		kreg->add(name::galerkin_prod, "fortran-ex",
 		         Kernel<int,int,int,
 		         const inter::prolong_op&,
-		         const bmg2d::StencilOp&,
-		         bmg2d::StencilOp&>(impls::galerkin_prod));
+		         const bmg2d::stencil_op&,
+		         bmg2d::stencil_op&>(impls::galerkin_prod));
 
 		kreg->add(name::setup_relax,"fortran-rbgs-point",
-		         Kernel<const bmg2d::StencilOp&,
-		         bmg2d::RelaxStencil&>(impls::setup_rbgs_point));
+		         Kernel<const bmg2d::stencil_op&,
+		         bmg2d::relax_stencil&>(impls::setup_rbgs_point));
 
 		kreg->add(name::setup_cg_lu, "fortran",
-		         Kernel<const bmg2d::StencilOp&,
+		         Kernel<const bmg2d::stencil_op&,
 		         bmg2d::grid_func&>(impls::setup_cg_lu));
 
 		kreg->add(name::setup_cg_lu, "fortran-msg",
-		         Kernel<const bmg2d::StencilOp&,
+		         Kernel<const bmg2d::stencil_op&,
 		         bmg2d::grid_func&>(impls::mpi_setup_cg_lu));
 
 		kreg->add(name::relax, "fortran-rbgs",
-		         Kernel<const bmg2d::StencilOp&,
+		         Kernel<const bmg2d::stencil_op&,
 		         bmg2d::grid_func&,
 		         const bmg2d::grid_func&,
-		         const bmg2d::RelaxStencil&,
+		         const bmg2d::relax_stencil&,
 		         cycle::Dir>(impls::relax_rbgs_point));
 
 		kreg->add(name::relax, "fortran-msg-rbgs",
-		         Kernel<const bmg2d::StencilOp&,
+		         Kernel<const bmg2d::stencil_op&,
 		         bmg2d::grid_func&,
 		         const bmg2d::grid_func&,
-		         const bmg2d::RelaxStencil&,
+		         const bmg2d::relax_stencil&,
 		         cycle::Dir>(impls::mpi_relax_rbgs_point));
 
 		kreg->add(name::relax_lines_x, "fortran-msg",
-		         Kernel<const bmg2d::StencilOp&,
+		         Kernel<const bmg2d::stencil_op&,
 		         bmg2d::grid_func&,
 		         const bmg2d::grid_func&,
-		         const bmg2d::RelaxStencil&,
+		         const bmg2d::relax_stencil&,
 		          bmg2d::grid_func&,
 		         cycle::Dir>(impls::mpi_relax_lines_x));
 
 		kreg->add(name::relax_lines_y, "fortran-msg",
-		         Kernel<const bmg2d::StencilOp&,
+		         Kernel<const bmg2d::stencil_op&,
 		         bmg2d::grid_func&,
 		         const bmg2d::grid_func&,
-		         const bmg2d::RelaxStencil&,
+		         const bmg2d::relax_stencil&,
 		          bmg2d::grid_func&,
 		         cycle::Dir>(impls::mpi_relax_lines_y));
 
@@ -137,44 +137,44 @@ namespace factory
 		          real_t*>(impls::mpi_solve_cg_lu));
 
 		kreg->add(name::setup_nog, "fortran",
-		         Kernel<bmg2d::mpi::GridTopo&,
+		         Kernel<bmg2d::mpi::grid_topo&,
 		         len_t, int*>(impls::fortran_setup_nog));
 
 		kreg->add(name::halo_setup, "fortran-msg",
-		         Kernel<bmg2d::mpi::GridTopo&,void**>(impls::setup_msg));
+		         Kernel<bmg2d::mpi::grid_topo&,void**>(impls::setup_msg));
 
 		kreg->add(name::halo_exchange, "fortran-msg",
 		         Kernel<bmg2d::mpi::grid_func&>(impls::msg_exchange));
 
 		kreg->add(name::halo_stencil_exchange, "fortran-msg",
-		         Kernel<bmg2d::mpi::StencilOp&>(impls::msg_stencil_exchange));
+		         Kernel<bmg2d::mpi::stencil_op&>(impls::msg_stencil_exchange));
 
 		kreg->add(name::setup_interp, "fortran-msg",
 		         Kernel<int,int,int,
-		         const bmg2d::StencilOp&,
-		         const bmg2d::StencilOp&,
+		         const bmg2d::stencil_op&,
+		         const bmg2d::stencil_op&,
 		         inter::prolong_op&>(impls::mpi_setup_interp));
 
 		kreg->add(name::galerkin_prod, "fortran-msg",
 		         Kernel<int,int,int,
 		         const inter::prolong_op&,
-		         const bmg2d::StencilOp&,
-		         bmg2d::StencilOp&>(impls::mpi_galerkin_prod));
+		         const bmg2d::stencil_op&,
+		         bmg2d::stencil_op&>(impls::mpi_galerkin_prod));
 
 		kreg->add(name::setup_relax, "fortran-msg-rbgs-point",
-		         Kernel<const bmg2d::StencilOp&,
-		         bmg2d::RelaxStencil&>(impls::mpi_setup_rbgs_point));
+		         Kernel<const bmg2d::stencil_op&,
+		         bmg2d::relax_stencil&>(impls::mpi_setup_rbgs_point));
 
 		kreg->add(name::setup_relax_x, "fortran-msg",
-		         Kernel<const bmg2d::StencilOp&,
-		         bmg2d::RelaxStencil&>(impls::mpi_setup_rbgs_x));
+		         Kernel<const bmg2d::stencil_op&,
+		         bmg2d::relax_stencil&>(impls::mpi_setup_rbgs_x));
 
 		kreg->add(name::setup_relax_y, "fortran-msg",
-		         Kernel<const bmg2d::StencilOp&,
-		         bmg2d::RelaxStencil&>(impls::mpi_setup_rbgs_y));
+		         Kernel<const bmg2d::stencil_op&,
+		         bmg2d::relax_stencil&>(impls::mpi_setup_rbgs_y));
 
 		kreg->add(name::setup_cg_boxmg, "fortran-msg",
-		          Kernel<const bmg2d::StencilOp &,
+		          Kernel<const bmg2d::stencil_op &,
 		          std::shared_ptr<solver>*>(impls::setup_cg_boxmg));
 
 		kreg->add(name::solve_cg_boxmg, "fortran-msg",
@@ -183,7 +183,7 @@ namespace factory
 		          const bmg2d::grid_func &>(impls::solve_cg_boxmg));
 
 		kreg->add(name::matvec, "fortran-msg",
-		          Kernel<const bmg2d::StencilOp&,
+		          Kernel<const bmg2d::stencil_op&,
 		          const bmg2d::grid_func &, bmg2d::grid_func&>(impls::matvec));
 
 

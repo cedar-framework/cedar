@@ -5,7 +5,7 @@
 
 namespace boxmg { namespace bmg2d {
 
-class DiscreteOp
+class discrete_op
 {
 
 public:

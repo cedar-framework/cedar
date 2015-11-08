@@ -9,11 +9,11 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-	void residual(const StencilOp & A, const grid_func & x,
+	void residual(const stencil_op & A, const grid_func & x,
 				  const grid_func & b, grid_func &y);
-	void residual_fortran(const StencilOp & A, const grid_func & x,
+	void residual_fortran(const stencil_op & A, const grid_func & x,
 						  const grid_func & b, grid_func &y);
-	void mpi_residual_fortran(const StencilOp & A, const grid_func & x,
+	void mpi_residual_fortran(const stencil_op & A, const grid_func & x,
 	                          const grid_func & b, grid_func &y);
 }
 

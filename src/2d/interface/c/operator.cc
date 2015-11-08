@@ -12,9 +12,9 @@ extern "C"
 	{
 		using namespace boxmg::bmg2d;
 
-		auto & grid = *(reinterpret_cast<std::shared_ptr<mpi::GridTopo>*>(topo));
+		auto & grid = *(reinterpret_cast<std::shared_ptr<mpi::grid_topo>*>(topo));
 
-		mpi::StencilOp *sop = new mpi::StencilOp(grid);
+		mpi::stencil_op *sop = new mpi::stencil_op(grid);
 		auto & sten = sop->stencil();
 		sten.five_pt() = true;
 
@@ -27,8 +27,8 @@ extern "C"
 		using namespace boxmg;
 		using namespace boxmg::bmg2d;
 
-		auto & sten = reinterpret_cast<mpi::StencilOp*>(op)->stencil();
-		auto & grid = reinterpret_cast<mpi::StencilOp*>(op)->grid();
+		auto & sten = reinterpret_cast<mpi::stencil_op*>(op)->stencil();
+		auto & grid = reinterpret_cast<mpi::stencil_op*>(op)->grid();
 
 		for (auto i: range(nvals)) {
 			len_t ci = static_cast<len_t>(coords[i].i - grid.is(0) + 2);
@@ -48,7 +48,7 @@ extern "C"
 	{
 		using namespace boxmg::bmg2d;
 
-		auto *sop = reinterpret_cast<mpi::StencilOp*>(op);
+		auto *sop = reinterpret_cast<mpi::stencil_op*>(op);
 		auto grid = sop->grid_ptr();
 
 		mpi::grid_func xgf(grid);
@@ -83,10 +83,10 @@ extern "C"
 		using namespace boxmg::bmg2d;
 		std::ofstream ofile;
 
-		auto &grid = reinterpret_cast<mpi::StencilOp*>(op)->grid();
+		auto &grid = reinterpret_cast<mpi::stencil_op*>(op)->grid();
 
 		ofile.open("op" + std::to_string(grid.coord(0)) + "-" + std::to_string(grid.coord(1)) + ".txt", std::ios::out | std::ios::trunc | std::ios::binary);
-		ofile << *(reinterpret_cast<mpi::StencilOp*>(op));
+		ofile << *(reinterpret_cast<mpi::stencil_op*>(op));
 		ofile.close();
 
 	}
@@ -96,6 +96,6 @@ extern "C"
 	{
 		using namespace boxmg::bmg2d;
 
-		delete reinterpret_cast<mpi::StencilOp*>(op);
+		delete reinterpret_cast<mpi::stencil_op*>(op);
 	}
 }

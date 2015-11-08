@@ -12,7 +12,7 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 namespace impls
 {
 
-	void setup_cg_boxmg(const StencilOp & so,
+	void setup_cg_boxmg(const stencil_op & so,
 	                    std::shared_ptr<solver> *slv);
 }
 

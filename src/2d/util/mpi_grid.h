@@ -9,7 +9,7 @@
 
 namespace boxmg { namespace bmg2d { namespace util { namespace mpi {
 
-bool has_boundary(bmg2d::mpi::GridTopo & grid, bmg2d::Dir dir);
+bool has_boundary(bmg2d::mpi::grid_topo & grid, bmg2d::Dir dir);
 
 }}}}
 #endif

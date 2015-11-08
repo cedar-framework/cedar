@@ -46,8 +46,8 @@ namespace impls
 		inter::prolong_op & ser_P = Rd.getP();
 		inter::mpi::prolong_op & P = dynamic_cast<inter::mpi::prolong_op&>(ser_P);
 		auto & fine_par = dynamic_cast<const mpi::grid_func&>(fine);
-		mpi::GridTopo & topo = P.grid();
-		const mpi::GridTopo & fine_topo = fine_par.grid();
+		mpi::grid_topo & topo = P.grid();
+		const mpi::grid_topo & fine_topo = fine_par.grid();
 		MsgCtx *ctx = (MsgCtx*) P.halo_ctx;
 		auto & fined = const_cast<grid_func&>(fine);
 

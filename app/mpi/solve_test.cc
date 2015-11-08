@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 	auto nx = config::get<len_t>("grid.nx", 9);
 	auto ny = config::get<len_t>("grid.ny", 9);
 	auto grid = bmg2d::util::create_topo(MPI_COMM_WORLD, nx, ny);
-	auto so = mpi::StencilOp(grid);
+	auto so = mpi::stencil_op(grid);
 
 	const double pi = M_PI;
 
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 	real_t hy = (1.0/(so.grid().nglobal(1)-1));
 	real_t h2 = hx * hy;
 
-	GridStencil & sten = so.stencil();
+	grid_stencil & sten = so.stencil();
 	sten.five_pt() = true;
 
 	mpi::grid_func b(so.grid_ptr());

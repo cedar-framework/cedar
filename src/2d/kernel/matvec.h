@@ -8,7 +8,7 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-	void matvec(const StencilOp & so,
+	void matvec(const stencil_op & so,
 	            const grid_func & x,
 	            grid_func & y);
 }

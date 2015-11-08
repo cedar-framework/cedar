@@ -13,8 +13,8 @@ public:
 	prolong_op() {};
 	prolong_op(bmg2d::mpi::topo_ptr grid);
 	void *halo_ctx;
-	bmg2d::mpi::GridTopo & grid() { return *grid_; }
-	const bmg2d::mpi::GridTopo & grid() const { return *grid_; }
+	bmg2d::mpi::grid_topo & grid() { return *grid_; }
+	const bmg2d::mpi::grid_topo & grid() const { return *grid_; }
 	bmg2d::mpi::topo_ptr grid_ptr() const { return grid_; }
 	friend std::ostream & operator<< (std::ostream &os, const prolong_op & P);
 

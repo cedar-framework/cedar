@@ -13,8 +13,8 @@ int main(int argc, char *argv[])
 	len_t nx = 5;
 	len_t ny = nx;
 
-	auto so = StencilOp(nx,ny);
-	GridStencil & sten = so.stencil();
+	auto so = stencil_op(nx,ny);
+	grid_stencil & sten = so.stencil();
 	sten.five_pt() = true;
 
 	for (auto j: sten.range(1)) {

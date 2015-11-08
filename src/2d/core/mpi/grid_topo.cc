@@ -5,11 +5,11 @@
 using namespace boxmg;
 using namespace boxmg::bmg2d::mpi;
 
-GridTopo::GridTopo() : igrd(nullptr) {}
+grid_topo::grid_topo() : igrd(nullptr) {}
 
-GridTopo::GridTopo(igrd_t grd, int level, int nlevel) : igrd(grd), lvl(level), nlvl(nlevel) {}
+grid_topo::grid_topo(igrd_t grd, int level, int nlevel) : igrd(grd), lvl(level), nlvl(nlevel) {}
 
-len_t & GridTopo::is(int dim)
+len_t & grid_topo::is(int dim)
 {
 	if (dim == 0) {
 		return (*igrd)[(idL_BMG_Icoord-1)*nlvl + lvl];
@@ -22,7 +22,7 @@ len_t & GridTopo::is(int dim)
 }
 
 
-const len_t & GridTopo::is(int dim) const
+const len_t & grid_topo::is(int dim) const
 {
 	if (dim == 0) {
 		return (*igrd)[(idL_BMG_Icoord-1)*nlvl + lvl];
@@ -35,7 +35,7 @@ const len_t & GridTopo::is(int dim) const
 }
 
 
-len_t & GridTopo::nlocal(int dim)
+len_t & grid_topo::nlocal(int dim)
 {
 	if (dim == 0) {
 		return (*igrd)[(idL_BMG_NLx-1)*nlvl + lvl];
@@ -48,7 +48,7 @@ len_t & GridTopo::nlocal(int dim)
 }
 
 
-const len_t & GridTopo::nlocal(int dim) const
+const len_t & grid_topo::nlocal(int dim) const
 {
 	if (dim == 0) {
 		return (*igrd)[(idL_BMG_NLx-1)*nlvl + lvl];
@@ -61,7 +61,7 @@ const len_t & GridTopo::nlocal(int dim) const
 }
 
 
-len_t & GridTopo::nglobal(int dim)
+len_t & grid_topo::nglobal(int dim)
 {
 	if (dim == 0) {
 		return (*igrd)[(idL_BMG_NGx-1)*nlvl + lvl];
@@ -74,7 +74,7 @@ len_t & GridTopo::nglobal(int dim)
 }
 
 
-const len_t & GridTopo::nglobal(int dim) const
+const len_t & grid_topo::nglobal(int dim) const
 {
 	if (dim == 0) {
 		return (*igrd)[(idL_BMG_NGx-1)*nlvl + lvl];
@@ -87,31 +87,31 @@ const len_t & GridTopo::nglobal(int dim) const
 }
 
 
-int & GridTopo::nproc(int dim)
+int & grid_topo::nproc(int dim)
 {
 	return nproc_[dim];
 }
 
 
-const int & GridTopo::nproc(int dim) const
+const int & grid_topo::nproc(int dim) const
 {
 	return nproc_[dim];
 }
 
 
-int & GridTopo::coord(int dim)
+int & grid_topo::coord(int dim)
 {
 	return coord_[dim];
 }
 
 
-const int & GridTopo::coord(int dim) const
+const int & grid_topo::coord(int dim) const
 {
 	return coord_[dim];
 }
 
 
-void GridTopo::grow(int nlevels)
+void grid_topo::grow(int nlevels)
 {
 	std::vector<len_t> tmp = (*igrd);
 
