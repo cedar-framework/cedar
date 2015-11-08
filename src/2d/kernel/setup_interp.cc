@@ -22,7 +22,7 @@ namespace impls
 	void setup_interp(int kf, int kc, int nog,
 	                  const StencilOp &fop,
 	                  const StencilOp &cop,
-	                  inter::ProlongOp &P)
+	                  inter::prolong_op &P)
 	{
 		using namespace boxmg::bmg2d;
 		int ifd;
@@ -60,7 +60,7 @@ namespace impls
 	void mpi_setup_interp(int kf, int kc, int nog,
 	                      const StencilOp & fop,
 	                      const StencilOp & cop,
-	                      inter::ProlongOp & P)
+	                      inter::prolong_op & P)
 	{
 		int ifd, nstencil;
 

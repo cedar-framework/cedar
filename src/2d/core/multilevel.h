@@ -8,7 +8,7 @@
 
 namespace boxmg { namespace bmg2d {
 
-template <class LevelType,class GridFunc=GridFunc>
+template <class LevelType,class grid_func=grid_func>
 class MultiLevel
 {
 
@@ -40,7 +40,7 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 	}
 	virtual int nlevels() { return levels.size(); }
 
-	virtual void log_residual(int lvl, const GridFunc & res)
+	virtual void log_residual(int lvl, const grid_func & res)
 	{
 		if (log::info.active()) {
 			log::info << "Level " << (levels.size() - lvl - 1) << " residual norm: "
@@ -49,14 +49,14 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 	}
 
 
-	virtual void ncycle(int lvl, GridFunc & x, const GridFunc & b,
+	virtual void ncycle(int lvl, grid_func & x, const grid_func & b,
 		int n=1)
 	{
 		auto & A = levels[lvl].A;
 
 		levels[lvl].presmoother(A, x, b);
 
-		GridFunc & residual = levels[lvl].res;
+		grid_func & residual = levels[lvl].res;
 		A.residual(x, b, residual);
 
 		levels[lvl].P.residual = &levels[lvl].res;
@@ -87,9 +87,9 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 	}
 
 
-	virtual GridFunc solve(const GridFunc & b)
+	virtual grid_func solve(const grid_func & b)
 	{
-		GridFunc x = GridFunc::zeros_like(b);
+		grid_func x = grid_func::zeros_like(b);
 		int maxiter = config::get<int>("solver.max-iter", 10);
 		real_t tol = config::get<real_t>("solver.tol", 1e-8);
 		levels[0].A.residual(x,b,levels[0].res);
@@ -114,7 +114,7 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 	}
 
 
-	virtual void solve(const GridFunc & b, GridFunc & x)
+	virtual void solve(const grid_func & b, grid_func & x)
 	{
 		int maxiter = config::get<int>("solver.max-iter", 10);
 		real_t tol = config::get<real_t>("solver.tol", 1e-8);
@@ -139,7 +139,7 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 
 protected:
 	std::vector<LevelType> levels;
-	std::function<void(const DiscreteOp & A, GridFunc &x, const GridFunc &b)> coarse_solver;
+	std::function<void(const DiscreteOp & A, grid_func &x, const grid_func &b)> coarse_solver;
 	config::Reader conf;
 	std::shared_ptr<KernelRegistry> kreg;
 };

@@ -12,26 +12,26 @@
 
 namespace boxmg { namespace bmg2d { namespace inter {
 
-using iadd_pack = std::tuple<const ProlongOp&, const GridFunc &, const GridFunc&>;
-class ProlongOp : public StencilOp
+using iadd_pack = std::tuple<const prolong_op&, const grid_func &, const grid_func&>;
+class prolong_op : public StencilOp
 {
 
 public:
-	ProlongOp() {};
-	ProlongOp(len_t nx, len_t ny);
-	ProlongOp & operator=(ProlongOp&& P)
+	prolong_op() {};
+	prolong_op(len_t nx, len_t ny);
+	prolong_op & operator=(prolong_op&& P)
 	{
 		gs = std::move(P.gs);
 		return *this;
 	}
-	ProlongOp(ProlongOp&& P)
+	prolong_op(prolong_op&& P)
 	{
 		*this = std::move(P);
 	}
-	friend std::ostream & operator<< (std::ostream &os, const ProlongOp & P);
-	friend iadd_pack operator*(const ProlongOp&, const GridFunc&);
+	friend std::ostream & operator<< (std::ostream &os, const prolong_op & P);
+	friend iadd_pack operator*(const prolong_op&, const grid_func&);
 	StencilOp * fine_op;
-	GridFunc *residual;
+	grid_func *residual;
 };
 
 }}}

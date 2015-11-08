@@ -12,16 +12,16 @@ StencilOp::StencilOp(topo_ptr grd) :
 }
 
 
-GridFunc StencilOp::residual(const GridFunc &x, const GridFunc &b) const
+grid_func StencilOp::residual(const grid_func &x, const grid_func &b) const
 {
-	auto r = GridFunc(x.grid_ptr());
+	auto r = grid_func(x.grid_ptr());
 	bmg2d::StencilOp::residual(x,b,r);
 
 	return r;
 }
 
 
-void StencilOp::residual(const GridFunc &x, const GridFunc &b, GridFunc &r) const
+void StencilOp::residual(const grid_func &x, const grid_func &b, grid_func &r) const
 {
 	bmg2d::StencilOp::residual(x,b,r);
 }

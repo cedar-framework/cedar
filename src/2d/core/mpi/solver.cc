@@ -18,7 +18,7 @@ mpi::solver::solver(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 	kreg = kernel::mpi::factory::from_config(conf);
 	fop.set_registry(kreg);
 
-	levels.emplace_back(std::move(fop), inter::mpi::ProlongOp());
+	levels.emplace_back(std::move(fop), inter::mpi::prolong_op());
 
 	auto num_levels = mpi::solver::compute_num_levels(levels[0].A);
 	log::debug << "Using a " << num_levels << " level heirarchy" << std::endl;
@@ -38,10 +38,10 @@ mpi::solver::solver(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 	kernels->halo_stencil_exchange(levels[0].A);
 
 	for (auto i: range(num_levels)) {
-		levels[i].res = bmg2d::mpi::GridFunc(levels[i].A.grid_ptr());
+		levels[i].res = bmg2d::mpi::grid_func(levels[i].A.grid_ptr());
 		if (i) {
-			levels[i].x = bmg2d::mpi::GridFunc(levels[i].A.grid_ptr());
-			levels[i].b = bmg2d::mpi::GridFunc(levels[i].A.grid_ptr());
+			levels[i].x = bmg2d::mpi::grid_func(levels[i].A.grid_ptr());
+			levels[i].b = bmg2d::mpi::grid_func(levels[i].A.grid_ptr());
 		}
 		levels[i].A.halo_ctx = halo_ctx;
 		if (i != num_levels-1) {
@@ -67,7 +67,7 @@ mpi::solver::solver(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 			}
 			int nrelax_pre = conf.get<int>("solver.cycle.nrelax-pre", 2);
 			int nrelax_post = conf.get<int>("solver.cycle.nrelax-post", 1);
-			levels[i].presmoother = [&,i,nrelax_pre,kernels,relax_type](const bmg2d::DiscreteOp &A, bmg2d::GridFunc &x, const bmg2d::GridFunc &b) {
+			levels[i].presmoother = [&,i,nrelax_pre,kernels,relax_type](const bmg2d::DiscreteOp &A, bmg2d::grid_func &x, const bmg2d::grid_func &b) {
 				const bmg2d::StencilOp & av = dynamic_cast<const bmg2d::StencilOp &>(A);
 				for (auto j : range(nrelax_pre)) {
 					(void)j;
@@ -83,7 +83,7 @@ mpi::solver::solver(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 					}
 				}
 			};
-			levels[i].postsmoother = [&,i,nrelax_post,kernels,relax_type](const bmg2d::DiscreteOp &A, bmg2d::GridFunc &x, const bmg2d::GridFunc&b) {
+			levels[i].postsmoother = [&,i,nrelax_post,kernels,relax_type](const bmg2d::DiscreteOp &A, bmg2d::grid_func &x, const bmg2d::grid_func&b) {
 
 				const bmg2d::StencilOp & av = dynamic_cast<const bmg2d::StencilOp &>(A);
 				for (auto j: range(nrelax_post)) {
@@ -117,22 +117,22 @@ mpi::solver::solver(bmg2d::mpi::StencilOp&& fop) : comm(fop.grid().comm)
 		auto & coarse_topo = cop.grid();
 		auto nxc = coarse_topo.nglobal(0);
 		auto nyc = coarse_topo.nglobal(1);
-		ABD = bmg2d::GridFunc(nxc+2, nxc*nyc);
+		ABD = bmg2d::grid_func(nxc+2, nxc*nyc);
 		bbd = new real_t[ABD.len(1)];
 		kernels->setup_cg_lu(cop, ABD);
 	} else {
 		kernels->setup_cg_boxmg(cop, &cg_bmg);
 	}
 
-	coarse_solver = [&,cg_bmg,kernels](const bmg2d::DiscreteOp &A, bmg2d::mpi::GridFunc &x, const bmg2d::mpi::GridFunc &b) {
+	coarse_solver = [&,cg_bmg,kernels](const bmg2d::DiscreteOp &A, bmg2d::mpi::grid_func &x, const bmg2d::mpi::grid_func &b) {
 		const bmg2d::mpi::StencilOp &av = dynamic_cast<const bmg2d::mpi::StencilOp&>(A);
-		auto &b_rw = const_cast<bmg2d::mpi::GridFunc&>(b);
+		auto &b_rw = const_cast<bmg2d::mpi::grid_func&>(b);
 		b_rw.halo_ctx = av.halo_ctx;
 		if (cg_solver_lu)
 			kernels->solve_cg(x, b, ABD, bbd);
 		else
 			kernels->solve_cg_boxmg(*cg_bmg, x, b);
-		bmg2d::mpi::GridFunc residual = av.residual(x,b);
+		bmg2d::mpi::grid_func residual = av.residual(x,b);
 		log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
 	};
 
@@ -185,11 +185,11 @@ void mpi::solver::add_level(bmg2d::mpi::StencilOp & fop, int num_levels)
 
 
 	auto cop = bmg2d::mpi::StencilOp(cgrid);
-	levels.back().P = inter::mpi::ProlongOp(cgrid);
+	levels.back().P = inter::mpi::prolong_op(cgrid);
 
 	cop.set_registry(kreg);
 
-	levels.emplace_back(std::move(cop),inter::mpi::ProlongOp());
+	levels.emplace_back(std::move(cop),inter::mpi::prolong_op());
 }
 
 
@@ -212,17 +212,17 @@ std::shared_ptr<kernel::Registry> mpi::solver::kernel_registry()
 }
 
 
-bmg2d::mpi::GridFunc mpi::solver::solve(const bmg2d::mpi::GridFunc & b)
+bmg2d::mpi::grid_func mpi::solver::solve(const bmg2d::mpi::grid_func & b)
 {
 	auto kernels = kernel_registry();
 	kernels->halo_exchange(b, halo_ctx);
-	return MultiLevel<BoxMGLevel,bmg2d::mpi::GridFunc>::solve(b);
+	return MultiLevel<BoxMGLevel,bmg2d::mpi::grid_func>::solve(b);
 }
 
 
-void mpi::solver::solve(const bmg2d::mpi::GridFunc & b, bmg2d::mpi::GridFunc & x)
+void mpi::solver::solve(const bmg2d::mpi::grid_func & b, bmg2d::mpi::grid_func & x)
 {
 	auto kernels = kernel_registry();
 	kernels->halo_exchange(b, halo_ctx);
-	return MultiLevel<BoxMGLevel,bmg2d::mpi::GridFunc>::solve(b, x);
+	return MultiLevel<BoxMGLevel,bmg2d::mpi::grid_func>::solve(b, x);
 }

@@ -6,10 +6,10 @@
 
 namespace boxmg { namespace bmg2d { namespace inter { namespace mpi {
 
-class RestrictOp : public inter::RestrictOp
+class restrict_op : public inter::restrict_op
 {
 public:
-	friend bmg2d::mpi::GridFunc operator*(const RestrictOp &R, const GridFunc &x);
+	friend bmg2d::mpi::grid_func operator*(const restrict_op &R, const grid_func &x);
 };
 
 }}}}

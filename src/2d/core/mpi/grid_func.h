@@ -10,33 +10,33 @@
 
 namespace boxmg { namespace bmg2d { namespace mpi {
 
-class GridFunc : public ::boxmg::bmg2d::GridFunc
+class grid_func : public ::boxmg::bmg2d::grid_func
 {
 public:
 	/* template<typename... ArgTypes> */
-	/* 	GridFunc(ArgTypes&&... args) : ::boxmg::bmg2d::core::GridFunc(std::forward<decltype(args)>(args)...) {} */
-	GridFunc(){};
-	GridFunc(topo_ptr grid);
+	/* 	grid_func(ArgTypes&&... args) : ::boxmg::bmg2d::core::grid_func(std::forward<decltype(args)>(args)...) {} */
+	grid_func(){};
+	grid_func(topo_ptr grid);
 
 	MPI_Comm comm;
 	GridTopo & grid() { return *grid_; }
 	const GridTopo & grid() const { return *grid_;}
 	topo_ptr grid_ptr() const { return grid_; }
 	void *halo_ctx;
-	static GridFunc zeros_like(const GridFunc &likeable);
-	static GridFunc ones_like(const GridFunc &likeable);
+	static grid_func zeros_like(const grid_func &likeable);
+	static grid_func ones_like(const grid_func &likeable);
 	template<int p> real_t lp_norm() const;
 	real_t inf_norm() const;
-	GridFunc & operator-=(const GridFunc & rhs);
-	friend GridFunc operator-(GridFunc lhs, const GridFunc &rhs) { return lhs -= rhs; }
-	friend std::ostream& operator<< (std::ostream& os, const GridFunc &obj);
+	grid_func & operator-=(const grid_func & rhs);
+	friend grid_func operator-(grid_func lhs, const grid_func &rhs) { return lhs -= rhs; }
+	friend std::ostream& operator<< (std::ostream& os, const grid_func &obj);
 
 protected:
 	topo_ptr grid_;
 };
 
 
-template<int p> real_t GridFunc::lp_norm() const
+template<int p> real_t grid_func::lp_norm() const
 {
 	real_t result = 0;
 

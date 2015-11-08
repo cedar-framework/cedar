@@ -11,7 +11,6 @@ int main(int argc, char *argv[])
 {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
-	using namespace boxmg::bmg2d::core;
 
 	int provided;
 
@@ -31,7 +30,7 @@ int main(int argc, char *argv[])
 	GridStencil & sten = so.stencil();
 	sten.five_pt() = true;
 
-	mpi::GridFunc b(so.grid_ptr());
+	mpi::grid_func b(so.grid_ptr());
 
 	int rank;
 	MPI_Comm_rank(so.grid().comm, &rank);
@@ -61,11 +60,11 @@ int main(int argc, char *argv[])
 	if (util::mpi::has_boundary(so.grid(), Dir::W))
 	    for (auto idx: sten.boarder(Dir::W)) sten(idx, Dir::W) = 0;
 
-	bmg2d::mpi::solver bmg(std::move(so));
+	mpi::solver bmg(std::move(so));
 
 	auto sol = bmg.solve(b);
 
-	bmg2d::mpi::GridFunc exact_sol(sol.grid_ptr());
+	mpi::grid_func exact_sol(sol.grid_ptr());
 
 	y = sol.grid().is(1)*hy;
 	for (auto j: exact_sol.range(1)) {
@@ -77,7 +76,7 @@ int main(int argc, char *argv[])
 		y+= hy;
 	}
 
-	bmg2d::mpi::GridFunc diff = exact_sol - sol;
+	mpi::grid_func diff = exact_sol - sol;
 
 	log::status << "Solution norm: " << diff.inf_norm() << std::endl;
 

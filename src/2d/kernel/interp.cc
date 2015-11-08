@@ -20,18 +20,18 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-	void fortran_interp(const inter::ProlongOp & P,
-	                    const GridFunc & coarse,
-	                    const GridFunc & residual,
-	                    GridFunc & fine)
+	void fortran_interp(const inter::prolong_op & P,
+	                    const grid_func & coarse,
+	                    const grid_func & residual,
+	                    grid_func & fine)
 	{
 		using namespace boxmg::bmg2d;
 
 		int nstencil, ibc;
 
-		inter::ProlongOp & Pd = const_cast<inter::ProlongOp&>(P);
-		GridFunc & coarsed = const_cast<GridFunc&>(coarse);
-		GridFunc & res = const_cast<GridFunc&>(residual);
+		inter::prolong_op & Pd = const_cast<inter::prolong_op&>(P);
+		grid_func & coarsed = const_cast<grid_func&>(coarse);
+		grid_func & res = const_cast<grid_func&>(residual);
 
 		if (Pd.stencil().five_pt()) {
 			nstencil = 3;
@@ -47,19 +47,19 @@ namespace impls
 	}
 
 
-	void mpi_fortran_interp(const inter::ProlongOp & P,
-	                        const GridFunc & coarse,
-	                        const GridFunc & residual,
-	                        GridFunc & fine)
+	void mpi_fortran_interp(const inter::prolong_op & P,
+	                        const grid_func & coarse,
+	                        const grid_func & residual,
+	                        grid_func & fine)
 	{
 		using namespace boxmg::bmg2d;
 
 		int nstencil, kf, kc, nog;
 
-		inter::ProlongOp & Pd = const_cast<inter::ProlongOp&>(P);
-		GridFunc & coarsed = const_cast<GridFunc&>(coarse);
-		GridFunc & res = const_cast<GridFunc&>(residual);
-		inter::mpi::ProlongOp & mpi_Pd = dynamic_cast<inter::mpi::ProlongOp&>(Pd);
+		inter::prolong_op & Pd = const_cast<inter::prolong_op&>(P);
+		grid_func & coarsed = const_cast<grid_func&>(coarse);
+		grid_func & res = const_cast<grid_func&>(residual);
+		inter::mpi::prolong_op & mpi_Pd = dynamic_cast<inter::mpi::prolong_op&>(Pd);
 		mpi::GridTopo & topo = mpi_Pd.grid();
 		MsgCtx *ctx = (MsgCtx*) mpi_Pd.halo_ctx;
 

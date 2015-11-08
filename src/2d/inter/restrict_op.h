@@ -13,28 +13,28 @@
 
 namespace boxmg { namespace bmg2d { namespace inter {
 
-class RestrictOp : public DiscreteOp
+class restrict_op : public DiscreteOp
 {
 
 public:
-RestrictOp(): kernels(nullptr) {}
-RestrictOp(ProlongOp * P) : kernels(nullptr), P(P) {}
-	void associate(ProlongOp *P) { this->P = P; }
+restrict_op(): kernels(nullptr) {}
+restrict_op(prolong_op * P) : kernels(nullptr), P(P) {}
+	void associate(prolong_op *P) { this->P = P; }
 
-	ProlongOp & getP() { return *P; }
-	const ProlongOp & getP() const { return *P; }
+	prolong_op & getP() { return *P; }
+	const prolong_op & getP() const { return *P; }
 
-	virtual void apply(const GridFunc &x, GridFunc &y) const;
-	virtual void residual(const GridFunc &x, const GridFunc &b, GridFunc &r) const{}
+	virtual void apply(const grid_func &x, grid_func &y) const;
+	virtual void residual(const grid_func &x, const grid_func &b, grid_func &r) const{}
 	virtual void set_registry(std::shared_ptr<KernelRegistry> kreg);
-	friend std::ostream & operator<< (std::ostream &os, const RestrictOp & R);
-	friend GridFunc operator* (const RestrictOp & R, const GridFunc &x);
+	friend std::ostream & operator<< (std::ostream &os, const restrict_op & R);
+	friend grid_func operator* (const restrict_op & R, const grid_func &x);
 
 protected:
 	std::shared_ptr<KernelRegistry> kernels;
 
 private:
-	ProlongOp * P;
+	prolong_op * P;
 };
 }}}
 

@@ -20,8 +20,8 @@ public:
 	GridTopo & grid() { return *grid_; }
 	const GridTopo & grid() const { return *grid_; }
 	void *halo_ctx;
-	virtual GridFunc residual(const GridFunc &x, const GridFunc &b) const;
-	virtual void residual(const GridFunc &x, const GridFunc &b, GridFunc &r) const;
+	virtual grid_func residual(const grid_func &x, const grid_func &b) const;
+	virtual void residual(const grid_func &x, const grid_func &b, grid_func &r) const;
 	friend std::ostream & operator<< (std::ostream &os, const StencilOp & op);
 
 protected:

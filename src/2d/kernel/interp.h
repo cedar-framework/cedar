@@ -9,14 +9,14 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-	void fortran_interp(const inter::ProlongOp & P,
-	                    const GridFunc & coarse,
-	                    const GridFunc & residual,
-	                    GridFunc & fine);
-	void mpi_fortran_interp(const inter::ProlongOp & P,
-	                        const GridFunc & coarse,
-	                        const GridFunc & residual,
-	                        GridFunc & fine);
+	void fortran_interp(const inter::prolong_op & P,
+	                    const grid_func & coarse,
+	                    const grid_func & residual,
+	                    grid_func & fine);
+	void mpi_fortran_interp(const inter::prolong_op & P,
+	                        const grid_func & coarse,
+	                        const grid_func & residual,
+	                        grid_func & fine);
 }
 
 }}}

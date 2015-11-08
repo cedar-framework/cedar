@@ -6,12 +6,12 @@
 
 using namespace boxmg::bmg2d::inter;
 
-ProlongOp::ProlongOp(len_t nx, len_t ny) : StencilOp(nx,ny,true)
+prolong_op::prolong_op(len_t nx, len_t ny) : StencilOp(nx,ny,true)
 {
 }
 
 namespace boxmg { namespace bmg2d { namespace inter {
-std::ostream & operator<< (std::ostream &os, const ProlongOp &P)
+std::ostream & operator<< (std::ostream &os, const prolong_op &P)
 {
 	auto & sten = P.stencil();
 	// unsigned int width = 8;
@@ -51,11 +51,11 @@ std::ostream & operator<< (std::ostream &os, const ProlongOp &P)
 }
 
 
-iadd_pack operator*(const ProlongOp & P, const GridFunc & coarse)
+iadd_pack operator*(const prolong_op & P, const grid_func & coarse)
 {
-	return std::make_tuple<std::reference_wrapper<const ProlongOp>,
-	                       std::reference_wrapper<const GridFunc>,
-	                       std::reference_wrapper<const GridFunc>>(P,coarse,*(P.residual));
+	return std::make_tuple<std::reference_wrapper<const prolong_op>,
+	                       std::reference_wrapper<const grid_func>,
+	                       std::reference_wrapper<const grid_func>>(P,coarse,*(P.residual));
 }
 
 

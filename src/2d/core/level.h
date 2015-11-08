@@ -13,8 +13,8 @@ struct Level
     /* Level(core::DiscreteOp &A, core::DiscreteOp &P) :A(A),P(P) {} */
 	/* core::DiscreteOp & A; */
 	/* core::DiscreteOp & P; */
-	std::function<void(const DiscreteOp & A, GridFunc &x, const GridFunc &b)> presmoother;
-	std::function<void(const DiscreteOp & A, GridFunc &x, const GridFunc &b)> postsmoother;
+	std::function<void(const DiscreteOp & A, grid_func &x, const grid_func &b)> presmoother;
+	std::function<void(const DiscreteOp & A, grid_func &x, const grid_func &b)> postsmoother;
 	//DiscreteOp & R;
 };
 

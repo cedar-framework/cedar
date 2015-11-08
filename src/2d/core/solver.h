@@ -15,14 +15,14 @@ namespace boxmg { namespace bmg2d {
 
 struct BoxMGLevel : Level
 {
-BoxMGLevel(StencilOp&& A, inter::ProlongOp&& P) : /*Level(A,P),*/
+BoxMGLevel(StencilOp&& A, inter::prolong_op&& P) : /*Level(A,P),*/
 	A(std::move(A)), P(std::move(P)), SOR({{RelaxStencil(), RelaxStencil()}}) { R.associate(&P); }
 	StencilOp    A;
-	inter::ProlongOp   P;
-	inter::RestrictOp  R;
-	GridFunc     x;
-	GridFunc     res;
-	GridFunc     b;
+	inter::prolong_op   P;
+	inter::restrict_op  R;
+	grid_func     x;
+	grid_func     res;
+	grid_func     b;
 	std::array<RelaxStencil, 2> SOR;
 };
 
@@ -36,7 +36,7 @@ public:
 	std::shared_ptr<kernel::Registry> kernel_registry();
 
 private:
-	GridFunc ABD;
+	grid_func ABD;
 	real_t *bbd;
 };
 

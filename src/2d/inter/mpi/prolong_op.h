@@ -7,16 +7,16 @@
 
 namespace boxmg { namespace bmg2d { namespace inter { namespace mpi {
 
-class ProlongOp : public inter::ProlongOp
+class prolong_op : public inter::prolong_op
 {
 public:
-	ProlongOp() {};
-	ProlongOp(bmg2d::mpi::topo_ptr grid);
+	prolong_op() {};
+	prolong_op(bmg2d::mpi::topo_ptr grid);
 	void *halo_ctx;
 	bmg2d::mpi::GridTopo & grid() { return *grid_; }
 	const bmg2d::mpi::GridTopo & grid() const { return *grid_; }
 	bmg2d::mpi::topo_ptr grid_ptr() const { return grid_; }
-	friend std::ostream & operator<< (std::ostream &os, const ProlongOp & P);
+	friend std::ostream & operator<< (std::ostream &os, const prolong_op & P);
 
 private:
 	bmg2d::mpi::topo_ptr grid_;

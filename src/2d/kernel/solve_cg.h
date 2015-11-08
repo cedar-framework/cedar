@@ -8,21 +8,21 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-	void fortran_solve_cg(GridFunc & x,
-	                      const GridFunc & b,
-	                      const GridFunc & ABD,
+	void fortran_solve_cg(grid_func & x,
+	                      const grid_func & b,
+	                      const grid_func & ABD,
 	                      real_t *bbd);
 
 
-	void mpi_solve_cg_lu(GridFunc &x,
-	                     const GridFunc &b,
-	                     const GridFunc & ABD,
+	void mpi_solve_cg_lu(grid_func &x,
+	                     const grid_func &b,
+	                     const grid_func & ABD,
 	                     real_t *bbd);
 
 
 	void solve_cg_boxmg(const solver & cg_solver,
-	                    GridFunc &x,
-	                    const GridFunc &b);
+	                    grid_func &x,
+	                    const grid_func &b);
 
 }
 

@@ -13,8 +13,8 @@ extern "C"
 		mpi::StencilOp *sop = reinterpret_cast<mpi::StencilOp*>(*op);
 
 		mpi::solver *bmg = new mpi::solver(std::move(*sop));
-		bmg->level(-1).x = mpi::GridFunc::zeros_like(bmg->level(-1).res);
-		bmg->level(-1).b = mpi::GridFunc::zeros_like(bmg->level(-1).res);
+		bmg->level(-1).x = mpi::grid_func::zeros_like(bmg->level(-1).res);
+		bmg->level(-1).b = mpi::grid_func::zeros_like(bmg->level(-1).res);
 		*op = reinterpret_cast<bmg2_operator>(&bmg->level(-1).A);
 
 		return reinterpret_cast<bmg2_solver>(bmg);

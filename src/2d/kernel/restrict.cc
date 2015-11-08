@@ -20,16 +20,16 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-	void fortran_restrict(const inter::RestrictOp & R,
-	                      const GridFunc & fine,
-	                      GridFunc & coarse)
+	void fortran_restrict(const inter::restrict_op & R,
+	                      const grid_func & fine,
+	                      grid_func & coarse)
 	{
 		using namespace boxmg::bmg2d;
 		int ibc;
 
-		auto & fined = const_cast<GridFunc&>(fine);
-		auto & Rd = const_cast<inter::RestrictOp&>(R);
-		inter::ProlongOp & P = Rd.getP();
+		auto & fined = const_cast<grid_func&>(fine);
+		auto & Rd = const_cast<inter::restrict_op&>(R);
+		inter::prolong_op & P = Rd.getP();
 		ibc = BMG_BCs_definite;
 
 		BMG2_SymStd_restrict(fined.data(), coarse.data(),
@@ -37,19 +37,19 @@ namespace impls
 		                     coarse.len(0), coarse.len(1), ibc);
 	}
 
-	void mpi_fortran_restrict(const inter::RestrictOp & R,
-	                          const GridFunc & fine,
-	                          GridFunc & coarse)
+	void mpi_fortran_restrict(const inter::restrict_op & R,
+	                          const grid_func & fine,
+	                          grid_func & coarse)
 	{
 		int kf, kc, nog;
-		auto & Rd = const_cast<inter::RestrictOp&>(R);
-		inter::ProlongOp & ser_P = Rd.getP();
-		inter::mpi::ProlongOp & P = dynamic_cast<inter::mpi::ProlongOp&>(ser_P);
-		auto & fine_par = dynamic_cast<const mpi::GridFunc&>(fine);
+		auto & Rd = const_cast<inter::restrict_op&>(R);
+		inter::prolong_op & ser_P = Rd.getP();
+		inter::mpi::prolong_op & P = dynamic_cast<inter::mpi::prolong_op&>(ser_P);
+		auto & fine_par = dynamic_cast<const mpi::grid_func&>(fine);
 		mpi::GridTopo & topo = P.grid();
 		const mpi::GridTopo & fine_topo = fine_par.grid();
 		MsgCtx *ctx = (MsgCtx*) P.halo_ctx;
-		auto & fined = const_cast<GridFunc&>(fine);
+		auto & fined = const_cast<grid_func&>(fine);
 
 		nog = kf = topo.nlevel();
 		kc = topo.level();

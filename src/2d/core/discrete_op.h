@@ -9,9 +9,9 @@ class DiscreteOp
 {
 
 public:
-	virtual void apply(const GridFunc & x, GridFunc & y) const = 0;
-	virtual void residual(const GridFunc &x, const GridFunc &b, GridFunc &r) const = 0;
-	//virtual void axpy(GridFunc &
+	virtual void apply(const grid_func & x, grid_func & y) const = 0;
+	virtual void residual(const grid_func &x, const grid_func &b, grid_func &r) const = 0;
+	//virtual void axpy(grid_func &
 };
 
 

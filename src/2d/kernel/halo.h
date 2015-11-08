@@ -36,7 +36,7 @@ namespace impls
 	};
 
 	void setup_msg(mpi::GridTopo &topo, void **msg_ctx);
-	void msg_exchange(mpi::GridFunc & f);
+	void msg_exchange(mpi::grid_func & f);
 	void msg_stencil_exchange(mpi::StencilOp & so);
 }
 }}}

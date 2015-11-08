@@ -2,7 +2,7 @@
 
 using namespace boxmg::bmg2d::inter::mpi;
 
-ProlongOp::ProlongOp(bmg2d::mpi::topo_ptr topo) : inter::ProlongOp(topo->nlocal(0)-2,
+prolong_op::prolong_op(bmg2d::mpi::topo_ptr topo) : inter::prolong_op(topo->nlocal(0)-2,
                                                              topo->nlocal(1)-2),
                                             grid_(topo)
 {
@@ -13,7 +13,7 @@ ProlongOp::ProlongOp(bmg2d::mpi::topo_ptr topo) : inter::ProlongOp(topo->nlocal(
 
 namespace boxmg { namespace bmg2d { namespace inter { namespace mpi {
 
-std::ostream & operator<< (std::ostream &os, const ProlongOp &P)
+std::ostream & operator<< (std::ostream &os, const prolong_op &P)
 {
 	auto & topo = P.grid();
 	auto iGs = topo.is(0);

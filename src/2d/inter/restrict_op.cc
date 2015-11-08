@@ -5,7 +5,7 @@
 
 namespace boxmg { namespace bmg2d { namespace inter {
 
-std::ostream & operator<< (std::ostream &os, const RestrictOp &R)
+std::ostream & operator<< (std::ostream &os, const restrict_op &R)
 {
 	os << *R.P;
 	return os;
@@ -13,17 +13,17 @@ std::ostream & operator<< (std::ostream &os, const RestrictOp &R)
 
 
 
-void RestrictOp::set_registry(std::shared_ptr<KernelRegistry> kreg)
+void restrict_op::set_registry(std::shared_ptr<KernelRegistry> kreg)
 {
 	kernels = kreg;
 }
 
 
-void RestrictOp::apply(const GridFunc &x, GridFunc &y) const
+void restrict_op::apply(const grid_func &x, grid_func &y) const
 {
 	if (kernels != nullptr) {
 		kernels->run(kernel::name::restriction,
-		             static_cast<const RestrictOp&>(*this),
+		             static_cast<const restrict_op&>(*this),
 		             x,y);
 	} else {
 		log::error << "You forgot to give the Restrict Operator a kernel registry!" << std::endl;
@@ -31,12 +31,12 @@ void RestrictOp::apply(const GridFunc &x, GridFunc &y) const
 }
 
 
-GridFunc operator*(const RestrictOp & R, const GridFunc &x)
+grid_func operator*(const restrict_op & R, const grid_func &x)
 {
 	auto & P = R.getP();
 	auto & Psten = P.stencil();
 
-	GridFunc y(Psten.shape(0), Psten.shape(1));
+	grid_func y(Psten.shape(0), Psten.shape(1));
 	R.apply(x,y);
 
 	return y;

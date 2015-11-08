@@ -51,7 +51,7 @@ extern "C"
 		auto *sop = reinterpret_cast<mpi::StencilOp*>(op);
 		auto grid = sop->grid_ptr();
 
-		mpi::GridFunc xgf(grid);
+		mpi::grid_func xgf(grid);
 		int idx = 0;
 		for (auto j : xgf.range(1)) {
 			for (auto i : xgf.range(0)) {
@@ -65,7 +65,7 @@ extern "C"
 		xgf.halo_ctx = sop->halo_ctx;
 		kreg->halo_exchange(xgf);
 
-		mpi::GridFunc bgf(grid);
+		mpi::grid_func bgf(grid);
 		sop->apply(xgf, bgf);
 
 		idx = 0;

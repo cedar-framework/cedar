@@ -11,11 +11,11 @@ using namespace boxmg::bmg2d;
 solver::solver(StencilOp&& fop)
 {
 	kreg = kernel::factory::from_config(conf);
-	levels.emplace_back(std::move(fop), inter::ProlongOp());
+	levels.emplace_back(std::move(fop), inter::prolong_op());
 	levels.back().A.set_registry(kreg);
 	{
 		GridStencil & fsten = levels.back().A.stencil();
-		levels.back().res = GridFunc(fsten.shape(0), fsten.shape(1));
+		levels.back().res = grid_func(fsten.shape(0), fsten.shape(1));
 	}
 
 	auto num_levels = solver::compute_num_levels(levels[0].A);
@@ -35,13 +35,13 @@ solver::solver(StencilOp&& fop)
 	auto & cop_sten = cop.stencil();
 	auto nxc = cop_sten.shape(0);
 	auto nyc = cop_sten.shape(1);
-	ABD = GridFunc(nxc+2, nxc*nyc, 0);
+	ABD = grid_func(nxc+2, nxc*nyc, 0);
 	bbd = new real_t[ABD.len(1)];
 	kernels->setup_cg_lu(cop, ABD);
-	coarse_solver = [&,kernels](const DiscreteOp &A, GridFunc &x, const GridFunc &b) {
+	coarse_solver = [&,kernels](const DiscreteOp &A, grid_func &x, const grid_func &b) {
 		kernels->solve_cg(x, b, ABD, bbd);
 		const StencilOp &av = dynamic_cast<const StencilOp&>(A);
-		GridFunc & residual = levels[levels.size()-1].res;
+		grid_func & residual = levels[levels.size()-1].res;
 		av.residual(x,b,residual);
 		log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
 	};
@@ -60,7 +60,7 @@ void solver::add_level(StencilOp & fop, int num_levels)
 	int kf = kc + 1;
 
 	auto cop = StencilOp(nxc, nyc);
-	auto P = inter::ProlongOp(nxc, nyc);
+	auto P = inter::prolong_op(nxc, nyc);
 	std::array<RelaxStencil, 2> SOR{{RelaxStencil(nx, ny),
 				RelaxStencil(nx, ny)}};
 	GridStencil & st = cop.stencil();
@@ -91,7 +91,7 @@ void solver::add_level(StencilOp & fop, int num_levels)
 	int nrelax_pre = conf.get<int>("solver.cycle.nrelax-pre", 2);
 	int nrelax_post = conf.get<int>("solver.cycle.nrelax-post", 1);
 
-	levels.back().presmoother = [&,lvl,nrelax_pre,kernels,relax_type](const DiscreteOp &A, GridFunc &x, const GridFunc&b) {
+	levels.back().presmoother = [&,lvl,nrelax_pre,kernels,relax_type](const DiscreteOp &A, grid_func &x, const grid_func&b) {
 		const StencilOp & av = dynamic_cast<const StencilOp &>(A);
 		for (auto i : range(nrelax_pre)) {
 			(void) i;
@@ -107,7 +107,7 @@ void solver::add_level(StencilOp & fop, int num_levels)
 			}
 		}
 	};
-	levels.back().postsmoother = [&,lvl,nrelax_post,kernels,relax_type](const DiscreteOp &A, GridFunc &x, const GridFunc&b) {
+	levels.back().postsmoother = [&,lvl,nrelax_post,kernels,relax_type](const DiscreteOp &A, grid_func &x, const grid_func&b) {
 
 		const StencilOp & av = dynamic_cast<const StencilOp &>(A);
 		for (auto i: range(nrelax_post)) {
@@ -127,10 +127,10 @@ void solver::add_level(StencilOp & fop, int num_levels)
 
 	cop.set_registry(kreg);
 
-	levels.emplace_back(std::move(cop),inter::ProlongOp());
-	levels.back().x = GridFunc(nxc, nyc);
-	levels.back().res = GridFunc(nxc, nyc);
-	levels.back().b = GridFunc(nxc, nyc);
+	levels.emplace_back(std::move(cop),inter::prolong_op());
+	levels.back().x = grid_func(nxc, nyc);
+	levels.back().res = grid_func(nxc, nyc);
+	levels.back().b = grid_func(nxc, nyc);
 }
 
 

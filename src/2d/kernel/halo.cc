@@ -166,7 +166,7 @@ namespace impls
 	}
 
 
-	void msg_exchange(mpi::GridFunc & f)
+	void msg_exchange(mpi::grid_func & f)
 	{
 		MsgCtx *ctx = (MsgCtx*) f.halo_ctx;
 		mpi::GridTopo &topo = f.grid();

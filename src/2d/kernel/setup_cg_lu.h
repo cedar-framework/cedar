@@ -9,10 +9,10 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 namespace impls
 {
 	void setup_cg_lu(const StencilOp & so,
-	                 GridFunc & ABD);
+	                 grid_func & ABD);
 
 	void mpi_setup_cg_lu(const StencilOp & so,
-	                     GridFunc & ABD);
+	                     grid_func & ABD);
 
 }
 

@@ -19,7 +19,7 @@ namespace impls
 {
 	using namespace boxmg::bmg2d::core;
 	void setup_cg_lu(const StencilOp & so,
-	                 GridFunc & ABD)
+	                 grid_func & ABD)
 	{
 		len_t nx, ny;
 		int nstencil;
@@ -44,7 +44,7 @@ namespace impls
 
 
 	void mpi_setup_cg_lu(const StencilOp & so,
-	                     GridFunc & ABD)
+	                     grid_func & ABD)
 	{
 		mpi::StencilOp & copd = const_cast<mpi::StencilOp&>(dynamic_cast<const mpi::StencilOp&>(so));
 

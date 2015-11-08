@@ -18,7 +18,7 @@ std::shared_ptr<boxmg::KernelRegistry> StencilOp::get_registry() const
 }
 
 
-void StencilOp::apply(const GridFunc &x, GridFunc &b) const
+void StencilOp::apply(const grid_func &x, grid_func &b) const
 {
 	if (kernels != nullptr) {
 		kernels->run(kernel::name::matvec,
@@ -31,7 +31,7 @@ void StencilOp::apply(const GridFunc &x, GridFunc &b) const
 }
 
 
-void StencilOp::residual(const GridFunc &x, const GridFunc &b, GridFunc & r) const
+void StencilOp::residual(const grid_func &x, const grid_func &b, grid_func & r) const
 {
 	if (kernels != nullptr) {
 		kernels->run(kernel::name::residual,
@@ -43,9 +43,9 @@ void StencilOp::residual(const GridFunc &x, const GridFunc &b, GridFunc & r) con
 }
 
 
-GridFunc StencilOp::residual(const GridFunc &x, const GridFunc &b) const
+grid_func StencilOp::residual(const grid_func &x, const grid_func &b) const
 {
-	auto r = GridFunc(x.shape(0),x.shape(1));
+	auto r = grid_func(x.shape(0),x.shape(1));
 	this->residual(x,b,r);
 
 	return r;

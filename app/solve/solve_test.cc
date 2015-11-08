@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 	GridStencil & sten = so.stencil();
 	sten.five_pt() = true;
 
-	GridFunc b(nx, ny);
+	grid_func b(nx, ny);
 	auto xs = linspace(0,1,nx+2);
 	auto ys = linspace(0,1,ny+2);
 
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
 	auto sol = bmg.solve(b);
 
-	GridFunc exact_sol(sol.shape(0), sol.shape(1));
+	grid_func exact_sol(sol.shape(0), sol.shape(1));
 
 	std::ofstream dfile;
 	dfile.open("sol.txt", std::ios::out | std::ios::trunc | std::ios::binary);
