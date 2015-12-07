@@ -3,8 +3,11 @@
 #include <memory>
 #include <math.h>
 
-#include <boxmg-common.h>
-#include <boxmg-2d.h>
+#include <boxmg/types.h>
+#include <boxmg/2d/mpi/grid_func.h>
+#include <boxmg/2d/util/topo.h>
+#include <boxmg/2d/util/mpi_grid.h>
+#include <boxmg/2d/mpi/solver.h>
 
 
 int main(int argc, char *argv[])

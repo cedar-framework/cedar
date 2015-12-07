@@ -17,3 +17,6 @@ FIND_PACKAGE(LAPACK REQUIRED)
 if(ENABLE_MPI)
 	set(boxmg-examples_LINKER_FLAGS ${Boost_LIBRARIES} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${MPI_LIBRARIES} ${MPI_Fortran_LIBRARIES})
 endif(ENABLE_MPI)
+
+
+include_directories(${CMAKE_BINARY_DIR}/include/boxmg/2d)

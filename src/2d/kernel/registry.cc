@@ -1,6 +1,6 @@
-#include "kernel/name.h"
+#include "boxmg/2d/kernel/name.h"
 
-#include "registry.h"
+#include "boxmg/2d/kernel/registry.h"
 
 using namespace boxmg::bmg2d::kernel;
 

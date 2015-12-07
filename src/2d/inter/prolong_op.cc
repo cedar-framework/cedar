@@ -1,7 +1,7 @@
 #include <iomanip>
 
-#include "inter/types.h"
-#include "inter/prolong_op.h"
+#include <boxmg/2d/inter/types.h>
+#include <boxmg/2d/inter/prolong_op.h>
 
 
 using namespace boxmg::bmg2d::inter;

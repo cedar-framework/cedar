@@ -1,4 +1,4 @@
-#include "mpi_grid.h"
+#include "boxmg/2d/util/mpi_grid.h"
 
 namespace boxmg { namespace bmg2d { namespace util { namespace mpi {
 

@@ -1,6 +1,6 @@
-#include "kernel/fortran/mpi/BMG_workspace_c.h"
+#include "boxmg/2d/ftn/mpi/BMG_workspace_c.h"
 
-#include "topo.h"
+#include "boxmg/2d/util/topo.h"
 
 namespace boxmg { namespace bmg2d { namespace util {
 

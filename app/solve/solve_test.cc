@@ -2,9 +2,11 @@
 #include <memory>
 #include <math.h>
 
-#include <boxmg-common.h>
-#include <boxmg-2d.h>
-
+#include <boxmg/types.h>
+#include <boxmg/util/grid.h>
+#include <boxmg/2d/grid_func.h>
+#include <boxmg/2d/stencil_op.h>
+#include <boxmg/2d/solver.h>
 
 
 int main(int argc, char *argv[])

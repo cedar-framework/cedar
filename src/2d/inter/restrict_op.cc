@@ -1,6 +1,6 @@
-#include "kernel/name.h"
+#include <boxmg/2d/kernel/name.h>
 
-#include "restrict_op.h"
+#include <boxmg/2d/inter/restrict_op.h>
 
 
 namespace boxmg { namespace bmg2d { namespace inter {

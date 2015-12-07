@@ -1,6 +1,6 @@
 #include <mpi.h>
 
-#include "setup_nog.h"
+#include "boxmg/2d/kernel/setup_nog.h"
 
 extern "C" {
 	using namespace boxmg;

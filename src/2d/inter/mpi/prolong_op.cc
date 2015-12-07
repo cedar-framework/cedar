@@ -1,4 +1,4 @@
-#include "prolong_op.h"
+#include <boxmg/2d/inter/mpi/prolong_op.h>
 
 using namespace boxmg::bmg2d::inter::mpi;
 
