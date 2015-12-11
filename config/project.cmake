@@ -9,3 +9,4 @@ set(CINCH_HEADER_SUFFIXES "\\.h")
 
 add_definitions(-DMSG_DOUBLE -DNO_SECOND_UNDERSCORE -fPIC)
 include_directories(include)
+install(DIRECTORY include/ DESTINATION include)

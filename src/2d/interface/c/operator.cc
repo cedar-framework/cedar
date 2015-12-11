@@ -1,14 +1,28 @@
-#include "operator.h"
+#include <stdbool.h>
 
-#include "util/topo.h"
-#include "core/mpi/stencil_op.h"
-#include "kernel/registry.h"
+#include <boxmg/types.h>
+#include <boxmg/2d/util/topo.h>
+#include <boxmg/2d/mpi/stencil_op.h>
+#include <boxmg/2d/kernel/registry.h>
 
-#include "boxmg-common.h"
+#include <boxmg/2d/interface/c/operator.h>
 
 extern "C"
 {
 	bmg2_operator bmg2_operator_create(bmg2_topo topo)
+	{
+		using namespace boxmg::bmg2d;
+
+		auto & grid = *(reinterpret_cast<std::shared_ptr<mpi::grid_topo>*>(topo));
+
+		mpi::stencil_op *sop = new mpi::stencil_op(grid);
+		auto & sten = sop->stencil();
+
+		return reinterpret_cast<bmg2_operator>(sop);
+	}
+
+
+	bmg2_operator bmg2_operator_create_fivept(bmg2_topo topo)
 	{
 		using namespace boxmg::bmg2d;
 

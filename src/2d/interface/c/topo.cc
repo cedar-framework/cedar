@@ -1,8 +1,8 @@
-#include "kernel/fortran/mpi/BMG_workspace_c.h"
-#include "boxmg-common.h"
-#include "core/mpi/grid_topo.h"
+#include <boxmg/2d/ftn/mpi/BMG_workspace_c.h>
+#include <boxmg/types.h>
+#include <boxmg/2d/mpi/grid_topo.h>
 
-#include "topo.h"
+#include <boxmg/2d/interface/c/topo.h>
 
 extern "C"
 {

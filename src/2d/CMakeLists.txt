@@ -4,6 +4,7 @@ add_subdirectory(inter)
 add_subdirectory(kernel)
 add_subdirectory(relax)
 add_subdirectory(util)
+add_subdirectory(interface)
 
 set(2d_SOURCES
   ${cg_SOURCES}
@@ -12,6 +13,7 @@ set(2d_SOURCES
   ${kernel_SOURCES}
   ${relax_SOURCES}
   ${util_SOURCES}
+  ${interface_SOURCES}
   grid_func.cc
   grid_stencil.cc
   stencil_op.cc

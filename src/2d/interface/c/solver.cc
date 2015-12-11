@@ -1,8 +1,8 @@
-#include "core/mpi/solver.h"
-#include "core/mpi/stencil_op.h"
-#include "boxmg-common.h"
+#include <boxmg/types.h>
+#include <boxmg/2d/mpi/solver.h>
+#include <boxmg/2d/mpi/stencil_op.h>
 
-#include "solver.h"
+#include <boxmg/2d/interface/c/solver.h>
 
 extern "C"
 {

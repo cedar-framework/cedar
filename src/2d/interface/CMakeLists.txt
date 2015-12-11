@@ -4,13 +4,6 @@ set(interface_SOURCES
   interface/c/solver.cc
   PARENT_SCOPE)
 
-
-set(interface_HEADERS
-  interface/c/operator.h
-  interface/c/topo.h
-  interface/c/solver.h
-  PARENT_SCOPE)
-
 # add_library(core SHARED python/core.cc)
 # set_target_properties(core PROPERTIES PREFIX "")
 # target_include_directories(core PUBLIC "/usr/include/python2.7" ${CMAKE_BINARY_DIR}/include ${CMAKE_BINARY_DIR}/include/boxmg-common ${CMAKE_BINARY_DIR}/include/boxmg-2d)

@@ -1,13 +1,13 @@
 #ifndef BOXMG_2D_INTERFACE_OPERATOR_H
 #define BOXMG_2D_INTERFACE_OPERATOR_H
 
-#include "topo.h"
+#include <boxmg/2d/interface/c/topo.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "boxmg-2d/core/base_types.h"
+#include <boxmg/2d/base_types.h>
 
 struct bmg2_op;
 typedef struct bmg2_op* bmg2_operator;
@@ -19,6 +19,8 @@ typedef struct {
 } grid_coord;
 
 bmg2_operator bmg2_operator_create(bmg2_topo topo);
+
+bmg2_operator bmg2_operator_create_fivept(bmg2_topo topo);
 
 void bmg2_operator_set(bmg2_operator, unsigned int nvals, grid_coord coords[], double vals[]);
 

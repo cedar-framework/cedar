@@ -1,7 +1,7 @@
 #ifndef BOXMG_2D_INTERFACE_SOLVER_H
 #define BOXMG_2D_INTERFACE_SOLVER_H
 
-#include "operator.h"
+#include <boxmg/2d/interface/c/operator.h>
 
 #ifdef __cplusplus
 extern "C" {
