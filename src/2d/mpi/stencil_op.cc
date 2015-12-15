@@ -7,8 +7,9 @@ stencil_op::stencil_op(topo_ptr grd) :
 	bmg2d::stencil_op(grd->nlocal(0)-2, grd->nlocal(1)-2),
 	comm(grd->comm), grid_(grd)
 {
-	gs.stride(1)++;
-	gs.stride(2) = (gs.len(0)+1)*(gs.len(1)+1);
+	gs.reshape(gs.len(0)+1, gs.len(1)+1, gs.len(2));
+	gs.len(0)--;
+	gs.len(1)--;
 }
 
 

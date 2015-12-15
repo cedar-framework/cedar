@@ -3,26 +3,27 @@
 
 #include "boxmg/2d/inter/types.h"
 #include "boxmg/2d/types.h"
-#include "boxmg/2d/array.h"
+#include "boxmg/array.h"
 #include "boxmg/2d/boundary_iterator.h"
 
 namespace boxmg { namespace bmg2d {
 
-	class grid_stencil : public Array<len_t, real_t>
+	class grid_stencil : public array<len_t, real_t, 3>
 	{
 	public:
 		grid_stencil() {};
 		grid_stencil(len_t nx, len_t ny, unsigned int nghosts=1, bool intergrid=false, bool symmetric=true, bool five_pt=false);
 
-		using Array<len_t,real_t>::index;
+		using array<len_t,real_t,3>::index;
+		using array<len_t,real_t,3>::operator();
 		len_t index(len_t i, len_t j, dir direction) const
 		{
-			return static_cast<int>(direction)*ostride + i*stride_[0] + j*stride_[1];
+			return this->index(i,j,static_cast<len_t>(direction));
 		}
 
 		len_t index(len_t i, len_t j, inter::dir direction) const
 		{
-			return static_cast<int>(direction)*ostride + i*stride_[0] + j*stride_[1];
+			return this->index(i,j,static_cast<len_t>(direction));
 		}
 
 
@@ -33,24 +34,20 @@ namespace boxmg { namespace bmg2d {
 
 		real_t & operator()(len_t i, len_t j, dir direction)
 		{
-			#ifdef DEBUG
-			this->check_bounds(i,j);
-			#endif
 			symmetric_hack(i,j,direction);
 			#ifdef DEBUG
-			return data_.at(index(i,j,direction));
+			return vec.at(index(i,j,direction));
 			#else
-			return data_.data()[index(i,j,direction)];
+			return vec.data()[index(i,j,direction)];
 			#endif
 		}
 
 		real_t & operator()(len_t i, len_t j, inter::dir direction)
 		{
 			#ifdef DEBUG
-			this->check_bounds(i,j);
-			return data_.at(index(i,j,direction));
+			return vec.at(index(i,j,direction));
 			#else
-			return data_.data()[index(i,j,direction)];
+			return vec.data()[index(i,j,direction)];
 			#endif
 		}
 
@@ -58,25 +55,20 @@ namespace boxmg { namespace bmg2d {
 		real_t operator()(len_t i, len_t j, inter::dir direction) const
 		{
 			#ifdef DEBUG
-			this->check_bounds(i,j);
-			return data_.at(index(i,j,direction));
+			return vec.at(index(i,j,direction));
 			#else
-			return data_.data()[index(i,j,direction)];
+			return vec.data()[index(i,j,direction)];
 			#endif
 		}
 
 		real_t operator()(len_t i, len_t j, dir direction) const
 		{
-			#ifdef DEBUG
-			this->check_bounds(i,j);
-			#endif
-
 			symmetric_hack(i,j,direction);
 
 			#ifdef DEBUG
-			return data_.at(index(i,j,direction));
+			return vec.at(index(i,j,direction));
 			#else
-			return data_.data()[index(i,j,direction)];
+			return vec.data()[index(i,j,direction)];
 			#endif
 		}
 
@@ -110,17 +102,9 @@ namespace boxmg { namespace bmg2d {
 			return five_pt_;
 		}
 
-		len_t & stride(int dim)
-		{
-			if (dim < 2) return stride_[dim];
-			else return ostride;
-		}
-
-		len_t stride(int dim) const
-		{
-			if (dim < 2) return stride_[dim];
-			else return ostride;
-		}
+		const virtual range_t<len_t> & range(int i) const;
+		const virtual range_t<len_t> & grange(int i) const;
+		virtual len_t shape(int i) const;
 
 		/* AlignedVector<real_t> & vector() { return data_;} */
 		/* const AlignedVector<real_t> & vector() const { return data_;} */
@@ -128,7 +112,9 @@ namespace boxmg { namespace bmg2d {
 	private:
 		bool symmetric;
 		bool five_pt_;
-		len_t ostride;
+		int num_ghosts;
+		std::array<range_t<len_t>, 2> range_;
+		std::array<range_t<len_t>, 2> grange_;
 	};
 
 }}

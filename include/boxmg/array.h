@@ -35,6 +35,12 @@ public:
 	array() {};
 	template <typename... T> array(T... args)
 	{
+		reshape(std::forward<decltype(args)>(args)...);
+	}
+
+
+	template <typename... T> void reshape(T... args)
+	{
 		auto pos = unpack_extents(std::forward<decltype(args)>(args)...);
 		#ifdef BOUNDS_CHECK
 		assert(pos == -1);
@@ -101,7 +107,7 @@ public:
 	}
 
 
-	template<typename... T>	len_t index(T... args)
+	template<typename... T>	len_t index(T... args) const
 	{
 		auto offset = get_offset(std::forward<decltype(args)>(args)...);
 		return std::get<1>(offset);
@@ -117,7 +123,25 @@ public:
 	}
 
 
+	len_type & len(int i)
+	{
+		#ifdef BOUNDS_CHECK
+		assert(i < ND);
+		#endif
+		return extents[i];
+	}
+
+
 	len_type stride(int i) const
+	{
+		#ifdef BOUNDS_CHECK
+		assert(i < ND);
+		#endif
+		return strides[i];
+	}
+
+
+	len_type & stride(int i)
 	{
 		#ifdef BOUNDS_CHECK
 		assert(i < ND);
