@@ -27,15 +27,15 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 namespace impls
 {
 	MsgCtx::MsgCtx(mpi::grid_topo & topo) :
-		pMSG(NBMG_pMSG, topo.nlevel(),0),
-		pLS(NBMG_pLS, topo.nlevel(),0),
-		pMSGSO(NBMG_pMSG, topo.nlevel(),0),
-		proc_grid(topo.nproc(0), topo.nproc(1),0),
+		pMSG(NBMG_pMSG, topo.nlevel()),
+		pLS(NBMG_pLS, topo.nlevel()),
+		pMSGSO(NBMG_pMSG, topo.nlevel()),
+		proc_grid(topo.nproc(0), topo.nproc(1)),
 		proc_coord(topo.nproc(0)*topo.nproc(1)*2),
 		dimxfine(topo.nproc(0)),
 		dimyfine(topo.nproc(1)),
-		dimx(topo.nproc(0), topo.nlevel(),0),
-		dimy(topo.nproc(1), topo.nlevel(),0)
+		dimx(topo.nproc(0), topo.nlevel()),
+		dimy(topo.nproc(1), topo.nlevel())
 	{
 		MPI_Comm_split(topo.comm, topo.coord(1), topo.coord(0),
 		               &xlinecomm);
