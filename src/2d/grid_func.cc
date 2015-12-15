@@ -5,7 +5,25 @@
 
 #include <boxmg/2d/grid_func.h>
 
+using namespace boxmg;
 using namespace boxmg::bmg2d;
+
+
+grid_func::grid_func(len_t nx, len_t ny, unsigned int nghosts) :
+	array<len_t,real_t,2>(nx+2*nghosts, ny+2*nghosts), num_ghosts(nghosts)
+{
+	range_[0] = boxmg::range(static_cast<len_t>(nghosts), static_cast<len_t>(nx + nghosts));
+	range_[1] = boxmg::range(static_cast<len_t>(nghosts), static_cast<len_t>(ny + nghosts));
+
+	grange_[0] = boxmg::range(static_cast<len_t>(0), nx + 2*nghosts);
+	grange_[1] = boxmg::range(static_cast<len_t>(0), ny + 2*nghosts);
+}
+
+
+boxmg::len_t grid_func::shape(int i) const
+{
+	return this->len(i) - 2*num_ghosts;
+}
 
 
 grid_func grid_func::ones(len_t nx, len_t ny)
@@ -33,6 +51,26 @@ grid_func grid_func::zeros(len_t nx, len_t ny)
 	}
 
 	return ret;
+}
+
+
+const range_t<len_t> & grid_func::range(int i) const
+{
+		#ifdef DEBUG
+		return range_.at(i);
+		#else
+		return range_[i];
+		#endif
+}
+
+
+const range_t<len_t> & grid_func::grange(int i) const
+{
+	#ifdef DEBUG
+	return grange_.at(i);
+	#else
+	return grange_[i];
+	#endif
 }
 
 
@@ -83,7 +121,7 @@ boxmg::real_t grid_func::inf_norm() const
 		return (std::abs(a) < std::abs(b));
 	};
 
-	auto res = std::max_element(data_.begin(), data_.end(), abs_compare);
+	auto res = std::max_element(vec.begin(), vec.end(), abs_compare);
 	return *res;
 }
 
@@ -98,3 +136,16 @@ grid_func & grid_func::operator-=(const grid_func &rhs)
 
 	return *this;
 }
+
+
+namespace boxmg { namespace bmg2d {
+std::ostream & operator<<(std::ostream &os, const grid_func & obj)
+{
+	for (auto j: obj.range(1)) {
+		for (auto i: obj.range(0)) {
+			os << i << " " << j << " " << std::to_string(obj(i,j));
+		}
+	}
+	return os;
+}
+}}

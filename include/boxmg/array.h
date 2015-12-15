@@ -3,33 +3,28 @@
 
 #include <cassert>
 #include <tuple>
+#include <boxmg/types.h>
 
 namespace boxmg {
 
-template <typename D, unsigned short ND>
+template <typename len_type, typename data_type, unsigned short ND>
 class array
 {
-private:
-	D *arr;
-	std::array<int, ND> strides;
-	std::array<int, ND> extents;
+protected:
+	AlignedVector<data_type> vec;
+	std::array<len_type, ND> strides;
+	std::array<len_type, ND> extents;
 
 public:
 
-	std::vector<int> unpack_extents()
-	{
-		std::vector<int> v;
-		return v;
-	}
-
-	int unpack_extents(int n)
+	len_type unpack_extents(len_type n)
 	{
 		extents[ND-1] = n;
 
 		return ND-2;
 	}
 
-	template <typename... T> int unpack_extents(int n, T... args)
+	template <typename... T> len_type unpack_extents(len_type n, T... args)
 	{
 		auto pos = unpack_extents(std::forward<decltype(args)>(args)...);
 		extents[pos] = n;
@@ -44,10 +39,10 @@ public:
 		#ifdef BOUNDS_CHECK
 		assert(pos == -1);
 		#endif
-		int len = 1;
+		len_type len = 1;
 		for (int i = 0; i < ND; i++)
 			len *= extents[i];
-		arr = new D[len];
+		vec.resize(len);
 
 		strides[0] = 1;
 		for (int i = 1; i < ND; i++) {
@@ -60,44 +55,60 @@ public:
 	}
 
 
-	~array()
-	{
-		delete[] arr;
-	}
-
-
-	std::tuple<int, D*> get_base(int i)
+	std::tuple<int, len_type> get_offset(int i) const
 	{
 		#ifdef BOUNDS_CHECK
 		assert(i < extents[ND-1]);
 		#endif
-		return std::make_tuple(ND-2, arr + i*strides[ND-1]);
+		return std::make_tuple(ND-2, i*strides[ND-1]);
 	}
 
 
-	template<typename... T> std::tuple<int, D*> get_base(int i, T... args)
+	template<typename... T> std::tuple<int, len_type> get_offset(int i, T... args) const
 	{
-		auto base = get_base(std::forward<decltype(args)>(args)...);
-		auto pos = std::get<0>(base);
+		auto offset = get_offset(std::forward<decltype(args)>(args)...);
+		auto pos = std::get<0>(offset);
 		#ifdef BOUNDS_CHECK
 		assert(pos >= 0);
 		assert(i < extents[pos]);
 		#endif
 		return std::make_tuple(pos-1,
-		                       std::get<1>(base) + i*strides[pos]);
+		                       std::get<1>(offset) + i*strides[pos]);
 	}
 
-	template<typename... T> D & operator()(T... args)
+
+	template<typename... T> data_type & operator()(T... args)
 	{
-		auto base = get_base(std::forward<decltype(args)>(args)...);
+		auto offset = get_offset(std::forward<decltype(args)>(args)...);
 		#ifdef BOUNDS_CHECK
-		assert(std::get<0>(base) == -1);
+		assert(std::get<0>(offset) == -1);
+		return vec.at(std::get<1>(offset));
+		#else
+		return vec[std::get<1>(offset)];
 		#endif
-		D * ret = std::get<1>(base);
-		return *ret;
 	}
 
-	int len(int i) const
+
+	template<typename... T> const data_type & operator()(T... args) const
+	{
+		auto offset = get_offset(std::forward<decltype(args)>(args)...);
+		#ifdef BOUNDS_CHECK
+		assert(std::get<0>(offset) == -1);
+		return vec.at(std::get<1>(offset));
+		#else
+		return vec[std::get<1>(offset)];
+		#endif
+	}
+
+
+	template<typename... T>	len_t index(T... args)
+	{
+		auto offset = get_offset(std::forward<decltype(args)>(args)...);
+		return std::get<1>(offset);
+	}
+
+
+	len_type len(int i) const
 	{
 		#ifdef BOUNDS_CHECK
 		assert(i < ND);
@@ -105,13 +116,30 @@ public:
 		return extents[i];
 	}
 
-	int stride(int i) const
+
+	len_type stride(int i) const
 	{
 		#ifdef BOUNDS_CHECK
 		assert(i < ND);
 		#endif
 		return strides[i];
 	}
+
+
+	void set(data_type v)
+	{
+		for (auto&& val: vec)
+			val = v;
+	}
+
+
+	void scale(data_type scalar)
+	{
+		for (auto&& val: vec)
+			val *= scalar;
+	}
+
+	data_type * data() { return vec.data(); }
 };
 
 }

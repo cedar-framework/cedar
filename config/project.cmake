@@ -7,6 +7,6 @@ cinch_add_library_target(boxmg src)
 
 set(CINCH_HEADER_SUFFIXES "\\.h")
 
-add_definitions(-DMSG_DOUBLE -DNO_SECOND_UNDERSCORE -fPIC)
+add_definitions(-DMSG_DOUBLE -DNO_SECOND_UNDERSCORE -fPIC -DBOUNDS_CHECK)
 include_directories(include)
 install(DIRECTORY include/ DESTINATION include)

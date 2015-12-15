@@ -17,7 +17,7 @@ public:
 	/* 	grid_func(ArgTypes&&... args) : ::boxmg::bmg2d::core::grid_func(std::forward<decltype(args)>(args)...) {} */
 	grid_func(){};
 	grid_func(topo_ptr grid);
-
+	using ::boxmg::bmg2d::grid_func::operator();
 	MPI_Comm comm;
 	grid_topo & grid() { return *grid_; }
 	const grid_topo & grid() const { return *grid_;}

@@ -2,8 +2,12 @@
 #define BOXMG_2D_CORE_GRIDFUNC_H
 
 #include <cmath>
-#include "../types.h"
-#include "array.h"
+#include <iostream>
+
+#include <boxmg/types.h>
+#include <boxmg/2d/types.h>
+#include <boxmg/array.h>
+
 
 namespace boxmg { namespace bmg2d { namespace inter {
 class prolong_op;
@@ -12,21 +16,30 @@ class prolong_op;
 
 namespace boxmg { namespace bmg2d {
 
-	class grid_func : public Array<len_t, real_t>
+	class grid_func : public array<len_t, real_t, 2>
 	{
 	public:
 		using iadd_t = std::tuple<const boxmg::bmg2d::inter::prolong_op&, const grid_func&, const grid_func&>;
-		template<typename... ArgTypes>
-			grid_func(ArgTypes&&... args) : Array<len_t,real_t>(std::forward<decltype(args)>(args)...){}
+		using array<len_t, real_t, 2>::operator();
+		grid_func(len_t nx, len_t ny, unsigned int nghosts=1);
+		grid_func() {}
 		static grid_func ones(len_t nx, len_t ny);
 		static grid_func zeros(len_t nx, len_t ny);
 		static grid_func zeros_like(const grid_func &likeable);
 		static grid_func ones_like(const grid_func &likeable);
+		virtual len_t shape(int i) const;
 		virtual real_t inf_norm() const;
+		const virtual range_t<len_t> & range(int i) const;
+		const virtual range_t<len_t> & grange(int i) const;
 		template<int p> real_t lp_norm() const;
 		grid_func & operator+=(iadd_t interp_add_package);
 		grid_func & operator-=(const grid_func & rhs);
 		friend grid_func operator-(grid_func lhs, const grid_func &rhs) { return lhs -= rhs; }
+		friend std::ostream & operator<<(std::ostream &os, const grid_func & obj);
+	protected:
+		std::array<range_t<len_t>, 2> range_;
+		std::array<range_t<len_t>, 2> grange_;
+		unsigned int num_ghosts;
 	};
 
 
@@ -34,7 +47,7 @@ namespace boxmg { namespace bmg2d {
 	{
 		real_t result = 0;
 
-		for (auto &v : data_) result += std::pow(v, p);
+		for (auto &v : vec) result += std::pow(v, p);
 
 		return std::pow(result, 1./p);
 	}
