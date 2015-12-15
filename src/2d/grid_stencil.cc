@@ -6,8 +6,9 @@
 using namespace boxmg::bmg2d;
 
 
-grid_stencil::grid_stencil(len_t nx, len_t ny, unsigned int nghosts, bool intergrid, bool symmetric, bool five_pt): array(), symmetric(not intergrid and symmetric), five_pt_(five_pt), num_ghosts(nghosts)
+grid_stencil::grid_stencil(len_t nx, len_t ny, unsigned int nghosts, bool intergrid, bool symmetric, bool five_pt): array(), symmetric(not intergrid and symmetric), five_pt_(five_pt)
 {
+	num_ghosts = nghosts;
 	range_[0] = boxmg::range(static_cast<len_t>(nghosts), static_cast<len_t>(nx + nghosts));
 	range_[1] = boxmg::range(static_cast<len_t>(nghosts), static_cast<len_t>(ny + nghosts));
 
@@ -27,27 +28,16 @@ grid_stencil::grid_stencil(len_t nx, len_t ny, unsigned int nghosts, bool interg
 }
 
 
-const boxmg::range_t<boxmg::len_t> & grid_stencil::range(int i) const
+grid_stencil & grid_stencil::operator=(grid_stencil&& gs)
 {
-		#ifdef DEBUG
-		return range_.at(i);
-		#else
-		return range_[i];
-		#endif
-}
+	vec = std::move(gs.vec);
+	strides = std::move(gs.strides);
+	extents = std::move(gs.extents);
+	five_pt_ = gs.five_pt_;
+	symmetric = gs.symmetric;
+	num_ghosts = gs.num_ghosts;
+	range_ = std::move(gs.range_);
+	grange_ = std::move(gs.grange_);
 
-
-const boxmg::range_t<boxmg::len_t> & grid_stencil::grange(int i) const
-{
-	#ifdef DEBUG
-	return grange_.at(i);
-	#else
-	return grange_[i];
-	#endif
-}
-
-
-boxmg::len_t grid_stencil::shape(int i) const
-{
-	return this->len(i) - 2*num_ghosts;
+	return *this;
 }

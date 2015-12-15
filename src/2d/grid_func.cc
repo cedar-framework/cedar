@@ -9,20 +9,28 @@ using namespace boxmg;
 using namespace boxmg::bmg2d;
 
 
-grid_func::grid_func(len_t nx, len_t ny, unsigned int nghosts) :
-	array<len_t,real_t,2>(nx+2*nghosts, ny+2*nghosts), num_ghosts(nghosts)
+grid_func & grid_func::operator=(grid_func &&gf)
 {
+	vec = std::move(gf.vec);
+	strides = std::move(gf.strides);
+	extents = std::move(gf.extents);
+	num_ghosts = gf.num_ghosts;
+	range_ = std::move(gf.range_);
+	grange_ = std::move(gf.grange_);
+
+	return *this;
+}
+
+
+grid_func::grid_func(len_t nx, len_t ny, unsigned int nghosts) :
+	array<len_t,real_t,2>(nx+2*nghosts, ny+2*nghosts)
+{
+	num_ghosts = nghosts;
 	range_[0] = boxmg::range(static_cast<len_t>(nghosts), static_cast<len_t>(nx + nghosts));
 	range_[1] = boxmg::range(static_cast<len_t>(nghosts), static_cast<len_t>(ny + nghosts));
 
 	grange_[0] = boxmg::range(static_cast<len_t>(0), nx + 2*nghosts);
 	grange_[1] = boxmg::range(static_cast<len_t>(0), ny + 2*nghosts);
-}
-
-
-boxmg::len_t grid_func::shape(int i) const
-{
-	return this->len(i) - 2*num_ghosts;
 }
 
 
@@ -51,26 +59,6 @@ grid_func grid_func::zeros(len_t nx, len_t ny)
 	}
 
 	return ret;
-}
-
-
-const range_t<len_t> & grid_func::range(int i) const
-{
-		#ifdef DEBUG
-		return range_.at(i);
-		#else
-		return range_[i];
-		#endif
-}
-
-
-const range_t<len_t> & grid_func::grange(int i) const
-{
-	#ifdef DEBUG
-	return grange_.at(i);
-	#else
-	return grange_[i];
-	#endif
 }
 
 

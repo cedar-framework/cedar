@@ -3,11 +3,12 @@
 
 #include <boxmg/2d/types.h>
 #include <boxmg/array.h>
+#include <boxmg/grid_quantity.h>
 
 namespace boxmg { namespace bmg2d {
 
 
-class relax_stencil : public array<len_t, real_t,3>
+class relax_stencil : public array<len_t, real_t,3>, public grid_quantity<len_t, 2>
 {
 public:
 	relax_stencil() {};
@@ -15,10 +16,6 @@ public:
 
 	using array<len_t,real_t,3>::index;
 	using array<len_t,real_t,3>::operator();
-
-	const virtual range_t<len_t> & range(int i) const;
-	const virtual range_t<len_t> & grange(int i) const;
-	virtual len_t shape(int i) const;
 
 	/* len_t index(len_t i, len_t j, int dir) const */
 	/* { */
@@ -44,10 +41,6 @@ public:
 	/* 	return data_.data()[index(i,j,dir)]; */
 	/* 	#endif */
 	/* } */
-private:
-	int num_ghosts;
-	std::array<range_t<len_t>, 2> range_;
-	std::array<range_t<len_t>, 2> grange_;
 };
 
 

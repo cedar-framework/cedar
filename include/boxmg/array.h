@@ -4,11 +4,12 @@
 #include <cassert>
 #include <tuple>
 #include <boxmg/types.h>
+#include <boxmg/array_base.h>
 
 namespace boxmg {
 
 template <typename len_type, typename data_type, unsigned short ND>
-class array
+class array : public virtual array_base<len_type>
 {
 protected:
 	AlignedVector<data_type> vec;
@@ -114,7 +115,7 @@ public:
 	}
 
 
-	len_type len(int i) const
+	virtual len_type len(int i) const
 	{
 		#ifdef BOUNDS_CHECK
 		assert(i < ND);
@@ -123,7 +124,7 @@ public:
 	}
 
 
-	len_type & len(int i)
+	virtual len_type & len(int i)
 	{
 		#ifdef BOUNDS_CHECK
 		assert(i < ND);

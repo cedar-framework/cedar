@@ -5,13 +5,17 @@
 #include "boxmg/2d/types.h"
 #include "boxmg/array.h"
 #include "boxmg/2d/boundary_iterator.h"
+#include "boxmg/grid_quantity.h"
 
 namespace boxmg { namespace bmg2d {
 
-	class grid_stencil : public array<len_t, real_t, 3>
+	class grid_stencil : public array<len_t, real_t, 3>, public grid_quantity<len_t, 2>
 	{
 	public:
 		grid_stencil() {};
+		grid_stencil & operator=(grid_stencil&& gs);
+		grid_stencil(const grid_stencil &gs) = default;
+		grid_stencil & operator=(const grid_stencil & gs) = default;
 		grid_stencil(len_t nx, len_t ny, unsigned int nghosts=1, bool intergrid=false, bool symmetric=true, bool five_pt=false);
 
 		using array<len_t,real_t,3>::index;
@@ -101,20 +105,12 @@ namespace boxmg { namespace bmg2d {
 		{
 			return five_pt_;
 		}
-
-		const virtual range_t<len_t> & range(int i) const;
-		const virtual range_t<len_t> & grange(int i) const;
-		virtual len_t shape(int i) const;
-
 		/* AlignedVector<real_t> & vector() { return data_;} */
 		/* const AlignedVector<real_t> & vector() const { return data_;} */
 
 	private:
 		bool symmetric;
 		bool five_pt_;
-		int num_ghosts;
-		std::array<range_t<len_t>, 2> range_;
-		std::array<range_t<len_t>, 2> grange_;
 	};
 
 }}
