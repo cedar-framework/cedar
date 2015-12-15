@@ -9,7 +9,6 @@
 #include "boxmg/2d/inter/interp.h"
 #include "boxmg/2d/inter/restrict.h"
 #include "boxmg/2d/kernel/setup_nog.h"
-#include "boxmg/2d/mpi/halo.h"
 
 #include "boxmg/2d/kernel/factory.h"
 
@@ -28,12 +27,6 @@ namespace factory
 		         const grid_func &,
 		         const grid_func &,
 		         grid_func&>(impls::residual_fortran));
-
-		kreg->add(name::residual, "fortran-msg",
-		         Kernel<const stencil_op &,
-		         const grid_func &,
-		         const grid_func &,
-		         grid_func&>(impls::mpi_residual_fortran));
 
 		kreg->add(name::residual,"c++",
 		         Kernel<const stencil_op &,
@@ -92,34 +85,16 @@ namespace factory
 		          grid_func&,
 		         cycle::Dir>(impls::relax_lines_y));
 
-		kreg->add(name::relax, "fortran-msg-rbgs",
-		         Kernel<const stencil_op&,
-		         grid_func&,
-		         const grid_func&,
-		         const relax_stencil&,
-		         cycle::Dir>(impls::mpi_relax_rbgs_point));
-
 		kreg->add(name::restriction, "fortran",
 		         Kernel<const inter::restrict_op&,
 		         const grid_func&,
 		         grid_func&>(impls::fortran_restrict));
-
-		kreg->add(name::restriction, "fortran-msg",
-		         Kernel<const inter::restrict_op&,
-		         const grid_func&,
-		         grid_func&>(impls::mpi_fortran_restrict));
 
 		kreg->add(name::interp_add,"fortran",
 		         Kernel<const inter::prolong_op&,
 		         const grid_func&,
 		         const grid_func&,
 		         grid_func&>(impls::fortran_interp));
-
-		kreg->add(name::interp_add, "fortran-msg",
-		         Kernel<const inter::prolong_op&,
-		         const grid_func&,
-		         const grid_func&,
-		         grid_func&>(impls::mpi_fortran_interp));
 
 		kreg->add(name::solve_cg, "fortran",
 		          Kernel<grid_func&,
@@ -131,68 +106,27 @@ namespace factory
 		         Kernel<mpi::grid_topo&,
 		         len_t, int*>(impls::fortran_setup_nog));
 
-		kreg->add(name::halo_setup, "fortran-msg",
-		         Kernel<mpi::grid_topo&,void**>(impls::setup_msg));
+		std::vector<std::tuple<std::string, std::string, std::string>> defaults = {
+			std::make_tuple(name::residual, "kernels.residual", "fortran"),
+			std::make_tuple(name::setup_interp, "kernels.setup-interp", "fortran"),
+			std::make_tuple(name::galerkin_prod, "kernels.galerkin-prod", "fortran-ex"),
+			std::make_tuple(name::setup_relax, "kernels.setup-relax", "fortran-rbgs-point"),
+			std::make_tuple(name::setup_cg_lu, "kernels.setup-cg-lu", "fortran"),
+			std::make_tuple(name::restriction, "kernels.restrict", "fortran"),
+			std::make_tuple(name::interp_add, "kernels.interp-add", "fortran"),
+			std::make_tuple(name::solve_cg, "kernels.solve-cg", "fortran"),
+			std::make_tuple(name::relax, "kernels.relax", "fortran-rbgs"),
+			std::make_tuple(name::setup_relax_x, "kernels.setup-relax-x", "fortran"),
+			std::make_tuple(name::setup_relax_y, "kernels.setup-relax-y", "fortran"),
+			std::make_tuple(name::relax_lines_x, "kernels.relax-x", "fortran"),
+			std::make_tuple(name::relax_lines_y, "kernels.relax-y", "fortran")
+		};
 
-		kreg->add(name::halo_exchange, "fortran-msg",
-		         Kernel<mpi::grid_func&>(impls::msg_exchange));
-
-		kreg->add(name::halo_stencil_exchange, "fortran-msg",
-		         Kernel<mpi::stencil_op&>(impls::msg_stencil_exchange));
-
-		kreg->add(name::setup_interp, "fortran-msg",
-		         Kernel<int,int,int,
-		         const stencil_op&,
-		         const stencil_op&,
-		         inter::prolong_op&>(impls::mpi_setup_interp));
-
-		kreg->add(name::galerkin_prod, "fortran-msg",
-		         Kernel<int,int,int,
-		         const inter::prolong_op&,
-		         const stencil_op&,
-		         stencil_op&>(impls::mpi_galerkin_prod));
-
-		kreg->add(name::setup_relax, "fortran-msg-rbgs-point",
-		         Kernel<const stencil_op&,
-		         relax_stencil&>(impls::mpi_setup_rbgs_point));
-
-		// TODO: This could be automatic.
-
-		std::string res_kern = conf.get<std::string>("kernels.residual", "c++");
-		std::string setup_interp_kern = conf.get<std::string>("kernels.setup-interp", "fortran");
-		std::string galerkin_prod_kern = conf.get<std::string>("kernels.galerkin-prod", "fortran-ex");
-		std::string setup_relax_kern = conf.get<std::string>("kernels.setup-relax", "fortran-rbgs-point");
-		std::string setup_cg_lu_kern = conf.get<std::string>("kernels.setup-cg-lu", "fortran");
-		std::string relax_kern = conf.get<std::string>("kernels.relax", "fortran-rbgs");
-		std::string restrict_kern = conf.get<std::string>("kernels.restrict", "fortran");
-		std::string interp_kern = conf.get<std::string>("kernels.interp-add", "fortran");
-		std::string solve_cg_kern = conf.get<std::string>("kernels.solve-cg", "fortran");
-		std::string halo_setup_kern = conf.get<std::string>("kernels.halo-setup", "fortran-msg");
-		std::string halo_exchange_kern = conf.get<std::string>("kernels.halo-exchange", "fortran-msg");
-
-		log::info << "Using '" << res_kern << "' to compute residual." << std::endl;
-		log::info << "Using '" + setup_interp_kern + "' to setup interpolation operator." << std::endl;
-		log::info << "Using '" + galerkin_prod_kern + "' for operator coarsening." << std::endl;
-		log::info << "Using '" + setup_relax_kern + "' to setup relaxation." << std::endl;
-		log::info << "Using '" + setup_cg_lu_kern + "' to setup coarse grid solve." << std::endl;
-		log::info << "Using '" + relax_kern + "' for relaxation." << std::endl;
-		log::info << "Using '" + restrict_kern + "' for " << name::restriction << "." << std::endl;
-		log::info << "Using '" + interp_kern + "' for " << name::interp_add << "." << std::endl;
-		log::info << "Using '" + solve_cg_kern + "' for " << name::solve_cg << "." << std::endl;
-
-		kreg->set(name::residual, res_kern);
-		kreg->set(name::galerkin_prod, galerkin_prod_kern);
-		kreg->set(name::setup_interp, setup_interp_kern);
-		kreg->set(name::setup_relax, setup_relax_kern);
-		kreg->set(name::setup_relax_x, "fortran");
-		kreg->set(name::setup_relax_y, "fortran");
-		kreg->set(name::setup_cg_lu, setup_cg_lu_kern);
-		kreg->set(name::relax, relax_kern);
-		kreg->set(name::restriction, restrict_kern);
-		kreg->set(name::interp_add, interp_kern);
-		kreg->set(name::solve_cg, solve_cg_kern);
-		kreg->set(name::relax_lines_x, "fortran");
-		kreg->set(name::relax_lines_y, "fortran");
+		for (auto&& v : defaults) {
+			std::string kname = conf.get<std::string>(std::get<1>(v), std::get<2>(v));
+			log::info << "Using '" + kname + " ' for " <<  std::get<0>(v) << "." << std::endl;
+			kreg->set(std::get<0>(v), kname);
+		}
 
 		return kreg;
 	}
