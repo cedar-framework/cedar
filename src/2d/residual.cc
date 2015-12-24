@@ -70,16 +70,15 @@ namespace impls
 	}
 
 
-	void mpi_residual_fortran(const stencil_op &A, const grid_func &x,
-	                          const grid_func &b, grid_func &r)
+	void mpi_residual_fortran(const mpi::stencil_op &A, const mpi::grid_func &x,
+	                          const mpi::grid_func &b, mpi::grid_func &r)
 	{
 		int k, kf, nog, ifd, nstencil;
-		auto & Ad = const_cast<stencil_op &>(A);
-		auto & xd = const_cast<grid_func&>(x);
-		auto & bd = const_cast<grid_func&>(b);
-		auto & mpi_Ad = dynamic_cast<mpi::stencil_op&>(Ad);
-		mpi::grid_topo & topo = mpi_Ad.grid();
-		MsgCtx *ctx = (MsgCtx*) mpi_Ad.halo_ctx;
+		auto & Ad = const_cast<mpi::stencil_op &>(A);
+		auto & xd = const_cast<mpi::grid_func&>(x);
+		auto & bd = const_cast<mpi::grid_func&>(b);
+		mpi::grid_topo & topo = Ad.grid();
+		MsgCtx *ctx = (MsgCtx*) Ad.halo_ctx;
 
 		if (Ad.stencil().five_pt()) {
 			ifd = 1;
@@ -97,7 +96,7 @@ namespace impls
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 		MPI_BMG2_SymStd_residual(k, kf, nog,
-		                         mpi_Ad.data(), bd.data(), xd.data(), r.data(),
+		                         Ad.data(), bd.data(), xd.data(), r.data(),
 		                         r.len(0), r.len(1), ifd, nstencil,
 		                         irelax, irelax_sym,
 		                         ctx->msg_geom.data(), ctx->msg_geom.size(),

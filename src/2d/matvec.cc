@@ -17,16 +17,17 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-	void matvec(const stencil_op & so,
-	            const grid_func & x,
-	            grid_func & b)
+	namespace mpi = boxmg::bmg2d::mpi;
+	void matvec(const mpi::stencil_op & so,
+	            const mpi::grid_func & x,
+	            mpi::grid_func & b)
 	{
 		using namespace boxmg::bmg2d;
 		int k, kf, ifd;
 		int nstencil;
 
-		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(dynamic_cast<const mpi::stencil_op&>(so));
-		grid_func & xd = const_cast<grid_func&>(x);
+		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);
+		mpi::grid_func & xd = const_cast<mpi::grid_func&>(x);
 		mpi::grid_topo & topo = sod.grid();
 		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
 		grid_stencil & sten = sod.stencil();

@@ -37,19 +37,17 @@ namespace impls
 		                     coarse.len(0), coarse.len(1), ibc);
 	}
 
-	void mpi_fortran_restrict(const inter::restrict_op & R,
-	                          const grid_func & fine,
-	                          grid_func & coarse)
+	void mpi_fortran_restrict(const inter::mpi::restrict_op & R,
+	                          const mpi::grid_func & fine,
+	                          mpi::grid_func & coarse)
 	{
 		int kf, kc, nog;
-		auto & Rd = const_cast<inter::restrict_op&>(R);
-		inter::prolong_op & ser_P = Rd.getP();
-		inter::mpi::prolong_op & P = dynamic_cast<inter::mpi::prolong_op&>(ser_P);
-		auto & fine_par = dynamic_cast<const mpi::grid_func&>(fine);
+		auto & Rd = const_cast<inter::mpi::restrict_op&>(R);
+		inter::mpi::prolong_op & P = Rd.getP();
 		mpi::grid_topo & topo = P.grid();
-		const mpi::grid_topo & fine_topo = fine_par.grid();
+		const mpi::grid_topo & fine_topo = fine.grid();
 		MsgCtx *ctx = (MsgCtx*) P.halo_ctx;
-		auto & fined = const_cast<grid_func&>(fine);
+		auto & fined = const_cast<mpi::grid_func&>(fine);
 
 		nog = kf = topo.nlevel();
 		kc = topo.level();

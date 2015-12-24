@@ -58,14 +58,14 @@ namespace impls
 	}
 
 	void mpi_setup_interp(int kf, int kc, int nog,
-	                      const stencil_op & fop,
-	                      const stencil_op & cop,
-	                      inter::prolong_op & P)
+	                      const mpi::stencil_op & fop,
+	                      const mpi::stencil_op & cop,
+	                      inter::mpi::prolong_op & P)
 	{
 		int ifd, nstencil;
 
-		mpi::stencil_op & fopd = const_cast<mpi::stencil_op&>(dynamic_cast<const mpi::stencil_op&>(fop));
-		mpi::stencil_op & copd = const_cast<mpi::stencil_op&>(dynamic_cast<const mpi::stencil_op&>(cop));
+		mpi::stencil_op & fopd = const_cast<mpi::stencil_op&>(fop);
+		mpi::stencil_op & copd = const_cast<mpi::stencil_op&>(cop);
 		grid_stencil & fsten = fopd.stencil();
 		grid_stencil & csten = copd.stencil();
 		mpi::grid_topo & topo = fopd.grid();

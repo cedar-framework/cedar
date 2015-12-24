@@ -60,14 +60,13 @@ namespace impls
 
 
 	void mpi_galerkin_prod(int kf, int kc, int nog,
-	                       const inter::prolong_op & P,
-	                       const stencil_op & fop,
-	                       stencil_op & cop)
+	                       const inter::mpi::prolong_op & P,
+	                       const mpi::stencil_op & fop,
+	                       mpi::stencil_op & copd)
 	{
 		int ifd, nstencil;
-		inter::mpi::prolong_op & Pd = const_cast<inter::mpi::prolong_op&>(dynamic_cast<const inter::mpi::prolong_op&>(P));
-		mpi::stencil_op & fopd = const_cast<mpi::stencil_op&>(dynamic_cast<const mpi::stencil_op&>(fop));
-		mpi::stencil_op & copd = dynamic_cast<mpi::stencil_op&>(cop);
+		inter::mpi::prolong_op & Pd = const_cast<inter::mpi::prolong_op&>(P);
+		mpi::stencil_op & fopd = const_cast<mpi::stencil_op&>(fop);
 		mpi::grid_topo & topo = fopd.grid();
 		grid_stencil & fsten = fopd.stencil();
 		grid_stencil & csten = copd.stencil();

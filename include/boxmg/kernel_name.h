@@ -1,13 +1,13 @@
-#ifndef BOXMG_2D_KERNEL_NAME
-#define BOXMG_2D_KERNEL_NAME
+#ifndef BOXMG_KERNEL_NAME
+#define BOXMG_KERNEL_NAME
 
 #include <string>
 #include <tuple>
 
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace boxmg {
 
-namespace name {
+namespace kernel_name {
 	const std::string residual("residual");
 	const std::string setup_interp("setup-oi-interp");
 	const std::string galerkin_prod("galerkin-prod");
@@ -30,5 +30,5 @@ namespace name {
 	const std::string matvec("matrix vector multiply");
 }
 
-}}}
+}
 #endif

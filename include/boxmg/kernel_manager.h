@@ -7,12 +7,12 @@
 #include <exception>
 
 #include "kernel.h"
-#include "timer.h"
-#include "log.h"
+#include "util/timer.h"
+#include "util/log.h"
 
 namespace boxmg {
 
-class KernelManager
+class kernel_manager
 {
 public:
 	template <typename S, typename T>
@@ -33,7 +33,7 @@ public:
 				throw std::invalid_argument("Argument does not match signature of kernel: " + kname);
 			}
 		} else {
-			throw std::invalid_argument("Kernel not found: " + kname);
+			throw std::invalid_argument("kernel not found: " + kname);
 		}
 	}
 
@@ -42,7 +42,7 @@ public:
 	{
 		kmap_t::const_iterator it = kmap.find(kname);
 		if (it != kmap.end()) {
-			Kernel<Args...> *c = dynamic_cast<Kernel<Args...>*>(it->second.get());
+			kernel<Args...> *c = dynamic_cast<kernel<Args...>*>(it->second.get());
 			if (c) {
 				log::debug << "Running kernel: " << kname << std::endl;
 				Timer kern_timer(kname);
@@ -57,18 +57,18 @@ public:
 				//throw std::invalid_argument(msg);
 			}
 		} else {
-			log::error << "Kernel not found: "  << kname << std::endl;
-			//throw std::invalid_argument("Kernel not found: " + kname);
+			log::error << "kernel not found: "  << kname << std::endl;
+			//throw std::invalid_argument("kernel not found: " + kname);
 		}
 	}
 
-	std::shared_ptr<KernelBase> & operator[](const std::string & kname)
+	std::shared_ptr<kernel_base> & operator[](const std::string & kname)
 	{
 		return kmap[kname];
 	}
 
 
-	std::shared_ptr<KernelBase> at(const std::string & kname)
+	std::shared_ptr<kernel_base> at(const std::string & kname)
 	{
 		try {
 			return kmap.at(kname);
@@ -78,7 +78,7 @@ public:
 		}
 	}
 private:
-	using kmap_t = std::map<std::string, std::shared_ptr<KernelBase>>;
+	using kmap_t = std::map<std::string, std::shared_ptr<kernel_base>>;
 	kmap_t kmap;
 };
 

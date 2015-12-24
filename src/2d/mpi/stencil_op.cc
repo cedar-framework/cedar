@@ -4,7 +4,7 @@ using namespace boxmg;
 using namespace boxmg::bmg2d::mpi;
 
 stencil_op::stencil_op(topo_ptr grd) :
-	bmg2d::stencil_op(grd->nlocal(0)-2, grd->nlocal(1)-2),
+	stencil_op_base(grd->nlocal(0)-2, grd->nlocal(1)-2),
 	comm(grd->comm), grid_(grd)
 {
 	gs.reshape(gs.len(0)+1, gs.len(1)+1, gs.len(2));
@@ -16,15 +16,9 @@ stencil_op::stencil_op(topo_ptr grd) :
 grid_func stencil_op::residual(const grid_func &x, const grid_func &b) const
 {
 	auto r = grid_func(x.grid_ptr());
-	bmg2d::stencil_op::residual(x,b,r);
+	stencil_op_base::residual(x,b,r);
 
 	return r;
-}
-
-
-void stencil_op::residual(const grid_func &x, const grid_func &b, grid_func &r) const
-{
-	bmg2d::stencil_op::residual(x,b,r);
 }
 
 

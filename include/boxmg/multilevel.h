@@ -1,21 +1,19 @@
-#ifndef BOXMG_2D_SOLVER_MULTILEVEL_H
-#define BOXMG_2D_SOLVER_MULTILEVEL_H
+#ifndef BOXMG_MULTILEVEL_H
+#define BOXMG_MULTILEVEL_H
 
 #include "boxmg/types.h"
-#include "boxmg/util/kernel_registry.h"
-#include "boxmg/2d/level.h"
-#include "boxmg/2d/grid_func.h"
-
+#include "boxmg/util/timer.h"
+#include "boxmg/discrete_op.h"
 
 namespace boxmg { namespace bmg2d {
 
-template <class LevelType,class grid_func=grid_func>
-class MultiLevel
+template <class LevelType,class grid_func,class registry>
+class multilevel
 {
 
 public:
-MultiLevel() : conf("config.json"), kreg(nullptr) {};
-	virtual ~MultiLevel() {};
+multilevel() : conf("config.json") {};
+	virtual ~multilevel() {};
 
 	virtual LevelType & level(int i)
 	{
@@ -140,9 +138,9 @@ MultiLevel() : conf("config.json"), kreg(nullptr) {};
 
 protected:
 	std::vector<LevelType> levels;
-	std::function<void(const discrete_op & A, grid_func &x, const grid_func &b)> coarse_solver;
+	std::function<void(const discrete_op<grid_func> & A, grid_func &x, const grid_func &b)> coarse_solver;
 	config::Reader conf;
-	std::shared_ptr<KernelRegistry> kreg;
+	std::shared_ptr<registry> kreg;
 };
 
 }}

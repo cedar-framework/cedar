@@ -3,7 +3,7 @@
 #include <boxmg/types.h>
 #include <boxmg/2d/util/topo.h>
 #include <boxmg/2d/mpi/stencil_op.h>
-#include <boxmg/2d/kernel/registry.h>
+#include <boxmg/2d/kernel/mpi/registry.h>
 
 #include <boxmg/2d/interface/c/operator.h>
 
@@ -74,8 +74,8 @@ extern "C"
 			}
 		}
 
-		std::shared_ptr<kernel::Registry> kreg;
-		kreg = std::dynamic_pointer_cast<kernel::Registry>(sop->get_registry());
+		std::shared_ptr<kernel::mpi::registry> kreg;
+		kreg = std::dynamic_pointer_cast<kernel::mpi::registry>(sop->get_registry());
 		xgf.halo_ctx = sop->halo_ctx;
 		kreg->halo_exchange(xgf);
 

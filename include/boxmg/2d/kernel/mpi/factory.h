@@ -3,13 +3,13 @@
 
 #include <memory>
 
-#include "../registry.h"
+#include <boxmg/2d/kernel/mpi/registry.h>
 
 namespace boxmg { namespace bmg2d { namespace kernel { namespace mpi {
 
 namespace factory
 {
-	std::shared_ptr<Registry> from_config(config::Reader &conf);
+	std::shared_ptr<registry> from_config(config::Reader &conf);
 }
 
 }}}}

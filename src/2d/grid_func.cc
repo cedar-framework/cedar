@@ -1,6 +1,6 @@
 #include <algorithm>
 
-#include <boxmg/2d/kernel/name.h>
+#include <boxmg/kernel_name.h>
 #include <boxmg/2d/inter/prolong_op.h>
 
 #include <boxmg/2d/grid_func.h>
@@ -93,7 +93,7 @@ grid_func grid_func::ones_like(const grid_func &like)
 grid_func & grid_func::operator+=(iadd_t package)
 {
 	auto kernels = std::get<0>(package).get_registry();
-	kernels->run(kernel::name::interp_add,
+	kernels->run(kernel_name::interp_add,
 	             std::get<0>(package),
 	             std::get<1>(package),
 	             std::get<2>(package),

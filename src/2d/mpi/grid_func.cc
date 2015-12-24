@@ -1,10 +1,13 @@
 #include <boxmg/2d/mpi/grid_func.h>
+#include <boxmg/2d/inter/mpi/prolong_op.h>
 
 using namespace boxmg::bmg2d::mpi;
 
 grid_func::grid_func(topo_ptr grid) :
 	::boxmg::bmg2d::grid_func(grid->nlocal(0)-2,grid->nlocal(1)-2), comm(grid->comm), grid_(grid) {}
 
+grid_func::grid_func(len_t nx, len_t ny): ::boxmg::bmg2d::grid_func(nx,ny)
+{}
 
 grid_func grid_func::zeros_like(const grid_func &like)
 {
@@ -53,6 +56,18 @@ boxmg::real_t grid_func::inf_norm() const
 	MPI_Allreduce(MPI_IN_PLACE, &mval, 1, MPI_DOUBLE, MPI_MAX, grid_->comm);
 
 	return mval;
+}
+
+grid_func & grid_func::operator+=(iadd_t package)
+{
+	auto kernels = std::get<0>(package).get_registry();
+	kernels->run(kernel_name::interp_add,
+	             std::get<0>(package),
+	             std::get<1>(package),
+	             std::get<2>(package),
+	             static_cast<grid_func&>(*this));
+
+	return *this;
 }
 
 namespace boxmg { namespace bmg2d { namespace mpi {

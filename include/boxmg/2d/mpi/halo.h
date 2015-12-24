@@ -9,6 +9,7 @@
 namespace boxmg { namespace bmg2d { namespace kernel {
 namespace impls
 {
+	namespace mpi = boxmg::bmg2d::mpi;
 	struct MsgCtx
 	{
 		MsgCtx(mpi::grid_topo & topo);

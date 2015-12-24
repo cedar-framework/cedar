@@ -1,4 +1,5 @@
-#include "boxmg/2d/kernel/name.h"
+#include "boxmg/kernel.h"
+#include "boxmg/kernel_name.h"
 #include "boxmg/2d/residual.h"
 #include "boxmg/2d/inter/setup_interp.h"
 #include "boxmg/2d/relax/setup_relax.h"
@@ -8,7 +9,6 @@
 #include "boxmg/2d/relax/relax.h"
 #include "boxmg/2d/inter/interp.h"
 #include "boxmg/2d/inter/restrict.h"
-#include "boxmg/2d/kernel/setup_nog.h"
 
 #include "boxmg/2d/kernel/factory.h"
 
@@ -17,60 +17,61 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace factory
 {
-	std::shared_ptr<Registry> from_config(config::Reader &conf)
+	namespace name = boxmg::kernel_name;
+	std::shared_ptr<registry> from_config(config::Reader &conf)
 	{
-		auto kreg = std::make_shared<Registry>();
+		auto kreg = std::make_shared<registry>();
 
 
 		kreg->add(name::residual, "fortran",
-		         Kernel<const stencil_op &,
+		         boxmg::kernel<const stencil_op &,
 		         const grid_func &,
 		         const grid_func &,
 		         grid_func&>(impls::residual_fortran));
 
 		kreg->add(name::residual,"c++",
-		         Kernel<const stencil_op &,
+		         boxmg::kernel<const stencil_op &,
 		         const grid_func &,
 		         const grid_func &,
 		         grid_func&>(impls::residual));
 
 		kreg->add(name::setup_interp, "fortran",
-		         Kernel<int, int , int,
+		         boxmg::kernel<int, int , int,
 		         const stencil_op &,
 		         const stencil_op &,
 		         inter::prolong_op &>(impls::setup_interp));
 
 		kreg->add(name::galerkin_prod, "fortran-ex",
-		         Kernel<int,int,int,
+		         boxmg::kernel<int,int,int,
 		         const inter::prolong_op&,
 		         const stencil_op&,
 		         stencil_op&>(impls::galerkin_prod));
 
 		kreg->add(name::setup_relax,"fortran-rbgs-point",
-		         Kernel<const stencil_op&,
+		         boxmg::kernel<const stencil_op&,
 		         relax_stencil&>(impls::setup_rbgs_point));
 
 		kreg->add(name::setup_relax_x,"fortran",
-		         Kernel<const stencil_op&,
+		         boxmg::kernel<const stencil_op&,
 		         relax_stencil&>(impls::setup_rbgs_x));
 
 		kreg->add(name::setup_relax_y,"fortran",
-		         Kernel<const stencil_op&,
+		         boxmg::kernel<const stencil_op&,
 		         relax_stencil&>(impls::setup_rbgs_y));
 
 		kreg->add(name::setup_cg_lu, "fortran",
-		         Kernel<const stencil_op&,
+		         boxmg::kernel<const stencil_op&,
 		         grid_func&>(impls::setup_cg_lu));
 
 		kreg->add(name::relax, "fortran-rbgs",
-		         Kernel<const stencil_op&,
+		         boxmg::kernel<const stencil_op&,
 		         grid_func&,
 		         const grid_func&,
 		         const relax_stencil&,
 		         cycle::Dir>(impls::relax_rbgs_point));
 
 		kreg->add(name::relax_lines_x, "fortran",
-		         Kernel<const stencil_op&,
+		         boxmg::kernel<const stencil_op&,
 		         grid_func&,
 		         const grid_func&,
 		         const relax_stencil&,
@@ -78,7 +79,7 @@ namespace factory
 		         cycle::Dir>(impls::relax_lines_x));
 
 		kreg->add(name::relax_lines_y, "fortran",
-		         Kernel<const stencil_op&,
+		         boxmg::kernel<const stencil_op&,
 		         grid_func&,
 		         const grid_func&,
 		         const relax_stencil&,
@@ -86,25 +87,21 @@ namespace factory
 		         cycle::Dir>(impls::relax_lines_y));
 
 		kreg->add(name::restriction, "fortran",
-		         Kernel<const inter::restrict_op&,
+		         boxmg::kernel<const inter::restrict_op&,
 		         const grid_func&,
 		         grid_func&>(impls::fortran_restrict));
 
 		kreg->add(name::interp_add,"fortran",
-		         Kernel<const inter::prolong_op&,
+		         boxmg::kernel<const inter::prolong_op&,
 		         const grid_func&,
 		         const grid_func&,
 		         grid_func&>(impls::fortran_interp));
 
 		kreg->add(name::solve_cg, "fortran",
-		          Kernel<grid_func&,
+		          boxmg::kernel<grid_func&,
 		          const grid_func&,
 		          const grid_func&,
 		          real_t*>(impls::fortran_solve_cg));
-
-		kreg->add(name::setup_nog, "fortran",
-		         Kernel<mpi::grid_topo&,
-		         len_t, int*>(impls::fortran_setup_nog));
 
 		std::vector<std::tuple<std::string, std::string, std::string>> defaults = {
 			std::make_tuple(name::residual, "kernels.residual", "fortran"),

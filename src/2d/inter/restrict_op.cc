@@ -1,4 +1,4 @@
-#include <boxmg/2d/kernel/name.h>
+#include <boxmg/kernel_name.h>
 
 #include <boxmg/2d/inter/restrict_op.h>
 
@@ -12,17 +12,10 @@ std::ostream & operator<< (std::ostream &os, const restrict_op &R)
 }
 
 
-
-void restrict_op::set_registry(std::shared_ptr<KernelRegistry> kreg)
-{
-	kernels = kreg;
-}
-
-
 void restrict_op::apply(const grid_func &x, grid_func &y) const
 {
 	if (kernels != nullptr) {
-		kernels->run(kernel::name::restriction,
+		kernels->run(kernel_name::restriction,
 		             static_cast<const restrict_op&>(*this),
 		             x,y);
 	} else {

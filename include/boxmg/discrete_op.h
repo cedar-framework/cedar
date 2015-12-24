@@ -1,10 +1,10 @@
-#ifndef BOXMG_2D_CORE_DISCRETE_OP_H
-#define BOXMG_2D_CORE_DISCRETE_OP_H
+#ifndef BOXMG_DISCRETE_OP_H
+#define BOXMG_DISCRETE_OP_H
 
-#include "grid_func.h"
 
-namespace boxmg { namespace bmg2d {
+namespace boxmg {
 
+template <class grid_func>
 class discrete_op
 {
 
@@ -14,7 +14,6 @@ public:
 	//virtual void axpy(grid_func &
 };
 
-
-}}
+}
 
 #endif

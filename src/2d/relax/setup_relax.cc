@@ -78,13 +78,13 @@ namespace impls
 
 
 
-	void mpi_setup_rbgs_point(const stencil_op & so,
+	void mpi_setup_rbgs_point(const mpi::stencil_op & so,
 	                          relax_stencil & sor)
 	{
 		int nx, ny, nstencil;
 
 		const grid_stencil & so_sten = so.stencil();
-		stencil_op & sod = const_cast<stencil_op&>(so);
+		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);
 
 		nx = so_sten.len(0);
 		ny = so_sten.len(1);
@@ -96,13 +96,13 @@ namespace impls
 	}
 
 
-	void mpi_setup_rbgs_x(const stencil_op & so,
+	void mpi_setup_rbgs_x(const mpi::stencil_op & so,
 	                      relax_stencil & sor)
 	{
 		int nx, ny, nstencil;
 
 		const grid_stencil & so_sten = so.stencil();
-		stencil_op & sod = const_cast<stencil_op&>(so);
+		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);
 
 		nx = so_sten.len(0);
 		ny = so_sten.len(1);
@@ -114,13 +114,13 @@ namespace impls
 	}
 
 
-	void mpi_setup_rbgs_y(const stencil_op & so,
+	void mpi_setup_rbgs_y(const mpi::stencil_op & so,
 	                      relax_stencil & sor)
 	{
 		int nx, ny, nstencil;
 
 		const grid_stencil & so_sten = so.stencil();
-		stencil_op & sod = const_cast<stencil_op&>(so);
+		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);
 
 		nx = so_sten.len(0);
 		ny = so_sten.len(1);

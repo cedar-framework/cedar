@@ -2,8 +2,8 @@
 
 using namespace boxmg::bmg2d::inter::mpi;
 
-prolong_op::prolong_op(bmg2d::mpi::topo_ptr topo) : inter::prolong_op(topo->nlocal(0)-2,
-                                                             topo->nlocal(1)-2),
+prolong_op::prolong_op(bmg2d::mpi::topo_ptr topo) : mpi::stencil_op(topo->nlocal(0)-2,
+                                                                    topo->nlocal(1)-2, true),
                                             grid_(topo)
 {
 }
@@ -56,6 +56,13 @@ std::ostream & operator<< (std::ostream &os, const prolong_op &P)
 	}
 
 	return os;
+}
+
+iadd_pack operator*(const prolong_op & P, const mpi::grid_func & coarse)
+{
+	return std::make_tuple<std::reference_wrapper<const prolong_op>,
+	                       std::reference_wrapper<const mpi::grid_func>,
+	                       std::reference_wrapper<const mpi::grid_func>>(P,coarse,*(P.residual));
 }
 
 }}}}

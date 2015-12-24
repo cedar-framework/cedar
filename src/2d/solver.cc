@@ -2,6 +2,7 @@
 
 #include <boxmg/2d/kernel/factory.h>
 #include <boxmg/2d/solver.h>
+#include <boxmg/2d/kernel/registry.h>
 
 using namespace boxmg;
 using namespace boxmg::bmg2d;
@@ -36,7 +37,7 @@ solver::solver(stencil_op&& fop)
 	ABD = grid_func(nxc+2, nxc*nyc, 0);
 	bbd = new real_t[ABD.len(1)];
 	kernels->setup_cg_lu(cop, ABD);
-	coarse_solver = [&,kernels](const discrete_op &A, grid_func &x, const grid_func &b) {
+	coarse_solver = [&,kernels](const discrete_op<grid_func> &A, grid_func &x, const grid_func &b) {
 		kernels->solve_cg(x, b, ABD, bbd);
 		const stencil_op &av = dynamic_cast<const stencil_op&>(A);
 		grid_func & residual = levels[levels.size()-1].res;
@@ -89,7 +90,7 @@ void solver::add_level(stencil_op & fop, int num_levels)
 	int nrelax_pre = conf.get<int>("solver.cycle.nrelax-pre", 2);
 	int nrelax_post = conf.get<int>("solver.cycle.nrelax-post", 1);
 
-	levels.back().presmoother = [&,lvl,nrelax_pre,kernels,relax_type](const discrete_op &A, grid_func &x, const grid_func&b) {
+	levels.back().presmoother = [&,lvl,nrelax_pre,kernels,relax_type](const discrete_op<grid_func> &A, grid_func &x, const grid_func&b) {
 		const stencil_op & av = dynamic_cast<const stencil_op &>(A);
 		for (auto i : range(nrelax_pre)) {
 			(void) i;
@@ -105,7 +106,7 @@ void solver::add_level(stencil_op & fop, int num_levels)
 			}
 		}
 	};
-	levels.back().postsmoother = [&,lvl,nrelax_post,kernels,relax_type](const discrete_op &A, grid_func &x, const grid_func&b) {
+	levels.back().postsmoother = [&,lvl,nrelax_post,kernels,relax_type](const discrete_op<grid_func> &A, grid_func &x, const grid_func&b) {
 
 		const stencil_op & av = dynamic_cast<const stencil_op &>(A);
 		for (auto i: range(nrelax_post)) {
@@ -152,7 +153,7 @@ int solver::compute_num_levels(stencil_op & fop)
 }
 
 
-std::shared_ptr<kernel::Registry> solver::kernel_registry()
+std::shared_ptr<bmg2d::kernel::registry> solver::kernel_registry()
 {
-	return std::static_pointer_cast<kernel::Registry>(kreg);
+	return std::static_pointer_cast<bmg2d::kernel::registry>(kreg);
 }

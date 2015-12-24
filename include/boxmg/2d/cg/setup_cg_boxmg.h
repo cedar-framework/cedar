@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "boxmg/2d/stencil_op.h"
+#include "boxmg/2d/mpi/stencil_op.h"
 #include "boxmg/2d/solver.h"
 
 
@@ -11,8 +11,8 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-
-	void setup_cg_boxmg(const stencil_op & so,
+	namespace mpi = boxmg::bmg2d::mpi;
+	void setup_cg_boxmg(const mpi::stencil_op & so,
 	                    std::shared_ptr<solver> *slv);
 }
 

@@ -43,10 +43,10 @@ namespace impls
 	}
 
 
-	void mpi_setup_cg_lu(const stencil_op & so,
+	void mpi_setup_cg_lu(const mpi::stencil_op & so,
 	                     grid_func & ABD)
 	{
-		mpi::stencil_op & copd = const_cast<mpi::stencil_op&>(dynamic_cast<const mpi::stencil_op&>(so));
+		mpi::stencil_op & copd = const_cast<mpi::stencil_op&>(so);
 
 		grid_stencil & csten = copd.stencil();
 		mpi::grid_topo & topo = copd.grid();

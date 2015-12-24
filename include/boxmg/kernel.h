@@ -5,22 +5,22 @@
 
 namespace boxmg {
 
-class KernelBase
+class kernel_base
 {
 public:
-	virtual ~KernelBase() {};
+	virtual ~kernel_base() {};
 };
 
 
 template <typename... Args>
-class Kernel : public KernelBase
+class kernel : public kernel_base
 {
 private:
 	using kern_t = std::function<void(Args...)>;
 	kern_t kern;
 
 public:
-    Kernel(kern_t&& kern): kern(std::move(kern)) {}
+    kernel(kern_t&& kern): kern(std::move(kern)) {}
 	void operator()(Args... args) { if (kern) kern(args...); }
 };
 

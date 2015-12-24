@@ -54,13 +54,12 @@ namespace impls
 
 
 	void solve_cg_boxmg(const solver &cg_solver,
-	                    grid_func &x,
-	                    const grid_func &b)
+	                    mpi::grid_func &x_par,
+	                    const mpi::grid_func &b)
 	{
 		int rank;
 
-		mpi::grid_func & b_par = const_cast<mpi::grid_func&>(dynamic_cast<const mpi::grid_func&>(b));
-		mpi::grid_func & x_par = dynamic_cast<mpi::grid_func&>(x);
+		mpi::grid_func & b_par = const_cast<mpi::grid_func&>(b);
 		auto &coarse_solver = const_cast<solver&>(cg_solver);
 
 		mpi::grid_topo & topo = b_par.grid();
@@ -105,16 +104,15 @@ namespace impls
 	}
 
 
-	void mpi_solve_cg_lu(grid_func &x,
-	                     const grid_func &b,
-	                     const grid_func & ABD,
+	void mpi_solve_cg_lu(mpi::grid_func &x_par,
+	                     const mpi::grid_func &b,
+	                     const mpi::grid_func & ABD,
 	                     real_t *bbd)
 	{
 		int rank;
 
-		mpi::grid_func & b_par = const_cast<mpi::grid_func&>(dynamic_cast<const mpi::grid_func&>(b));
-		mpi::grid_func & x_par = dynamic_cast<mpi::grid_func&>(x);
-		grid_func & abd_data = const_cast<grid_func&>(ABD);
+		mpi::grid_func & b_par = const_cast<mpi::grid_func&>(b);
+		mpi::grid_func & abd_data = const_cast<mpi::grid_func&>(ABD);
 
 		mpi::grid_topo & topo = b_par.grid();
 		MsgCtx *ctx = (MsgCtx*) b_par.halo_ctx;
