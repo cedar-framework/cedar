@@ -52,10 +52,10 @@ public:
 	}
 
 
-	void halo_exchange(grid_func &f)
+	void halo_exchange(mpi::grid_func &f)
 	{
 		active.run(kernel_name::halo_exchange,
-		           static_cast<grid_func&>(f));
+		           static_cast<mpi::grid_func&>(f));
 	}
 
 
@@ -64,7 +64,7 @@ public:
 		auto & fd = const_cast<mpi::grid_func&>(f);
 		fd.halo_ctx = halo_ctx;
 		active.run(kernel_name::halo_exchange,
-		           static_cast<grid_func&>(fd));
+		           static_cast<mpi::grid_func&>(fd));
 
 	}
 

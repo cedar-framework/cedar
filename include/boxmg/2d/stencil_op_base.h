@@ -21,11 +21,12 @@ public:
 	const grid_stencil & stencil() const { return gs; }
 	virtual void set_registry(std::shared_ptr<registry> kreg) { kernels = kreg; }
 	virtual std::shared_ptr<registry> get_registry() const { return kernels; }
-	virtual void apply(const grid_func &x, grid_func &y) const
+	template <class stencil_op>
+	void apply(const grid_func &x, grid_func &y) const
 	{
 		if (kernels != nullptr) {
 			kernels->run(kernel_name::matvec,
-			             static_cast<const decltype(*this)>(*this),
+			             static_cast<const stencil_op&>(*this),
 			             x,y);
 		} else {
 			log::error << "Kernel registry for stencil op not set!" << std::endl;
@@ -33,12 +34,12 @@ public:
 	}
 
 
-	virtual void residual(const grid_func &x, const grid_func &b, grid_func &r) const
+	template <class stencil_op>
+	void residual(const grid_func &x, const grid_func &b, grid_func &r) const
 	{
-		std::cout << typeid(decltype(*this)).name() << std::endl;
 		if (kernels != nullptr) {
 			kernels->run(kernel_name::residual,
-			             static_cast<const decltype(*this)>(*this),
+			             static_cast<const stencil_op&>(*this),
 			             x,b,r);
 		} else {
 			log::error << "Kernel registry for stencil op not set!" << std::endl;
@@ -46,10 +47,11 @@ public:
 	}
 
 
-	virtual grid_func residual(const grid_func &x, const grid_func &b) const
+	template <class stencil_op>
+	grid_func residual(const grid_func &x, const grid_func &b) const
 	{
 		auto r = grid_func(x.shape(0),x.shape(1));
-		this->residual(x,b,r);
+		this->residual<stencil_op>(x,b,r);
 
 		return r;
 	}

@@ -16,7 +16,7 @@ stencil_op::stencil_op(topo_ptr grd) :
 grid_func stencil_op::residual(const grid_func &x, const grid_func &b) const
 {
 	auto r = grid_func(x.grid_ptr());
-	stencil_op_base::residual(x,b,r);
+	stencil_op_base::residual<stencil_op>(x,b,r);
 
 	return r;
 }
