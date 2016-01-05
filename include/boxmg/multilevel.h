@@ -5,7 +5,7 @@
 #include "boxmg/util/timer.h"
 #include "boxmg/discrete_op.h"
 
-namespace boxmg { namespace bmg2d {
+namespace boxmg {
 
 template <class LevelType,class grid_func,class registry>
 class multilevel
@@ -143,6 +143,6 @@ protected:
 	std::shared_ptr<registry> kreg;
 };
 
-}}
+}
 
 #endif

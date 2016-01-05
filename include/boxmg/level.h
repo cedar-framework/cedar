@@ -5,7 +5,7 @@
 
 #include "boxmg/discrete_op.h"
 
-namespace boxmg { namespace bmg2d {
+namespace boxmg {
 template <class grid_func>
 struct Level
 {
@@ -18,6 +18,6 @@ struct Level
 	//discrete_op & R;
 };
 
-}}
+}
 
 #endif
