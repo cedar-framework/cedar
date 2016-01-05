@@ -1,9 +1,11 @@
 add_subdirectory(ftn)
 add_subdirectory(inter)
+add_subdirectory(relax)
 
 set(3d_SOURCES
   ${ftn_SOURCES}
   ${inter_SOURCES}
+  ${relax_SOURCES}
   grid_func.cc
   grid_stencil.cc
   stencil_op.cc
