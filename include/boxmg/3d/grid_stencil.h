@@ -2,6 +2,7 @@
 #define BOXMG_3D_GRIDSTENCIL_H
 
 #include <boxmg/3d/types.h>
+#include <boxmg/3d/inter/types.h>
 #include <boxmg/array.h>
 #include <boxmg/grid_quantity.h>
 
@@ -27,6 +28,16 @@ public:
 	}
 
 	real_t operator()(len_t i, len_t j, len_t k, dir direction) const
+	{
+		return array<len_t,real_t,4>::operator()(i,j,k,static_cast<len_t>(direction));
+	}
+
+	real_t & operator()(len_t i, len_t j, len_t k, inter::dir direction)
+	{
+		return array<len_t,real_t,4>::operator()(i,j,k,static_cast<len_t>(direction));
+	}
+
+	real_t operator()(len_t i, len_t j, len_t k, inter::dir direction) const
 	{
 		return array<len_t,real_t,4>::operator()(i,j,k,static_cast<len_t>(direction));
 	}

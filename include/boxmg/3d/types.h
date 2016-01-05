@@ -10,7 +10,7 @@ enum class dir
 	P=BMG3_P,
 	PW=BMG3_PW,
 	PS=BMG3_PS,
-	PB=BMG3_PB,
+	B=BMG3_B,
 	PSW=BMG3_PSW,
 	PNW=BMG3_PNW,
 	BW=BMG3_BW,

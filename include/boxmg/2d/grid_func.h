@@ -29,6 +29,7 @@ namespace boxmg { namespace bmg2d {
 		grid_func & operator=(const grid_func & gf) = default;
 		static grid_func ones(len_t nx, len_t ny);
 		static grid_func zeros(len_t nx, len_t ny);
+		static grid_func like(const grid_func &likeable);
 		static grid_func zeros_like(const grid_func &likeable);
 		static grid_func ones_like(const grid_func &likeable);
 		virtual real_t inf_norm() const;

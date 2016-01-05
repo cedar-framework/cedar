@@ -14,6 +14,7 @@ class grid_func : public array<len_t, real_t, 3>, public grid_quantity<len_t, 3>
 public:
 	grid_func(len_t nx, len_t ny, len_t nz, unsigned int nghosts=1);
 	grid_func() {}
+	static grid_func like(const grid_func & likeable);
 	static grid_func ones(len_t nx, len_t ny, len_t nz);
 	static grid_func zeros(len_t nx, len_t ny, len_t nz);
 	static grid_func ones_like(const grid_func & likeable);

@@ -6,7 +6,7 @@ typedef enum {
 	BMG3_P=0,
 	BMG3_PW=1,
 	BMG3_PS=2,
-	BMG3_PB=3,
+	BMG3_B=3,
 	BMG3_PSW=4,
 	BMG3_PNW=5,
 	BMG3_BW=6,

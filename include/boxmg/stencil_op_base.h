@@ -48,7 +48,7 @@ public:
 	template <class stencil_op>
 	grid_func residual(const grid_func &x, const grid_func &b) const
 	{
-		auto r = grid_func(x.shape(0),x.shape(1));
+		auto r = grid_func::like(x);
 		this->residual<stencil_op>(x,b,r);
 
 		return r;

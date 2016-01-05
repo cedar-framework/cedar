@@ -8,7 +8,7 @@ namespace boxmg { namespace bmg2d {
 
 std::ostream & operator<< (std::ostream & os, const stencil_op &op)
 {
-	auto sten = op.stencil();
+	auto & sten = op.stencil();
 	unsigned int width = 4;
 
 	os << std::setprecision(7);

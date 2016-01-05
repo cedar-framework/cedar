@@ -62,6 +62,14 @@ grid_func grid_func::zeros(len_t nx, len_t ny)
 }
 
 
+grid_func grid_func::like(const grid_func &likeable)
+{
+	grid_func ret(likeable.shape(0), likeable.shape(1));
+
+	return ret;
+}
+
+
 grid_func grid_func::zeros_like(const grid_func &like)
 {
 	grid_func ret(like.shape(0), like.shape(1));

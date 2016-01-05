@@ -32,6 +32,7 @@ public:
 	const grid_topo & grid() const { return *grid_;}
 	topo_ptr grid_ptr() const { return grid_; }
 	void *halo_ctx;
+	static grid_func like(const grid_func &likeable);
 	static grid_func zeros_like(const grid_func &likeable);
 	static grid_func ones_like(const grid_func &likeable);
 	template<int p> real_t lp_norm() const;

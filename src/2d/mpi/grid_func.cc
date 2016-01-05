@@ -9,6 +9,15 @@ grid_func::grid_func(topo_ptr grid) :
 grid_func::grid_func(len_t nx, len_t ny): ::boxmg::bmg2d::grid_func(nx,ny)
 {}
 
+
+grid_func grid_func::like(const grid_func &likeable)
+{
+	grid_func ret(likeable.grid_ptr());
+
+	return ret;
+}
+
+
 grid_func grid_func::zeros_like(const grid_func &like)
 {
 	grid_func ret(like.grid_ptr());
