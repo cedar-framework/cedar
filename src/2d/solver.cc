@@ -112,14 +112,14 @@ void solver::add_level(stencil_op & fop, int num_levels)
 		for (auto i: range(nrelax_post)) {
 			(void) i;
 			if (relax_type == "point")
-				kernels->relax(av, x, b, levels[lvl].SOR[0], cycle::Dir::DOWN);
+				kernels->relax(av, x, b, levels[lvl].SOR[0], cycle::Dir::UP);
 			else if (relax_type == "line-x")
-				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], levels[lvl].res, cycle::Dir::DOWN);
+				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], levels[lvl].res, cycle::Dir::UP);
 			else if (relax_type == "line-y")
-				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[0], levels[lvl].res, cycle::Dir::DOWN);
+				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[0], levels[lvl].res, cycle::Dir::UP);
 			else {
-				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[1], levels[lvl].res, cycle::Dir::DOWN);
-				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], levels[lvl].res, cycle::Dir::DOWN);
+				kernels->relax_lines_y(av, x, b, levels[lvl].SOR[1], levels[lvl].res, cycle::Dir::UP);
+				kernels->relax_lines_x(av, x, b, levels[lvl].SOR[0], levels[lvl].res, cycle::Dir::UP);
 			}
 		}
 	};

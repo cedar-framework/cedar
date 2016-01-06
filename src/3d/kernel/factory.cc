@@ -33,9 +33,16 @@ namespace factory
 		          boxmg::kernel<const stencil_op&,
 		          relax_stencil&>(impls::setup_rbgs_point));
 
+		kreg->add(name::galerkin_prod, "fortran-ex",
+		         boxmg::kernel<int,int,int,
+		         const inter::prolong_op&,
+		         const stencil_op&,
+		         stencil_op&>(impls::galerkin_prod));
+
 
 		std::vector<std::tuple<std::string, std::string, std::string>> defaults = {
 			std::make_tuple(name::residual, "kernels.residual", "fortran"),
+			std::make_tuple(name::galerkin_prod, "kernels.galerkin-prod", "fortran-ex"),
 			std::make_tuple(name::setup_interp, "kernels.setup-interp", "fortran"),
 			std::make_tuple(name::setup_relax, "kernels.setup-relax", "fortran-rbgs-point")
 		};
