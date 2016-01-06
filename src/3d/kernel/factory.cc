@@ -4,6 +4,7 @@
 #include <boxmg/3d/relax/setup_relax.h>
 #include <boxmg/3d/inter/setup_interp.h>
 #include <boxmg/3d/inter/galerkin_prod.h>
+#include <boxmg/3d/relax/relax.h>
 
 #include <boxmg/3d/kernel/factory.h>
 
@@ -39,12 +40,20 @@ namespace factory
 		         const stencil_op&,
 		         stencil_op&>(impls::galerkin_prod));
 
+		kreg->add(name::relax, "fortran-rbgs-point",
+		          boxmg::kernel<const stencil_op&,
+		          grid_func&,
+		          const grid_func&,
+		          const relax_stencil&,
+		          cycle::Dir>(impls::relax_rbgs_point));
+
 
 		std::vector<std::tuple<std::string, std::string, std::string>> defaults = {
 			std::make_tuple(name::residual, "kernels.residual", "fortran"),
 			std::make_tuple(name::galerkin_prod, "kernels.galerkin-prod", "fortran-ex"),
 			std::make_tuple(name::setup_interp, "kernels.setup-interp", "fortran"),
-			std::make_tuple(name::setup_relax, "kernels.setup-relax", "fortran-rbgs-point")
+			std::make_tuple(name::setup_relax, "kernels.setup-relax", "fortran-rbgs-point"),
+			std::make_tuple(name::relax, "kernels.relax", "fortran-rbgs-point")
 		};
 
 		for (auto&& v : defaults) {

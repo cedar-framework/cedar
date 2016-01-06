@@ -4,4 +4,5 @@ set(ftn_SOURCES
   ftn/BMG3_SymStd_SETUP_recip.f90
   ftn/BMG3_SymStd_SETUP_ITLI07_ex.f90
   ftn/BMG3_SymStd_SETUP_ITLI27_ex.f90
+  ftn/BMG3_SymStd_relax_GS.f90
   PARENT_SCOPE)
