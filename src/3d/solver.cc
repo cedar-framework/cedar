@@ -31,20 +31,21 @@ solver::solver(stencil_op&& fop)
 
 	auto kernels = kernel_registry();
 
-	// auto & cop = levels.back().A;
-	// auto & cop_sten = cop.stencil();
-	// auto nxc = cop_sten.shape(0);
-	// auto nyc = cop_sten.shape(1);
-	// ABD = grid_func(nxc+2, nxc*nyc, 0);
-	// bbd = new real_t[ABD.len(1)];
-	// kernels->setup_cg_lu(cop, ABD);
-	// coarse_solver = [&,kernels](const discrete_op<grid_func> &A, grid_func &x, const grid_func &b) {
-	// 	kernels->solve_cg(x, b, ABD, bbd);
-	// 	const stencil_op &av = dynamic_cast<const stencil_op&>(A);
-	// 	grid_func & residual = levels[levels.size()-1].res;
-	// 	av.residual(x,b,residual);
-	// 	log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
-	// };
+	auto & cop = levels.back().A;
+	auto & cop_sten = cop.stencil();
+	auto nxc = cop_sten.shape(0);
+	auto nyc = cop_sten.shape(1);
+	auto nzc = cop_sten.shape(2);
+	ABD = grid_func(nxc*(nyc+1)+2, nxc*nyc*nzc, 0);
+	bbd = new real_t[ABD.len(1)];
+	kernels->setup_cg_lu(cop, ABD);
+	coarse_solver = [&,kernels](const discrete_op<grid_func> &A, grid_func &x, const grid_func &b) {
+		kernels->solve_cg(x, b, ABD, bbd);
+		const stencil_op &av = dynamic_cast<const stencil_op&>(A);
+		grid_func & residual = levels[levels.size()-1].res;
+		av.residual(x,b,residual);
+		log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
+	};
 }
 
 
