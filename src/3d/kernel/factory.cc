@@ -5,6 +5,9 @@
 #include <boxmg/3d/inter/setup_interp.h>
 #include <boxmg/3d/inter/galerkin_prod.h>
 #include <boxmg/3d/relax/relax.h>
+#include <boxmg/3d/cg/setup_cg_lu.h>
+#include <boxmg/3d/cg/solve_cg.h>
+#include <boxmg/3d/inter/restrict.h>
 
 #include <boxmg/3d/kernel/factory.h>
 
@@ -47,13 +50,30 @@ namespace factory
 		          const relax_stencil&,
 		          cycle::Dir>(impls::relax_rbgs_point));
 
+		kreg->add(name::setup_cg_lu, "fortran",
+		         boxmg::kernel<const stencil_op&,
+		         grid_func&>(impls::setup_cg_lu));
+
+		kreg->add(name::solve_cg, "fortran",
+		          boxmg::kernel<grid_func&,
+		          const grid_func&,
+		          const grid_func&,
+		          real_t*>(impls::fortran_solve_cg));
+
+		kreg->add(name::restriction, "fortran",
+		         boxmg::kernel<const inter::restrict_op&,
+		         const grid_func&,
+		         grid_func&>(impls::fortran_restrict));
 
 		std::vector<std::tuple<std::string, std::string, std::string>> defaults = {
 			std::make_tuple(name::residual, "kernels.residual", "fortran"),
 			std::make_tuple(name::galerkin_prod, "kernels.galerkin-prod", "fortran-ex"),
 			std::make_tuple(name::setup_interp, "kernels.setup-interp", "fortran"),
 			std::make_tuple(name::setup_relax, "kernels.setup-relax", "fortran-rbgs-point"),
-			std::make_tuple(name::relax, "kernels.relax", "fortran-rbgs-point")
+			std::make_tuple(name::restriction, "kernels.restrict", "fortran"),
+			std::make_tuple(name::relax, "kernels.relax", "fortran-rbgs-point"),
+			std::make_tuple(name::setup_cg_lu, "kernels.setup-cg-lu", "fortran"),
+			std::make_tuple(name::solve_cg, "kernels.solve-cg", "fortran")
 		};
 
 		for (auto&& v : defaults) {

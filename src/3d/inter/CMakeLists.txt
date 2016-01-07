@@ -3,4 +3,5 @@ set(inter_SOURCES
   inter/restrict_op.cc
   inter/setup_interp.cc
   inter/galerkin_prod.cc
+  inter/restrict.cc
   PARENT_SCOPE)
