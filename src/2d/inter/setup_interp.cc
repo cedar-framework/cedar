@@ -68,7 +68,7 @@ namespace impls
 		mpi::stencil_op & copd = const_cast<mpi::stencil_op&>(cop);
 		grid_stencil & fsten = fopd.stencil();
 		grid_stencil & csten = copd.stencil();
-		mpi::grid_topo & topo = fopd.grid();
+		grid_topo & topo = fopd.grid();
 		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
 
 		if (fsten.five_pt()) {

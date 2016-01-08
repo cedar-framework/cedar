@@ -2,7 +2,7 @@
 #define BOXMG_2D_KERNEL_HALO_H
 
 #include <boxmg/array.h>
-#include <boxmg/2d/mpi/grid_topo.h>
+#include <boxmg/mpi/grid_topo.h>
 #include <boxmg/2d/mpi/stencil_op.h>
 #include <boxmg/2d/mpi/grid_func.h>
 
@@ -12,7 +12,7 @@ namespace impls
 	namespace mpi = boxmg::bmg2d::mpi;
 	struct MsgCtx
 	{
-		MsgCtx(mpi::grid_topo & topo);
+		MsgCtx(grid_topo & topo);
 		array<int,int,2> pMSG; // these should be int, len_t
 		array<int,int,2> pLS;
 		array<int,int,2> pMSGSO;
@@ -36,7 +36,7 @@ namespace impls
 		/* int nmsgr; */
 	};
 
-	void setup_msg(mpi::grid_topo &topo, void **msg_ctx);
+	void setup_msg(grid_topo &topo, void **msg_ctx);
 	void msg_exchange(mpi::grid_func & f);
 	void msg_stencil_exchange(mpi::stencil_op & so);
 }

@@ -62,7 +62,7 @@ namespace impls
 		mpi::grid_func & b_par = const_cast<mpi::grid_func&>(b);
 		auto &coarse_solver = const_cast<solver&>(cg_solver);
 
-		mpi::grid_topo & topo = b_par.grid();
+		grid_topo & topo = b_par.grid();
 		MsgCtx *ctx = (MsgCtx*) b_par.halo_ctx;
 
 
@@ -114,7 +114,7 @@ namespace impls
 		mpi::grid_func & b_par = const_cast<mpi::grid_func&>(b);
 		mpi::grid_func & abd_data = const_cast<mpi::grid_func&>(ABD);
 
-		mpi::grid_topo & topo = b_par.grid();
+		grid_topo & topo = b_par.grid();
 		MsgCtx *ctx = (MsgCtx*) b_par.halo_ctx;
 
 

@@ -1,6 +1,6 @@
 #include <boxmg/2d/ftn/mpi/BMG_workspace_c.h>
 #include <boxmg/types.h>
-#include <boxmg/2d/mpi/grid_topo.h>
+#include <boxmg/mpi/grid_topo.h>
 
 #include <boxmg/2d/interface/c/topo.h>
 
@@ -15,14 +15,13 @@ extern "C"
 	                           int nprocy)
 	{
 		using namespace boxmg;
-		using namespace boxmg::bmg2d;
 		int rank;
 
 		MPI_Comm_rank(comm, &rank);
 
-		std::shared_ptr<mpi::grid_topo> *grid_ptr;
+		std::shared_ptr<grid_topo> *grid_ptr;
 		auto igrd = std::make_shared<std::vector<len_t>>(NBMG_pIGRD);
-		auto grid = std::make_shared<mpi::grid_topo>(igrd, 0, 1);
+		auto grid = std::make_shared<grid_topo>(igrd, 0, 1);
 
 		grid->comm = comm;
 
@@ -62,7 +61,7 @@ extern "C"
 	//        grid->nglobal(0), grid->nglobal(1),
 	//        grid->is(0), grid->is(1));
 
-		grid_ptr = new std::shared_ptr<mpi::grid_topo>(std::move(grid));
+		grid_ptr = new std::shared_ptr<grid_topo>(std::move(grid));
 		return reinterpret_cast<bmg2_topo>(grid_ptr);
 	}
 }

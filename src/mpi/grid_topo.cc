@@ -1,9 +1,8 @@
 #include <boxmg/2d/ftn/mpi/BMG_workspace_c.h>
 
-#include <boxmg/2d/mpi/grid_topo.h>
+#include <boxmg/mpi/grid_topo.h>
 
 using namespace boxmg;
-using namespace boxmg::bmg2d::mpi;
 
 grid_topo::grid_topo() : igrd(nullptr) {}
 

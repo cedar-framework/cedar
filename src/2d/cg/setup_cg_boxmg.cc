@@ -28,7 +28,7 @@ namespace impls
 	{
 		int nstencil, nog, rank;
 		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);
-		mpi::grid_topo & topo = sod.grid();
+		grid_topo & topo = sod.grid();
 		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
 		auto & sten = sod.stencil();
 

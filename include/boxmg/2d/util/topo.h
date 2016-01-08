@@ -3,11 +3,11 @@
 
 #include <mpi.h>
 #include "boxmg/types.h"
-#include "boxmg/2d/mpi/grid_topo.h"
+#include "boxmg/mpi/grid_topo.h"
 
 namespace boxmg { namespace bmg2d { namespace util {
 
-			bmg2d::mpi::topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny);
+			topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny);
 
 }}}
 #endif

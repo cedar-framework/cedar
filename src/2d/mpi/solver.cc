@@ -144,8 +144,8 @@ void mpi::solver::add_level(bmg2d::mpi::stencil_op & fop, int num_levels)
 {
 	int kc = num_levels - levels.size() - 1;
 
-	bmg2d::mpi::grid_topo & fgrid = fop.grid();
-	auto cgrid = std::make_shared<bmg2d::mpi::grid_topo>(fgrid.get_igrd(), kc, num_levels);
+	grid_topo & fgrid = fop.grid();
+	auto cgrid = std::make_shared<grid_topo>(fgrid.get_igrd(), kc, num_levels);
 	cgrid->comm = fgrid.comm;
 
 	len_t NLxg = fgrid.nlocal(0) - 2;

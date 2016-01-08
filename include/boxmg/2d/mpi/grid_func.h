@@ -5,7 +5,7 @@
 #include <mpi.h>
 
 #include "boxmg/2d/grid_func.h"
-#include "boxmg/2d/mpi/grid_topo.h"
+#include "boxmg/mpi/grid_topo.h"
 #include <iostream>
 
 namespace boxmg { namespace bmg2d { namespace inter { namespace mpi {

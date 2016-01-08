@@ -24,7 +24,6 @@ set(2d_SOURCES
   solver.cc
   stencil_op.cc
   mpi/grid_func.cc
-  mpi/grid_topo.cc
   mpi/halo.cc
   mpi/solver.cc
   mpi/stencil_op.cc

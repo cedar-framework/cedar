@@ -13,7 +13,7 @@ extern "C"
 	{
 		using namespace boxmg::bmg2d;
 
-		auto & grid = *(reinterpret_cast<std::shared_ptr<mpi::grid_topo>*>(topo));
+		auto & grid = *(reinterpret_cast<std::shared_ptr<boxmg::grid_topo>*>(topo));
 
 		mpi::stencil_op *sop = new mpi::stencil_op(grid);
 		auto & sten = sop->stencil();
@@ -24,9 +24,10 @@ extern "C"
 
 	bmg2_operator bmg2_operator_create_fivept(bmg2_topo topo)
 	{
+		using namespace boxmg;
 		using namespace boxmg::bmg2d;
 
-		auto & grid = *(reinterpret_cast<std::shared_ptr<mpi::grid_topo>*>(topo));
+		auto & grid = *(reinterpret_cast<std::shared_ptr<grid_topo>*>(topo));
 
 		mpi::stencil_op *sop = new mpi::stencil_op(grid);
 		auto & sten = sop->stencil();

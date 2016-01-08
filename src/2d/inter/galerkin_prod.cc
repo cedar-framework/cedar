@@ -67,7 +67,7 @@ namespace impls
 		int ifd, nstencil;
 		inter::mpi::prolong_op & Pd = const_cast<inter::mpi::prolong_op&>(P);
 		mpi::stencil_op & fopd = const_cast<mpi::stencil_op&>(fop);
-		mpi::grid_topo & topo = fopd.grid();
+		grid_topo & topo = fopd.grid();
 		grid_stencil & fsten = fopd.stencil();
 		grid_stencil & csten = copd.stencil();
 		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;

@@ -162,7 +162,7 @@ namespace impls
 		int updown, nstencil;
 
 		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);
-		mpi::grid_topo & topo = sod.grid();
+		grid_topo & topo = sod.grid();
 		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
 		grid_stencil & sten = sod.stencil();
 		relax_stencil & sord = const_cast<relax_stencil&>(sor);
@@ -204,7 +204,7 @@ namespace impls
 		int updown, nstencil;
 
 		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);
-		mpi::grid_topo & topo = sod.grid();
+		grid_topo & topo = sod.grid();
 		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
 		grid_stencil & sten = sod.stencil();
 		relax_stencil & sord = const_cast<relax_stencil&>(sor);
@@ -253,7 +253,7 @@ namespace impls
 		int updown, nstencil;
 
 		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);
-		mpi::grid_topo & topo = sod.grid();
+		grid_topo & topo = sod.grid();
 		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
 		grid_stencil & sten = sod.stencil();
 		relax_stencil & sord = const_cast<relax_stencil&>(sor);

@@ -82,11 +82,11 @@ namespace factory
 		          real_t*>(impls::mpi_solve_cg_lu));
 
 		kreg->add(kernel_name::setup_nog, "fortran",
-		         boxmg::kernel<bmg2d::mpi::grid_topo&,
+		         boxmg::kernel<grid_topo&,
 		         len_t, int*>(impls::fortran_setup_nog));
 
 		kreg->add(kernel_name::halo_setup, "fortran-msg",
-		         boxmg::kernel<bmg2d::mpi::grid_topo&,void**>(impls::setup_msg));
+		         boxmg::kernel<grid_topo&,void**>(impls::setup_msg));
 
 		kreg->add(kernel_name::halo_exchange, "fortran-msg",
 		          boxmg::kernel<bmg2d::mpi::grid_func&>(impls::msg_exchange));

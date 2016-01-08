@@ -1,12 +1,12 @@
-#ifndef BOXMG_2D_CORE_MPI_GRIDTOPO_H
-#define BOXMG_2D_CORE_MPI_GRIDTOPO_H
+#ifndef BOXMG_MPI_GRIDTOPO_H
+#define BOXMG_MPI_GRIDTOPO_H
 
 #include <mpi.h>
 #include <array>
 
-#include "boxmg/types.h"
+#include <boxmg/types.h>
 
-namespace boxmg { namespace bmg2d { namespace mpi {
+namespace boxmg {
 
 class grid_topo
 {
@@ -52,6 +52,6 @@ private:
 
 using topo_ptr = std::shared_ptr<grid_topo>;
 
-}}}
+}
 
 #endif

@@ -77,7 +77,7 @@ namespace impls
 		auto & Ad = const_cast<mpi::stencil_op &>(A);
 		auto & xd = const_cast<mpi::grid_func&>(x);
 		auto & bd = const_cast<mpi::grid_func&>(b);
-		mpi::grid_topo & topo = Ad.grid();
+		grid_topo & topo = Ad.grid();
 		MsgCtx *ctx = (MsgCtx*) Ad.halo_ctx;
 
 		if (Ad.stencil().five_pt()) {

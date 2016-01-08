@@ -9,7 +9,7 @@
 
 #include "boxmg/2d/relax_stencil.h"
 #include "boxmg/2d/mpi/grid_func.h"
-#include "boxmg/2d/mpi/grid_topo.h"
+#include "boxmg/mpi/grid_topo.h"
 #include "boxmg/2d/mpi/grid_func.h"
 
 
@@ -34,7 +34,7 @@ namespace mpi = boxmg::bmg2d::mpi;
 class registry : public kernel_registry<mpi::stencil_op, relax_stencil, inter::mpi::prolong_op, mpi::grid_func>
 {
 public:
-	void setup_nog(mpi::grid_topo &topo,
+	void setup_nog(grid_topo &topo,
 	               len_t min_coarse, int *nog)
 	{
 		active.run(kernel_name::setup_nog, topo,
@@ -43,11 +43,11 @@ public:
 	}
 
 
-	void halo_setup(mpi::grid_topo &topo,
+	void halo_setup(grid_topo &topo,
 	                void **halo_ctx)
 	{
 		active.run(kernel_name::halo_setup,
-		           static_cast<mpi::grid_topo&>(topo),
+		           static_cast<grid_topo&>(topo),
 		           static_cast<void**>(halo_ctx));
 	}
 

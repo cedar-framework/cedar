@@ -2,7 +2,7 @@
 
 namespace boxmg { namespace bmg2d { namespace util { namespace mpi {
 
-bool has_boundary(bmg2d::mpi::grid_topo & grid,bmg2d::dir dir)
+bool has_boundary(grid_topo & grid,bmg2d::dir dir)
 {
 	if (dir == bmg2d::dir::N)
 		return grid.is(1) - 1 + grid.nlocal(1) == grid.nglobal(1);

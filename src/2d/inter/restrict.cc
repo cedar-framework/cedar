@@ -44,8 +44,8 @@ namespace impls
 		int kf, kc, nog;
 		auto & Rd = const_cast<inter::mpi::restrict_op&>(R);
 		inter::mpi::prolong_op & P = Rd.getP();
-		mpi::grid_topo & topo = P.grid();
-		const mpi::grid_topo & fine_topo = fine.grid();
+		grid_topo & topo = P.grid();
+		const grid_topo & fine_topo = fine.grid();
 		MsgCtx *ctx = (MsgCtx*) P.halo_ctx;
 		auto & fined = const_cast<mpi::grid_func&>(fine);
 

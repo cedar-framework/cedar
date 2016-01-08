@@ -4,7 +4,7 @@
 #include <mpi.h>
 
 #include <boxmg/2d/stencil_op_base.h>
-#include <boxmg/2d/mpi/grid_topo.h>
+#include <boxmg/mpi/grid_topo.h>
 #include <boxmg/2d/mpi/grid_func.h>
 #include <boxmg/2d/kernel/mpi/registry.h>
 
