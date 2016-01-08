@@ -5,7 +5,7 @@ using namespace boxmg::bmg2d::mpi;
 
 stencil_op::stencil_op(topo_ptr grd) :
 	stencil_op_base(grd->nlocal(0)-2, grd->nlocal(1)-2),
-	comm(grd->comm), grid_(grd)
+	par_object(grd, grd->comm)
 {
 	gs.reshape(gs.len(0)+1, gs.len(1)+1, gs.len(2));
 	gs.len(0)--;

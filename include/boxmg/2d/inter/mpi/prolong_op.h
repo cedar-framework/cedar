@@ -2,7 +2,6 @@
 #define BOXMG_2D_INTER_MPI_PROLONG_OP_H
 
 #include "boxmg/2d/mpi/stencil_op.h"
-#include "boxmg/mpi/grid_topo.h"
 #include "boxmg/2d/mpi/grid_func.h"
 
 
@@ -17,17 +16,10 @@ class prolong_op : public mpi::stencil_op
 public:
 	prolong_op() {};
 	prolong_op(topo_ptr grid);
-	void *halo_ctx;
-	grid_topo & grid() { return *grid_; }
-	const grid_topo & grid() const { return *grid_; }
-	topo_ptr grid_ptr() const { return grid_; }
 	friend std::ostream & operator<< (std::ostream &os, const prolong_op & P);
 	mpi::stencil_op * fine_op;
 	mpi::grid_func *residual;
 	friend iadd_pack operator*(const prolong_op&, const mpi::grid_func&);
-
-private:
-	topo_ptr grid_;
 };
 
 }}}}

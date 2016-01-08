@@ -3,9 +3,9 @@
 using namespace boxmg::bmg2d::inter::mpi;
 
 prolong_op::prolong_op(topo_ptr topo) : mpi::stencil_op(topo->nlocal(0)-2,
-                                                                    topo->nlocal(1)-2, true),
-                                            grid_(topo)
+                                                                    topo->nlocal(1)-2, true)
 {
+	grid_ = topo;
 }
 
 

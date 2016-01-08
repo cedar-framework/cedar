@@ -4,7 +4,7 @@
 using namespace boxmg::bmg2d::mpi;
 
 grid_func::grid_func(topo_ptr grid) :
-	::boxmg::bmg2d::grid_func(grid->nlocal(0)-2,grid->nlocal(1)-2), comm(grid->comm), grid_(grid) {}
+	::boxmg::bmg2d::grid_func(grid->nlocal(0)-2,grid->nlocal(1)-2), par_object(grid, grid->comm) {}
 
 grid_func::grid_func(len_t nx, len_t ny): ::boxmg::bmg2d::grid_func(nx,ny)
 {}

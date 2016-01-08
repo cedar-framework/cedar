@@ -4,8 +4,8 @@
 
 #include <mpi.h>
 
-#include "boxmg/2d/grid_func.h"
-#include "boxmg/mpi/grid_topo.h"
+#include <boxmg/2d/grid_func.h>
+#include <boxmg/mpi/par_object.h>
 #include <iostream>
 
 namespace boxmg { namespace bmg2d { namespace inter { namespace mpi {
@@ -17,7 +17,7 @@ namespace boxmg { namespace bmg2d { namespace inter { namespace mpi {
 
 namespace boxmg { namespace bmg2d { namespace mpi {
 
-class grid_func : public ::boxmg::bmg2d::grid_func
+class grid_func : public ::boxmg::bmg2d::grid_func, public par_object
 {
 public:
 	/* template<typename... ArgTypes> */
@@ -27,11 +27,6 @@ public:
 	grid_func(topo_ptr grid);
 	grid_func(len_t nx, len_t ny);
 	using ::boxmg::bmg2d::grid_func::operator();
-	MPI_Comm comm;
-	grid_topo & grid() { return *grid_; }
-	const grid_topo & grid() const { return *grid_;}
-	topo_ptr grid_ptr() const { return grid_; }
-	void *halo_ctx;
 	static grid_func like(const grid_func &likeable);
 	static grid_func zeros_like(const grid_func &likeable);
 	static grid_func ones_like(const grid_func &likeable);
@@ -41,9 +36,6 @@ public:
 	friend grid_func operator-(grid_func lhs, const grid_func &rhs) { return lhs -= rhs; }
 	grid_func & operator+=(iadd_t interp_add_package);
 	friend std::ostream& operator<< (std::ostream& os, const grid_func &obj);
-
-protected:
-	topo_ptr grid_;
 };
 
 
