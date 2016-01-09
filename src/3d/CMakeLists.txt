@@ -16,5 +16,7 @@ set(3d_SOURCES
   relax_stencil.cc
   residual.cc
   solver.cc
+  mpi/grid_func.cc
+  mpi/stencil_op.cc
   PARENT_SCOPE
   )
