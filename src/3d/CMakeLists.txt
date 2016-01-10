@@ -3,6 +3,7 @@ add_subdirectory(inter)
 add_subdirectory(relax)
 add_subdirectory(kernel)
 add_subdirectory(cg)
+add_subdirectory(util)
 
 set(3d_SOURCES
   ${ftn_SOURCES}
@@ -10,6 +11,7 @@ set(3d_SOURCES
   ${relax_SOURCES}
   ${kernel_SOURCES}
   ${cg_SOURCES}
+  ${util_SOURCES}
   grid_func.cc
   grid_stencil.cc
   stencil_op.cc
@@ -18,5 +20,6 @@ set(3d_SOURCES
   solver.cc
   mpi/grid_func.cc
   mpi/stencil_op.cc
+  mpi/halo.cc
   PARENT_SCOPE
   )

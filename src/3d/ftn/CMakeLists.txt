@@ -8,4 +8,11 @@ set(ftn_SOURCES
   ftn/BMG3_SymStd_SETUP_cg_LU.f90
   ftn/BMG3_SymStd_SOLVE_cg.f90
   ftn/BMG3_SymStd_restrict.f90
+  ftn/BMG3_SymStd_interp_add.f90
+  ftn/mpi/BMG3_SymStd_residual.f90
+  ftn/mpi/BMG3_SymStd_SETUP_MSG.f90
+  ftn/mpi/BMG3_SymStd_SETUP_PtrMSG.f90
+  ftn/mpi/BMG3_SymStd_SETUP_MSGGrid.f90
+  ftn/mpi/BMG3_SymStd_SETUP_fine_stencil.f90
+  ftn/mpi/BMG3_SymStd_UTILS_update_ghosts.f90
   PARENT_SCOPE)

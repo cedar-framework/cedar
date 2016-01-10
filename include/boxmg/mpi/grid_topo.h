@@ -31,7 +31,7 @@ public:
 	const int & nproc(int dim) const;
 	const int & coord(int dim) const;
 
-	len_t nproc() const { return nproc_[0]*nproc_[1]; }
+	len_t nproc() const { return nproc_[0]*nproc_[1]*nproc_[2]; }
 	int nlevel() const { return nlvl; }
 	int level() const { return lvl; }
 
@@ -41,13 +41,14 @@ public:
 	MPI_Comm comm;
 	std::vector<int> dimxfine;
 	std::vector<int> dimyfine;
+	std::vector<int> dimzfine;
 
 private:
 	igrd_t igrd;
 	int lvl;
 	int nlvl;
-	std::array<int, 2> nproc_;
-	std::array<int, 2> coord_;
+	std::array<int, 3> nproc_;
+	std::array<int, 3> coord_;
 };
 
 using topo_ptr = std::shared_ptr<grid_topo>;

@@ -8,6 +8,7 @@
 #include <boxmg/3d/cg/setup_cg_lu.h>
 #include <boxmg/3d/cg/solve_cg.h>
 #include <boxmg/3d/inter/restrict.h>
+#include <boxmg/3d/inter/interp.h>
 
 #include <boxmg/3d/kernel/factory.h>
 
@@ -65,6 +66,12 @@ namespace factory
 		         const grid_func&,
 		         grid_func&>(impls::fortran_restrict));
 
+		kreg->add(name::interp_add,"fortran",
+		         boxmg::kernel<const inter::prolong_op&,
+		         const grid_func&,
+		         const grid_func&,
+		         grid_func&>(impls::fortran_interp));
+
 		std::vector<std::tuple<std::string, std::string, std::string>> defaults = {
 			std::make_tuple(name::residual, "kernels.residual", "fortran"),
 			std::make_tuple(name::galerkin_prod, "kernels.galerkin-prod", "fortran-ex"),
@@ -73,6 +80,7 @@ namespace factory
 			std::make_tuple(name::restriction, "kernels.restrict", "fortran"),
 			std::make_tuple(name::relax, "kernels.relax", "fortran-rbgs-point"),
 			std::make_tuple(name::setup_cg_lu, "kernels.setup-cg-lu", "fortran"),
+			std::make_tuple(name::interp_add, "kernels.interp-add", "fortran"),
 			std::make_tuple(name::solve_cg, "kernels.solve-cg", "fortran")
 		};
 

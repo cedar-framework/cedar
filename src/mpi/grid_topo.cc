@@ -14,6 +14,8 @@ len_t & grid_topo::is(int dim)
 		return (*igrd)[(idL_BMG_Icoord-1)*nlvl + lvl];
 	} else if (dim == 1) {
 		return (*igrd)[(idL_BMG_Jcoord-1)*nlvl + lvl];
+	} else if (dim == 2) {
+		return (*igrd)[(idL_BMG_Kcoord-1)*nlvl + lvl];
 	} else {
 		log::error << "Invalid dimension" << std::endl;
 		return (*igrd)[(idL_BMG_Kcoord-1)*nlvl + lvl];
@@ -27,6 +29,8 @@ const len_t & grid_topo::is(int dim) const
 		return (*igrd)[(idL_BMG_Icoord-1)*nlvl + lvl];
 	} else if (dim == 1) {
 		return (*igrd)[(idL_BMG_Jcoord-1)*nlvl + lvl];
+	} else if (dim == 2) {
+		return (*igrd)[(idL_BMG_Kcoord-1)*nlvl + lvl];
 	} else {
 		log::error << "Invalid dimension" << std::endl;
 		return (*igrd)[(idL_BMG_Kcoord-1)*nlvl + lvl];
@@ -40,6 +44,8 @@ len_t & grid_topo::nlocal(int dim)
 		return (*igrd)[(idL_BMG_NLx-1)*nlvl + lvl];
 	} else if (dim == 1) {
 		return (*igrd)[(idL_BMG_NLy-1)*nlvl + lvl];
+	} else if (dim == 2) {
+		return (*igrd)[(idL_BMG_NLz-1)*nlvl + lvl];
 	} else {
 		log::error << "invalid dimension" << std::endl;
 		return (*igrd)[(idL_BMG_NLz-1)*nlvl + lvl];
@@ -53,6 +59,8 @@ const len_t & grid_topo::nlocal(int dim) const
 		return (*igrd)[(idL_BMG_NLx-1)*nlvl + lvl];
 	} else if (dim == 1) {
 		return (*igrd)[(idL_BMG_NLy-1)*nlvl + lvl];
+	} else if (dim == 2) {
+		return (*igrd)[(idL_BMG_NLz-1)*nlvl + lvl];
 	} else {
 		log::error << "invalid dimension" << std::endl;
 		return (*igrd)[(idL_BMG_NLz-1)*nlvl + lvl];
@@ -66,6 +74,8 @@ len_t & grid_topo::nglobal(int dim)
 		return (*igrd)[(idL_BMG_NGx-1)*nlvl + lvl];
 	} else if (dim == 1) {
 		return (*igrd)[(idL_BMG_NGy-1)*nlvl + lvl];
+	} else if (dim == 2) {
+		return (*igrd)[(idL_BMG_NGz-1)*nlvl + lvl];
 	} else {
 		log::error << "invalid dimension" << std::endl;
 		return (*igrd)[0];
@@ -79,6 +89,8 @@ const len_t & grid_topo::nglobal(int dim) const
 		return (*igrd)[(idL_BMG_NGx-1)*nlvl + lvl];
 	} else if (dim == 1) {
 		return (*igrd)[(idL_BMG_NGy-1)*nlvl + lvl];
+	} else if (dim == 2) {
+		return (*igrd)[(idL_BMG_NGz-1)*nlvl + lvl];
 	} else {
 		log::error << "invalid dimension" << std::endl;
 		return (*igrd)[0];
