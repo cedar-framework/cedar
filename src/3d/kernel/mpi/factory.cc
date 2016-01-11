@@ -3,6 +3,9 @@
 #include <boxmg/kernel_name.h>
 #include <boxmg/3d/mpi/halo.h>
 #include <boxmg/3d/residual.h>
+#include <boxmg/3d/relax/setup_relax.h>
+#include <boxmg/3d/inter/setup_interp.h>
+#include <boxmg/3d/inter/galerkin_prod.h>
 
 #include <boxmg/3d/kernel/mpi/factory.h>
 
@@ -31,11 +34,30 @@ namespace factory
 		          const mpi::grid_func &,
 		          mpi::grid_func&>(impls::mpi_residual_fortran));
 
+		kreg->add(kernel_name::setup_relax, "fortran-msg-rbgs-point",
+		          boxmg::kernel<const mpi::stencil_op&,
+		          bmg3::relax_stencil&>(impls::mpi_setup_rbgs_point));
+
+		kreg->add(kernel_name::setup_interp, "fortran-msg",
+		          boxmg::kernel<int,int,int,
+		          const mpi::stencil_op&,
+		          const mpi::stencil_op&,
+		          inter::mpi::prolong_op&>(impls::mpi_setup_interp));
+
+		kreg->add(kernel_name::galerkin_prod, "fortran-msg",
+		          boxmg::kernel<int,int,int,
+		          const inter::mpi::prolong_op&,
+		          const mpi::stencil_op&,
+		          mpi::stencil_op&>(impls::mpi_galerkin_prod));
+
 		std::vector<std::tuple<std::string, std::string, std::string>> defaults = {
 			std::make_tuple(kernel_name::residual, "kernels.residual", "fortran-msg"),
 			std::make_tuple(kernel_name::halo_setup, "kernels.halo-setup", "fortran-msg"),
 			std::make_tuple(kernel_name::halo_exchange, "kernels.halo-exchange", "fortran-msg"),
-			std::make_tuple(kernel_name::halo_stencil_exchange, "kernels.halo-stencil-exchange", "fortran-msg")
+			std::make_tuple(kernel_name::halo_stencil_exchange, "kernels.halo-stencil-exchange", "fortran-msg"),
+			std::make_tuple(kernel_name::setup_relax, "kernels.setup-relax", "fortran-msg-rbgs-point"),
+			std::make_tuple(kernel_name::setup_interp, "kernels.setup-interp", "fortran-msg"),
+			std::make_tuple(kernel_name::galerkin_prod, "kernels.galerkin-prod", "fortran-msg")
 		};
 
 		for (auto&& v : defaults) {

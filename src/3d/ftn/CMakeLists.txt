@@ -15,4 +15,8 @@ set(ftn_SOURCES
   ftn/mpi/BMG3_SymStd_SETUP_MSGGrid.f90
   ftn/mpi/BMG3_SymStd_SETUP_fine_stencil.f90
   ftn/mpi/BMG3_SymStd_UTILS_update_ghosts.f90
+  ftn/mpi/BMG3_SymStd_SETUP_recip.f90
+  ftn/mpi/BMG3_SymStd_SETUP_interp_OI.f90
+  ftn/mpi/BMG3_SymStd_SETUP_ITLI07_ex.f90
+  ftn/mpi/BMG3_SymStd_SETUP_ITLI27_ex.f90
   PARENT_SCOPE)
