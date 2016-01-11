@@ -5,14 +5,14 @@
 
 using namespace boxmg;
 
-void Timer::begin()
+void timer::begin()
 {
 	if (log::timer.active())
 		starttime = MPI_Wtime();
 }
 
 
-void Timer::end()
+void timer::end()
 {
 	if (log::timer.active()) {
 		endtime = MPI_Wtime();

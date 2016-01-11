@@ -5,11 +5,11 @@
 
 namespace boxmg {
 
-	class Timer
+	class timer
 	{
 	public:
 		template<class T>
-			Timer(T&& name): name(std::forward<T>(name)) {};
+			timer(T&& name): name(std::forward<T>(name)) {};
 		void begin();
 		void end();
 	private:

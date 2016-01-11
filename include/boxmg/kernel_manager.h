@@ -45,7 +45,7 @@ public:
 			kernel<Args...> *c = dynamic_cast<kernel<Args...>*>(it->second.get());
 			if (c) {
 				log::debug << "Running kernel: " << kname << std::endl;
-				Timer kern_timer(kname);
+				timer kern_timer(kname);
 				if (log::debug.active())
 					kern_timer.begin();
 				(*c)(std::forward<decltype(args)>(args)...);

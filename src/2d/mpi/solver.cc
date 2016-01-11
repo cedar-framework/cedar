@@ -12,7 +12,7 @@ using namespace boxmg::bmg2d;
 
 mpi::solver::solver(bmg2d::mpi::stencil_op&& fop) : comm(fop.grid().comm)
 {
-	Timer setup_timer("Setup");
+	timer setup_timer("Setup");
 	setup_timer.begin();
 
 	kreg = kernel::mpi::factory::from_config(conf);

@@ -95,7 +95,7 @@ multilevel() : conf("config.json") {};
 		real_t res0_l2 = levels[0].res.template lp_norm<2>();
 		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
 
-		Timer solve_timer("Solve");
+		timer solve_timer("Solve");
 		solve_timer.begin();
 
 		for (auto i: range(maxiter)) {
@@ -121,7 +121,7 @@ multilevel() : conf("config.json") {};
 		real_t res0_l2 = levels[0].res.template lp_norm<2>();
 		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
 
-		Timer solve_timer("Solve");
+		timer solve_timer("Solve");
 		solve_timer.begin();
 
 		for (auto i: range(maxiter)) {
