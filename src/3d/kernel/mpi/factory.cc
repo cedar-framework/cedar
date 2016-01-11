@@ -8,6 +8,7 @@
 #include <boxmg/3d/inter/galerkin_prod.h>
 #include <boxmg/3d/relax/relax.h>
 #include <boxmg/3d/inter/interp.h>
+#include <boxmg/3d/inter/restrict.h>
 
 #include <boxmg/3d/kernel/mpi/factory.h>
 
@@ -65,6 +66,11 @@ namespace factory
 		         const mpi::grid_func&,
 		         mpi::grid_func&>(impls::mpi_fortran_interp));
 
+		kreg->add(kernel_name::restriction, "fortran-msg",
+		          boxmg::kernel<const inter::mpi::restrict_op&,
+		          const mpi::grid_func&,
+		          mpi::grid_func&>(impls::mpi_fortran_restrict));
+
 		std::vector<std::tuple<std::string, std::string, std::string>> defaults = {
 			std::make_tuple(kernel_name::residual, "kernels.residual", "fortran-msg"),
 			std::make_tuple(kernel_name::halo_setup, "kernels.halo-setup", "fortran-msg"),
@@ -74,7 +80,8 @@ namespace factory
 			std::make_tuple(kernel_name::setup_interp, "kernels.setup-interp", "fortran-msg"),
 			std::make_tuple(kernel_name::galerkin_prod, "kernels.galerkin-prod", "fortran-msg"),
 			std::make_tuple(kernel_name::relax, "kernels.relax", "fortran-msg-rbgs"),
-			std::make_tuple(kernel_name::interp_add, "kernels.interp-add", "fortran-msg")
+			std::make_tuple(kernel_name::interp_add, "kernels.interp-add", "fortran-msg"),
+			std::make_tuple(kernel_name::restriction, "kernels.restrict", "fortran-msg")
 		};
 
 		for (auto&& v : defaults) {
