@@ -21,5 +21,6 @@ set(3d_SOURCES
   mpi/grid_func.cc
   mpi/stencil_op.cc
   mpi/halo.cc
+  mpi/solver.cc
   PARENT_SCOPE
   )
