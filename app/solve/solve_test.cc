@@ -2,16 +2,17 @@
 #include <memory>
 #include <math.h>
 
-#include <boxmg-common.h>
-#include <boxmg-2d.h>
-
+#include <boxmg/types.h>
+#include <boxmg/util/grid.h>
+#include <boxmg/2d/grid_func.h>
+#include <boxmg/2d/stencil_op.h>
+#include <boxmg/2d/solver.h>
 
 
 int main(int argc, char *argv[])
 {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
-	using namespace boxmg::bmg2d::core;
 
 	const double pi = M_PI;
 
@@ -20,11 +21,11 @@ int main(int argc, char *argv[])
 
 	real_t h2 = (1.0/(nx+1)) * (1.0/(ny+1));
 
-	auto so = StencilOp(nx,ny);
-	GridStencil & sten = so.stencil();
+	auto so = stencil_op(nx,ny);
+	grid_stencil & sten = so.stencil();
 	sten.five_pt() = true;
 
-	GridFunc b(nx, ny);
+	grid_func b(nx, ny);
 	auto xs = linspace(0,1,nx+2);
 	auto ys = linspace(0,1,ny+2);
 
@@ -34,11 +35,11 @@ int main(int argc, char *argv[])
 		auto x = xs.begin();
 		x++;
 		for (auto i: sten.range(0)) {
-			sten(i,j,Dir::E) = 1;
-			sten(i,j,Dir::N) = 1;
-			sten(i,j,Dir::C) = 4;
-			sten(i,j,Dir::S) = 1;
-			sten(i,j,Dir::W) = 1;
+			sten(i,j,dir::E) = 1;
+			sten(i,j,dir::N) = 1;
+			sten(i,j,dir::C) = 4;
+			sten(i,j,dir::S) = 1;
+			sten(i,j,dir::W) = 1;
 
 			b(i,j) = 8*(pi*pi)*sin(2*pi*(*x))*sin(2*pi*(*y)) * h2;
 			x++;
@@ -46,16 +47,16 @@ int main(int argc, char *argv[])
 		y++;
 	}
 
-	for (auto idx: sten.boarder(Dir::N)) sten(idx, Dir::N) = 0;
-	for (auto idx: sten.boarder(Dir::S)) sten(idx, Dir::S) = 0;
-	for (auto idx: sten.boarder(Dir::E)) sten(idx, Dir::E) = 0;
-	for (auto idx: sten.boarder(Dir::W)) sten(idx, Dir::W) = 0;
+	for (auto idx: sten.boarder(dir::N)) sten(idx, dir::N) = 0;
+	for (auto idx: sten.boarder(dir::S)) sten(idx, dir::S) = 0;
+	for (auto idx: sten.boarder(dir::E)) sten(idx, dir::E) = 0;
+	for (auto idx: sten.boarder(dir::W)) sten(idx, dir::W) = 0;
 
-	solver::BoxMG bmg(std::move(so));
+	solver bmg(std::move(so));
 
 	auto sol = bmg.solve(b);
 
-	core::GridFunc exact_sol(sol.shape(0), sol.shape(1));
+	grid_func exact_sol(sol.shape(0), sol.shape(1));
 
 	std::ofstream dfile;
 	dfile.open("sol.txt", std::ios::out | std::ios::trunc | std::ios::binary);

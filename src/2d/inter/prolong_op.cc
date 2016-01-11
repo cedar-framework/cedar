@@ -1,17 +1,17 @@
 #include <iomanip>
 
-#include "inter/types.h"
-#include "inter/prolong_op.h"
+#include <boxmg/2d/inter/types.h>
+#include <boxmg/2d/inter/prolong_op.h>
 
 
 using namespace boxmg::bmg2d::inter;
 
-ProlongOp::ProlongOp(len_t nx, len_t ny) : StencilOp(nx,ny,true)
+prolong_op::prolong_op(len_t nx, len_t ny) : stencil_op(nx,ny,true)
 {
 }
 
 namespace boxmg { namespace bmg2d { namespace inter {
-std::ostream & operator<< (std::ostream &os, const ProlongOp &P)
+std::ostream & operator<< (std::ostream &os, const prolong_op &P)
 {
 	auto & sten = P.stencil();
 	// unsigned int width = 8;
@@ -35,15 +35,15 @@ std::ostream & operator<< (std::ostream &os, const ProlongOp &P)
 	for (auto j: sten.range(1)) {
 		for (auto i: sten.range(0)) {
 			os << i+1 << ", " <<  j+1 << ", "
-			   << std::scientific << sten(i,j+1,Dir::SE) << ", "
-			   << std::scientific << sten(i,j+1,Dir::B)  << ", "
-			   << std::scientific << sten(i+1,j+1,Dir::SW) << ", "
-			   << std::scientific << sten(i,j,Dir::R) << ", "
+			   << std::scientific << sten(i,j+1,dir::SE) << ", "
+			   << std::scientific << sten(i,j+1,dir::B)  << ", "
+			   << std::scientific << sten(i+1,j+1,dir::SW) << ", "
+			   << std::scientific << sten(i,j,dir::R) << ", "
 			   << std::scientific << 1.0 << ", "
-			   << std::scientific << sten(i+1,j,Dir::L) << ", "
-			   << std::scientific << sten(i,j,Dir::NE) << ", "
-			   << std::scientific << sten(i,j,Dir::A) << ", "
-			   << std::scientific << sten(i+1,j,Dir::NW) << '\n';
+			   << std::scientific << sten(i+1,j,dir::L) << ", "
+			   << std::scientific << sten(i,j,dir::NE) << ", "
+			   << std::scientific << sten(i,j,dir::A) << ", "
+			   << std::scientific << sten(i+1,j,dir::NW) << '\n';
 		}
 	}
 
@@ -51,11 +51,11 @@ std::ostream & operator<< (std::ostream &os, const ProlongOp &P)
 }
 
 
-iadd_pack operator*(const ProlongOp & P, const core::GridFunc & coarse)
+iadd_pack operator*(const prolong_op & P, const grid_func & coarse)
 {
-	return std::make_tuple<std::reference_wrapper<const ProlongOp>,
-	                       std::reference_wrapper<const core::GridFunc>,
-	                       std::reference_wrapper<const core::GridFunc>>(P,coarse,*(P.residual));
+	return std::make_tuple<std::reference_wrapper<const prolong_op>,
+	                       std::reference_wrapper<const grid_func>,
+	                       std::reference_wrapper<const grid_func>>(P,coarse,*(P.residual));
 }
 
 

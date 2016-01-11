@@ -1,1 +1,31 @@
-../../cinch/cmake/SourceLists.txt
+add_subdirectory(cg)
+add_subdirectory(ftn)
+add_subdirectory(inter)
+add_subdirectory(kernel)
+add_subdirectory(relax)
+add_subdirectory(util)
+add_subdirectory(interface)
+
+set(2d_SOURCES
+  ${cg_SOURCES}
+  ${ftn_SOURCES}
+  ${inter_SOURCES}
+  ${kernel_SOURCES}
+  ${relax_SOURCES}
+  ${util_SOURCES}
+  ${interface_SOURCES}
+  grid_func.cc
+  grid_stencil.cc
+  stencil_op.cc
+  boundary_iterator.cc
+  matvec.cc
+  relax_stencil.cc
+  residual.cc
+  solver.cc
+  stencil_op.cc
+  mpi/grid_func.cc
+  mpi/halo.cc
+  mpi/solver.cc
+  mpi/stencil_op.cc
+  PARENT_SCOPE
+  )

@@ -1,6 +1,6 @@
 #include <mpi.h>
 
-#include "setup_nog.h"
+#include "boxmg/2d/kernel/setup_nog.h"
 
 extern "C" {
 	using namespace boxmg;
@@ -13,8 +13,8 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace impls
 {
-	using namespace boxmg::bmg2d::core;
-	void fortran_setup_nog(mpi::GridTopo & topo, len_t min_coarse, int *nog)
+	using namespace boxmg::bmg2d;
+	void fortran_setup_nog(grid_topo & topo, len_t min_coarse, int *nog)
 	{
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 

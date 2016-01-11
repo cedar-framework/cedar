@@ -1,22 +1,23 @@
-#include "kernel/fortran/mpi/BMG_workspace_c.h"
+#include "boxmg/2d/ftn/mpi/BMG_workspace_c.h"
 
-#include "topo.h"
+#include "boxmg/2d/util/topo.h"
 
 namespace boxmg { namespace bmg2d { namespace util {
 
-core::mpi::topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny)
+topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny)
 {
 	int rank, size;
 	int periodic[3];
 
 	auto igrd = std::make_shared<std::vector<len_t>>(NBMG_pIGRD);
 
-	auto grid = std::make_shared<core::mpi::GridTopo>(igrd, 0, 1);
+	auto grid = std::make_shared<grid_topo>(igrd, 0, 1);
 
 	periodic[0] = periodic[1] = periodic[2] = 0;
 
 	MPI_Comm_size(comm, &size);
 	grid->nproc(0) = grid->nproc(1) = 0;
+	grid->nproc(2) = 1;
 	MPI_Dims_create(size, 2, &grid->nproc(0));
 	MPI_Cart_create(comm, 2, &grid->nproc(0), periodic, 1, &grid->comm);
 	MPI_Comm_rank(grid->comm, &rank);
