@@ -22,4 +22,5 @@ set(ftn_SOURCES
   ftn/mpi/BMG3_SymStd_relax_GS.f90
   ftn/mpi/BMG3_SymStd_interp_add.f90
   ftn/mpi/BMG3_SymStd_restrict.f90
+  ftn/mpi/BMG3_SymStd_SETUP_nog.f90
   PARENT_SCOPE)
