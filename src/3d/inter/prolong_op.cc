@@ -18,7 +18,7 @@ std::ostream & operator<<(std::ostream & os, const prolong_op & P)
 	for (auto k : sten.range(2)) {
 		for (auto j : sten.range(1)) {
 			for (auto i : sten.range(0)) {
-				os << i+1 << ", " << j+1 << ", " << k+1 << "N, "
+				os << i+1 << ", " << j+1 << ", " << k+1 << " N, "
 				   << std::scientific << sten(i,j,k+1, dir::BNE) << ", "
 				   << std::scientific << sten(i,j,k+1, dir::XZSE) << ", "
 				   << std::scientific << sten(i,j+1,k+1,dir::BSE) << ", "
@@ -29,18 +29,18 @@ std::ostream & operator<<(std::ostream & os, const prolong_op & P)
 				   << std::scientific << sten(i,j,k,dir::XZNE) << ", "
 				   << std::scientific << sten(i,j+1,k,dir::TSE) << '\n';
 
-				os << i+1 << ", " << j+1 << ", " << k+1 << "O, "
+				os << i+1 << ", " << j+1 << ", " << k+1 << " O, "
 				   << std::scientific << sten(i,j,k+1,dir::YZSW) << ", "
 				   << std::scientific << sten(i,j,k+1,dir::XZB) << ", "
 				   << std::scientific << sten(i,j+1,k+1,dir::YZSE) << ", "
 				   << std::scientific << sten(i,j,k,dir::XYA) << ", "
-				   << std::scientific << "1.0, "
+				   << std::scientific << 1.0 << ", "
 				   << std::scientific << sten(i,j+1,k,dir::XYB) << ", "
 				   << std::scientific << sten(i,j,k,dir::YZNW) << ", "
 				   << std::scientific << sten(i,j,k,dir::XZA) << ", "
 				   << std::scientific << sten(i,j+1,k,dir::YZNE) << '\n';
 
-				os << i+1 << ", " << j+1 << ", " << k+1 << "S, "
+				os << i+1 << ", " << j+1 << ", " << k+1 << " S, "
 				   << std::scientific << sten(i+1,j,k+1,dir::BNW) << ", "
 				   << std::scientific << sten(i+1,j,k+1,dir::XZSW) << ", "
 				   << std::scientific << sten(i+1,j+1,k+1, dir::BSW) << ", "
