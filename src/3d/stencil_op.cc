@@ -1,7 +1,8 @@
 #include <iomanip>
 #include <boxmg/3d/stencil_op.h>
 
-using namespace boxmg::bmg3;
+
+namespace boxmg { namespace bmg3 {
 
 std::ostream & operator<< (std::ostream & os, const stencil_op & op)
 {
@@ -79,3 +80,5 @@ std::ostream & operator<< (std::ostream & os, const stencil_op & op)
 
 	return os;
 }
+
+}}

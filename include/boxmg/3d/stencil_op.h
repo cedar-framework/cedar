@@ -14,7 +14,7 @@ namespace boxmg { namespace bmg3 {
 class stencil_op : public stencil_op_base<grid_func, kernel::registry>
 {
 public:
-	stencil_op();
+	stencil_op() {};
     stencil_op(len_t nx, len_t ny, len_t nz, bool intergrid=false) : stencil_op_base(nx,ny,nz, intergrid) {}
 	friend std::ostream & operator<< (std::ostream &os, const stencil_op & op);
 	virtual void apply(const grid_func & x, grid_func &y) const

@@ -1,6 +1,6 @@
       SUBROUTINE BMG3_SymStd_SETUP_recip( &
      &                SO, SOR, Nx, Ny, Nz, NStncl, NSORv&
-     &                ) BIND(C, NAME='BMG3_SymStd_SETUP_recip')
+     &                ) BIND(C, NAME='MPI_BMG3_SymStd_SETUP_recip')
 
 ! ======================================================================
 !  --------------------

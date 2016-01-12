@@ -5,6 +5,6 @@ add_executable(solve-test solve/solve_test.cc)
 target_link_libraries(solve-test boxmg ${boxmg-examples_LINKER_FLAGS})
 add_executable(mpi-test mpi/solve_test.cc)
 target_link_libraries(mpi-test boxmg ${boxmg-examples_LINKER_FLAGS})
-add_executable(setup-test-3 setup-3d/test.cc)
-target_link_libraries(setup-test-3 boxmg ${boxmg-examples_LINKER_FLAGS})
+add_executable(solve-test-3 solve-3d/test.cc)
+target_link_libraries(solve-test-3 boxmg ${boxmg-examples_LINKER_FLAGS})
 

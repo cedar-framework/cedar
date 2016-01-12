@@ -4,7 +4,7 @@
      &                NOG, ifd, NStncl, irelax, yo, &
      &                NOGm, IGRD, iWork, NMSGi, pMSG,&
      &                BUFFER, NMSGr, MyProc, MPICOMM&
-     &                ) BIND(C, NAME='BMG3_SymStd_SETUP_interp_OI')
+     &                ) BIND(C, NAME='MPI_BMG3_SymStd_SETUP_interp_OI')
 
 ! ======================================================================
 !  --------------------

@@ -17,7 +17,10 @@ grid_stencil::grid_stencil(len_t nx, len_t ny, len_t nz, unsigned int nghosts, b
 	if (this->symmetric) {
 		reshape(lens[0], lens[1], lens[2], 14);
 	} else {
-		log::error << "non-symmetric problems not supported" << std::endl;
+		if (intergrid)
+			reshape(lens[0], lens[1], lens[2], 26);
+		else
+			log::error << "non-symmetric problems not supported" << std::endl;
 	}
 }
 

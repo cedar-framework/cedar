@@ -3,7 +3,7 @@
      &                Q, QF, SO, RES, II, JJ, KK, NStncl,&
      &                iWork, NMSGi, pMSG, &
      &                MSG_Buffer, NMSGr, MPICOMM &
-     &                ) BIND(C, NAME='BMG3_SymStd_residual')
+     &                ) BIND(C, NAME='MPI_BMG3_SymStd_residual')
 
 ! ======================================================================
 !  --------------------
