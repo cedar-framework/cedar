@@ -21,12 +21,12 @@ std::ostream & operator<< (std::ostream & os, const stencil_op & op)
 					os << std::setw(width) << (k+1-2)*(nx*ny) + (j+1-2)*nx + i+1-2 << " "
 					   << std::setw(width) << i+1 << ", " << std::setw(width) << j+1 << ", "
 					   << std::setw(width) << k + 1 << ", "
-					   << std::scientific << -sten(i,j+1,k,dir::PS)
-					   << std::scientific << -sten(i,j,k+1,dir::B)
-					   << std::scientific << -sten(i,j,k,dir::PW) << ' '
-					   << std::scientific << sten(i,j,k,dir::P)
-					   << std::scientific << -sten(i+1,j,k,dir::PW)
-					   << std::scientific << -sten(i,j,k,dir::B)
+					   << std::scientific << -sten(i,j+1,k,dir::PS) << ", "
+					   << std::scientific << -sten(i,j,k+1,dir::B) << ", "
+					   << std::scientific << -sten(i,j,k,dir::PW) << ",  "
+					   << std::scientific << sten(i,j,k,dir::P) << ", "
+					   << std::scientific << -sten(i+1,j,k,dir::PW) << ", "
+					   << std::scientific << -sten(i,j,k,dir::B) << ", "
 					   << std::scientific << -sten(i,j,k,dir::PS) << '\n';
 				}
 			}

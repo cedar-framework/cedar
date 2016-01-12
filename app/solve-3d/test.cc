@@ -8,69 +8,37 @@
 #include <boxmg/3d/stencil_op.h>
 #include <boxmg/3d/solver.h>
 
+extern "C" {
+	using namespace boxmg;
+	void putf(real_t *so, real_t *qf,
+	          len_t ii, len_t jj, len_t kk,
+	          real_t hx, real_t hy, real_t hz);
+}
 
-static void putf(boxmg::bmg3::stencil_op & so, boxmg::bmg3::grid_func & b,
-          boxmg::len_t nx, boxmg::len_t ny, boxmg::len_t nz)
+
+static void set_problem(boxmg::bmg3::stencil_op & so, boxmg::bmg3::grid_func & b)
 {
 	using namespace boxmg;
 	using namespace boxmg::bmg3;
 
 	const double pi = M_PI;
 
+	auto nx = b.shape(0);
+	auto ny = b.shape(1);
+	auto nz = b.shape(2);
+
 	real_t hx = 1.0/(nx+1);
 	real_t hy = 1.0/(ny+1);
 	real_t hz = 1.0/(nz+1);
 
-	real_t h2 = hx*hy*hz;
-	real_t xh = hy*hz/hx;
-	real_t yh = hx*hz/hy;
-	real_t zh = hx*hy/hz;
-
 	auto & sten = so.stencil();
 	sten.five_pt() = true;
 	sten.set(0);
-
 	b.set(0);
 
-	auto xs = linspace(0, 1, nx + 2);
-	auto ys = linspace(0, 1, ny + 2);
-	auto zs = linspace(0, 1, nz + 2);
-
-	for (auto k : sten.range(2)) {
-		for (auto j : range(static_cast<len_t>(2), sten.shape(1)+1)) {
-			for (auto i : sten.range(0)) {
-				sten(i, j, k, dir::PS) = 1.0 * yh;
-			}
-		}
-	}
-
-	for (auto k : sten.range(2)) {
-		for (auto j : sten.range(1)) {
-			for (auto i : range(static_cast<len_t>(2), sten.shape(0)+1)) {
-				sten(i, j, k, dir::PW) = 1.0 * xh;
-			}
-		}
-	}
-
-	for (auto k : range(static_cast<len_t>(2), sten.shape(2)+1)) {
-		for (auto j : sten.range(1)) {
-			for (auto i : sten.range(0)) {
-				sten(i, j, k, dir::B) = 1.0 * zh;
-			}
-		}
-	}
-
-	for (auto k : sten.range(2)) {
-		for (auto j : sten.range(1)) {
-			for (auto i: sten.range(0)) {
-				sten(i, j, k, dir::P) = 2*yh + 2*zh + 2*xh;
-				auto x = xs[i];
-				auto y = ys[j];
-				auto z = zs[k];
-				b(i, j, k) = 12*(pi*pi)*sin(2*pi*x)*sin(2*pi*y)*sin(2*pi*z)*h2;
-			}
-		}
-	}
+	putf(so.data(), b.data(),
+	     b.len(0), b.len(1), b.len(2),
+	     hx, hy, hz);
 }
 
 
@@ -87,14 +55,17 @@ int main(int argc, char *argv[])
 
 	auto so = stencil_op(nx, ny, nz);
 	grid_func b(nx, ny, nz);
-	putf(so, b, nx, ny, nz);
+	set_problem(so, b);
 
-	solver bmg(std::move(so));
+	log::status << nx << " " << so.stencil().shape(0) << " " << so.stencil().len(0) << std::endl;
+
+	//solver bmg(std::move(so));
 
 	// auto sol = bmg.solve(b);
+	log::status << so.stencil()(1, 1, 1, dir::P) << std::endl;
 	std::ofstream sten_file;
 	sten_file.open("Stencil", std::ios::out | std::ios::trunc | std::ios::binary);
-	sten_file << bmg.level(-1).A;
+	sten_file << so;
 	sten_file.close();
 
 	log::status << "Finished test" << std::endl;

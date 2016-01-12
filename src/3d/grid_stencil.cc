@@ -10,8 +10,8 @@ grid_stencil::grid_stencil(len_t nx, len_t ny, len_t nz, unsigned int nghosts, b
 	std::vector<len_t> lens = {nx, ny, nz};
 	for (auto i : boxmg::range(3)) {
 		range_[i] = boxmg::range(static_cast<len_t>(nghosts), static_cast<len_t>(lens[i]+nghosts));
-		grange_[i] = boxmg::range(static_cast<len_t>(0), lens[i] + 3*nghosts);
-		lens[i] += nghosts*3;
+		grange_[i] = boxmg::range(static_cast<len_t>(0), lens[i] + 2*nghosts);
+		lens[i] += nghosts*2;
 	}
 
 	if (this->symmetric) {
