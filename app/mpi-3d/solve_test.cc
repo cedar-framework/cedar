@@ -30,8 +30,8 @@ static void set_problem(boxmg::bmg3::mpi::stencil_op & so,
 	auto & topo = so.grid();
 
 	putf(so.data(), b.data(),
-	     topo.nlocal(0), topo.nlocal(1), topo.nlocal(2),
-	     topo.nglobal(0), topo.nglobal(1), topo.nglobal(2),
+	     topo.nlocal(0)-2, topo.nlocal(1)-2, topo.nlocal(2)-2,
+	     topo.nglobal(0)-2, topo.nglobal(1)-2, topo.nglobal(2)-2,
 	     topo.is(0), topo.is(1), topo.is(2),
 	     hx, hy, hz);
 }
@@ -45,11 +45,16 @@ int main(int argc, char *argv[])
 	int provided, rank;
 
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 	auto nx = config::get<len_t>("grid.nx", 9);
 	auto ny = config::get<len_t>("grid.ny", 9);
 	auto nz = config::get<len_t>("grid.nz", 9);
 	auto grid = util::create_topo(MPI_COMM_WORLD, nx, ny, nz);
+
+	// log::status << grid->is(0) << " " << grid->is(1) << " " << grid->is(2) << std::endl;
+	// log::status << grid->nlocal(0) << " " << grid->nlocal(1) << " " << grid->nlocal(2) << std::endl;
+	// log::status << grid->nglobal(0) << " " <<grid->nglobal(1) << " " << grid->nglobal(2) << std::endl;
 
 	auto so = mpi::stencil_op(grid);
 	mpi::grid_func b(so.grid_ptr());

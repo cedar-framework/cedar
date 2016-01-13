@@ -63,11 +63,11 @@ namespace impls
 		                   + topo.nlevel()*( 80 + 20* topo.nproc()));
 
 		NMSGi = NMSGi + 2*(topo.nproc() + 3
-		                   + 2*( 6*(NLx+5)*(NLy+5)
+		                   + ( 6*(NLx+5)*(NLy+5)
 		                         + 6*(NLx+5)*(NLz+5)
 		                         + 6*(NLy+5)*(NLz+5) )
-		                   + topo.nlevel()*( 80 + 20* topo.nproc()));
-
+		                   + ( 80 + 20* topo.nproc()));
+		msg_geom.resize(NMSGi);
 		//  !
 		//  !  Need to fix the this bound!!
 		//  !
@@ -151,6 +151,8 @@ namespace impls
 		                      ctx->dimxfine.data(), ctx->dimyfine.data(), ctx->dimzfine.data(),
 		                      ctx->proc_grid.data(), topo.nproc(0), topo.nproc(1), topo.nproc(2),
 		                      fcomm);
+
+		*msg_ctx = (void*) ctx;
 	}
 
 
@@ -169,7 +171,7 @@ namespace impls
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
-		BMG3_SymStd_SETUP_fine_stencil(topo.nlevel()+1, sop.data(),
+		BMG3_SymStd_SETUP_fine_stencil(topo.level()+1, sop.data(),
 		                               sten.len(0), sten.len(1), sten.len(2),
 		                               nstencil,
 		                               ctx->msg_geom.data(), ctx->msg_geom.size(),
@@ -185,7 +187,7 @@ namespace impls
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
-		BMG3_SymStd_UTILS_update_ghosts(topo.nlevel()+1, f.data(),
+		BMG3_SymStd_UTILS_update_ghosts(topo.level()+1, f.data(),
 		                                f.len(0), f.len(1), f.len(2),
 		                                ctx->msg_geom.data(), ctx->msg_geom.size(),
 		                                ctx->pMSG.data(), ctx->msg_buffer.data(),

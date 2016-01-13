@@ -45,10 +45,15 @@ topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny, len_t nz)
 	grid->nlocal(1) += 2;
 	grid->nlocal(2) += 2;
 
-	// printf("%d %d -> %u %u : %u %u ==== %u %u\n", grid->coord(0), grid->coord(1),
-	//        grid->nlocal(0), grid->nlocal(1),
-	//        grid->nglobal(0), grid->nglobal(1),
-	//        grid->is(0), grid->is(1));
+	// {
+	// 	int rank;
+	// 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	// 	printf("[%d] %d %d %d -> %u %u %u : %u %u %u ==== %u %u %u\n", rank+1,
+	// 	       grid->coord(0)+1, grid->coord(1)+1, grid->coord(2)+1,
+	// 	       grid->nlocal(0), grid->nlocal(1), grid->nlocal(2),
+	// 	       grid->nglobal(0), grid->nglobal(1), grid->nlocal(2),
+	// 	       grid->is(0), grid->is(1), grid->is(2));
+	// }
 
 	return grid;
 }
