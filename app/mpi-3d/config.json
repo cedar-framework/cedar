@@ -1,0 +1,23 @@
+{
+	"log": ["error", "status", "info", "debug"],
+	"kernels":
+	{
+		"residual": "fortran"
+	},
+	"solver":
+	{
+		"cycle":
+		{
+			"nrelax-pre": 1,
+			"nrelax-post": 1
+		},
+		"tol": 1e-10,
+		"max-iter": 10,
+		"min-coarse": 3
+	},
+	"grid":
+	{
+		"nx": 17,
+		"ny" : 17
+	}
+}

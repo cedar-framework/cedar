@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include <boxmg/types.h>
-#include <boxmg/util/grid.h>
 #include <boxmg/3d/grid_func.h>
 #include <boxmg/3d/stencil_op.h>
 #include <boxmg/3d/solver.h>
@@ -57,16 +56,16 @@ int main(int argc, char *argv[])
 	grid_func b(nx, ny, nz);
 	set_problem(so, b);
 
-	log::status << nx << " " << so.stencil().shape(0) << " " << so.stencil().len(0) << std::endl;
-
-	//solver bmg(std::move(so));
+	solver bmg(std::move(so));
 
 	// auto sol = bmg.solve(b);
-	log::status << so.stencil()(1, 1, 1, dir::P) << std::endl;
-	std::ofstream sten_file;
-	sten_file.open("Stencil", std::ios::out | std::ios::trunc | std::ios::binary);
-	sten_file << so;
-	sten_file.close();
+
+	{
+		std::ofstream sten_file;
+		sten_file.open("stencil", std::ios::out | std::ios::trunc | std::ios::binary);
+		sten_file << bmg.level(-1).A;
+		sten_file.close();
+	}
 
 	log::status << "Finished test" << std::endl;
 

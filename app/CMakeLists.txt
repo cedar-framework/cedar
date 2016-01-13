@@ -7,4 +7,5 @@ add_executable(mpi-test mpi/solve_test.cc)
 target_link_libraries(mpi-test boxmg ${boxmg-examples_LINKER_FLAGS})
 add_executable(solve-test-3 solve-3d/test.cc solve-3d/putf.f90)
 target_link_libraries(solve-test-3 boxmg ${boxmg-examples_LINKER_FLAGS})
-
+add_executable(mpi-test-3 mpi-3d/solve_test.cc mpi-3d/putf.f90)
+target_link_libraries(mpi-test-3 boxmg ${boxmg-examples_LINKER_FLAGS})

@@ -6,4 +6,5 @@ set(inter_SOURCES
   inter/restrict.cc
   inter/interp.cc
   inter/mpi/prolong_op.cc
+  inter/mpi/restrict_op.cc
   PARENT_SCOPE)
