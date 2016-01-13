@@ -52,20 +52,19 @@ int main(int argc, char *argv[])
 	auto nz = config::get<len_t>("grid.nz", 9);
 	auto grid = util::create_topo(MPI_COMM_WORLD, nx, ny, nz);
 
-	// log::status << grid->is(0) << " " << grid->is(1) << " " << grid->is(2) << std::endl;
-	// log::status << grid->nlocal(0) << " " << grid->nlocal(1) << " " << grid->nlocal(2) << std::endl;
-	// log::status << grid->nglobal(0) << " " <<grid->nglobal(1) << " " << grid->nglobal(2) << std::endl;
-
 	auto so = mpi::stencil_op(grid);
 	mpi::grid_func b(so.grid_ptr());
 
 	set_problem(so, b);
 	mpi::solver bmg(std::move(so));
+	// auto x = bmg.solve(b);
 
 	{
 		std::ofstream ofile;
-		ofile.open("op-" + std::to_string(rank) + ".txt", std::ios::out | std::ios::trunc | std::ios::binary);
-		ofile << bmg.level(-1).A;
+		auto & topo = bmg.level(-1).A.grid();
+		ofile.open("op-" + std::to_string(topo.coord(0)+1) + "." +
+		           std::to_string(topo.coord(1)+1) + "." + std::to_string(topo.coord(2)+1) + ".txt", std::ios::out | std::ios::trunc | std::ios::binary);
+		ofile << bmg.level(0).A;
 		ofile.close();
 	}
 

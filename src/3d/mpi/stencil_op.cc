@@ -42,16 +42,16 @@ std::ostream & operator<< (std::ostream & os, const stencil_op &op)
 		for (auto k: sten.range(2)) {
 			for (auto j: sten.range(1)) {
 				for (auto i: sten.range(0)) {
-					os << std::setw(width) << (kGs+k-2)*NGx*NGy + (jGs+j-2)*NGx + iGs+i-2 << " "
+					os << std::setw(width) << (kGs+k-2)*NGx*NGy + (jGs+j-2)*NGx + iGs+i-1 << ", "
 					   << std::setw(width) << iGs + i << ", " << std::setw(width) << jGs + j << ", "
 					   << std::setw(width) << kGs + k << ", "
-					   << std::scientific << -sten(i,j+1,k,dir::PS) << " "
-					   << std::scientific << -sten(i,j,k+1,dir::B) << " "
-					   << std::scientific << -sten(i,j,k,dir::PW) << " "
-					   << std::scientific <<  sten(i,j,k,dir::P) << " "
-					   << std::scientific << -sten(i+1,j,k,dir::PW) << " "
-					   << std::scientific << -sten(i,j,k,dir::B) << " "
-					   << std::scientific << -sten(i,j,k,dir::BS) << '\n';
+					   << std::scientific << -sten(i,j+1,k,dir::PS) << ", "
+					   << std::scientific << -sten(i,j,k+1,dir::B) << ", "
+					   << std::scientific << -sten(i,j,k,dir::PW) << ", "
+					   << std::scientific <<  sten(i,j,k,dir::P) << ", "
+					   << std::scientific << -sten(i+1,j,k,dir::PW) << ", "
+					   << std::scientific << -sten(i,j,k,dir::B) << ", "
+					   << std::scientific << -sten(i,j,k,dir::PS) << '\n';
 				}
 			}
 		}
@@ -61,41 +61,41 @@ std::ostream & operator<< (std::ostream & os, const stencil_op &op)
 				for (auto i: sten.range(0)) {
 					os << std::setw(width) << (kGs+k-2)*NGx*NGy + (jGs+j-2)*NGx + iGs+i-2 << " "
 					   << std::setw(width) << iGs + i << ", " << std::setw(width) << jGs + j << ", "
-					   << std::setw(width) << kGs + k << ", N "
-					   << std::scientific << -sten(i,j+1,k+1,dir::BSE)
-					   << std::scientific << -sten(i,j+1,k+1,dir::BS)
-					   << std::scientific << -sten(i+1,j+1,k+1,dir::BSW)
-					   << std::scientific << -sten(i,j+1,k,dir::PNW)
-					   << std::scientific << -sten(i,j+1,k,dir::PS)
-					   << std::scientific << -sten(i+1,j+1,k,dir::PSW)
-					   << std::scientific << -sten(i,j+1,k,dir::BNW)
-					   << std::scientific << -sten(i,j+1,k,dir::BN)
+					   << std::setw(width) << kGs + k << ", N, "
+					   << std::scientific << -sten(i,j+1,k+1,dir::BSE) << ", "
+					   << std::scientific << -sten(i,j+1,k+1,dir::BS) << ", "
+					   << std::scientific << -sten(i+1,j+1,k+1,dir::BSW) << ", "
+					   << std::scientific << -sten(i,j+1,k,dir::PNW) << ", "
+					   << std::scientific << -sten(i,j+1,k,dir::PS) << ", "
+					   << std::scientific << -sten(i+1,j+1,k,dir::PSW) << ", "
+					   << std::scientific << -sten(i,j+1,k,dir::BNW) << ", "
+					   << std::scientific << -sten(i,j+1,k,dir::BN) << ", "
 					   << std::scientific << -sten(i+1,j+1,k,dir::BNE) << '\n';
 
 					os << std::setw(width) << (kGs+k-2)*NGx*NGy + (jGs+j-2)*NGx + iGs+i-2 << " "
 					   << std::setw(width) << iGs + i << ", " << std::setw(width) << jGs + j << ", "
-					   << std::setw(width) << kGs + k << ", O "
-					   << std::scientific << -sten(i,j,k+1,dir::BE)
-					   << std::scientific << -sten(i,j,k+1,dir::B)
-					   << std::scientific << -sten(i+1,j,k+1,dir::BW)
-					   << std::scientific << -sten(i,j,i,dir::PW)
-					   << std::scientific << sten(i,j,k,dir::P)
-					   << std::scientific << -sten(i+1,j,k,dir::PW)
-					   << std::scientific << -sten(i,j,k,dir::BW)
-					   << std::scientific << -sten(i,j,k,dir::B)
+					   << std::setw(width) << kGs + k << ", O, "
+					   << std::scientific << -sten(i,j,k+1,dir::BE) << ", "
+					   << std::scientific << -sten(i,j,k+1,dir::B) << ", "
+					   << std::scientific << -sten(i+1,j,k+1,dir::BW) << ", "
+					   << std::scientific << -sten(i,j,k,dir::PW) << ", "
+					   << std::scientific << sten(i,j,k,dir::P) << ", "
+					   << std::scientific << -sten(i+1,j,k,dir::PW) << ", "
+					   << std::scientific << -sten(i,j,k,dir::BW) << ", "
+					   << std::scientific << -sten(i,j,k,dir::B) << ", "
 					   << std::scientific << -sten(i+1,j,k,dir::BE) << '\n';
 
 					os << std::setw(width) << (kGs+k-2)*NGx*NGy + (jGs+j-2)*NGx + iGs+i-2 << " "
 					   << std::setw(width) << iGs + i << ", " << std::setw(width) << jGs + j << ", "
-					   << std::setw(width) << kGs + k << ", S "
-					   << std::scientific << -sten(i,j,k+1,dir::BNE)
-					   << std::scientific << -sten(i,j,k+1,dir::BN)
-					   << std::scientific << -sten(i+1,j,k+1,dir::BNW)
-					   << std::scientific << -sten(i,j,k,dir::PSW)
-					   << std::scientific << -sten(i,j,k,dir::PS)
-					   << std::scientific << -sten(i+1,j,k,dir::PNW)
-					   << std::scientific << -sten(i,j,k,dir::BSW)
-					   << std::scientific << -sten(i,j,k,dir::BS)
+					   << std::setw(width) << kGs + k << ", S, "
+					   << std::scientific << -sten(i,j,k+1,dir::BNE) << ", "
+					   << std::scientific << -sten(i,j,k+1,dir::BN) << ", "
+					   << std::scientific << -sten(i+1,j,k+1,dir::BNW) << ", "
+					   << std::scientific << -sten(i,j,k,dir::PSW) << ", "
+					   << std::scientific << -sten(i,j,k,dir::PS) << ", "
+					   << std::scientific << -sten(i+1,j,k,dir::PNW) << ", "
+					   << std::scientific << -sten(i,j,k,dir::BSW) << ", "
+					   << std::scientific << -sten(i,j,k,dir::BS) << ", "
 					   << std::scientific << -sten(i+1,j,k,dir::BSE) << '\n';
 				}
 			}
