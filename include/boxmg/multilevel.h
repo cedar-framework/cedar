@@ -88,12 +88,25 @@ multilevel() : conf("config.json") {};
 
 	virtual void setup_relax(int lvl)
 	{
+		auto & sop = level(lvl).A;
+
 		std::string relax_type = conf.get<std::string>("solver.relaxation", "point");
 		int nrelax_pre = conf.get<int>("solver.cycle.nrelax-pre", 2);
 		int nrelax_post = conf.get<int>("solver.cycle.nrelax-post", 1);
 		auto kernels = kernel_registry();
 
-		levels.back().presmoother = [&,lvl,nrelax_pre,kernels,relax_type](const discrete_op<grid_func> &A, grid_func &x, const grid_func&b) {
+		if (relax_type == "point")
+			kernels->setup_relax(sop, level(lvl).SOR[0]);
+		else if (relax_type == "line-x")
+			kernels->setup_relax_x(sop, level(lvl).SOR[0]);
+		else if (relax_type == "line-y")
+			kernels->setup_relax_y(sop, level(lvl).SOR[0]);
+		else { // line-xy
+			kernels->setup_relax_x(sop, level(lvl).SOR[0]);
+			kernels->setup_relax_y(sop, level(lvl).SOR[1]);
+		}
+
+		level(lvl).presmoother = [&,lvl,nrelax_pre,kernels,relax_type](const discrete_op<grid_func> &A, grid_func &x, const grid_func&b) {
 			const stencil_op & av = dynamic_cast<const stencil_op &>(A);
 			for (auto i : range(nrelax_pre)) {
 				(void) i;
@@ -109,7 +122,7 @@ multilevel() : conf("config.json") {};
 				}
 			}
 		};
-		levels.back().postsmoother = [&,lvl,nrelax_post,kernels,relax_type](const discrete_op<grid_func> &A, grid_func &x, const grid_func&b) {
+		level(lvl).postsmoother = [&,lvl,nrelax_post,kernels,relax_type](const discrete_op<grid_func> &A, grid_func &x, const grid_func&b) {
 
 			const stencil_op & av = dynamic_cast<const stencil_op &>(A);
 			for (auto i: range(nrelax_post)) {
