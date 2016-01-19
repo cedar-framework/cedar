@@ -17,6 +17,8 @@ namespace boxmg { namespace bmg3 { namespace mpi {
 
 struct BoxMGLevel : Level<bmg3::mpi::grid_func>
 {
+BoxMGLevel(bmg3::mpi::stencil_op&& A) : /*Level(A,P),*/
+	A(std::move(A)), P(inter::mpi::prolong_op()), SOR({{relax_stencil(),relax_stencil()}}) { R.associate(&P); }
 BoxMGLevel(bmg3::mpi::stencil_op&& A, inter::mpi::prolong_op&& P) : /*Level(A,P),*/
 	A(std::move(A)), P(std::move(P)), SOR({{relax_stencil(),relax_stencil()}}) { R.associate(&P); }
 	bmg3::mpi::grid_func     x;
@@ -28,22 +30,19 @@ BoxMGLevel(bmg3::mpi::stencil_op&& A, inter::mpi::prolong_op&& P) : /*Level(A,P)
 	std::array<relax_stencil,2> SOR;
 };
 
-class solver: public multilevel<BoxMGLevel,bmg3::mpi::grid_func, kernel::mpi::registry>
+class solver: public multilevel<BoxMGLevel,bmg3::mpi::stencil_op,bmg3::mpi::grid_func, kernel::mpi::registry>
 {
 public:
 	solver(bmg3::mpi::stencil_op&& fop);
-	~solver() {if (cg_solver_lu) delete[] bbd;};
+	~solver() {if (cg_solver_lu) bbd = new real_t[1];}
 	int compute_num_levels(bmg3::mpi::stencil_op & fop);
-	void add_level(bmg3::mpi::stencil_op& fop, int num_levels);
 	MPI_Comm comm;
-	std::shared_ptr<kernel::mpi::registry> kernel_registry();
 	virtual bmg3::mpi::grid_func solve(const bmg3::mpi::grid_func &b);
 	virtual void solve(const bmg3::mpi::grid_func &b, bmg3::mpi::grid_func &x);
+	virtual void setup_space(int nlevels);
 
 private:
-	bmg3::mpi::grid_func ABD;
 	bool cg_solver_lu;
-	real_t *bbd;
 	void *halo_ctx;
 };
 

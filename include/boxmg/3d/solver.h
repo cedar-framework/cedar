@@ -17,6 +17,8 @@ namespace boxmg { namespace bmg3 {
 
 struct bmg_level : Level<grid_func>
 {
+bmg_level(stencil_op&& A) :
+	A(std::move(A)), P(inter::prolong_op()), SOR({{relax_stencil(), relax_stencil()}}) { R.associate(&P); }
 bmg_level(stencil_op&& A, inter::prolong_op&& P) :
 	A(std::move(A)), P(std::move(P)), SOR({{relax_stencil(), relax_stencil()}}) { R.associate(&P); }
 	stencil_op A;
@@ -29,19 +31,13 @@ bmg_level(stencil_op&& A, inter::prolong_op&& P) :
 };
 
 
-class solver : public multilevel<bmg_level, grid_func, kernel::registry>
+class solver : public multilevel<bmg_level, stencil_op, grid_func, kernel::registry>
 {
 public:
 	solver(stencil_op&& fop);
-	~solver() { delete[] bbd; }
-	int compute_num_levels(stencil_op & fop);
-	void add_level(stencil_op & fop, int num_levels);
-	std::shared_ptr<kernel::registry> kernel_registry();
-
-private:
-	grid_func ABD;
-	real_t *bbd;
-
+	~solver() {}
+	virtual int compute_num_levels(stencil_op & fop);
+	virtual void setup_space(int nlevels);
 };
 
 

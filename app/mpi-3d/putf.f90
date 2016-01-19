@@ -161,9 +161,9 @@ subroutine putf(so, qf,&
      ENDDO
   ENDDO
 
-  do k=kbeg, kend
-     do j=jbeg,jend
-        do i=ibeg,iend
+  do k=2,k1
+     do j=2,j1
+        do i=2,i1
            is = iGs+i-1
            js = jGs+j-1
            kss = kGs+k-1

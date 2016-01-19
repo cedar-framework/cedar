@@ -3,17 +3,23 @@
 
 #include "boxmg/types.h"
 #include "boxmg/util/timer.h"
+#include "boxmg/cycle/types.h"
 #include "boxmg/discrete_op.h"
 
 namespace boxmg {
 
-template <class LevelType,class grid_func,class registry>
+template <class LevelType,class stencil_op, class grid_func,class registry>
 class multilevel
 {
 
 public:
 multilevel() : conf("config.json") {};
-	virtual ~multilevel() {};
+	virtual ~multilevel() {delete[] bbd;}
+
+	std::shared_ptr<registry> kernel_registry()
+	{
+		return kreg;
+	}
 
 	virtual LevelType & level(int i)
 	{
@@ -45,6 +51,110 @@ multilevel() : conf("config.json") {};
 			log::info << "Level " << (levels.size() - lvl - 1) << " residual norm: "
 			<< res.template lp_norm<2>() << std::endl;
 		}
+	}
+
+
+	virtual void setup_cg_solve()
+	{
+		kreg->setup_cg_lu(levels.back().A, ABD);
+		auto kernels = kernel_registry();
+		coarse_solver = [&, kernels](const discrete_op<grid_func> &A, grid_func &x, const grid_func & b) {
+			kernels->solve_cg(x, b, ABD, bbd);
+			const stencil_op &av = dynamic_cast<const stencil_op&>(A);
+			grid_func & residual = levels[levels.size()-1].res;
+			av.residual(x,b,residual);
+			log::info << "Level 0 residual norm: " << residual.template lp_norm<2>() << std::endl;
+		};
+	}
+
+
+	virtual void setup_interp(int lvl)
+	{
+		auto & P = level(lvl).P;
+		auto & fop = level(lvl).A;
+		auto & cop = level(lvl-1).A;
+		kreg->setup_interp(lvl, lvl-1, levels.size(), fop, cop, P);
+	}
+
+
+	virtual void setup_operator(int lvl)
+	{
+		auto & P = level(lvl).P;
+		auto & fop = level(lvl).A;
+		auto & cop = level(lvl-1).A;
+		kreg->galerkin_prod(lvl, lvl-1, levels.size(), P, fop, cop);
+	}
+
+
+	virtual void setup_relax(int lvl)
+	{
+		std::string relax_type = conf.get<std::string>("solver.relaxation", "point");
+		int nrelax_pre = conf.get<int>("solver.cycle.nrelax-pre", 2);
+		int nrelax_post = conf.get<int>("solver.cycle.nrelax-post", 1);
+		auto kernels = kernel_registry();
+
+		levels.back().presmoother = [&,lvl,nrelax_pre,kernels,relax_type](const discrete_op<grid_func> &A, grid_func &x, const grid_func&b) {
+			const stencil_op & av = dynamic_cast<const stencil_op &>(A);
+			for (auto i : range(nrelax_pre)) {
+				(void) i;
+				if (relax_type == "point")
+					kernels->relax(av, x, b, level(lvl).SOR[0], cycle::Dir::DOWN);
+				else if (relax_type == "line-x")
+					kernels->relax_lines_x(av, x, b, level(lvl).SOR[0], level(lvl).res, cycle::Dir::DOWN);
+				else if (relax_type == "line-y")
+					kernels->relax_lines_y(av, x, b, level(lvl).SOR[0], level(lvl).res, cycle::Dir::DOWN);
+				else {
+					kernels->relax_lines_x(av, x, b, level(lvl).SOR[0], level(lvl).res, cycle::Dir::DOWN);
+					kernels->relax_lines_y(av, x, b, level(lvl).SOR[1], level(lvl).res, cycle::Dir::DOWN);
+				}
+			}
+		};
+		levels.back().postsmoother = [&,lvl,nrelax_post,kernels,relax_type](const discrete_op<grid_func> &A, grid_func &x, const grid_func&b) {
+
+			const stencil_op & av = dynamic_cast<const stencil_op &>(A);
+			for (auto i: range(nrelax_post)) {
+				(void) i;
+				if (relax_type == "point")
+					kernels->relax(av, x, b, level(lvl).SOR[0], cycle::Dir::UP);
+				else if (relax_type == "line-x")
+					kernels->relax_lines_x(av, x, b, level(lvl).SOR[0], level(lvl).res, cycle::Dir::UP);
+				else if (relax_type == "line-y")
+					kernels->relax_lines_y(av, x, b, level(lvl).SOR[0], level(lvl).res, cycle::Dir::UP);
+				else {
+					kernels->relax_lines_y(av, x, b, level(lvl).SOR[1], level(lvl).res, cycle::Dir::UP);
+					kernels->relax_lines_x(av, x, b, level(lvl).SOR[0], level(lvl).res, cycle::Dir::UP);
+				}
+			}
+		};
+	}
+
+
+	// eventually make this necessary
+	virtual void setup_space(int nlevels)
+	{
+	}
+
+
+	virtual void setup(stencil_op&& fop)
+	{
+		levels.emplace_back(std::move(fop));
+		levels.back().A.set_registry(kreg);
+		auto num_levels = compute_num_levels(levels[0].A);
+		log::debug << "Using a " << num_levels << " level heirarchy" << std::endl;
+		levels.reserve(num_levels);
+		setup_space(num_levels);
+		for (auto i : range(num_levels-1)) {
+			levels[i].R.associate(&levels[i].P);
+			levels[i].P.fine_op = &levels[i].A;
+			levels[i].R.set_registry(kreg);
+			levels[i].P.set_registry(kreg);
+
+			auto lvl = num_levels - i - 1;
+			setup_interp(lvl);
+			setup_operator(lvl);
+			setup_relax(lvl);
+		}
+		setup_cg_solve();
 	}
 
 
@@ -136,11 +246,16 @@ multilevel() : conf("config.json") {};
 		solve_timer.end();
 	}
 
+
+	virtual int compute_num_levels(stencil_op & fop) { return 0; }
+
 protected:
 	std::vector<LevelType> levels;
 	std::function<void(const discrete_op<grid_func> & A, grid_func &x, const grid_func &b)> coarse_solver;
 	config::Reader conf;
 	std::shared_ptr<registry> kreg;
+	grid_func ABD;
+	real_t *bbd;
 };
 
 }
