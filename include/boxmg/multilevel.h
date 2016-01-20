@@ -73,7 +73,7 @@ multilevel() : conf("config.json") {};
 		auto & P = level(lvl).P;
 		auto & fop = level(lvl).A;
 		auto & cop = level(lvl-1).A;
-		kreg->setup_interp(lvl, lvl-1, levels.size(), fop, cop, P);
+		kreg->setup_interp(lvl+1, lvl, levels.size(), fop, cop, P);
 	}
 
 
@@ -82,7 +82,7 @@ multilevel() : conf("config.json") {};
 		auto & P = level(lvl).P;
 		auto & fop = level(lvl).A;
 		auto & cop = level(lvl-1).A;
-		kreg->galerkin_prod(lvl, lvl-1, levels.size(), P, fop, cop);
+		kreg->galerkin_prod(lvl+1, lvl, levels.size(), P, fop, cop);
 	}
 
 

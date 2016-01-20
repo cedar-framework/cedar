@@ -13,6 +13,7 @@ using namespace boxmg::bmg3;
 
 void mpi::solver::setup_space(int nlevels)
 {
+	levels.back().A.grid().grow(nlevels);
 	levels[0].res = bmg3::mpi::grid_func(levels[0].A.grid_ptr());
 	for (auto i : range(nlevels-1)) {
 		auto & fop = levels.back().A;
@@ -75,19 +76,18 @@ void mpi::solver::setup_space(int nlevels)
 
 		auto cop = bmg3::mpi::stencil_op(cgrid);
 		levels.back().P = inter::mpi::prolong_op(cgrid);
-		levels[i].P.halo_ctx = halo_ctx;
 		std::array<bmg3::relax_stencil,2> SOR{{bmg3::relax_stencil(levels[i].A.stencil().shape(0), levels[i].A.stencil().shape(1), levels[i].A.stencil().shape(2)),bmg3::relax_stencil(levels[i].A.stencil().shape(0), levels[i].A.stencil().shape(1), levels[i].A.stencil().shape(2))}};
 		levels[i].SOR = std::move(SOR);
 
 		cop.set_registry(kreg);
-		cop.halo_ctx = levels.back().A.halo_ctx;
 
 		levels.emplace_back(std::move(cop),inter::mpi::prolong_op());
 		levels.back().x = bmg3::mpi::grid_func(levels.back().A.grid_ptr());
 		levels.back().b = bmg3::mpi::grid_func(levels.back().A.grid_ptr());
-		levels.back().x.halo_ctx = levels.back().A.halo_ctx;
-		levels.back().b.halo_ctx = levels.back().A.halo_ctx;
+		levels.back().res = bmg3::mpi::grid_func(levels.back().A.grid_ptr());
 	}
+
+	setup_halo();
 
 	auto & cop = levels.back().A;
 	{
@@ -115,10 +115,6 @@ mpi::solver::solver(bmg3::mpi::stencil_op&& fop) : comm(fop.grid().comm)
 	setup_timer.begin();
 
 	kreg = kernel::mpi::factory::from_config(conf);
-
-	kreg->halo_setup(levels[0].A.grid(), &halo_ctx);
-	fop.halo_ctx = halo_ctx;
-	kreg->halo_stencil_exchange(fop);
 
 	setup(std::move(fop));
 
@@ -152,4 +148,22 @@ void mpi::solver::solve(const bmg3::mpi::grid_func & b, bmg3::mpi::grid_func & x
 	auto kernels = kernel_registry();
 	kernels->halo_exchange(b, halo_ctx);
 	return multilevel::solve(b, x);
+}
+
+
+void mpi::solver::setup_halo()
+{
+	auto & sop = levels[0].A;
+
+	kreg->halo_setup(sop.grid(), &halo_ctx);
+	sop.halo_ctx = halo_ctx;
+	kreg->halo_stencil_exchange(sop);
+
+	for (auto i :range(levels.size()-1)) {
+		levels[i+1].x.halo_ctx = halo_ctx;
+		levels[i+1].b.halo_ctx = halo_ctx;
+		levels[i+1].res.halo_ctx = halo_ctx;
+		levels[i+1].A.halo_ctx = halo_ctx;
+		levels[i].P.halo_ctx = halo_ctx;
+	}
 }

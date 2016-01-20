@@ -40,6 +40,7 @@ public:
 	virtual bmg3::mpi::grid_func solve(const bmg3::mpi::grid_func &b);
 	virtual void solve(const bmg3::mpi::grid_func &b, bmg3::mpi::grid_func &x);
 	virtual void setup_space(int nlevels);
+	void setup_halo();
 
 private:
 	bool cg_solver_lu;
