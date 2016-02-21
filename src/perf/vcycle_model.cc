@@ -36,6 +36,19 @@ grid_topo & vcycle_model::grid(int i)
 }
 
 
+topo_ptr vcycle_model::grid_ptr(int i)
+{
+	int ind;
+	if (i < 0) ind = (i + 1)*-1;
+	else ind = grids.size() - i - 1;
+	#ifdef DEBUG
+	return grids.at(ind);
+	#else
+	return grids[ind];
+	#endif
+}
+
+
 float vcycle_model::tsmooth(int lvl)
 {
 	float time = 0;
@@ -142,4 +155,10 @@ float vcycle_model::time()
 	}
 
 	return time;
+}
+
+
+void vcycle_model::set_cgperf(std::shared_ptr<perf_model> mod)
+{
+	cg_perf = mod;
 }
