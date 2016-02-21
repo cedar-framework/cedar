@@ -40,7 +40,9 @@ void init()
 		count++;
 	}
 
-	std::vector<std::string> clevels = config::getvec<std::string>("log");
+	config::reader conf;
+
+	std::vector<std::string> clevels = conf.getvec<std::string>("log");
 
 	for (auto clvl : clevels) level |= (*log_level)[clvl];
 

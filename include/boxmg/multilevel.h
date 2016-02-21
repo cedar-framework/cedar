@@ -212,8 +212,8 @@ multilevel() : conf("config.json") {};
 	virtual grid_func solve(const grid_func & b)
 	{
 		grid_func x = grid_func::zeros_like(b);
-		int maxiter = config::get<int>("solver.max-iter", 10);
-		real_t tol = config::get<real_t>("solver.tol", 1e-8);
+		int maxiter = conf.get<int>("solver.max-iter", 10);
+		real_t tol = conf.get<real_t>("solver.tol", 1e-8);
 		levels[0].A.residual(x,b,levels[0].res);
 		real_t res0_l2 = levels[0].res.template lp_norm<2>();
 		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
@@ -238,8 +238,8 @@ multilevel() : conf("config.json") {};
 
 	virtual void solve(const grid_func & b, grid_func & x)
 	{
-		int maxiter = config::get<int>("solver.max-iter", 10);
-		real_t tol = config::get<real_t>("solver.tol", 1e-8);
+		int maxiter = conf.get<int>("solver.max-iter", 10);
+		real_t tol = conf.get<real_t>("solver.tol", 1e-8);
 		levels[0].A.residual(x,b,levels[0].res);
 		real_t res0_l2 = levels[0].res.template lp_norm<2>();
 		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
@@ -265,7 +265,7 @@ multilevel() : conf("config.json") {};
 protected:
 	std::vector<LevelType> levels;
 	std::function<void(const discrete_op<grid_func> & A, grid_func &x, const grid_func &b)> coarse_solver;
-	config::Reader conf;
+	config::reader conf;
 	std::shared_ptr<registry> kreg;
 	grid_func ABD;
 	real_t *bbd;

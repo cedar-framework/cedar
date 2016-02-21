@@ -47,9 +47,11 @@ int main(int argc, char *argv[])
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-	auto nx = config::get<len_t>("grid.nx", 9);
-	auto ny = config::get<len_t>("grid.ny", 9);
-	auto nz = config::get<len_t>("grid.nz", 9);
+	config::reader conf;
+
+	auto nx = conf.get<len_t>("grid.nx", 9);
+	auto ny = conf.get<len_t>("grid.ny", 9);
+	auto nz = conf.get<len_t>("grid.nz", 9);
 	auto grid = util::create_topo(MPI_COMM_WORLD, nx, ny, nz);
 
 	auto so = mpi::stencil_op(grid);

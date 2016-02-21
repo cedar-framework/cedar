@@ -16,8 +16,9 @@ int main(int argc, char *argv[])
 
 	const double pi = M_PI;
 
-	auto nx = config::get<len_t>("grid.nx", 301);
-	auto ny = config::get<len_t>("grid.ny", 301);
+	config::reader conf;
+	auto nx = conf.get<len_t>("grid.nx", 301);
+	auto ny = conf.get<len_t>("grid.ny", 301);
 
 	real_t h2 = (1.0/(nx+1)) * (1.0/(ny+1));
 

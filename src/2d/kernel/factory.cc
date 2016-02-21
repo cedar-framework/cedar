@@ -18,7 +18,7 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 namespace factory
 {
 	namespace name = boxmg::kernel_name;
-	std::shared_ptr<registry> from_config(config::Reader &conf)
+	std::shared_ptr<registry> from_config(config::reader &conf)
 	{
 		auto kreg = std::make_shared<registry>();
 
