@@ -48,9 +48,11 @@ int main(int argc, char *argv[])
 
 	log::status << "Beginning test" << std::endl;
 
-	auto nx = config::get<len_t>("grid.nx", 301);
-	auto ny = config::get<len_t>("grid.ny", 301);
-	auto nz = config::get<len_t>("grid.nz", 301);
+	config::reader conf;
+
+	auto nx = conf.get<len_t>("grid.nx", 301);
+	auto ny = conf.get<len_t>("grid.ny", 301);
+	auto nz = conf.get<len_t>("grid.nz", 301);
 
 	auto so = stencil_op(nx, ny, nz);
 	grid_func b(nx, ny, nz);

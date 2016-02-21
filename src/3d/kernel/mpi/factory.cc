@@ -21,7 +21,7 @@ namespace mpi = boxmg::bmg3::mpi;
 
 namespace factory
 {
-	std::shared_ptr<registry> from_config(config::Reader &conf)
+	std::shared_ptr<registry> from_config(config::reader &conf)
 	{
 		auto kreg = std::make_shared<registry>();
 

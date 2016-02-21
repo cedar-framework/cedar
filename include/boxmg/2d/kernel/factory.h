@@ -9,7 +9,7 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 
 namespace factory
 {
-	std::shared_ptr<registry> from_config(config::Reader &conf);
+	std::shared_ptr<registry> from_config(config::reader &conf);
 }
 
 }}}
