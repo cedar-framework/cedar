@@ -13,14 +13,14 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len
 {
 	using namespace boxmg::bmg2d;
 
-	config::Reader conf("perf.json");
+	config::reader conf("perf.json");
 
-	int min_coarse = conf.get<int>("solver.min-coarse", 3);
-	float ts = conf.get<float>("machine.bandwidth", 1e-6);
-	float tw = conf.get<float>("machine.latency", 1e-4);
-	float tc = conf.get<float>("machine.fp_perf", 1e-8);
+	int min_coarse = conf.get<int>("solver.min-coarse");
+	float ts = conf.get<float>("machine.bandwidth");
+	float tw = conf.get<float>("machine.latency");
+	float tc = conf.get<float>("machine.fp_perf");
 	auto model = std::make_shared<vcycle_model>(2);
-	model->set_comp_param(params::compute_tc(2));
+	model->set_comp_param(params::compute_tc(2, conf));
 	model->set_comm_param(ts, tw);
 	auto topo = util::create_topo(np, nx, ny);
 
@@ -32,7 +32,6 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len
 		topo = util::coarsen_topo(model->grid_ptr(0));
 		nlx = topo->nlocal(0);
 		nly = topo->nlocal(1);
-		log::status << nlx << " " << nly << std::endl;
 	} while (std::min(nlx, nly) >= min_coarse);
 
 	auto & topoc = model->grid(0);
@@ -43,8 +42,8 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len
 		model->set_cgperf(cg_model);
 	} else {
 		auto cg_model = std::make_shared<cholesky_model>(topoc.nglobal(0)*topoc.nglobal(1));
+		cg_model->set_comp_param(tc);
 		model->set_cgperf(cg_model);
-		model->set_comp_param(tc);
 	}
 
 	return model;
@@ -55,7 +54,7 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len
 {
 	using namespace boxmg::bmg3;
 
-	config::Reader conf("perf.json");
+	config::reader conf("perf.json");
 	int min_coarse = conf.get<int>("solver.min-coarse", 3);
 	auto model = std::make_shared<vcycle_model>(3);
 	auto topo = util::create_topo(np, nx, ny, nz);

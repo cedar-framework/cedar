@@ -2,6 +2,7 @@
 #include <random>
 #include <boxmg/2d/grid_func.h>
 #include <boxmg/2d/stencil_op.h>
+#include <boxmg/2d/kernel/factory.h>
 #include <boxmg/perf/params.h>
 
 using namespace boxmg;
@@ -15,7 +16,7 @@ static void fill_random(real_t * arr, len_t size)
 }
 
 
-float params::compute_tc(int nd)
+float params::compute_tc(int nd, config::reader & conf)
 {
 	float tc;
 	int nsamples = 100;
@@ -23,8 +24,10 @@ float params::compute_tc(int nd)
 
 	if (nd == 2) {
 		using namespace boxmg::bmg2d;
+		auto kreg = boxmg::bmg2d::kernel::factory::from_config(conf);
 		int ns = 9;
 		auto so = stencil_op(nlocal, nlocal);
+		so.set_registry(kreg);
 		auto & sten = so.stencil();
 		auto len = sten.len(0)*sten.len(1);
 		fill_random(sten.data(), len*5);

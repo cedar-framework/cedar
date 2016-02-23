@@ -65,6 +65,7 @@ topo_ptr create_topo(int np, len_t nx, len_t ny)
 	auto tmp = grid->nproc(0);
 	grid->nproc(0) = grid->nproc(1);
 	grid->nproc(1) = tmp;
+	grid->nproc(2) = 1;
 
 	grid->nlocal(0) = std::ceil(nx / grid->nproc(0));
 	grid->nlocal(1) = std::ceil(ny / grid->nproc(1));
@@ -83,6 +84,7 @@ topo_ptr coarsen_topo(topo_ptr topof)
 
 	grid->nproc(0) = topof->nproc(0);
 	grid->nproc(1) = topof->nproc(1);
+	grid->nproc(2) = topof->nproc(2);
 
 	grid->nglobal(0) = (topof->nglobal(0) - 1) / 2 + 2;
 	grid->nglobal(1) = (topof->nglobal(1) - 1) / 2 + 2;
