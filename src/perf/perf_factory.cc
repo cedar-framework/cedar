@@ -22,7 +22,7 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len
 	auto model = std::make_shared<vcycle_model>(2);
 	model->set_comp_param(params::compute_tc(2, conf));
 	model->set_comm_param(ts, tw);
-	auto topo = util::create_topo(np, nx, ny);
+	auto topo = util::model_topo(np, nx, ny);
 
 	auto nlx = topo->nlocal(0);
 	auto nly = topo->nlocal(1);
@@ -57,7 +57,7 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len
 	config::reader conf("perf.json");
 	int min_coarse = conf.get<int>("solver.min-coarse", 3);
 	auto model = std::make_shared<vcycle_model>(3);
-	auto topo = util::create_topo(np, nx, ny, nz);
+	auto topo = util::model_topo(np, nx, ny, nz);
 
 	auto nlx = topo->nlocal(0);
 	auto nly = topo->nlocal(1);

@@ -7,7 +7,7 @@
 
 namespace boxmg { namespace bmg2d { namespace util {
 			topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny);
-			topo_ptr create_topo(int np, len_t ngx, len_t ngy);
+			topo_ptr model_topo(int np, len_t ngx, len_t ngy);
 			topo_ptr coarsen_topo(topo_ptr topof);
 }}}
 #endif
