@@ -10,8 +10,8 @@
 namespace boxmg {
 struct perf_factory
 {
-	static std::shared_ptr<vcycle_model> produce_vcycle(int np, len_t nx, len_t ny);
-	static std::shared_ptr<vcycle_model> produce_vcycle(int np, len_t nx, len_t ny, len_t nz);
+	static std::shared_ptr<vcycle_model> produce_vcycle(int np, len_t nx, len_t ny, bool terminate=false);
+	static std::shared_ptr<vcycle_model> produce_vcycle(int np, len_t nx, len_t ny, len_t nz, bool terminate=false);
 };
 }
 

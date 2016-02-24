@@ -1,3 +1,4 @@
+#include <limits>
 #include <boxmg/2d/util/topo.h>
 #include <boxmg/3d/util/topo.h>
 #include <boxmg/config/reader.h>
@@ -9,7 +10,7 @@
 
 using namespace boxmg;
 
-std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len_t ny)
+std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len_t ny, bool terminate)
 {
 	using namespace boxmg::bmg2d;
 
@@ -35,14 +36,40 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len
 	} while (std::min(nlx, nly) >= min_coarse);
 
 	auto & topoc = model->grid(0);
-	if (np != 1) {
-		log::status << np << std::endl;
-		auto cg_model = perf_factory::produce_vcycle(1, topoc.nglobal(0), topoc.nglobal(1));
+	if (terminate and np != 1) {
+		auto cg_model = perf_factory::produce_vcycle(1, topoc.nglobal(0), topoc.nglobal(1), true);
 		cg_model->set_comm_param(0, 0); // Since this is serial
 		model->set_cgperf(cg_model);
-	} else {
+	} else if (terminate and np == 1) {
 		auto cg_model = std::make_shared<cholesky_model>(topoc.nglobal(0)*topoc.nglobal(1));
 		cg_model->set_comp_param(tc);
+		model->set_cgperf(cg_model);
+	} else {
+		std::vector<int> chunks;
+		int bnd = static_cast<int>(sqrt(np)) + 1;
+		for (auto i = 1; i < bnd; i++) {
+			if (np % i == 0) {
+				chunks.push_back(i);
+				chunks.push_back(np/i);
+			}
+		}
+
+		int best_chunk = 0;
+		float best_time = std::numeric_limits<float>::max();
+		for (auto i = 0; i < chunks.size(); i++) {
+			model->set_nchunks(chunks[i]);
+			auto cg_model = perf_factory::produce_vcycle(np/chunks[i], topoc.nglobal(0), topoc.nglobal(1), true);
+			model->set_cgperf(cg_model);
+			float this_time = model->tcgsolve();
+			log::error << "cgsolve with " << chunks[i] << " chunks would take " << this_time << " seconds." << std::endl;
+			if (this_time < best_time) {
+				best_time = this_time;
+				best_chunk = i;
+			}
+		}
+
+		model->set_nchunks(chunks[best_chunk]);
+		auto cg_model = perf_factory::produce_vcycle(np/chunks[best_chunk], topoc.nglobal(0), topoc.nglobal(1), true);
 		model->set_cgperf(cg_model);
 	}
 
@@ -50,7 +77,7 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len_t ny, len_t nz)
+std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len_t ny, len_t nz, bool terminate)
 {
 	using namespace boxmg::bmg3;
 

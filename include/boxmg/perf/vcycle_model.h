@@ -24,6 +24,9 @@ public:
 	float tcgsolve();
 	void set_cgperf(std::shared_ptr<perf_model> mod);
 	virtual float time();
+	void save_levels();
+	void set_nchunks(int nchunks);
+	int get_nchunks();
 
 protected:
 	short nd;
@@ -31,6 +34,7 @@ protected:
 	int nc, ns;
 	int v1, v2;
 	std::shared_ptr<perf_model> cg_perf;
+	int nchunks;
 };
 
 }

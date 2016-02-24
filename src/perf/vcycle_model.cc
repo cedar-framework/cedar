@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iostream>
 
 #include <boxmg/perf/vcycle_model.h>
 
@@ -14,6 +15,20 @@ vcycle_model::vcycle_model(short nd, int v1, int v2) : nd(nd), v1(v1), v2(v2)
 		nc = 8;
 		ns = 27;
 	}
+
+	nchunks = 1;
+}
+
+
+void vcycle_model::set_nchunks(int nchunks)
+{
+	this->nchunks = nchunks;
+}
+
+
+int vcycle_model::get_nchunks()
+{
+	return nchunks;
 }
 
 
@@ -129,14 +144,15 @@ float vcycle_model::tcgsolve()
 {
 	float time = 0;
 	int p = grid(0).nproc();
+	int k = nchunks;
 
 	time += cg_perf->time();
-	time += std::ceil(std::log2(p))*ts;
+	time += std::ceil(std::log2(p/k))*ts;
 	float prod = 1;
 	for (int i = 0; i < nd; i++) {
 		prod *= grid(0).nglobal(i);
 	}
-	time += prod*(1 + std::ceil(std::log2(p)))*tw;
+	time += prod/k*(1 + std::ceil(std::log2(p/k)))*tw;
 
 	return time;
 }
@@ -161,4 +177,27 @@ float vcycle_model::time()
 void vcycle_model::set_cgperf(std::shared_ptr<perf_model> mod)
 {
 	cg_perf = mod;
+}
+
+
+void vcycle_model::save_levels()
+{
+	std::ofstream smooth_file;
+	std::ofstream residual_file;
+	std::ofstream interp_file;
+	std::ofstream restrict_file;
+	smooth_file.open("smooth.txt", std::ios::out | std::ios::trunc | std::ios::binary);
+	residual_file.open("residual.txt", std::ios::out | std::ios::trunc | std::ios::binary);
+	interp_file.open("interp.txt", std::ios::out | std::ios::trunc | std::ios::binary);
+	restrict_file.open("restrict.txt", std::ios::out | std::ios::trunc | std::ios::binary);
+	for (auto i = 1; i < ngrids(); i++) {
+		smooth_file << i << " " << tsmooth(i) << '\n';
+		residual_file << i << " " << tresidual(i) << '\n';
+		interp_file << i << " " << tinterp(i) << '\n';
+		restrict_file << i << " " << trestrict(i) << '\n';
+	}
+	smooth_file.close();
+	residual_file.close();
+	interp_file.close();
+	restrict_file.close();
 }
