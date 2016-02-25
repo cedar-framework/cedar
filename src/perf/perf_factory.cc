@@ -40,7 +40,7 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len
 		auto cg_model = perf_factory::produce_vcycle(1, topoc.nglobal(0), topoc.nglobal(1), true);
 		cg_model->set_comm_param(0, 0); // Since this is serial
 		model->set_cgperf(cg_model);
-	} else if (terminate and np == 1) {
+	} else if (np == 1) {
 		auto cg_model = std::make_shared<cholesky_model>(topoc.nglobal(0)*topoc.nglobal(1));
 		cg_model->set_comp_param(tc);
 		model->set_cgperf(cg_model);
@@ -69,7 +69,7 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len
 		}
 
 		model->set_nchunks(chunks[best_chunk]);
-		auto cg_model = perf_factory::produce_vcycle(np/chunks[best_chunk], topoc.nglobal(0), topoc.nglobal(1), true);
+		auto cg_model = perf_factory::produce_vcycle(np/chunks[best_chunk], topoc.nglobal(0), topoc.nglobal(1));
 		model->set_cgperf(cg_model);
 	}
 
