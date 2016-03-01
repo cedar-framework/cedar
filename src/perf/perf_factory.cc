@@ -46,19 +46,17 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len
 		model->set_cgperf(cg_model);
 	} else {
 		std::vector<int> chunks;
-		int bnd = static_cast<int>(sqrt(np)) + 1;
-		for (auto i = 1; i < bnd; i++) {
-			if (np % i == 0) {
-				chunks.push_back(i);
-				chunks.push_back(np/i);
-			}
-		}
+		int csize = 1;
+		do {
+			chunks.push_back(csize);
+			csize *= 2;
+		} while (csize <= np);
 
 		int best_chunk = 0;
 		float best_time = std::numeric_limits<float>::max();
 		for (auto i = 0; i < chunks.size(); i++) {
 			model->set_nchunks(chunks[i]);
-			auto cg_model = perf_factory::produce_vcycle(np/chunks[i], topoc.nglobal(0), topoc.nglobal(1), true);
+			auto cg_model = perf_factory::produce_vcycle(std::ceil(np/chunks[i]), topoc.nglobal(0), topoc.nglobal(1), true);
 			model->set_cgperf(cg_model);
 			float this_time = model->tcgsolve();
 			log::error << "cgsolve with " << chunks[i] << " chunks would take " << this_time << " seconds." << std::endl;
@@ -69,7 +67,7 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int np, len_t nx, len
 		}
 
 		model->set_nchunks(chunks[best_chunk]);
-		auto cg_model = perf_factory::produce_vcycle(np/chunks[best_chunk], topoc.nglobal(0), topoc.nglobal(1));
+		auto cg_model = perf_factory::produce_vcycle(std::ceil(np/chunks[best_chunk]), topoc.nglobal(0), topoc.nglobal(1));
 		model->set_cgperf(cg_model);
 	}
 
