@@ -4,6 +4,7 @@
 #include "boxmg/2d/grid_func.h"
 #include "boxmg/2d/mpi/grid_func.h"
 #include "boxmg/2d/solver.h"
+#include "boxmg/2d/mpi/solver.h"
 
 namespace boxmg { namespace bmg2d { namespace kernel {
 
@@ -25,6 +26,9 @@ namespace impls
 	                    mpi::grid_func &x,
 	                    const mpi::grid_func &b);
 
+	void solve_cg_redist(const mpi::solver & cg_solver,
+	                     mpi::grid_func &x,
+	                     const mpi::grid_func &b);
 }
 
 }}}

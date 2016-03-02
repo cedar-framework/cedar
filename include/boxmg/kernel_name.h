@@ -28,6 +28,8 @@ namespace kernel_name {
 	const std::string setup_cg_boxmg("BoxMG coarse grid solve setup");
 	const std::string solve_cg_boxmg("BoxMG coarse grid solver");
 	const std::string matvec("matrix vector multiply");
+	const std::string setup_cg_redist("Distributed BoxMG coarse grid solver setup");
+	const std::string solve_cg_redist("Distributed boxMG coarse grid solve");
 }
 
 }

@@ -17,6 +17,7 @@ namespace boxmg { namespace bmg3 {
 }}
 
 namespace boxmg { namespace bmg3 { namespace mpi {
+			class solver;
 			class stencil_op;
 		}
 		namespace inter {
@@ -30,7 +31,7 @@ namespace boxmg { namespace bmg3 { namespace mpi {
 
 namespace boxmg { namespace bmg3 { namespace kernel { namespace mpi {
 namespace mpi = boxmg::bmg3::mpi;
-class registry : public mpi_registry<mpi::stencil_op, relax_stencil, inter::mpi::prolong_op, mpi::grid_func, solver>
+class registry : public mpi_registry<mpi::stencil_op, relax_stencil, inter::mpi::prolong_op, mpi::grid_func, mpi::solver, solver>
 {
 };
 
