@@ -101,16 +101,28 @@ void mpi::solver::setup_cg_solve()
 	if (cg_solver_lu) {
 		multilevel::setup_cg_solve();
 	} else {
+		std::string cg_solver_str = conf.get<std::string>("solver.cg-solver");
 		auto kernels = kernel_registry();
 		auto & cop = levels.back().A;
-		std::shared_ptr<bmg2d::solver> cg_bmg;
-		kernels->setup_cg_boxmg(cop, &cg_bmg);
-		coarse_solver = [&,cg_bmg,kernels](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
-			const bmg2d::mpi::stencil_op &av = dynamic_cast<const bmg2d::mpi::stencil_op&>(A);
-			kernels->solve_cg_boxmg(*cg_bmg, x, b);
-			bmg2d::mpi::grid_func residual = av.residual(x,b);
-			log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
-		};
+		if (cg_solver_str == "boxmg") {
+			std::shared_ptr<bmg2d::solver> cg_bmg;
+			kernels->setup_cg_boxmg(cop, &cg_bmg);
+			coarse_solver = [&,cg_bmg,kernels](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
+				const bmg2d::mpi::stencil_op &av = dynamic_cast<const bmg2d::mpi::stencil_op&>(A);
+				kernels->solve_cg_boxmg(*cg_bmg, x, b);
+				bmg2d::mpi::grid_func residual = av.residual(x,b);
+				log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
+			};
+		} else {
+			std::shared_ptr<mpi::solver> cg_bmg;
+			kernels->setup_cg_redist(cop, &cg_bmg);
+			coarse_solver = [&,cg_bmg,kernels](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
+				const bmg2d::mpi::stencil_op &av = dynamic_cast<const bmg2d::mpi::stencil_op&>(A);
+				kernels->solve_cg_redist(*cg_bmg, x, b);
+				bmg2d::mpi::grid_func residual = av.residual(x,b);
+				log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
+			};
+		}
 	}
 }
 

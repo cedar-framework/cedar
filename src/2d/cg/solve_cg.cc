@@ -142,6 +142,7 @@ namespace impls
 	                     mpi::grid_func &x,
 	                     const mpi::grid_func &b)
 	{
+		log::status << "Solving cg redist" << std::endl;
 	}
 }
 

@@ -48,7 +48,7 @@
 				"cg-solver":
 				{
 					"type": "string",
-					"pattern": "boxmg|LU"
+					"pattern": "boxmg|LU|redist"
 				}
 			}
 		},

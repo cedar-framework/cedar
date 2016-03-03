@@ -9,6 +9,7 @@ namespace impls
 	void setup_cg_redist(const mpi::stencil_op & so,
 	                     std::shared_ptr<mpi::solver> * slv)
 	{
+		log::status << "Settup cg redist" << std::endl;
 	}
 }
 
