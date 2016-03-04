@@ -49,9 +49,9 @@ int main(int argc, char *argv[])
 
 	config::reader conf;
 
-	auto nx = conf.get<len_t>("grid.nx", 9);
-	auto ny = conf.get<len_t>("grid.ny", 9);
-	auto nz = conf.get<len_t>("grid.nz", 9);
+	auto nx = conf.get<len_t>("grid.nx", 31);
+	auto ny = conf.get<len_t>("grid.ny", 31);
+	auto nz = conf.get<len_t>("grid.nz", 31);
 	auto grid = util::create_topo(MPI_COMM_WORLD, nx, ny, nz);
 
 	auto so = mpi::stencil_op(grid);
@@ -59,16 +59,16 @@ int main(int argc, char *argv[])
 
 	set_problem(so, b);
 	mpi::solver bmg(std::move(so));
-	// auto x = bmg.solve(b);
+	auto x = bmg.solve(b);
 
-	{
-		std::ofstream ofile;
-		auto & topo = bmg.level(-1).A.grid();
-		ofile.open("op-" + std::to_string(topo.coord(0)+1) + "." +
-		           std::to_string(topo.coord(1)+1) + "." + std::to_string(topo.coord(2)+1) + ".txt", std::ios::out | std::ios::trunc | std::ios::binary);
-		ofile << bmg.level(0).A;
-		ofile.close();
-	}
+	// {
+	// 	std::ofstream ofile;
+	// 	auto & topo = bmg.level(-1).A.grid();
+	// 	ofile.open("op-" + std::to_string(topo.coord(0)+1) + "." +
+	// 	           std::to_string(topo.coord(1)+1) + "." + std::to_string(topo.coord(2)+1) + ".txt", std::ios::out | std::ios::trunc | std::ios::binary);
+	// 	ofile << bmg.level(0).A;
+	// 	ofile.close();
+	// }
 
 	log::status << "Finished Test" << std::endl;
 

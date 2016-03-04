@@ -170,11 +170,9 @@ subroutine putf(so, qf,&
 
            call rhs(is,js,kss,hx,hy,hz,fs)
            qf(i,j,k) = fs*h2
-           so(i,j,k,kp) = so(i,j+1,k,kps) + so(i,j,k+1,kb) + so(i,j,k,kpw)&
-                + so(i+1,j,k,kpw) + so(i,j,k,kb) + so(i,j,k,kps)
+           so(i,j,k,kp) = 2*xh + 2*yh + 2*zh
         enddo
      enddo
   enddo
 
 end subroutine putf
-
