@@ -39,7 +39,7 @@ public:
 	MPI_Comm comm;
 	virtual bmg2d::mpi::grid_func solve(const bmg2d::mpi::grid_func &b);
 	virtual void solve(const bmg2d::mpi::grid_func &b, bmg2d::mpi::grid_func &x);
-	virtual void setup_cg_solve();
+	virtual void setup_cg_solve() override;
 	virtual void setup_space(int nlevels);
 	void setup_halo();
 

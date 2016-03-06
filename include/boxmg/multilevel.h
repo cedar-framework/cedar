@@ -14,7 +14,7 @@ class multilevel
 
 public:
 multilevel() : conf("config.json") {};
-	virtual ~multilevel() {delete[] bbd;}
+	virtual ~multilevel() {}
 
 	std::shared_ptr<registry> kernel_registry()
 	{
