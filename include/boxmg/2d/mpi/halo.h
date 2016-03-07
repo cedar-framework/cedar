@@ -1,6 +1,8 @@
 #ifndef BOXMG_2D_KERNEL_HALO_H
 #define BOXMG_2D_KERNEL_HALO_H
 
+#include "boxmg/2d/ftn/mpi/BMG_workspace_c.h"
+
 #include <boxmg/array.h>
 #include <boxmg/mpi/grid_topo.h>
 #include <boxmg/2d/mpi/stencil_op.h>
@@ -34,6 +36,18 @@ namespace impls
 		/* int pmsg[nbmg_pmsg,nog]; */
 		/* int msgbuffer[nmsgr]; */
 		/* int nmsgr; */
+		len_t nlocal(int kg, int dim, int ijrank) {
+			len_t local_arr_ptr = pMSG(ipL_MSG_LocalArraySize,kg) - 1;  // 1 vs 0 based indexing
+			len_t idx = local_arr_ptr;
+			ijrank--; // 1 vs 0 based indexing
+			idx += ijrank*3 + dim;
+
+			return msg_geom[idx];
+		}
+
+		len_t cg_nlocal(int dim, int ijrank) {
+			return nlocal(0, dim, ijrank);
+		}
 	};
 
 	void setup_msg(grid_topo &topo, void **msg_ctx);

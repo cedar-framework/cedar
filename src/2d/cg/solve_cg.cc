@@ -138,7 +138,7 @@ namespace impls
 	}
 
 
-	void solve_cg_redist(const mpi::solver & cg_solver,
+	void solve_cg_redist(const mpi::redist_solver & cg_solver,
 	                     mpi::grid_func &x,
 	                     const mpi::grid_func &b)
 	{

@@ -114,7 +114,7 @@ void mpi::solver::setup_cg_solve()
 				log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
 			};
 		} else {
-			std::shared_ptr<mpi::solver> cg_bmg;
+			std::shared_ptr<mpi::redist_solver> cg_bmg;
 			kernels->setup_cg_redist(cop, &cg_bmg);
 			coarse_solver = [&,cg_bmg,kernels](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
 				const bmg2d::mpi::stencil_op &av = dynamic_cast<const bmg2d::mpi::stencil_op&>(A);
