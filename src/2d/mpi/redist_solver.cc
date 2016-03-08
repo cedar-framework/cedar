@@ -21,13 +21,15 @@ redist_solver::redist_solver(const stencil_op & so, std::array<int, 2> nblock) :
 	msg_ctx * ctx = (msg_ctx*) so.halo_ctx;
 	auto ctopo = redist_topo(topo, *ctx);
 	auto rop = redist_operator(so, ctopo);
+	b_redist = grid_func(ctopo);
+	x_redist = grid_func(ctopo);
 
 //	if (block_id == 2) {
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
-		//log::set_header_msg(" (redist)");
+		log::set_header_msg(" (redist)");
 		slv = std::make_unique<solver>(std::move(rop));
-		//log::set_header_msg("");
+		log::set_header_msg("");
 		MSG_pause(&msg_comm);
 		MSG_play(parent_comm);
 		// if (block_num == 1) {
@@ -39,6 +41,90 @@ redist_solver::redist_solver(const stencil_op & so, std::array<int, 2> nblock) :
 //	}
 	// MPI_Barrier(topo.comm);
 	// MPI_Abort(topo.comm,0);
+}
+
+
+void redist_solver::solve(const grid_func & b, grid_func & x)
+{
+	array<len_t,real_t,1> sbuf(b.shape(0)*b.shape(1));
+	int idx = 0;
+	for (auto j : b.range(1)) {
+		for (auto i : b.range(0)) {
+			sbuf(idx) = b(i,j);
+			idx++;
+		}
+	}
+
+
+	std::vector<int> rcounts(nlocal.len(0)*nlocal.len(1));
+	std::vector<int> displs(nlocal.len(0)*nlocal.len(1));
+	len_t rbuf_len = 0;
+	for (auto j : range(nlocal.len(1))) {
+		for (auto i : range(nlocal.len(0))) {
+			int idx = i+j*nlocal.len(0);
+			displs[idx] = rbuf_len;
+			rcounts[idx] = nlocal(0,i,j)*nlocal(1,i,j);
+			rbuf_len += rcounts[idx];
+		}
+	}
+	array<len_t,real_t,1> rbuf(rbuf_len);
+	MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
+	               displs.data(), MPI_DOUBLE, collcomm);
+
+
+	// Loop through all my blocks
+	len_t igs, jgs;
+	idx = 0;
+	jgs = 1;
+	for (auto j : range(nlocal.len(2))) {
+		auto ny = 0;
+		igs = 1;
+		for (auto i : range(nlocal.len(1))) {
+			// if (i == 1 and j == 0) {
+			// 	std::cout << "igs,jgs: " << igs << " " << jgs << std::endl;
+			// 	std::cout << "nlx,nly: " << nlocal(0,i,j) << " " << nlocal(1,i,j) << std::endl;
+			// }
+			auto nx = nlocal(0,i,j);
+			ny = nlocal(1,i,j);
+			for (auto jj: range(ny)) {
+				for (auto ii : range(nx)) {
+					b_redist(igs+ii,jgs+jj) = rbuf(idx);
+					idx++;
+				}
+			}
+			igs += nx;
+		}
+		jgs += ny;
+	}
+
+	MPI_Fint parent_comm;
+	MSG_pause(&parent_comm);
+	MSG_play(msg_comm);
+	log::set_header_msg(" (redist)");
+	slv->solve(b_redist, x_redist);
+	log::set_header_msg("");
+	// MSG_pause(&msg_comm);
+	MSG_play(parent_comm);
+
+	int ci = block_id % nlocal.len(1);
+	int cj = block_id / nlocal.len(0);
+
+	igs = 1;
+	for (auto i = 0; i < ci; i++) {
+		igs += nlocal(0,i,0);
+	}
+	jgs = 1;
+	for (auto j = 0; j < cj; j++) {
+		jgs += nlocal(1,0,j);
+	}
+
+	igs--; jgs--; // include ghosts
+
+	for (auto jj : range(x.len(1))) {
+		for (auto ii : range(x.len(0))) {
+			x(ii,jj) = x_redist(igs+ii,jgs+jj);
+		}
+	}
 }
 
 

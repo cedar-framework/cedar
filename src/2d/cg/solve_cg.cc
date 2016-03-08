@@ -143,6 +143,12 @@ namespace impls
 	                     const mpi::grid_func &b)
 	{
 		log::status << "Solving cg redist" << std::endl;
+		/*
+		  should move work vectors outside redist_solver
+		  to eliminate need for this const_cast
+		*/
+		auto & slv = const_cast<mpi::redist_solver&>(cg_solver);
+		slv.solve(b,x);
 	}
 }
 

@@ -15,6 +15,7 @@ class redist_solver
 public:
 	using msg_ctx = boxmg::bmg2d::kernel::impls::MsgCtx;
 	redist_solver(const stencil_op & so, std::array<int, 2> nblock);
+	void solve(const grid_func & b, grid_func & x);
 
 protected:
 	std::unique_ptr<solver> slv;
@@ -25,6 +26,8 @@ protected:
 	// std::vector<len_t> nlocal; /** # d.o.f. for each processor in my block */
 	array<len_t, len_t, 3> nlocal;
 	MPI_Fint msg_comm;
+	grid_func b_redist;
+	grid_func x_redist;
 	std::shared_ptr<grid_topo> redist_topo(const grid_topo & fine_topo, msg_ctx & ctx);
 	stencil_op redist_operator(const stencil_op & so, topo_ptr topo);
 };
