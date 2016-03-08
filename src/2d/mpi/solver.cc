@@ -78,6 +78,10 @@ void mpi::solver::setup_space(int nlevels)
 
 	{
 		std::string cg_solver_str = conf.get<std::string>("solver.cg-solver", "LU");
+		{  // debug
+			auto & tp = levels[0].A.grid();
+			if (tp.nproc() < 16) cg_solver_str = "LU";
+		} // end debug
 		if (cg_solver_str == "LU")
 			cg_solver_lu = true;
 		else

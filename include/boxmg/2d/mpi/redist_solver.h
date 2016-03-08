@@ -15,11 +15,17 @@ class redist_solver
 public:
 	using msg_ctx = boxmg::bmg2d::kernel::impls::MsgCtx;
 	redist_solver(const stencil_op & so, std::array<int, 2> nblock);
-	std::shared_ptr<grid_topo> redist_topo(const grid_topo & fine_topo, msg_ctx & ctx);
 
 protected:
-	MPI_Comm collcomm;
+	std::unique_ptr<solver> slv;
+	MPI_Comm collcomm; /** Collective communicator for gathering data */
+	int block_id; /** id within a block */
+	int block_num; /** which block */
 	std::array<int,2> nblock;
+	// std::vector<len_t> nlocal; /** # d.o.f. for each processor in my block */
+	array<len_t, len_t, 3> nlocal;
+	std::shared_ptr<grid_topo> redist_topo(const grid_topo & fine_topo, msg_ctx & ctx);
+	stencil_op redist_operator(const stencil_op & so, topo_ptr topo);
 };
 
 }}}
