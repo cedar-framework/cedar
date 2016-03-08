@@ -52,4 +52,5 @@ set(ftn_SOURCES
   ftn/mpi/BMG2_SymStd_UTILS_matvec.f90
   ftn/mpi/BMG2_SymStd_SETUP_cg_LU.f90
   ftn/mpi/BMG2_SymStd_SOLVE_cg_LU.f90
+  ftn/mpi/msg_util.f90
   PARENT_SCOPE)

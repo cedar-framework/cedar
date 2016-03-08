@@ -6,6 +6,11 @@
 #include <boxmg/2d/mpi/redist_solver.h>
 
 
+extern "C" {
+	void MSG_pause(MPI_Fint *msg_comm);
+	void MSG_play(MPI_Fint msg_comm);
+}
+
 using namespace boxmg;
 using namespace boxmg::bmg2d::mpi;
 
@@ -17,19 +22,23 @@ redist_solver::redist_solver(const stencil_op & so, std::array<int, 2> nblock) :
 	auto ctopo = redist_topo(topo, *ctx);
 	auto rop = redist_operator(so, ctopo);
 
-	if (block_id == 2) {
-		log::set_header_msg(" (redist)");
+//	if (block_id == 2) {
+		MPI_Fint parent_comm;
+		MSG_pause(&parent_comm);
+		//log::set_header_msg(" (redist)");
 		slv = std::make_unique<solver>(std::move(rop));
-		log::set_header_msg("");
+		//log::set_header_msg("");
+		MSG_pause(&msg_comm);
+		MSG_play(parent_comm);
 		// if (block_num == 1) {
 		// 	std::ofstream rfile;
 		// 	rfile.open("after", std::ios::out | std::ios::trunc | std::ios::binary);
 		// 	rfile << (*slv).level(-1).A;
 		// 	rfile.close();
 		// }
-	}
-	MPI_Barrier(topo.comm);
-	MPI_Abort(topo.comm,0);
+//	}
+	// MPI_Barrier(topo.comm);
+	// MPI_Abort(topo.comm,0);
 }
 
 
