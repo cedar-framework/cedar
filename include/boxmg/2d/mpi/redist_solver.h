@@ -23,8 +23,11 @@ protected:
 	int block_id; /** id within a block */
 	int block_num; /** which block */
 	std::array<int,2> nblock;
-	// std::vector<len_t> nlocal; /** # d.o.f. for each processor in my block */
-	array<len_t, len_t, 3> nlocal;
+	bool active;
+	int recv_id;
+	std::vector<int> send_ids;
+	array<len_t, len_t, 1> nbx; /** # d.o.f. for each processor in my block */
+	array<len_t, len_t, 1> nby; /** # d.o.f. for each processor in my block */
 	MPI_Fint msg_comm;
 	grid_func b_redist;
 	grid_func x_redist;

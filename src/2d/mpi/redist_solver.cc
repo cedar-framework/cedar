@@ -14,7 +14,8 @@ extern "C" {
 using namespace boxmg;
 using namespace boxmg::bmg2d::mpi;
 
-redist_solver::redist_solver(const stencil_op & so, std::array<int, 2> nblock) : nblock(nblock)
+redist_solver::redist_solver(const stencil_op & so, std::array<int, 2> nblock) : nblock(nblock), active(true),
+	           recv_id(-1)
 {
 	// Split communicator into collective processor blocks
 	auto & topo = so.grid();
@@ -24,7 +25,7 @@ redist_solver::redist_solver(const stencil_op & so, std::array<int, 2> nblock) :
 	b_redist = grid_func(ctopo);
 	x_redist = grid_func(ctopo);
 
-//	if (block_id == 2) {
+	if (active) {
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
 		log::set_header_msg(" (redist)");
@@ -32,15 +33,7 @@ redist_solver::redist_solver(const stencil_op & so, std::array<int, 2> nblock) :
 		log::set_header_msg("");
 		MSG_pause(&msg_comm);
 		MSG_play(parent_comm);
-		// if (block_num == 1) {
-		// 	std::ofstream rfile;
-		// 	rfile.open("after", std::ios::out | std::ios::trunc | std::ios::binary);
-		// 	rfile << (*slv).level(-1).A;
-		// 	rfile.close();
-		// }
-//	}
-	// MPI_Barrier(topo.comm);
-	// MPI_Abort(topo.comm,0);
+	}
 }
 
 
@@ -56,14 +49,14 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 	}
 
 
-	std::vector<int> rcounts(nlocal.len(0)*nlocal.len(1));
-	std::vector<int> displs(nlocal.len(0)*nlocal.len(1));
+	std::vector<int> rcounts(nbx.len(0)*nby.len(0));
+	std::vector<int> displs(nbx.len(0)*nby.len(0));
 	len_t rbuf_len = 0;
-	for (auto j : range(nlocal.len(1))) {
-		for (auto i : range(nlocal.len(0))) {
-			int idx = i+j*nlocal.len(0);
+	for (auto j : range(nby.len(0))) {
+		for (auto i : range(nbx.len(0))) {
+			int idx = i+j*nbx.len(0);
 			displs[idx] = rbuf_len;
-			rcounts[idx] = nlocal(0,i,j)*nlocal(1,i,j);
+			rcounts[idx] = nbx(i)*nby(j);
 			rbuf_len += rcounts[idx];
 		}
 	}
@@ -76,16 +69,12 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 	len_t igs, jgs;
 	idx = 0;
 	jgs = 1;
-	for (auto j : range(nlocal.len(2))) {
+	for (auto j : range(nby.len(0))) {
 		auto ny = 0;
 		igs = 1;
-		for (auto i : range(nlocal.len(1))) {
-			// if (i == 1 and j == 0) {
-			// 	std::cout << "igs,jgs: " << igs << " " << jgs << std::endl;
-			// 	std::cout << "nlx,nly: " << nlocal(0,i,j) << " " << nlocal(1,i,j) << std::endl;
-			// }
-			auto nx = nlocal(0,i,j);
-			ny = nlocal(1,i,j);
+		for (auto i : range(nbx.len(0))) {
+			auto nx = nbx(i);
+			ny = nby(j);
 			for (auto jj: range(ny)) {
 				for (auto ii : range(nx)) {
 					b_redist(igs+ii,jgs+jj) = rbuf(idx);
@@ -97,33 +86,66 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 		jgs += ny;
 	}
 
-	MPI_Fint parent_comm;
-	MSG_pause(&parent_comm);
-	MSG_play(msg_comm);
-	log::set_header_msg(" (redist)");
-	slv->solve(b_redist, x_redist);
-	log::set_header_msg("");
-	// MSG_pause(&msg_comm);
-	MSG_play(parent_comm);
+	if (active) {
+		MPI_Fint parent_comm;
+		MSG_pause(&parent_comm);
+		MSG_play(msg_comm);
+		log::set_header_msg(" (redist)");
+		slv->solve(b_redist, x_redist);
+		log::set_header_msg("");
+		MSG_play(parent_comm);
 
-	int ci = block_id % nlocal.len(1);
-	int cj = block_id / nlocal.len(0);
+		// copy local part from redistributed solution
+		int ci = block_id % nbx.len(0);
+		int cj = block_id / nbx.len(0);
 
-	igs = 1;
-	for (auto i = 0; i < ci; i++) {
-		igs += nlocal(0,i,0);
-	}
-	jgs = 1;
-	for (auto j = 0; j < cj; j++) {
-		jgs += nlocal(1,0,j);
-	}
-
-	igs--; jgs--; // include ghosts
-
-	for (auto jj : range(x.len(1))) {
-		for (auto ii : range(x.len(0))) {
-			x(ii,jj) = x_redist(igs+ii,jgs+jj);
+		igs = 1;
+		for (auto i = 0; i < ci; i++) {
+			igs += nbx(i);
 		}
+		jgs = 1;
+		for (auto j = 0; j < cj; j++) {
+			jgs += nby(j);
+		}
+
+		igs--; jgs--; // include ghosts
+
+		for (auto jj : range(x.len(1))) {
+			for (auto ii : range(x.len(0))) {
+				x(ii,jj) = x_redist(igs+ii,jgs+jj);
+			}
+		}
+
+
+		for (auto send_id : send_ids) {
+			ci = send_id % nbx.len(0);
+			cj = send_id / nbx.len(0);
+
+			igs = 1;
+			for (auto i = 0; i < ci; i++) {
+				igs += nbx(i);
+			}
+			jgs = 1;
+			for (auto j = 0; j < cj; j++) {
+				jgs += nby(j);
+			}
+
+			igs--; jgs--; // include ghosts
+
+			array<len_t,real_t,2> sbuf(nbx(ci)+2, nby(cj)+2);
+			for (auto jj : range(sbuf.len(1))) {
+				for (auto ii : range(sbuf.len(0))) {
+					sbuf(ii,jj) = x_redist(igs+ii,jgs+jj);
+				}
+			}
+
+			MPI_Send(sbuf.data(), sbuf.len(0)*sbuf.len(1), MPI_DOUBLE, send_id, 0, collcomm);
+		}
+	} else if (recv_id > -1) {
+		int ci = block_id % nbx.len(0);
+		int cj = block_id / nbx.len(0);
+
+		MPI_Recv(x.data(), x.len(0)*x.len(1), MPI_DOUBLE, recv_id, 0, collcomm, MPI_STATUS_IGNORE);
 	}
 }
 
@@ -137,7 +159,6 @@ stencil_op redist_solver::redist_operator(const stencil_op & so, topo_ptr topo)
 	// save general case for later
 	assert(sten.five_pt() == false);
 
-	//if (block_num == 1) {
 	array<len_t,real_t,1> sbuf(5*sten.shape(0)*sten.shape(1));
 	int idx = 0;
 	for (auto j : sten.range(1)) {
@@ -151,14 +172,14 @@ stencil_op redist_solver::redist_operator(const stencil_op & so, topo_ptr topo)
 		}
 	}
 
-	std::vector<int> rcounts(nlocal.len(0)*nlocal.len(1));
-	std::vector<int> displs(nlocal.len(0)*nlocal.len(1));
+	std::vector<int> rcounts(nbx.len(0)*nby.len(0));
+	std::vector<int> displs(nbx.len(0)*nby.len(0));
 	len_t rbuf_len = 0;
-	for (auto j : range(nlocal.len(1))) {
-		for (auto i : range(nlocal.len(0))) {
-			int idx = i+j*nlocal.len(0);
+	for (auto j : range(nby.len(0))) {
+		for (auto i : range(nbx.len(0))) {
+			int idx = i+j*nbx.len(0);
 			displs[idx] = rbuf_len;
-			rcounts[idx] = nlocal(0,i,j)*nlocal(1,i,j)*5;
+			rcounts[idx] = nbx(i)*nby(j)*5;
 			rbuf_len += rcounts[idx];
 		}
 	}
@@ -166,34 +187,16 @@ stencil_op redist_solver::redist_operator(const stencil_op & so, topo_ptr topo)
 	MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
 	               displs.data(), MPI_DOUBLE, collcomm);
 
-	// {// DEBUG
-	// 	if (block_id == 0) {
-	// 		idx = rcounts[0];
-	// 		for (auto j : range(nlocal(1,1,0))) {
-	// 			for (auto i : range(nlocal(0,1,0))) {
-	// 				for (auto k : range(5)) {
-	// 					std::cout << "after: " << rbuf(idx+k) << std::endl;
-	// 				}
-	// 				idx += 5;
-	// 			}
-	// 		}
-	// 	}
-	// }
-
 	// Loop through all my blocks
 	len_t igs, jgs;
 	idx = 0;
 	jgs = 1;
-	for (auto j : range(nlocal.len(2))) {
+	for (auto j : range(nby.len(0))) {
 		auto ny = 0;
 		igs = 1;
-		for (auto i : range(nlocal.len(1))) {
-			// if (i == 1 and j == 0) {
-			// 	std::cout << "igs,jgs: " << igs << " " << jgs << std::endl;
-			// 	std::cout << "nlx,nly: " << nlocal(0,i,j) << " " << nlocal(1,i,j) << std::endl;
-			// }
-			auto nx = nlocal(0,i,j);
-			ny = nlocal(1,i,j);
+		for (auto i : range(nbx.len(0))) {
+			auto nx = nbx(i);
+			ny = nby(j);
 			for (auto jj: range(ny)) {
 				for (auto ii : range(nx)) {
 					rsten(igs+ii,jgs+jj,dir::C) = rbuf(idx);
@@ -208,38 +211,6 @@ stencil_op redist_solver::redist_operator(const stencil_op & so, topo_ptr topo)
 		}
 		jgs += ny;
 	}
-
-	// { // debug
-	// 	if (block_num == 1) {
-	// 		std::ofstream cfile;
-	// 		int rank;
-	// 		auto &ctopo = so.grid();
-	// 		MPI_Comm_rank(ctopo.comm, &rank);
-	// 		cfile.open("stencil-before-" + std::to_string(rank), std::ios::out | std::ios::trunc | std::ios::binary);
-
-	// 		cfile << so;
-	// 		cfile.close();
-	// 	}
-
-	// 	// if (block_num == 0 and block_id == 0) {
-	// 	// 	std::ofstream rfile;
-	// 	// 	rfile.open("after", std::ios::out | std::ios::trunc | std::ios::binary);
-	// 	// 	rfile << rop;
-	// 	// 	rfile.close();
-
-	// 	// 	auto &ctopo = so.grid();
-	// 	// 	auto &rtopo = rop.grid();
-	// 	// 	//std::cout << "after: " << ctopo.is(0) << " " << ctopo.is(1) << " " << rtopo.is(0) << " " << rtopo.is(1) << std::endl;
-	// 	// 	//std::cout << ctopo.nglobal(0) << " " << ctopo.nglobal(1) << " => " << rtopo.nglobal(0) << " " << rtopo.nglobal(1) << std::endl;
-	// 	// 	//std::cout << ctopo.nlocal(0) << " " << ctopo.nlocal(1) << " => " << nlocal(0,1,0) << " " << nlocal(1,1,0) << std::endl;
-	// 	// }
-	// }
-
-	// {
-	// 	auto & tp = rop.grid();
-	// 	auto & rsten = rop.stencil();
-	// 	std::cout << tp.nglobal(0) << " vs " << rsten.len(0) << std::endl;
-	// }
 
 	return rop;
 }
@@ -293,14 +264,15 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 	grid->is(1)++;
 
 	// get ready for allgatherv
-	nlocal = array<len_t,len_t,3>(2,(highi-lowi+1), (highj-lowj+1));
+	nbx = array<len_t,len_t,1>(highi-lowi+1);
+	nby = array<len_t,len_t,1>(highj-lowj+1);
+
 	for (auto j = lowj; j <= highj; j++) {
-		for (auto i = lowi; i <= highi; i++) {
-			auto nx = ctx.cg_nlocal(0, ctx.proc_grid(i,j)) - 2;
-			auto ny = ctx.cg_nlocal(1, ctx.proc_grid(i,j)) - 2;
-			nlocal(0,i-lowi,j-lowj) = nx;
-			nlocal(1,i-lowi,j-lowj) = ny;
-		}
+		nby(j-lowj) = ctx.cg_nlocal(1, ctx.proc_grid(0,j)) - 2;
+	}
+
+	for (auto i = lowi; i <= highi; i++) {
+		nbx(i-lowi) = ctx.cg_nlocal(0, ctx.proc_grid(i,0)) - 2;
 	}
 
 	// set dimxfine, dimyfine needed for MSG setup
@@ -332,36 +304,23 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 	block_num = color;
 	block_id = key;
 
-	// if (block_id == 1) {
-	// 	//std::cout << block_num << std::endl;
-	// 	int comm_size;
-	// 	int rank;
-	// 	MPI_Comm_size(grid->comm, &comm_size);
-	// 	MPI_Comm_rank(grid->comm, &rank);
-	// 	std::cout << "[" << rank << "] " << "comm size: " << comm_size << " vs " << grid->nproc() << std::endl;
-	// }
+	// Find out if my processor will be included in redundant solve
+	int ci = fine_topo.coord(0) - lowi;
+	int cj = fine_topo.coord(1) - lowj;
 
-	// if (block_num == 2) {
-	// 	// for (auto j = 0; j < lowj; j++) {
-	// 	// 	std::cout << "[" << j << "] " << ctx.cg_nlocal(0, 
-	// 	// }
-	// 	// std::cout << grid->is(0) << " " << grid->is(1) << std::endl;
-	// }
-
-	// if (fine_topo.coord(0) == 0 and fine_topo.coord(1) == 0) {
-	// 	std::cout << lowi << " " << highi << std::endl;
-	// 	std::cout << lowj << " " << highj << std::endl;
-	// 	std::cout << ctx.cg_nlocal(0, ctx.proc_grid(1,0)) - 2 << std::endl;
-	// }
-
-	// std::cout << grid->coord(0) << " " << grid->coord(1) << " => "
-	//           << grid->nlocal(0)-2 << " "  << grid->nlocal(1)-2 << std::endl;
-
-	// std::cout << fine_topo.coord(0) << " " << fine_topo.coord(1) << " => ("
-	//           << color << " " << key << ")" << std::endl;
-
-	// MPI_Barrier(fine_topo.comm);
-	// MPI_Abort(fine_topo.comm, 0);
+	int nactivex = (fine_topo.nproc(0) / nblock[0]);
+	int nactivey = (fine_topo.nproc(1) / nblock[1]);
+	int nactive = nactivex*nactivey;
+	if (block_id > (nactive-1)) {
+		active = false;
+		recv_id = block_id % nactive;
+	} else {
+		int send_id = block_id + nactive;
+		while (send_id < (nbx.len(0)*nby.len(0))) {
+			send_ids.push_back(send_id);
+			send_id += nactive;
+		}
+	}
 
 	return grid;
 }
