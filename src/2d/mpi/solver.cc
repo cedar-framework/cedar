@@ -119,7 +119,8 @@ void mpi::solver::setup_cg_solve()
 			};
 		} else {
 			std::shared_ptr<mpi::redist_solver> cg_bmg;
-			kernels->setup_cg_redist(cop, &cg_bmg);
+			std::vector<int> nblocks({2,2});
+			kernels->setup_cg_redist(cop, &cg_bmg, nblocks);
 			coarse_solver = [&,cg_bmg,kernels](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
 				const bmg2d::mpi::stencil_op &av = dynamic_cast<const bmg2d::mpi::stencil_op&>(A);
 				kernels->solve_cg_redist(*cg_bmg, x, b);

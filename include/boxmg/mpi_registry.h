@@ -73,10 +73,11 @@ public:
 
 
 	void setup_cg_redist(const stencil_op & so,
-	                     std::shared_ptr<redist_solver> * bmg)
+	                     std::shared_ptr<redist_solver> * bmg,
+	                     std::vector<int> & nblocks)
 	{
 		active.run(kernel_name::setup_cg_redist, so,
-		           static_cast<std::shared_ptr<redist_solver>*>(bmg));
+		           static_cast<std::shared_ptr<redist_solver>*>(bmg), nblocks);
 	}
 
 
