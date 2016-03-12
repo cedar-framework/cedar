@@ -52,19 +52,13 @@ topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny)
 }
 
 
-topo_ptr model_topo(int np, len_t nx, len_t ny)
+topo_ptr model_topo(int nprocx, int nprocy, len_t nx, len_t ny)
 {
 	auto igrd = std::make_shared<std::vector<len_t>>(NBMG_pIGRD);
 	auto grid = std::make_shared<grid_topo>(igrd, 0, 1);
 
-	grid->nproc(0) = grid->nproc(1) = 0;
-	grid->nproc(2) = 1;
-
-	MPI_Dims_create(np, 2, &grid->nproc(0));
-
-	auto tmp = grid->nproc(0);
-	grid->nproc(0) = grid->nproc(1);
-	grid->nproc(1) = tmp;
+	grid->nproc(0) = nprocx;
+	grid->nproc(1) = nprocy;
 	grid->nproc(2) = 1;
 
 	grid->nlocal(0) = std::ceil(nx / grid->nproc(0));

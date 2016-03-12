@@ -9,21 +9,10 @@ std::vector<int> predict_redist(int nprocx, int nprocy,
 {
 	std::vector<int> nblocks({1,1});
 
-	auto model = perf_factory::produce_vcycle(nprocx*nprocy, ngx, ngy);
+	auto model = perf_factory::produce_vcycle(nprocx, nprocy, ngx, ngy);
 
-	auto nb = model->get_nchunks();
-
-	// assuming number of blocks is a power of 2
-	int nref = std::log2(nb);
-
-	// basing on nproc for now (instead of nglobal)
-	// greedy assignment of processors to blocks
-	for (auto i : range(nref)) {
-		if ((nprocx / nblocks[0]) > (nprocy / nblocks[1]))
-			nblocks[0] *= 2;
-		else
-			nblocks[1] *= 2;
-	}
+	nblocks[0] = model->nblocks(0);
+	nblocks[1] = model->nblocks(1);
 
 	return nblocks;
 }

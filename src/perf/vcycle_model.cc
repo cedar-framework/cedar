@@ -16,19 +16,21 @@ vcycle_model::vcycle_model(short nd, int v1, int v2) : nd(nd), v1(v1), v2(v2)
 		ns = 27;
 	}
 
-	nchunks = 1;
+	for (auto i : range(nd)) {
+		nb[i] = 1;
+	}
 }
 
 
-void vcycle_model::set_nchunks(int nchunks)
+int & vcycle_model::nblocks(int dim)
 {
-	this->nchunks = nchunks;
+	return this->nb[dim];
 }
 
 
-int vcycle_model::get_nchunks()
+int vcycle_model::nblocks(int dim) const
 {
-	return nchunks;
+	return this->nb[dim];
 }
 
 
@@ -144,7 +146,9 @@ float vcycle_model::tcgsolve()
 {
 	float time = 0;
 	int p = grid(0).nproc();
-	int k = nchunks;
+	int k = 1;
+	for (auto i : range(nd))
+		k *= nb[i];
 
 	time += cg_perf->time();
 	time += std::ceil(std::log2(p/k))*ts;
