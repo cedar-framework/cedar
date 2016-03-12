@@ -13,9 +13,16 @@ std::vector<int> predict_redist(int nprocx, int nprocy,
 
 	auto nb = model->get_nchunks();
 
-	for (auto i : range(nb)) {
+	// assuming number of blocks is a power of 2
+	int nref = std::log2(nb);
 
-
+	// basing on nproc for now (instead of nglobal)
+	// greedy assignment of processors to blocks
+	for (auto i : range(nref)) {
+		if ((nprocx / nblocks[0]) > (nprocy / nblocks[1]))
+			nblocks[0] *= 2;
+		else
+			nblocks[1] *= 2;
 	}
 
 	return nblocks;
