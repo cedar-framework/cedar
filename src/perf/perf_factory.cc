@@ -52,26 +52,29 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 		model->nblocks(1) = 1;
 		std::array<int,2> best_blocks;
 		float best_time = std::numeric_limits<float>::max();
-		while ((npx/model->nblocks(0)) > 0 and (npy/model->nblocks(1) > 0)) {
+		while (((npx/model->nblocks(0)) > 0 and (npy/model->nblocks(1)) > 0)
+		       and (npx/model->nblocks(0)) * (npy/model->nblocks(1)) > 1) {
 			auto cg_model = perf_factory::produce_vcycle(npx / model->nblocks(0), npy / model->nblocks(1),
 			                                             topoc.nglobal(0), topoc.nglobal(1), true);
 			model->set_cgperf(cg_model);
 			float this_time = model->tcgsolve();
-			log::error << "cgsolve with " << model->nblocks(0)*model->nblocks(1) << " chunks would take " << this_time << " seconds." << std::endl;
+			// log::error << "cgsolve with " << model->nblocks(0) << " x " << model->nblocks(1) << " chunks would take " << this_time << " seconds." << std::endl;
 			if (this_time < best_time) {
 				best_time = this_time;
 				best_blocks[0] = model->nblocks(0);
 				best_blocks[1] = model->nblocks(1);
 			}
-			if ((npx / model->nblocks(0)) > (npy / model->nblocks(1)))
+			// greedily adding processor blocks by processor grid (instead of nglobal)
+			if ((npx / model->nblocks(0)) > (npy / model->nblocks(1))) {
 				model->nblocks(0) *= 2;
-			else
+			} else {
 				model->nblocks(1) *= 2;
+			}
 		}
 
 		model->nblocks(0) = best_blocks[0];
 		model->nblocks(1) = best_blocks[1];
-		auto cg_model = perf_factory::produce_vcycle(npx / model->nblocks(0), npy / model->nblocks(1),
+		auto cg_model = perf_factory::produce_vcycle(model->nblocks(0), model->nblocks(1),
 		                                             topoc.nglobal(0), topoc.nglobal(1));
 		model->set_cgperf(cg_model);
 	}

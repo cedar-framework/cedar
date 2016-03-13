@@ -2,7 +2,7 @@
 
 #include <boxmg/perf/predict.h>
 
-using namespace boxmg;
+namespace boxmg {
 
 std::vector<int> predict_redist(int nprocx, int nprocy,
                                 int ngx, int ngy)
@@ -15,4 +15,7 @@ std::vector<int> predict_redist(int nprocx, int nprocy,
 	nblocks[1] = model->nblocks(1);
 
 	return nblocks;
+}
+
+
 }
