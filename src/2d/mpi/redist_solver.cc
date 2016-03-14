@@ -30,6 +30,8 @@ redist_solver::redist_solver(const stencil_op & so, std::array<int, 2> nblock) :
 		MSG_pause(&parent_comm);
 		log::set_header_msg(" (redist)");
 		slv = std::make_unique<solver>(std::move(rop));
+		auto & cnf = slv->get_config();
+		cnf.set<int>("solver.max-iter", 1);
 		log::set_header_msg("");
 		MSG_pause(&msg_comm);
 		MSG_play(parent_comm);

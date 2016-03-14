@@ -262,6 +262,9 @@ multilevel() : conf("config.json") {};
 
 	virtual int compute_num_levels(stencil_op & fop) { return 0; }
 
+
+	config::reader & get_config() { return conf; }
+
 protected:
 	std::vector<LevelType> levels;
 	std::function<void(const discrete_op<grid_func> & A, grid_func &x, const grid_func &b)> coarse_solver;
