@@ -14,9 +14,9 @@ include_directories(${Boost_INCLUDE_DIR})
 FIND_PACKAGE(BLAS REQUIRED)
 FIND_PACKAGE(LAPACK REQUIRED)
 
-if(ENABLE_MPI)
-	set(boxmg-examples_LINKER_FLAGS ${Boost_LIBRARIES} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES} ${MPI_LIBRARIES} ${MPI_Fortran_LIBRARIES})
-endif(ENABLE_MPI)
+find_package(MPI REQUIRED)
+include_directories(${MPI_C_INCLUDE_PATH})
 
+set(boxmg-examples_LINKER_FLAGS ${Boost_LIBRARIES} ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${MPI_CXX_LIBRARIES} ${MPI_C_LIBRARIES} ${MPI_Fortran_LIBRARIES})
 
 include_directories(${CMAKE_BINARY_DIR}/include/boxmg/2d)
