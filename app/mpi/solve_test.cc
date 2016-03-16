@@ -21,9 +21,18 @@ int main(int argc, char *argv[])
 
 	config::reader conf;
 
+	auto islocal = conf.get<bool>("grid.local", true);
 	auto nx = conf.get<len_t>("grid.nx", 9);
 	auto ny = conf.get<len_t>("grid.ny", 9);
-	auto grid = bmg2d::util::create_topo(MPI_COMM_WORLD, nx, ny);
+	topo_ptr grid;
+	if (islocal) {
+		grid = bmg2d::util::create_topo(MPI_COMM_WORLD, nx, ny);
+		log::status << "Running local solve" << std::endl;
+	} else {
+		grid = bmg2d::util::create_topo_global(MPI_COMM_WORLD, nx, ny);
+		log::status << "Running global solve" << std::endl;
+	}
+
 	auto so = mpi::stencil_op(grid);
 
 	const double pi = M_PI;
