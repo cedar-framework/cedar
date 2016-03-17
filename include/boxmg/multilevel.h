@@ -222,7 +222,10 @@ multilevel() : conf("config.json") {};
 		solve_timer.begin();
 
 		for (auto i: range(maxiter)) {
-			ncycle(0, x, b);
+			if (levels.size() == 1)
+				coarse_solver(levels[0].A, x, b);
+			else
+				ncycle(0, x, b);
 			levels[0].A.residual(x,b,levels[0].res);
 			real_t res_l2 = levels[0].res.template lp_norm<2>();
 			real_t rel_l2 = res_l2 / res0_l2;
@@ -248,7 +251,10 @@ multilevel() : conf("config.json") {};
 		solve_timer.begin();
 
 		for (auto i: range(maxiter)) {
-			ncycle(0, x, b);
+			if (levels.size() == 1)
+				coarse_solver(levels[0].A, x, b);
+			else
+				ncycle(0, x, b);
 			levels[0].A.residual(x,b,levels[0].res);
 			real_t res_l2 = levels[0].res.template lp_norm<2>();
 			real_t rel_l2 = res_l2 / res0_l2;
