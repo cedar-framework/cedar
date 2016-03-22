@@ -23,6 +23,7 @@ public:
 	float tinterp(int lvl);
 	float tcgsolve();
 	void set_cgperf(std::shared_ptr<perf_model> mod);
+	std::shared_ptr<perf_model> get_cgperf();
 	virtual float time();
 	void save_levels();
 	int & nblocks(int dim);

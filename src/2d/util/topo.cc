@@ -64,8 +64,8 @@ topo_ptr model_topo(int nprocx, int nprocy, len_t nx, len_t ny)
 	grid->nproc(1) = nprocy;
 	grid->nproc(2) = 1;
 
-	grid->nlocal(0) = std::ceil(nx / grid->nproc(0));
-	grid->nlocal(1) = std::ceil(ny / grid->nproc(1));
+	grid->nlocal(0) = std::ceil(nx / static_cast<double>(grid->nproc(0)));
+	grid->nlocal(1) = std::ceil(ny / static_cast<double>(grid->nproc(1)));
 
 	grid->nglobal(0) = nx;
 	grid->nglobal(1) = ny;

@@ -3,6 +3,7 @@
 #include <boxmg/3d/util/topo.h>
 #include <boxmg/config/reader.h>
 #include <boxmg/perf/cholesky_model.h>
+#include <boxmg/perf/const_model.h>
 #include <boxmg/perf/params.h>
 
 #include <boxmg/perf/perf_factory.h>
@@ -54,10 +55,14 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 		model->nblocks(1) = 1;
 		std::array<int,2> best_blocks;
 		float best_time = std::numeric_limits<float>::max();
+		std::shared_ptr<vcycle_model> best_cg;
 		while (((npx/model->nblocks(0)) > 0 and (npy/model->nblocks(1)) > 0)
 		       and (npx/model->nblocks(0)) * (npy/model->nblocks(1)) > 1) {
 			auto cg_model = perf_factory::produce_vcycle(model->nblocks(0), model->nblocks(1),
-			                                             topoc.nglobal(0)/model->nblocks(0), topoc.nglobal(1)/model->nblocks(1), true);
+			                                             topoc.nglobal(0), topoc.nglobal(1));
+			// set coarse solve to 0
+			// cg_model->set_cgperf(std::make_shared<const_model>(0));
+
 			model->set_cgperf(cg_model);
 			float this_time = model->tcgsolve();
 			// log::error << "cgsolve with " << model->nblocks(0) << " x " << model->nblocks(1) << " chunks would take " << this_time << " seconds." << std::endl;
@@ -65,6 +70,7 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 				best_time = this_time;
 				best_blocks[0] = model->nblocks(0);
 				best_blocks[1] = model->nblocks(1);
+				best_cg = cg_model;
 			}
 			// greedily adding processor blocks by processor grid (instead of nglobal)
 			if ((npx / model->nblocks(0)) > (npy / model->nblocks(1))) {
@@ -76,9 +82,7 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 
 		model->nblocks(0) = best_blocks[0];
 		model->nblocks(1) = best_blocks[1];
-		auto cg_model = perf_factory::produce_vcycle(model->nblocks(0), model->nblocks(1),
-		                                             topoc.nglobal(0)/model->nblocks(0), topoc.nglobal(1)/model->nblocks(1));
-		model->set_cgperf(cg_model);
+		model->set_cgperf(best_cg);
 	}
 
 	return model;
