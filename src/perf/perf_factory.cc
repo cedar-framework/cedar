@@ -16,7 +16,7 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 
 	auto np = npx*npy;
 
-	config::reader conf("perf.json");
+	config::reader conf("config.json");
 
 	int min_coarse = conf.get<int>("solver.min-coarse");
 	float ts = conf.get<float>("machine.bandwidth");
@@ -41,6 +41,8 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 	if (terminate and np != 1) {
 		auto cg_model = perf_factory::produce_vcycle(1,1, topoc.nglobal(0), topoc.nglobal(1), true);
 		cg_model->set_comm_param(0, 0); // Since this is serial
+		model->nblocks(0) = 1;
+		model->nblocks(1) = 1;
 		model->set_cgperf(cg_model);
 	} else if (np == 1) {
 		auto cg_model = std::make_shared<cholesky_model>(topoc.nglobal(0)*topoc.nglobal(1));
@@ -54,8 +56,8 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 		float best_time = std::numeric_limits<float>::max();
 		while (((npx/model->nblocks(0)) > 0 and (npy/model->nblocks(1)) > 0)
 		       and (npx/model->nblocks(0)) * (npy/model->nblocks(1)) > 1) {
-			auto cg_model = perf_factory::produce_vcycle(npx / model->nblocks(0), npy / model->nblocks(1),
-			                                             topoc.nglobal(0), topoc.nglobal(1), true);
+			auto cg_model = perf_factory::produce_vcycle(model->nblocks(0), model->nblocks(1),
+			                                             topoc.nglobal(0)/model->nblocks(0), topoc.nglobal(1)/model->nblocks(1), true);
 			model->set_cgperf(cg_model);
 			float this_time = model->tcgsolve();
 			// log::error << "cgsolve with " << model->nblocks(0) << " x " << model->nblocks(1) << " chunks would take " << this_time << " seconds." << std::endl;
@@ -75,7 +77,7 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 		model->nblocks(0) = best_blocks[0];
 		model->nblocks(1) = best_blocks[1];
 		auto cg_model = perf_factory::produce_vcycle(model->nblocks(0), model->nblocks(1),
-		                                             topoc.nglobal(0), topoc.nglobal(1));
+		                                             topoc.nglobal(0)/model->nblocks(0), topoc.nglobal(1)/model->nblocks(1));
 		model->set_cgperf(cg_model);
 	}
 

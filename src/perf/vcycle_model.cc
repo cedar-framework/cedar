@@ -146,17 +146,20 @@ float vcycle_model::tcgsolve()
 {
 	float time = 0;
 	int p = grid(0).nproc();
-	int k = 1;
-	for (auto i : range(nd))
-		k *= nb[i];
+	int gather_size = 1;
+	int cg_size = 1;
+	for (auto i : range(nd)) {
+		gather_size *= std::ceil(grid(0).nproc(i) / nb[i]);
+		cg_size *= std::ceil(grid(0).nglobal(i)/nb[i]);
+	}
 
 	time += cg_perf->time();
-	time += std::ceil(std::log2(p/k))*ts;
-	float prod = 1;
-	for (int i = 0; i < nd; i++) {
-		prod *= grid(0).nglobal(i);
+	time += std::ceil(std::log2(gather_size))*ts;
+	if (gather_size < 1000) {
+		time += cg_size*(1 + std::ceil(std::log2(gather_size)))*tw;
+	} else {
+		time += cg_size*(gather_size-1)/gather_size*tw;
 	}
-	time += prod/k*(1 + std::ceil(std::log2(p/k)))*tw;
 
 	return time;
 }
