@@ -11,6 +11,7 @@ class cholesky_model : public perf_model
 public:
 	cholesky_model(len_t n);
 	virtual float time();
+	virtual void rep(std::ostream & os) const;
 
 private:
 	len_t n;

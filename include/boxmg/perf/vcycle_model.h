@@ -15,8 +15,9 @@ public:
 	vcycle_model(short nd, int v1=2, int v2=1);
 	void add_level(topo_ptr grid);
 	grid_topo & grid(int lvl);
+	const grid_topo & grid(int lvl) const;
 	topo_ptr grid_ptr(int lvl);
-	int ngrids() { return grids.size(); }
+	int ngrids() const { return grids.size(); }
 	float tsmooth(int lvl);
 	float tresidual(int lvl);
 	float trestrict(int lvl);
@@ -28,6 +29,7 @@ public:
 	void save_levels();
 	int & nblocks(int dim);
 	int nblocks(int dim) const;
+	virtual void rep(std::ostream & os) const;
 
 protected:
 	short nd;

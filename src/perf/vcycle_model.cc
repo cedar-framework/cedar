@@ -53,6 +53,19 @@ grid_topo & vcycle_model::grid(int i)
 }
 
 
+const grid_topo & vcycle_model::grid(int i) const
+{
+	int ind;
+	if (i < 0) ind = (i + 1)*-1;
+	else ind = grids.size() - i - 1;
+	#ifdef DEBUG
+	return *grids.at(ind);
+	#else
+	return *grids[ind];
+	#endif
+}
+
+
 topo_ptr vcycle_model::grid_ptr(int i)
 {
 	int ind;
@@ -155,11 +168,8 @@ float vcycle_model::tcgsolve()
 
 	time += cg_perf->time();
 	time += std::ceil(std::log2(gather_size))*ts;
-	if (gather_size < 1000) {
-		time += cg_size*(1 + std::ceil(std::log2(gather_size)))*tw;
-	} else {
-		time += cg_size*(gather_size-1)/gather_size*tw;
-	}
+	time += cg_size*(1 + std::ceil(std::log2(gather_size)))*tw;
+	// time += cg_size*(gather_size-1)/gather_size*tw;
 
 	return time;
 }
@@ -213,4 +223,15 @@ void vcycle_model::save_levels()
 	residual_file.close();
 	interp_file.close();
 	restrict_file.close();
+}
+
+
+void vcycle_model::rep(std::ostream & os) const
+{
+	os << "======== vcycle model ========" << '\n';
+	os << "nproc:      " << grid(-1).nproc(0) << " " << grid(-1).nproc(1) << std::endl;
+	os << "local size: " << grid(-1).nlocal(0) << " x " << grid(-1).nlocal(1) << '\n';
+	os << "nlevel:     " << ngrids() << '\n';
+	os << '\n';
+	os << *cg_perf;
 }

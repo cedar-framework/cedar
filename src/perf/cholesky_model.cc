@@ -9,3 +9,10 @@ float cholesky_model::time()
 {
 	return (n*n)*tc;
 }
+
+
+void cholesky_model::rep(std::ostream &os) const
+{
+	os << "======== Cholesky model ========" << '\n';
+	os << "size: " << n << '\n';
+}
