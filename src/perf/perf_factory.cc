@@ -11,6 +11,19 @@
 
 using namespace boxmg;
 
+
+static bool keep_refining(int npx, int npy, int nbx, int nby, len_t nlx, len_t nly,
+                          int min_coarse)
+{
+	bool ret = ((npx / nbx) > 0 and (npy / nby) > 0);
+	ret = ret and ((npx / nbx) * (npy / nby) > 1);
+	ret = ret and (nlx > 2*min_coarse);
+	ret = ret and (nly > 2*min_coarse);
+
+	return ret;
+}
+
+
 std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len_t nx, len_t ny, bool terminate)
 {
 	using namespace boxmg::bmg2d;
@@ -56,8 +69,9 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 		std::array<int,2> best_blocks;
 		float best_time = std::numeric_limits<float>::max();
 		std::shared_ptr<vcycle_model> best_cg;
-		while (((npx/model->nblocks(0)) > 0 and (npy/model->nblocks(1)) > 0)
-		       and (npx/model->nblocks(0)) * (npy/model->nblocks(1)) > 1) {
+		len_t nlx = topoc.nglobal(0);
+		len_t nly = topoc.nglobal(1);
+		do {
 			auto cg_model = perf_factory::produce_vcycle(model->nblocks(0), model->nblocks(1),
 			                                             topoc.nglobal(0), topoc.nglobal(1));
 			// set coarse solve to 0
@@ -65,20 +79,25 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 
 			model->set_cgperf(cg_model);
 			float this_time = model->tcgsolve();
-			// log::error << "cgsolve with " << model->nblocks(0) << " x " << model->nblocks(1) << " chunks would take " << this_time << " seconds." << std::endl;
 			if (this_time < best_time) {
 				best_time = this_time;
 				best_blocks[0] = model->nblocks(0);
 				best_blocks[1] = model->nblocks(1);
 				best_cg = cg_model;
 			}
-			// greedily adding processor blocks by processor grid (instead of nglobal)
-			if ((npx / model->nblocks(0)) > (npy / model->nblocks(1))) {
+			//if ((npx / model->nblocks(0)) > (npy / model->nblocks(1))) {
+			// greedily adding processor blocks by local problem size
+			if (nlx > nly) {
 				model->nblocks(0) *= 2;
 			} else {
 				model->nblocks(1) *= 2;
 			}
-		}
+
+			nlx = topoc.nglobal(0) / model->nblocks(0);
+			nly = topoc.nglobal(1) / model->nblocks(1);
+		} while (keep_refining(npx, npy, model->nblocks(0), model->nblocks(1),
+		                       nlx, nly, min_coarse));
+
 
 		model->nblocks(0) = best_blocks[0];
 		model->nblocks(1) = best_blocks[1];
