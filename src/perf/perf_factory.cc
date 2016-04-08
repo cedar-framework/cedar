@@ -88,9 +88,15 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 			//if ((npx / model->nblocks(0)) > (npy / model->nblocks(1))) {
 			// greedily adding processor blocks by local problem size
 			if (nlx > nly) {
-				model->nblocks(0) *= 2;
+				if (((topoc.nglobal(0) / (model->nblocks(0)*2)) <= 2*min_coarse) or (npx / (model->nblocks(0)*2) <= 0))
+					model->nblocks(1) *= 2;
+				else
+					model->nblocks(0) *= 2;
 			} else {
-				model->nblocks(1) *= 2;
+				if (((topoc.nglobal(1) / (model->nblocks(1)*2)) <= 2*min_coarse) or (npy / (model->nblocks(1)*2) <=0))
+					model->nblocks(0) *=2;
+				else
+					model->nblocks(1) *= 2;
 			}
 
 			nlx = topoc.nglobal(0) / model->nblocks(0);

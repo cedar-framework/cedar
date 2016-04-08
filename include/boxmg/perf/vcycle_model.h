@@ -18,14 +18,14 @@ public:
 	const grid_topo & grid(int lvl) const;
 	topo_ptr grid_ptr(int lvl);
 	int ngrids() const { return grids.size(); }
-	float tsmooth(int lvl);
-	float tresidual(int lvl);
-	float trestrict(int lvl);
-	float tinterp(int lvl);
-	float tcgsolve();
+	float tsmooth(int lvl) const;
+	float tresidual(int lvl) const;
+	float trestrict(int lvl) const;
+	float tinterp(int lvl) const;
+	float tcgsolve() const;
 	void set_cgperf(std::shared_ptr<perf_model> mod);
 	std::shared_ptr<perf_model> get_cgperf();
-	virtual float time();
+	virtual float time() const;
 	void save_levels();
 	int & nblocks(int dim);
 	int nblocks(int dim) const;

@@ -79,7 +79,7 @@ topo_ptr vcycle_model::grid_ptr(int i)
 }
 
 
-float vcycle_model::tsmooth(int lvl)
+float vcycle_model::tsmooth(int lvl) const
 {
 	float time = 0;
 	float prod = 1;
@@ -95,7 +95,7 @@ float vcycle_model::tsmooth(int lvl)
 }
 
 
-float vcycle_model::tresidual(int lvl)
+float vcycle_model::tresidual(int lvl) const
 {
 	float time = 0;
 	float prod = 1;
@@ -112,7 +112,7 @@ float vcycle_model::tresidual(int lvl)
 }
 
 
-float vcycle_model::trestrict(int lvl)
+float vcycle_model::trestrict(int lvl) const
 {
 	float time = 0;
 	float prod = 1;
@@ -126,7 +126,7 @@ float vcycle_model::trestrict(int lvl)
 }
 
 
-float vcycle_model::tinterp(int lvl)
+float vcycle_model::tinterp(int lvl) const
 {
 	float time = 0;
 
@@ -155,7 +155,7 @@ float vcycle_model::tinterp(int lvl)
 }
 
 
-float vcycle_model::tcgsolve()
+float vcycle_model::tcgsolve() const
 {
 	float time = 0;
 	int p = grid(0).nproc();
@@ -175,7 +175,7 @@ float vcycle_model::tcgsolve()
 }
 
 
-float vcycle_model::time()
+float vcycle_model::time() const
 {
 	float time = 0;
 
@@ -232,6 +232,7 @@ void vcycle_model::rep(std::ostream & os) const
 	os << "nproc:      " << grid(-1).nproc(0) << " " << grid(-1).nproc(1) << std::endl;
 	os << "local size: " << grid(-1).nlocal(0) << " x " << grid(-1).nlocal(1) << '\n';
 	os << "nlevel:     " << ngrids() << '\n';
+	os << "time:       " << time() << '\n';
 	os << '\n';
 	os << *cg_perf;
 }
