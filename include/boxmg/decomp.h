@@ -10,11 +10,34 @@
 namespace boxmg
 {
 
-// placeholder for future factorization function
-std::vector<int> factor(int np)
+
+inline std::vector<int> seive(int n)
+{
+	std::vector<bool> prime(n+1);
+	std::vector<int> ret;
+	std::fill(prime.begin(), prime.end(), true);
+
+	for (int p = 2; p*p <= n; p++) {
+		if (prime[p]) {
+			for (int i = 2*p; i <= n; i+= p) {
+				prime[i] = false;
+			}
+		}
+	}
+
+	for (int p = 2; p <= n; p++) {
+		if (prime[p])
+			ret.push_back(p);
+	}
+
+	return ret;
+}
+
+
+inline std::vector<int> factor(int np)
 {
 	std::vector<int> facs;
-	std::vector<int> primes({2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503});
+	std::vector<int> primes = seive(np);
 
 	int p = 0;
 	for (int i = 0; i < primes.size(); i++) {
@@ -27,6 +50,7 @@ std::vector<int> factor(int np)
 	}
 
 	std::sort(facs.begin(), facs.end());
+	std::reverse(facs.begin(), facs.end());
 
 	return facs;
 }
