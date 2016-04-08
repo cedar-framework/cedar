@@ -11,7 +11,7 @@ namespace boxmg
 {
 
 
-inline std::vector<int> seive(int n)
+inline std::vector<int> sieve(int n)
 {
 	std::vector<bool> prime(n+1);
 	std::vector<int> ret;
@@ -37,7 +37,7 @@ inline std::vector<int> seive(int n)
 inline std::vector<int> factor(int np)
 {
 	std::vector<int> facs;
-	std::vector<int> primes = seive(np);
+	std::vector<int> primes = sieve(np);
 
 	int p = 0;
 	for (int i = 0; i < primes.size(); i++) {
