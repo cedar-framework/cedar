@@ -81,22 +81,23 @@
 ! ---------------------------
 !     Argument Declarations:
 !
-      INTEGER  NGX, NGY, NGz
-      INTEGER  OFFX, OFFY, OFFZ
+      INTEGER(len_t) :: NGX, NGY, NGz
+      INTEGER(len_t) :: OFFX, OFFY, OFFZ
       INTEGER  MPICOMM
-      INTEGER  NProc, NProcI, NProcJ, NProcK, NOGm, KG
+      INTEGER(c_int)  NProc, NProcI, NProcJ, NProcK, NOGm, KG
 
-      INTEGER  LocalArraySize(3,NProc), ActDataStart(3,NProc)
-      INTEGER  GlobalCoordLocalData(2,3,NProc)
-      INTEGER  GlobalCoordActData(2,3,NProc)
+      INTEGER(len_t) :: LocalArraySize(3,NProc), ActDataStart(3,NProc)
+      INTEGER(len_t) :: GlobalCoordLocalData(2,3,NProc)
+      INTEGER(len_t) :: GlobalCoordActData(2,3,NProc)
 
-      INTEGER  DimX(NprocI,NOGm), DimY(NProcJ,NOGm), DimZ(NProcK,NOGm)
-      INTEGER  ProcGrid(NProcI, NProcJ, NProcK)
+      INTEGER(len_t) :: DimX(NprocI,NOGm), DimY(NProcJ,NOGm), DimZ(NProcK,NOGm)
+      INTEGER(c_int) :: ProcGrid(NProcI, NProcJ, NProcK)
 
 ! --------------------------
 !     Local Declarations:
 !
-      INTEGER I, J, K, II, JJ, KK, IJKRank, iGs, jGs, kGs
+      integer(len_t) :: I, J, K, II, JJ, KK, iGs, jGs, kGs
+      integer :: IJKRank
 
 ! ======================================================================
 

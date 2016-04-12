@@ -61,8 +61,8 @@
       INTEGER, VALUE :: MPICOMM
       INTEGER(len_t) :: IGRD(NOGm,NBMG_pIGRD), iMSG_Geom(NMSGi)
       INTEGER(C_INT) :: pMSG(NBMG_pMSG,NOG), pMSGSO(NBMG_pMSG,NOG)
-      INTEGER(C_INT) :: DimX(NProcI,NOGm), DimY(NProcJ,NOGm)
-      INTEGER(C_INT) :: DimXfine(NProcI), DimYfine(NProcJ)
+      INTEGER(len_t) :: DimX(NProcI,NOGm), DimY(NProcJ,NOGm)
+      INTEGER(len_t) :: DimXfine(NProcI), DimYfine(NProcJ)
       INTEGER(C_INT) ::  ProcGrid(NProcI,NProcJ)
       INTEGER(C_INT) :: pSI_MSG
       INTEGER(C_INT), VALUE :: NProc, MyProc
@@ -70,7 +70,7 @@
 ! --------------------------
 !     Local Declarations:
 !
-      INTEGER I, J, iGs, jGs
+      integer(len_t) :: I, J, iGs, jGs
       Integer ierror, N
 
 ! ======================================================================

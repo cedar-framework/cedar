@@ -12,8 +12,8 @@ extern "C" {
 	void BMG3_SymStd_SETUP_MSG(int *pMSG, int *pMSGSO, len_t *imsg_geom,
 	                           len_t nmsgi, int *pSI_MSG, len_t *IGRD,
 	                           int nog, int nogm, int nproc, int myproc,
-	                           int *dimx, int *dimy, int *dimz,
-	                           int *dimxfine, int *dimyfine, int *dimzfine,
+	                           len_t *dimx, len_t *dimy, len_t *dimz,
+	                           len_t *dimxfine, len_t *dimyfine, len_t *dimzfine,
 	                           int *proc_grid, int nproci, int nprocj, int nprock,
 	                           int mpicomm);
 	void BMG3_SymStd_SETUP_fine_stencil(int kf, real_t *so,

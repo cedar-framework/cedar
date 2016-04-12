@@ -70,7 +70,7 @@
       integer(c_int) :: pMSGSO(NBMG_pMSG,NOGm), ProcGrid(NProcI,NProcJ, NProcK)
       real(real_t) :: CI(IIC,JJC,KKC,26), SO(IIF+1,JJF+1,KKF+1,14),&
            SOC(IIC+1,JJC+1,KKC+1,14), BUFFER(NMSGr)
-      integer(c_int) :: DimX(NprocI,NOGm), DimY(NprocJ,NOGm), DimZ(Nprock,NOGm)
+      integer(len_t) :: DimX(NprocI,NOGm), DimY(NprocJ,NOGm), DimZ(Nprock,NOGm)
       integer(c_int) :: pSI_MSG
 
 ! ----------------------------

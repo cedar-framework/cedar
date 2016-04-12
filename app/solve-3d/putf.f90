@@ -29,7 +29,7 @@ subroutine putf(so, qf,&
   integer :: kb, kp, kpw, kps
   parameter ( kp=1, kpw=2, kps=3, kb=4 )
 
-  integer :: i, i1, i2, j, j1, j2, k, k1
+  integer(len_t) :: i, i1, i2, j, j1, j2, k, k1
   real(real_t) :: xh, yh, zh, h2, fs
 
   h2=hx*hy*hz

@@ -11,7 +11,7 @@ extern "C" {
 	void BMG2_SymStd_SETUP_MSG(int *pMSG, int *pMSGSO, len_t *iMSG_Geom,
 	                           len_t NMSGi, int *pSI_MSG, int IBC, len_t *IGRD,
 	                           int nog, int nogm, int nproc, int myproc,
-	                           int* dimx, int *dimy, int *dimxfine, int *dimyfine,
+	                           len_t* dimx, len_t *dimy, len_t *dimxfine, len_t *dimyfine,
 	                           int *procgrid, int nproci, int nprocj, int mpicomm);
 	void BMG2_SymStd_SETUP_LS(len_t *iWorkMSG, len_t NMSGi, int *pMSG, int *pLS, int *pSI_MSG,
 	                          int *procgrid, int nproci, int nprocj, int nog);

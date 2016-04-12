@@ -19,7 +19,7 @@ extern "C" {
 	                                     int *pMSGSO, real_t *buffer, len_t NMSGr,
 	                                     int nproc, int *proc_grid, int myproci,
 	                                     int myprocj, int myprock, int nproci, int nprocj,
-	                                     int nprock, int *dimx, int *dimy, int *dimz, int mpicomm);
+	                                     int nprock, len_t *dimx, len_t *dimy, len_t *dimz, int mpicomm);
 	void MPI_BMG3_SymStd_SETUP_ITLI27_ex(int kgf, int kgc, real_t *so, real_t *soc, real_t *ci,
 	                                     len_t iif, len_t jjf, len_t kkf,
 	                                     len_t iic, len_t jjc, len_t kkc,
@@ -29,7 +29,7 @@ extern "C" {
 	                                     int *pMSGSO, real_t *buffer, len_t NMSGr,
 	                                     int nproc, int *proc_grid, int myproci,
 	                                     int myprocj, int myprock, int nproci, int nprocj,
-	                                     int nprock, int *dimx, int *dimy, int *dimz, int mpicomm);
+	                                     int nprock, len_t *dimx, len_t *dimy, len_t *dimz, int mpicomm);
 }
 
 namespace boxmg { namespace bmg3 { namespace kernel {

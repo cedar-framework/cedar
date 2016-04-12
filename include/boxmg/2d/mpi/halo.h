@@ -19,10 +19,10 @@ namespace impls
 		std::vector<len_t> msg_geom;
 		array<int,int,2> proc_grid;
 		std::vector<int> proc_coord;
-		std::vector<int> dimxfine;
-		std::vector<int> dimyfine;
-		array<int,int,2> dimx;
-		array<int,int,2> dimy;
+		std::vector<len_t> dimxfine;
+		std::vector<len_t> dimyfine;
+		array<int,len_t,2> dimx;
+		array<int,len_t,2> dimy;
 		std::vector<real_t> msg_buffer;
 		int pSI_MSG;
 		int p_NLx_kg, p_NLy_kg;
