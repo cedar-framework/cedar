@@ -31,6 +31,9 @@ int main(int argc, char *argv[])
 		if (npx == 0 or npy == 0) {
 			grid = bmg2d::util::create_topo(MPI_COMM_WORLD, nx, ny);
 		} else {
+			int size;
+			MPI_Comm_size(MPI_COMM_WORLD, &size);
+			assert(size == npx*npy);
 			grid = bmg2d::util::create_topo(MPI_COMM_WORLD, npx, npy, nx, ny);
 		}
 		log::status << "Running local solve" << std::endl;
