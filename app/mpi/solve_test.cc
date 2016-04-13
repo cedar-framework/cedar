@@ -26,7 +26,13 @@ int main(int argc, char *argv[])
 	auto ny = conf.get<len_t>("grid.ny", 9);
 	topo_ptr grid;
 	if (islocal) {
-		grid = bmg2d::util::create_topo(MPI_COMM_WORLD, nx, ny);
+		auto npx = conf.get<int>("grid.npx", 0);
+		auto npy = conf.get<int>("grid.npy", 0);
+		if (npx == 0 or npy == 0) {
+			grid = bmg2d::util::create_topo(MPI_COMM_WORLD, nx, ny);
+		} else {
+			grid = bmg2d::util::create_topo(MPI_COMM_WORLD, npx, npy, nx, ny);
+		}
 		log::status << "Running local solve" << std::endl;
 	} else {
 		grid = bmg2d::util::create_topo_global(MPI_COMM_WORLD, nx, ny);
