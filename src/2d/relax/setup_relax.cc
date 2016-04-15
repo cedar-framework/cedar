@@ -2,8 +2,8 @@
 #include "boxmg/2d/relax/setup_relax.h"
 
 extern "C" {
-	void bmg2_symstd_setup_recip(double*, double*, int*, int*, int*, int*);
 	using namespace boxmg;
+	void BMG2_SymStd_SETUP_recip(real_t *so, real_t *sor, len_t nx, len_t ny, int nstncl, int nsor_v);
 	void BMG2_SymStd_SETUP_lines_x(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl, int JPN);
 	void BMG2_SymStd_SETUP_lines_y(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl, int JPN);
 	void MPI_BMG2_SymStd_SETUP_recip(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl);
@@ -20,7 +20,8 @@ namespace impls
 	void setup_rbgs_point(const stencil_op & so,
 	                      relax_stencil & sor)
 	{
-		int nx, ny, nstencil, nsorv;
+		len_t nx, ny;
+		int nstencil, nsorv;
 
 		const grid_stencil & so_sten = so.stencil();
 		stencil_op & sod = const_cast<stencil_op&>(so);
@@ -33,7 +34,7 @@ namespace impls
 
 		nsorv = 2;
 
-		bmg2_symstd_setup_recip(sod.data(), sor.data(), &nx, &ny, &nstencil, &nsorv);
+		BMG2_SymStd_SETUP_recip(sod.data(), sor.data(), nx, ny, nstencil, nsorv);
 	}
 
 

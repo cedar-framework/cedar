@@ -68,19 +68,21 @@
 ! ---------------------------
 !     Argument Declarations:
 !
-      INTEGER  NGx, NGy, MPICOMM
+      INTEGER  MPICOMM
+      integer(len_t) :: NGx, NGy
       INTEGER  NProc, NProcI, NProcJ, NOGm, KG
 
-      INTEGER  LocalArraySize(3,NProc), ActDataStart(3,NProc)
-      INTEGER  GlobalCoordLocalData(2,3,NProc)
-      INTEGER  GlobalCoordActData(2,3,NProc)
-      INTEGER  DimX(NProcI, NOGm), DimY(NProcJ, NOGm)
-      INTEGER  ProcGrid(NProcI,NProcJ)
+      integer(len_t) :: LocalArraySize(3,NProc), ActDataStart(3,NProc)
+      integer(len_t) :: GlobalCoordLocalData(2,3,NProc)
+      integer(len_t) :: GlobalCoordActData(2,3,NProc)
+      integer(len_t) :: DimX(NProcI, NOGm), DimY(NProcJ, NOGm)
+      INTEGER(C_INT) :: ProcGrid(NProcI,NProcJ)
 
 ! --------------------------
 !     Local Declarations:
 !
-      INTEGER  I,J, II, JJ, iGs, jGs, IJRank
+      integer(len_t) :: I,J, II, JJ, iGs, jGs
+      integer :: IJRank
 
 ! ======================================================================
 

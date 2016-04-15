@@ -31,7 +31,12 @@
 			{
 				"cycle":
 				{
-					"type": "object"
+					"type": "object",
+					"properties":
+					{
+						"nrelax-pre" : {"type": "integer"},
+						"nrelax-post" : {"type": "integer"}
+					}
 				},
 				"tol"
 				{
@@ -49,6 +54,11 @@
 				{
 					"type": "string",
 					"pattern": "boxmg|LU|redist"
+				},
+				"relaxation":
+				{
+					"type": "string",
+					"pattern": "point|line-x|line-y|line-xy"
 				}
 			}
 		},

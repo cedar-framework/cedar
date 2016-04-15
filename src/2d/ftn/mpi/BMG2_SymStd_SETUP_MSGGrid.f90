@@ -69,19 +69,21 @@
 ! ---------------------------
 !     Argument Declarations:
 !
-      INTEGER  IBC, NGX, NGY, MPICOMM
+      INTEGER  IBC, MPICOMM
+      integer(len_t) :: NGX, NGY
       INTEGER  MyProc, NProc, NProcI, NProcJ, NOGm, KG
 
-      INTEGER  LocalArraySize(3,NProc), ActDataStart(3,NProc)
-      INTEGER  GlobalCoordLocalData(2,3,NProc)
-      INTEGER  GlobalCoordActData(2,3,NProc)
-      INTEGER  DimX(NProcI, NOGm), DimY(NProcJ, NOGm)
+      integer(len_t) :: LocalArraySize(3,NProc), ActDataStart(3,NProc)
+      integer(len_t) :: GlobalCoordLocalData(2,3,NProc)
+      integer(len_t) :: GlobalCoordActData(2,3,NProc)
+      integer(len_t) :: DimX(NProcI, NOGm), DimY(NProcJ, NOGm)
       INTEGER  ProcGrid(NProcI,NProcJ)
 
 ! --------------------------
 !     Local Declarations:
 !
-      INTEGER  I,J, II, JJ, iGs, jGs, IJRank, IO_n
+      integer(len_t) :: I,J, II, JJ, iGs, jGs
+      integer :: IJRANK, IO_n
       LOGICAL  PERIODIC_X, PERIODIC_Y
 
 ! ======================================================================

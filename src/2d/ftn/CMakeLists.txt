@@ -7,9 +7,9 @@ set(ftn_SOURCES
   ftn/BMG2_SymStd_relax_lines_y.f90
   ftn/interface.cc
   ftn/ModInterface.f90
-  ftn/BMG2_SymStd_SETUP_interp_OI.f
-  ftn/BMG2_SymStd_SETUP_ITLI_ex.f
-  ftn/BMG2_SymStd_SETUP_recip.f
+  ftn/BMG2_SymStd_SETUP_interp_OI.f90
+  ftn/BMG2_SymStd_SETUP_ITLI_ex.f90
+  ftn/BMG2_SymStd_SETUP_recip.f90
   ftn/BMG2_SymStd_SETUP_lines_x.f90
   ftn/BMG2_SymStd_SETUP_lines_y.f90
   ftn/BMG2_SymStd_SETUP_cg_LU.f90

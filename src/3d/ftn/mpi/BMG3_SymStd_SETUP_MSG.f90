@@ -65,15 +65,15 @@
       integer(c_int) :: pSI_MSG
       integer(len_t) :: IGRD(NOGm,NBMG_pIGRD), iMSG_Geom(NMSGi)
       integer(c_int) :: pMSG(NBMG_pMSG,NOG), pMSGSO(NBMG_pMSG,NOG)
-      integer(c_int) :: DimX(NProcI,NOGm), DimY(NProcJ,NOGm), DimZ(NProcK,NOGm)
-      integer(c_int) :: DimXfine(NProcI), DimYfine(NProcJ), DimZfine(NProcK)
+      integer(len_t) :: DimX(NProcI,NOGm), DimY(NProcJ,NOGm), DimZ(NProcK,NOGm)
+      integer(len_t) :: DimXfine(NProcI), DimYfine(NProcJ), DimZfine(NProcK)
       integer(c_int) :: ProcGrid(NProcI,NProcJ,NProcK)
 
 ! ------------------------------------------------
 !     Local Declarations
 !
       INTEGER N, NOG_cg, NOG_fg, ierror
-      INTEGER iGs, jGs, kGs, I, J, K
+      integer(len_t) :: iGs, jGs, kGs, I, J, K
 
 ! ======================================================================
 

@@ -24,7 +24,7 @@ subroutine put_sol(q, ii, jj, kk,&
   real(real_t) :: q(ii,jj,kk)
   real(real_t), value :: hx, hy, hz
 
-  integer :: i, i1, j, j1, k, k1
+  integer(len_t) :: i, i1, j, j1, k, k1
   real(real_t) :: xh, yh, zh, val
 
   i1=ii-1
