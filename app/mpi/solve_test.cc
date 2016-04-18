@@ -9,6 +9,39 @@
 #include <boxmg/2d/util/mpi_grid.h>
 #include <boxmg/2d/mpi/solver.h>
 
+extern "C" {
+	using namespace boxmg;
+	void putf(real_t *so, real_t *qf,
+	          len_t nlx, len_t nly,
+	          len_t ngx, len_t ngy,
+	          len_t igs, len_t jgs,
+	          real_t hx, real_t hy);
+}
+
+
+static void set_problem(boxmg::bmg2d::mpi::stencil_op & so,
+                        boxmg::bmg2d::mpi::grid_func & b)
+{
+	using namespace boxmg;
+	using namespace boxmg::bmg2d;
+
+	real_t hx = (1.0/(so.grid().nglobal(0)-1));
+	real_t hy = (1.0/(so.grid().nglobal(1)-1));
+
+	auto & sten = so.stencil();
+	sten.five_pt() = true;
+	auto & topo = so.grid();
+
+	b.set(0);
+	sten.set(0);
+
+	putf(so.data(), b.data(),
+	     topo.nlocal(0) - 2, topo.nlocal(1) - 2,
+	     topo.nglobal(0) - 2, topo.nglobal(1) - 2,
+	     topo.is(0), topo.is(1),
+	     hx, hy);
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -50,38 +83,12 @@ int main(int argc, char *argv[])
 	real_t hy = (1.0/(so.grid().nglobal(1)-1));
 	real_t h2 = hx * hy;
 
-	grid_stencil & sten = so.stencil();
-	sten.five_pt() = true;
-
 	mpi::grid_func b(so.grid_ptr());
+
+	set_problem(so, b);
 
 	int rank;
 	MPI_Comm_rank(so.grid().comm, &rank);
-
-	real_t y = so.grid().is(1)*hy;
-	for (auto j: sten.range(1)) {
-		real_t x = so.grid().is(0)*hx;
-		for (auto i: sten.range(0)) {
-			sten(i,j,dir::E) = 1;
-			sten(i,j,dir::N) = 1;
-			sten(i,j,dir::C) = 4;
-			sten(i,j,dir::S) = 1;
-			sten(i,j,dir::W) = 1;
-
-			b(i,j) = 8*(pi*pi)*sin(2*pi*x)*sin(2*pi*y) * h2;
-			x += hx;
-		}
-		y += hy;
-	}
-
-	if (util::mpi::has_boundary(so.grid(), dir::N))
-		for (auto idx: sten.boarder(dir::N)) sten(idx, dir::N) = 0;
-	if (util::mpi::has_boundary(so.grid(), dir::S))
-		for (auto idx: sten.boarder(dir::S)) sten(idx, dir::S) = 0;
-	if (util::mpi::has_boundary(so.grid(), dir::E))
-		for (auto idx: sten.boarder(dir::E)) sten(idx, dir::E) = 0;
-	if (util::mpi::has_boundary(so.grid(), dir::W))
-	    for (auto idx: sten.boarder(dir::W)) sten(idx, dir::W) = 0;
 
 	mpi::solver bmg(std::move(so));
 
@@ -89,7 +96,7 @@ int main(int argc, char *argv[])
 
 	mpi::grid_func exact_sol(sol.grid_ptr());
 
-	y = sol.grid().is(1)*hy;
+	real_t y = sol.grid().is(1)*hy;
 	for (auto j: exact_sol.range(1)) {
 		real_t x = sol.grid().is(0)*hx;
 		for (auto i: exact_sol.range(0)) {
