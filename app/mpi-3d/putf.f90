@@ -119,11 +119,6 @@ subroutine putf(so, qf,&
   DO k=2, kEND
      DO j=jBEG,jEND
         DO i=2, iEND
-
-           is = iGs+i-1
-           js = jGs+j-1
-           kss = kGs+k-1
-
            SO(i,j,k,kps) = yh
         ENDDO
      ENDDO
@@ -135,11 +130,6 @@ subroutine putf(so, qf,&
   DO k=2, kEND
      DO j=2, jEND
         DO i=iBEG, iEND
-
-           is = iGs+i-1
-           js = jGs+j-1
-           kss = kGs+k-1
-
            SO(i,j,k,kpw) = xh
         ENDDO
      ENDDO
@@ -151,11 +141,6 @@ subroutine putf(so, qf,&
   DO k=kBEG, kEND
      DO j=2, jEND
         DO i=2, iEND
-
-           is = iGs+i-1
-           js = jGs+j-1
-           kss = kGs+k-1
-
            SO(i,j,k,kb) = zh
         ENDDO
      ENDDO
