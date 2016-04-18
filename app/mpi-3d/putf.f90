@@ -7,9 +7,9 @@ subroutine rhs(i, j, k, hx, hy, hz, fs)
   real(real_t) :: hx, hy, hz, fs, x, y, z
   real(real_t), parameter :: pi=4*atan(1.d0)
 
-  x = i + hx
-  y = j + hy
-  z = k + hz
+  x = (i-1)*hx
+  y = (j-1)*hy
+  z = (k-1)*hz
 
   fs = 12*(pi**2) * sin(2*pi*x)*sin(2*pi*y)*sin(2*pi*z)
 
