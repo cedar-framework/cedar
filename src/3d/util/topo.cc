@@ -1,6 +1,9 @@
 #include <cmath>
 #include "boxmg/2d/ftn/mpi/BMG_workspace_c.h"
 
+#include <boxmg/mpi/block_partition.h>
+#include <boxmg/decomp.h>
+
 #include "boxmg/3d/util/topo.h"
 
 namespace boxmg { namespace bmg3 { namespace util {
@@ -60,6 +63,55 @@ topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny, len_t nz)
 }
 
 
+topo_ptr create_topo(MPI_Comm comm, len_t npx, len_t npy, len_t npz,
+                     len_t nx, len_t ny, len_t nz)
+{
+	int rank;
+
+	auto igrd = std::make_shared<std::vector<len_t>>(NBMG_pIGRD);
+	auto grid = std::make_shared<grid_topo>(igrd, 0, 1);
+
+	grid->comm = comm;
+
+	grid->nproc(0) = npx;
+	grid->nproc(1) = npy;
+	grid->nproc(2) = npz;
+
+	MPI_Comm_rank(grid->comm, &rank);
+
+	grid->coord(0) = (rank % (grid->nproc(0)*grid->nproc(1))) % grid->nproc(0);
+	grid->coord(1) = (rank % (grid->nproc(0)*grid->nproc(1))) / grid->nproc(0);
+	grid->coord(2) = rank / (grid->nproc(0)*grid->nproc(1));
+
+	grid->is(0) = grid->coord(0) * nx + 1;
+	grid->nlocal(0) = nx;
+	grid->is(1) = grid->coord(1) * ny + 1;
+	grid->nlocal(1) = ny;
+	grid->is(2) = grid->coord(2) * nz + 1;
+	grid->nlocal(2) = nz;
+
+	grid->nglobal(0) = nx*grid->nproc(0) + 2;
+	grid->nglobal(1) = ny*grid->nproc(1) + 2;
+	grid->nglobal(2) = nz*grid->nproc(2) + 2;
+
+	grid->nlocal(0) += 2;
+	grid->nlocal(1) += 2;
+	grid->nlocal(2) += 2;
+
+	// {
+	// 	int rank;
+	// 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	// 	printf("[%d] %d %d %d -> %u %u %u : %u %u %u ==== %u %u %u\n", rank+1,
+	// 	       grid->coord(0)+1, grid->coord(1)+1, grid->coord(2)+1,
+	// 	       grid->nlocal(0), grid->nlocal(1), grid->nlocal(2),
+	// 	       grid->nglobal(0), grid->nglobal(1), grid->nlocal(2),
+	// 	       grid->is(0), grid->is(1), grid->is(2));
+	// }
+
+	return grid;
+}
+
+
 topo_ptr model_topo(int np, len_t nx, len_t ny, len_t nz)
 {
 	auto igrd = std::make_shared<std::vector<len_t>>(NBMG_pIGRD);
@@ -80,6 +132,56 @@ topo_ptr model_topo(int np, len_t nx, len_t ny, len_t nz)
 	grid->nglobal(0) = nx;
 	grid->nglobal(1) = ny;
 	grid->nglobal(2) = nz;
+
+	return grid;
+}
+
+
+topo_ptr create_topo_global(MPI_Comm comm, len_t ngx, len_t ngy, len_t ngz)
+{
+	int rank, size;
+
+	std::array<len_t,3> ng({ngx,ngy,ngz});
+
+	auto igrd = std::make_shared<std::vector<len_t>>(NBMG_pIGRD);
+	auto grid = std::make_shared<grid_topo>(igrd, 0, 1);
+
+	grid->comm = comm;
+
+	MPI_Comm_rank(grid->comm, &rank);
+	MPI_Comm_size(grid->comm, &size);
+
+	auto decomp = grid_decomp<3>(std::array<len_t,3>({ngx,ngy,ngz}), size);
+
+	for (auto i : range(3)) {
+		grid->nproc(i) = decomp[i];
+	}
+
+	assert(size == grid->nproc());
+
+	grid->coord(0) = (rank % (grid->nproc(0)*grid->nproc(1))) % grid->nproc(0);
+	grid->coord(1) = (rank % (grid->nproc(0)*grid->nproc(1))) / grid->nproc(0);
+	grid->coord(2) = rank / (grid->nproc(0)*grid->nproc(1));
+
+	for (auto dim : range(3)) {
+		auto part = block_partition(ng[dim], grid->nproc(dim));
+		grid->nglobal(dim) = ng[dim] + 2;
+		grid->is(dim) = part.low(grid->coord(dim)) + 1;
+		grid->nlocal(dim) = part.size(grid->coord(dim)) + 2;
+
+		std::vector<len_t> *dimfine;
+		if (dim == 0)
+			dimfine = &grid->dimxfine;
+		else if (dim == 1)
+			dimfine = &grid->dimyfine;
+		else
+			dimfine = &grid->dimzfine;
+
+		dimfine->resize(grid->nproc(dim));
+		for (auto i : range(grid->nproc(dim))) {
+			(*dimfine)[i] = part.size(i);
+		}
+	}
 
 	return grid;
 }

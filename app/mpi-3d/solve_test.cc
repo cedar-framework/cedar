@@ -45,14 +45,34 @@ int main(int argc, char *argv[])
 	int provided, rank;
 
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
 	config::reader conf;
 
+	auto islocal = conf.get<bool>("grid.local", true);
 	auto nx = conf.get<len_t>("grid.nx", 31);
 	auto ny = conf.get<len_t>("grid.ny", 31);
 	auto nz = conf.get<len_t>("grid.nz", 31);
-	auto grid = util::create_topo(MPI_COMM_WORLD, nx, ny, nz);
+	topo_ptr grid;
+	if (islocal) {
+		auto npx = conf.get<int>("grid.npx", 0);
+		auto npy = conf.get<int>("grid.npy", 0);
+		auto npz = conf.get<int>("grid.npz", 0);
+		if (npx == 0 or npy == 0 or npz == 0) {
+			grid = bmg3::util::create_topo(MPI_COMM_WORLD, nx, ny, nz);
+		} else {
+			int size;
+			MPI_Comm_size(MPI_COMM_WORLD, &size);
+			assert(size == npx*npy*npz);
+			grid = bmg3::util::create_topo(MPI_COMM_WORLD, npx, npy, npz,
+			                              nx, ny, nz);
+
+		}
+		log::status << "Running local solve" << std::endl;
+	} else {
+		grid = bmg3::util::create_topo_global(MPI_COMM_WORLD, nx, ny, nz);
+		log::status << "Running global solve" << std::endl;
+	}
+	//auto grid = util::create_topo(MPI_COMM_WORLD, nx, ny, nz);
 
 	auto so = mpi::stencil_op(grid);
 	mpi::grid_func b(so.grid_ptr());

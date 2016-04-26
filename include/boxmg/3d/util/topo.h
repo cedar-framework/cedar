@@ -8,6 +8,9 @@
 namespace boxmg { namespace bmg3 { namespace util {
 
 			topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny, len_t nz);
+			topo_ptr create_topo(MPI_Comm comm, len_t npx, len_t npy, len_t npz,
+			                     len_t nlx, len_t nly, len_t nlz);
+			topo_ptr create_topo_global(MPI_Comm comm, len_t ngx, len_t ngy, len_t ngz);
 			topo_ptr model_topo(int np, len_t ngx, len_t ngy, len_t ngz);
 			topo_ptr coarsen_topo(topo_ptr topof);
 }}}

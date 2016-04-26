@@ -22,5 +22,6 @@ set(3d_SOURCES
   mpi/stencil_op.cc
   mpi/halo.cc
   mpi/solver.cc
+  mpi/redist_solver.cc
   PARENT_SCOPE
   )
