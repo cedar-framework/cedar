@@ -41,7 +41,7 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 {
 	using buf_arr = array<len_t,real_t,1>;
 
-	buf_arr sbuf(b.shape(0)*b.shape(1));
+	buf_arr sbuf(b.shape(0)*b.shape(1)*b.shape(2));
 	int idx = 0;
 
 	for (auto k : b.range(2)) {
@@ -61,7 +61,7 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 			for (auto i : range(nbx.len(0))) {
 				int idx = i + j*nbx.len(0) + k*nbx.len(0)*nby.len(0);
 				displs[idx] = rbuf_len;
-				rcounts[idx] = nbx(i)*nby(j);
+				rcounts[idx] = nbx(i)*nby(j)*nbz(k);
 				rbuf_len += rcounts[idx];
 			}
 		}
@@ -330,15 +330,15 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 	nbz = array<len_t, len_t, 1>(high(2) - low(2) + 1);
 
 	for (auto i = low(0); i <= high(0); i++) {
-		nbx(i-low(0)) = ctx.cg_nlocal(0, ctx.proc_grid(i,0,0));
+		nbx(i-low(0)) = ctx.cg_nlocal(0, ctx.proc_grid(i,0,0)) - 2;
 	}
 
 	for (auto j = low(1); j <= high(1); j++) {
-		nby(j-low(1)) = ctx.cg_nlocal(1, ctx.proc_grid(0,j,0));
+		nby(j-low(1)) = ctx.cg_nlocal(1, ctx.proc_grid(0,j,0)) - 2;
 	}
 
 	for (auto k = low(2); k <= high(2); k++) {
-		nbz(k-low(2)) = ctx.cg_nlocal(2, ctx.proc_grid(0,0,k));
+		nbz(k-low(2)) = ctx.cg_nlocal(2, ctx.proc_grid(0,0,k)) - 2;
 	}
 
 	grid->dimxfine.resize(grid->nproc(0));

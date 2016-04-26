@@ -96,7 +96,8 @@ void mpi::solver::setup_cg_solve()
 {
 	auto & cop = levels.back().A;
 	std::string cg_solver_str = conf.get<std::string>("solver.cg-solver", "LU");
-	if (cg_solver_str == "LU")
+
+	if (cg_solver_str == "LU" or cop.grid().nproc() == 1)
 		cg_solver_lu = true;
 	else
 		cg_solver_lu = false;
@@ -111,7 +112,7 @@ void mpi::solver::setup_cg_solve()
 		multilevel::setup_cg_solve();
 	} else {
 		auto kernels = kernel_registry();
-		std::vector<int> nblocks({1,1});
+		std::vector<int> nblocks({1,1,1});
 
 		std::shared_ptr<mpi::redist_solver> cg_bmg;
 		kernels->setup_cg_redist(cop, &cg_bmg, nblocks);

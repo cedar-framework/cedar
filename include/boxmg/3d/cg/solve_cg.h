@@ -3,6 +3,7 @@
 
 #include <boxmg/3d/grid_func.h>
 #include <boxmg/3d/mpi/grid_func.h>
+#include "boxmg/3d/mpi/redist_solver.h"
 
 namespace boxmg { namespace bmg3 { namespace kernel {
 
@@ -18,6 +19,10 @@ namespace impls
 	                     const mpi::grid_func &b,
 	                     const mpi::grid_func & ABD,
 	                     real_t *bbd);
+
+	void solve_cg_redist(const mpi::redist_solver & cg_solver,
+	                     mpi::grid_func &x,
+	                     const mpi::grid_func &b);
 }
 
 }}}
