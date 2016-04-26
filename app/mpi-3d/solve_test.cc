@@ -13,6 +13,10 @@ extern "C" {
 	          len_t ngx, len_t ngy, len_t ngz,
 	          len_t igs, len_t jgs, len_t kgs,
 	          real_t hx, real_t hy, real_t hz);
+	void put_sol(real_t *q,
+	             len_t nlx, len_t nly, len_t nlz,
+	             len_t igs, len_t jgs, len_t kgs,
+	             real_t hx, real_t hy, real_t hz);
 }
 
 static void set_problem(boxmg::bmg3::mpi::stencil_op & so,
@@ -36,6 +40,23 @@ static void set_problem(boxmg::bmg3::mpi::stencil_op & so,
 	     hx, hy, hz);
 }
 
+
+static void set_solution(boxmg::bmg3::mpi::grid_func & x)
+{
+	using namespace boxmg;
+	using namespace boxmg::bmg3;
+
+	auto & topo = x.grid();
+
+	real_t hx = (1.0/(topo.nglobal(0)-1));
+	real_t hy = (1.0/(topo.nglobal(1)-1));
+	real_t hz = (1.0/(topo.nglobal(2)-1));
+
+	put_sol(x.data(),
+	        topo.nlocal(0)-2, topo.nlocal(1)-2, topo.nlocal(2)-2,
+	        topo.is(0), topo.is(1), topo.is(2),
+	        hx, hy, hz);
+}
 
 int main(int argc, char *argv[])
 {
@@ -80,6 +101,14 @@ int main(int argc, char *argv[])
 	set_problem(so, b);
 	mpi::solver bmg(std::move(so));
 	auto x = bmg.solve(b);
+
+	mpi::grid_func exact_sol(x.grid_ptr());
+
+	set_solution(exact_sol);
+
+	mpi::grid_func diff = exact_sol - x;
+
+	log::status << "Solution norm: " << diff.inf_norm() << std::endl;
 
 	// {
 	// 	std::ofstream ofile;
