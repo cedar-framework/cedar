@@ -104,6 +104,7 @@ void mpi::solver::setup_cg_solve()
 			auto & fgrid = levels[0].A.grid();
 			{
 				timer predict_timer("Redist Prediction");
+				predict_timer.begin();
 				int rank;
 				MPI_Comm_rank(fgrid.comm, &rank);
 				nblocks = std::move(
@@ -126,6 +127,7 @@ void mpi::solver::setup_cg_solve()
 			// log::status << "using: " << nblocks[0] << " x " << nblocks[1] << std::endl;
 			std::shared_ptr<mpi::redist_solver> cg_bmg;
 			timer redist_setup_timer("Redist Setup");
+			redist_setup_timer.begin();
 			kernels->setup_cg_redist(cop, &cg_bmg, nblocks);
 			redist_setup_timer.end();
 			coarse_solver = [&,cg_bmg,kernels](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
