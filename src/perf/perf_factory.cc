@@ -24,7 +24,7 @@ static bool keep_refining(int npx, int npy, int nbx, int nby, len_t nlx, len_t n
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len_t nx, len_t ny, bool terminate)
+std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len_t nx, len_t ny, bool terminate, int nlevel)
 {
 	using namespace boxmg::bmg2d;
 
@@ -44,12 +44,19 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 	auto nlx = topo->nlocal(0);
 	auto nly = topo->nlocal(1);
 
+	auto keep_coarsening = [nlevel,min_coarse](int nlx, int nly, int curr_levels){
+		if (nlevel == 0)
+			return std::min(nlx, nly) >= min_coarse;
+		else
+			return curr_levels <= nlevel;
+	};
+
 	do {
 		model->add_level(topo);
 		topo = util::coarsen_topo(model->grid_ptr(0));
 		nlx = topo->nlocal(0);
 		nly = topo->nlocal(1);
-	} while (std::min(nlx, nly) >= min_coarse);
+	} while (keep_coarsening(nlx, nly, model->ngrids()));
 
 	auto & topoc = model->grid(0);
 	if (terminate and np != 1) {

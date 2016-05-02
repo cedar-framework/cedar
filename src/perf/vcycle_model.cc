@@ -229,10 +229,11 @@ void vcycle_model::save_levels()
 void vcycle_model::rep(std::ostream & os) const
 {
 	os << "======== vcycle model ========" << '\n';
-	os << "nproc:      " << grid(-1).nproc(0) << " " << grid(-1).nproc(1) << '\n';
-	os << "local size: " << grid(-1).nlocal(0) << " x " << grid(-1).nlocal(1) << '\n';
-	os << "nlevel:     " << ngrids() << '\n';
-	os << "time:       " << time() << '\n';
+	os << "nproc:       " << grid(-1).nproc(0) << " " << grid(-1).nproc(1) << '\n';
+	os << "local size:  " << grid(-1).nlocal(0) << " x " << grid(-1).nlocal(1) << '\n';
+	os << "global size: " << grid(-1).nglobal(0) << " x " << grid(-1).nglobal(1) << '\n';
+	os << "nlevel:      " << ngrids() << '\n';
+	os << "time:        " << time() << '\n';
 	os << '\n';
 	os << *cg_perf;
 }

@@ -83,8 +83,8 @@ void mpi::solver::setup_cg_solve()
 {
 	auto & cop = levels.back().A;
 	std::string cg_solver_str = conf.get<std::string>("solver.cg-solver", "LU");
-	// boxmg cg solver fails when it can't coarsen (put threshold on cg size)
-	if (cg_solver_str == "LU" or cop.grid().nglobal(0)*cop.grid().nglobal(1) < 100)
+
+	if (cg_solver_str == "LU")
 		cg_solver_lu = true;
 	else
 		cg_solver_lu = false;
@@ -103,12 +103,14 @@ void mpi::solver::setup_cg_solve()
 		if (cg_solver_str == "redist") {
 			auto & fgrid = levels[0].A.grid();
 			{
+				timer predict_timer("Redist Prediction");
 				int rank;
 				MPI_Comm_rank(fgrid.comm, &rank);
 				nblocks = std::move(
 					predict_redist(fgrid.nproc(0), fgrid.nproc(1), fgrid.nglobal(0), fgrid.nglobal(1))
 					);
 				MPI_Bcast(nblocks.data(), 2, MPI_INT, 0, fgrid.comm);
+				predict_timer.end();
 			}
 		}
 		if (cg_solver_str == "boxmg" or nblocks[0]*nblocks[1] == 1) {
@@ -123,7 +125,9 @@ void mpi::solver::setup_cg_solve()
 		} else if (cg_solver_str == "redist") {
 			// log::status << "using: " << nblocks[0] << " x " << nblocks[1] << std::endl;
 			std::shared_ptr<mpi::redist_solver> cg_bmg;
+			timer redist_setup_timer("Redist Setup");
 			kernels->setup_cg_redist(cop, &cg_bmg, nblocks);
+			redist_setup_timer.end();
 			coarse_solver = [&,cg_bmg,kernels](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
 				const bmg2d::mpi::stencil_op &av = dynamic_cast<const bmg2d::mpi::stencil_op&>(A);
 				kernels->solve_cg_redist(*cg_bmg, x, b);
