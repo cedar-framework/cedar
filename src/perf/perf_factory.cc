@@ -48,7 +48,7 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 		if (nlevel == 0)
 			return std::min(nlx, nly) >= min_coarse;
 		else
-			return curr_levels <= nlevel;
+			return curr_levels < nlevel;
 	};
 
 	do {
