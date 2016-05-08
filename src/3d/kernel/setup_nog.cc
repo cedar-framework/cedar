@@ -18,7 +18,7 @@ namespace impls
 	{
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
-		BMG3_SymStd_SETUP_nog(topo.nlocal(0), topo.nlocal(1), topo.nlocal(2), min_coarse,
+		BMG3_SymStd_SETUP_nog(topo.nlocal(0)-2, topo.nlocal(1)-2, topo.nlocal(2)-2, min_coarse,
 		                      nog, topo.is(0), topo.is(1), topo.is(2), fcomm);
 	}
 }
