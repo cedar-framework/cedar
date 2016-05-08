@@ -5,6 +5,7 @@
 
 #include <boxmg/mpi/grid_topo.h>
 
+namespace boxmg {
 template <int ND>
 int compute_nlevels(grid_topo & topo, int min_coarse)
 {
@@ -19,8 +20,8 @@ int compute_nlevels(grid_topo & topo, int min_coarse)
 	for (auto dim = 0; dim < ND; dim++) {
 		for (auto i = 0; i < topo.nproc(dim); i++) {
 			int kg = 0;
-			len_t gs_c = (grid->nlocal(ND)-2)*grid->nproc(i) + 1;
-			len_t nl_c = grid->nlocal(ND) - 2;
+			len_t gs_c = (topo.nlocal(dim)-2)*topo.nproc(i) + 1;
+			len_t nl_c = topo.nlocal(dim) - 2;
 
 			do {
 				kg += 1;
@@ -38,12 +39,12 @@ int compute_nlevels(grid_topo & topo, int min_coarse)
 				}
 			} while (nl_c >= min_coarse);
 
-			if (kg < min_level)
-				min_level = kg;
+			if (kg < minlvl)
+				minlvl = kg;
 		}
 	}
 
 	return minlvl;
 }
-
+}
 #endif

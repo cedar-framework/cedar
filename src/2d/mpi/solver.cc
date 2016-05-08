@@ -108,7 +108,7 @@ void mpi::solver::setup_cg_solve()
 				int rank;
 				MPI_Comm_rank(fgrid.comm, &rank);
 				nblocks = std::move(
-					predict_redist(fgrid.nproc(0), fgrid.nproc(1), fgrid.nglobal(0), fgrid.nglobal(1), nlevels())
+					predict_redist(fgrid.nproc(0), fgrid.nproc(1), fgrid.nglobal(0), fgrid.nglobal(1))
 					);
 				MPI_Bcast(nblocks.data(), 2, MPI_INT, 0, fgrid.comm);
 				predict_timer.end();

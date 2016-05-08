@@ -7,7 +7,7 @@
 
 namespace boxmg {
 std::vector<int> predict_redist(int nprocx, int nprocy,
-                                len_t ngx, len_t ngy, int nlevels=0);
+                                len_t ngx, len_t ngy);
 }
 
 #endif
