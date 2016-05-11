@@ -7,6 +7,9 @@
 #include <boxmg/perf/params.h>
 #include <boxmg/perf/util.h>
 
+#include <boxmg/ss/astar.h>
+#include <boxmg/perf/search.h>
+
 #include <boxmg/perf/perf_factory.h>
 
 
@@ -25,7 +28,40 @@ static bool keep_refining(int npx, int npy, int nbx, int nby, len_t nlx, len_t n
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len_t nx, len_t ny, bool terminate)
+std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len_t nx, len_t ny)
+{
+	using namespace boxmg::bmg2d;
+
+	auto np = npx*npy;
+
+	config::reader conf("config.json");
+
+	int min_coarse = conf.get<int>("solver.min-coarse");
+	float ts = conf.get<float>("machine.bandwidth");
+	float tw = conf.get<float>("machine.latency");
+	float tc = conf.get<float>("machine.fp_perf");
+	auto model = std::make_shared<vcycle_model>(2);
+	model->set_comp_param(params::compute_tc(2, conf));
+	model->set_comm_param(ts, tw);
+	auto topo = util::model_topo(npx, npy, nx, ny);
+
+	auto nlx = topo->nlocal(0);
+	auto nly = topo->nlocal(1);
+
+	int nlevels = compute_nlevels<2>(*topo, min_coarse);
+
+	for (auto i = 0; i < nlevels; i++) {
+		model->add_level(topo);
+		topo = util::coarsen_topo(model->grid_ptr(0));
+		nlx = topo->nlocal(0);
+		nly = topo->nlocal(1);
+	}
+
+	return model;
+}
+
+
+std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(int npx, int npy, len_t nx, len_t ny, bool terminate)
 {
 	using namespace boxmg::bmg2d;
 
@@ -56,7 +92,7 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 
 	auto & topoc = model->grid(0);
 	if (terminate and np != 1) {
-		auto cg_model = perf_factory::produce_vcycle(1,1, topoc.nglobal(0), topoc.nglobal(1), true);
+		auto cg_model = perf_factory::dfs_vcycle(1,1, topoc.nglobal(0), topoc.nglobal(1), true);
 		cg_model->set_comm_param(0, 0); // Since this is serial
 		model->nblocks(0) = 1;
 		model->nblocks(1) = 1;
@@ -75,8 +111,8 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 		len_t nlx = topoc.nglobal(0);
 		len_t nly = topoc.nglobal(1);
 		do {
-			auto cg_model = perf_factory::produce_vcycle(model->nblocks(0), model->nblocks(1),
-			                                             topoc.nglobal(0), topoc.nglobal(1));
+			auto cg_model = perf_factory::dfs_vcycle(model->nblocks(0), model->nblocks(1),
+			                                         topoc.nglobal(0), topoc.nglobal(1));
 			// set coarse solve to 0
 			// cg_model->set_cgperf(std::make_shared<const_model>(0));
 
@@ -116,6 +152,19 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 	return model;
 }
 
+
+std::shared_ptr<vcycle_model> perf_factory::astar_vcycle(int npx, int npy, len_t nx, len_t ny)
+{
+	using namespace boxmg;
+	perf_problem pprob;
+	pprob.initial_state = perf_state();
+
+	pprob.initial_state.model = perf_factory::produce_vcycle(npx,npy,nx,ny);
+
+	auto sol = ss::astar<perf_solution>(pprob);
+
+	return sol.model();
+}
 
 // std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, int npz,
 //                                                            len_t nx, len_t ny, len_t nz, bool terminate)

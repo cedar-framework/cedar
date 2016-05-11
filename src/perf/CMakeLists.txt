@@ -4,4 +4,5 @@ set(perf_SOURCES
   cholesky_model.cc
   params.cc
   predict.cc
+  search.cc
   PARENT_SCOPE)
