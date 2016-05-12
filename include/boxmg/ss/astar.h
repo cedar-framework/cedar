@@ -8,7 +8,8 @@
 namespace boxmg { namespace ss {
 
 template<class solution_type, class problem_type>
-solution_type astar(problem_type & problem)
+solution_type astar(problem_type & problem,
+                    std::function<typename problem_type::cost_type(std::shared_ptr<node<typename problem_type::state_type, typename problem_type::action_type, typename problem_type::cost_type>>)> heuristic)
 {
 	typedef typename problem_type::state_type state_type;
 	typedef typename problem_type::action_type action_type;
@@ -20,7 +21,6 @@ solution_type astar(problem_type & problem)
 	init_node->state = problem.initial_state;
 	init_node->path_cost = 0.0;
 
-	auto heuristic = [](node_ptr nd) { return 0.0; };
 	auto astar_priority = [heuristic](node_ptr lhs, node_ptr rhs) {
 		cost_type lhs_cost = lhs->path_cost + heuristic(lhs);
 		cost_type rhs_cost = rhs->path_cost + heuristic(rhs);
