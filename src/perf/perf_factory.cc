@@ -57,11 +57,18 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 		nly = topo->nlocal(1);
 	}
 
+	if (np == 1) {
+		auto & topoc = model->grid(0);
+		auto cg_model = std::make_shared<cholesky_model>(topoc.nglobal(0)*topoc.nglobal(1));
+		cg_model->set_comp_param(tc);
+		model->set_cgperf(cg_model);
+	}
+
 	return model;
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(int npx, int npy, len_t nx, len_t ny, bool terminate)
+std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(int npx, int npy, len_t nx, len_t ny, bool terminate, int rlevel)
 {
 	using namespace boxmg::bmg2d;
 
@@ -112,7 +119,7 @@ std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(int npx, int npy, len_t n
 		len_t nly = topoc.nglobal(1);
 		do {
 			auto cg_model = perf_factory::dfs_vcycle(model->nblocks(0), model->nblocks(1),
-			                                         topoc.nglobal(0), topoc.nglobal(1));
+			                                         topoc.nglobal(0), topoc.nglobal(1),false,rlevel+1);
 			// set coarse solve to 0
 			// cg_model->set_cgperf(std::make_shared<const_model>(0));
 

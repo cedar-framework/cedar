@@ -36,9 +36,7 @@ perf_state perf_problem::result(perf_state & state, std::array<int,2> action)
 	auto cg_model = perf_factory::produce_vcycle(action[0], action[1],
 	                                             topoc.nglobal(0), topoc.nglobal(1));
 
-	// set coarse solve to 0
 	model->set_cgperf(cg_model);
-	cg_model->set_cgperf(std::make_shared<const_model>(0));
 	ret.model = cg_model;
 
 	return ret;

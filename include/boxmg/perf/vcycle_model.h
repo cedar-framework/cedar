@@ -38,6 +38,7 @@ protected:
 	int v1, v2;
 	std::shared_ptr<perf_model> cg_perf;
 	std::array<int,3> nb;
+	bool isleaf;
 };
 
 }

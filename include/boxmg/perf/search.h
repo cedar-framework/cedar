@@ -51,6 +51,8 @@ perf_solution(node_ptr sol_node) :
 
 		while (pnode->parent != nullptr) {
 			pnode->parent->state.model->set_cgperf(pnode->state.model);
+			pnode->parent->state.model->nblocks(0) = pnode->state.model->grid(0).nproc(0);
+			pnode->parent->state.model->nblocks(1) = pnode->state.model->grid(0).nproc(1);
 			pnode = pnode->parent;
 		}
 

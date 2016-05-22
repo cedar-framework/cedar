@@ -6,7 +6,7 @@
 
 using namespace boxmg;
 
-vcycle_model::vcycle_model(short nd, int v1, int v2) : nd(nd), v1(v1), v2(v2)
+vcycle_model::vcycle_model(short nd, int v1, int v2) : nd(nd), v1(v1), v2(v2), isleaf(true)
 {
 	if (nd == 2) {
 		nc = 4;
@@ -158,18 +158,21 @@ float vcycle_model::tinterp(int lvl) const
 float vcycle_model::tcgsolve() const
 {
 	float time = 0;
-	int p = grid(0).nproc();
-	int gather_size = 1;
-	len_t cg_size = 1;
-	for (auto i : range(nd)) {
-		gather_size *= std::ceil(static_cast<double>(grid(0).nproc(i)) / static_cast<double>(nb[i]));
-		cg_size *= std::ceil(static_cast<double>(grid(0).nglobal(i))/static_cast<double>(nb[i]));
-	}
 
-	time += cg_perf->time();
-	time += std::ceil(std::log2(gather_size))*ts;
-	time += cg_size*(1 + std::ceil(std::log2(gather_size)))*tw;
-	// time += cg_size*(gather_size-1)/gather_size*tw;
+	if (!isleaf) {
+		int p = grid(0).nproc();
+		int gather_size = 1;
+		len_t cg_size = 1;
+		for (auto i : range(nd)) {
+			gather_size *= std::ceil(static_cast<double>(grid(0).nproc(i)) / static_cast<double>(nb[i]));
+			cg_size *= std::ceil(static_cast<double>(grid(0).nglobal(i))/static_cast<double>(nb[i]));
+		}
+
+		time += cg_perf->time();
+		time += std::ceil(std::log2(gather_size))*ts;
+		time += cg_size*(1 + std::ceil(std::log2(gather_size)))*tw;
+		// time += cg_size*(gather_size-1)/gather_size*tw;
+	}
 
 	return time;
 }
@@ -194,6 +197,7 @@ float vcycle_model::time() const
 void vcycle_model::set_cgperf(std::shared_ptr<perf_model> mod)
 {
 	cg_perf = mod;
+	isleaf = false;
 }
 
 
@@ -230,10 +234,15 @@ void vcycle_model::rep(std::ostream & os) const
 {
 	os << "======== vcycle model ========" << '\n';
 	os << "nproc:       " << grid(-1).nproc(0) << " " << grid(-1).nproc(1) << '\n';
+	os << "nblock:      " << nblocks(0) << " " << nblocks(1) << '\n';
 	os << "local size:  " << grid(-1).nlocal(0) << " x " << grid(-1).nlocal(1) << '\n';
 	os << "global size: " << grid(-1).nglobal(0) << " x " << grid(-1).nglobal(1) << '\n';
+	os << "coarse size: " << grid(0).nglobal(0) << " x " << grid(0).nglobal(1) << '\n';
 	os << "nlevel:      " << ngrids() << '\n';
+	os << "cgtime:      " << tcgsolve() << '\n';
 	os << "time:        " << time() << '\n';
 	os << '\n';
-	os << *cg_perf;
+	if (!isleaf) {
+		os << *cg_perf;
+	}
 }
