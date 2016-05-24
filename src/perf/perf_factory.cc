@@ -169,7 +169,13 @@ std::shared_ptr<vcycle_model> perf_factory::astar_vcycle(int npx, int npy, len_t
 	pprob.initial_state.model = perf_factory::produce_vcycle(npx,npy,nx,ny);
 
 	using node_ptr = std::shared_ptr<perf_node>;
-	auto heuristic = [](node_ptr nd) { return 0.0; };
+	auto heuristic = [](node_ptr nd) {
+		auto model = nd->state.model;
+		auto topo = bmg2d::util::model_topo(1, 1, model->grid(0).nglobal(0), model->grid(0).nglobal(1));
+		int nlevels = compute_nlevels<2>(*topo, 3);
+
+		return model->tsmooth(-1)*nlevels;
+	};
 	auto sol = ss::astar<perf_solution>(pprob, heuristic);
 
 	return sol.model();
