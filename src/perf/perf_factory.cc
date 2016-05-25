@@ -181,6 +181,96 @@ std::shared_ptr<vcycle_model> perf_factory::astar_vcycle(int npx, int npy, len_t
 	return sol.model();
 }
 
+
+void perf_factory::graph_vcycle(std::ostream & os, int npx, int npy, len_t nx, len_t ny, bool terminate, int rlevel)
+{
+	// TODO: replace with graph library (libcgraph)
+	using namespace boxmg::bmg2d;
+
+	if (rlevel == 0) {
+		os << "digraph {" << '\n';
+	}
+
+	auto node_id = [](int rlevel, int npx, int npy) {
+		return "a" + std::to_string(rlevel) + "_" + std::to_string(npx) + "_" + std::to_string(npy);
+	};
+
+	auto np = npx*npy;
+
+	config::reader conf("config.json");
+
+	int min_coarse = conf.get<int>("solver.min-coarse");
+	float ts = conf.get<float>("machine.bandwidth");
+	float tw = conf.get<float>("machine.latency");
+	float tc = conf.get<float>("machine.fp_perf");
+	auto model = std::make_shared<vcycle_model>(2);
+	model->set_comp_param(params::compute_tc(2, conf));
+	model->set_comm_param(ts, tw);
+	auto topo = util::model_topo(npx, npy, nx, ny);
+
+	auto nlx = topo->nlocal(0);
+	auto nly = topo->nlocal(1);
+
+	int nlevels = compute_nlevels<2>(*topo, min_coarse);
+
+	for (auto i = 0; i < nlevels; i++) {
+		model->add_level(topo);
+		topo = util::coarsen_topo(model->grid_ptr(0));
+		nlx = topo->nlocal(0);
+		nly = topo->nlocal(1);
+	}
+
+	auto & topoc = model->grid(0);
+
+	os << node_id(rlevel, npx, npy) << " " << "[label=\""
+	   << npx << " x " << npy << "\\n"
+	   << topoc.nglobal(0) << " x " << topoc.nglobal(1) << "\"];\n";
+
+	if (terminate and np != 1) {
+		perf_factory::graph_vcycle(os, 1,1, topoc.nglobal(0), topoc.nglobal(1), true, rlevel+1);
+			os << node_id(rlevel, npx, npy) << " -> "
+			   << node_id(rlevel+1, model->nblocks(0), model->nblocks(1)) << ";\n";
+	} else if (np == 1) {
+		auto cg_model = std::make_shared<cholesky_model>(topoc.nglobal(0)*topoc.nglobal(1));
+		cg_model->set_comp_param(tc);
+		model->set_cgperf(cg_model);
+	} else {
+		// predict the best number of processor blocks
+		int nblocks[2];
+		model->nblocks(0) = 1;
+		model->nblocks(1) = 1;
+		len_t nlx = topoc.nglobal(0);
+		len_t nly = topoc.nglobal(1);
+		do {
+			perf_factory::graph_vcycle(os, model->nblocks(0), model->nblocks(1),
+			                           topoc.nglobal(0), topoc.nglobal(1),false,rlevel+1);
+			os << node_id(rlevel, npx, npy) << " -> "
+			   << node_id(rlevel+1, model->nblocks(0), model->nblocks(1)) << ";\n";
+			//if ((npx / model->nblocks(0)) > (npy / model->nblocks(1))) {
+			// greedily adding processor blocks by local problem size
+			if (nlx > nly) {
+				if (((topoc.nglobal(0) / (model->nblocks(0)*2)) <= 2*min_coarse) or (npx / (model->nblocks(0)*2) <= 0))
+					model->nblocks(1) *= 2;
+				else
+					model->nblocks(0) *= 2;
+			} else {
+				if (((topoc.nglobal(1) / (model->nblocks(1)*2)) <= 2*min_coarse) or (npy / (model->nblocks(1)*2) <=0))
+					model->nblocks(0) *=2;
+				else
+					model->nblocks(1) *= 2;
+			}
+
+			nlx = topoc.nglobal(0) / model->nblocks(0);
+			nly = topoc.nglobal(1) / model->nblocks(1);
+		} while (keep_refining(npx, npy, model->nblocks(0), model->nblocks(1),
+		                       nlx, nly, min_coarse));
+	}
+
+	if (rlevel == 0) {
+		os << "}";
+	}
+}
+
 // std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, int npz,
 //                                                            len_t nx, len_t ny, len_t nz, bool terminate)
 // {

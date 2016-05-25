@@ -14,6 +14,7 @@ struct perf_factory
 	static std::shared_ptr<vcycle_model> astar_vcycle(int npx, int npy, len_t nx, len_t ny);
 	static std::shared_ptr<vcycle_model> dfs_vcycle(int npx, int npy, len_t nx, len_t ny, bool terminate=false, int rlevel=0);
 	static std::shared_ptr<vcycle_model> produce_vcycle(int npx, int npy, int npz, len_t nx, len_t ny, len_t nz, bool terminate=false);
+	static void graph_vcycle(std::ostream & os, int npx, int npy, len_t nx, len_t ny, bool terminate=false, int rlevel = 0);
 };
 }
 
