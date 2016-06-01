@@ -189,10 +189,11 @@ void perf_factory::graph_vcycle(std::ostream & os, int npx, int npy, len_t nx, l
 
 	if (rlevel == 0) {
 		os << "digraph {" << '\n';
+		os << "a [label=\"proc grid\ncoarse grid\"];" << '\n';
 	}
 
-	auto node_id = [](int rlevel, int npx, int npy) {
-		return "a" + std::to_string(rlevel) + "_" + std::to_string(npx) + "_" + std::to_string(npy);
+	auto node_id = [](int rlevel, int npx, int npy, len_t ngx, len_t ngy) {
+		return "a" + std::to_string(rlevel) + "_" + std::to_string(npx) + "_" + std::to_string(npy) + "_" + std::to_string(ngx) + "_" + std::to_string(ngy);
 	};
 
 	auto np = npx*npy;
@@ -222,14 +223,14 @@ void perf_factory::graph_vcycle(std::ostream & os, int npx, int npy, len_t nx, l
 
 	auto & topoc = model->grid(0);
 
-	os << node_id(rlevel, npx, npy) << " " << "[label=\""
+	os << node_id(rlevel, npx, npy, nx, ny) << " " << "[label=\""
 	   << npx << " x " << npy << "\\n"
-	   << topoc.nglobal(0) << " x " << topoc.nglobal(1) << "\"];\n";
+	   << topoc.nglobal(0)-2 << " x " << topoc.nglobal(1)-2 << "\"];\n";
 
 	if (terminate and np != 1) {
 		perf_factory::graph_vcycle(os, 1,1, topoc.nglobal(0), topoc.nglobal(1), true, rlevel+1);
-			os << node_id(rlevel, npx, npy) << " -> "
-			   << node_id(rlevel+1, model->nblocks(0), model->nblocks(1)) << ";\n";
+		os << node_id(rlevel, npx, npy, nx, ny) << " -> "
+		   << node_id(rlevel+1, model->nblocks(0), model->nblocks(1), topoc.nglobal(0), topoc.nglobal(1)) << ";\n";
 	} else if (np == 1) {
 		auto cg_model = std::make_shared<cholesky_model>(topoc.nglobal(0)*topoc.nglobal(1));
 		cg_model->set_comp_param(tc);
@@ -244,8 +245,8 @@ void perf_factory::graph_vcycle(std::ostream & os, int npx, int npy, len_t nx, l
 		do {
 			perf_factory::graph_vcycle(os, model->nblocks(0), model->nblocks(1),
 			                           topoc.nglobal(0), topoc.nglobal(1),false,rlevel+1);
-			os << node_id(rlevel, npx, npy) << " -> "
-			   << node_id(rlevel+1, model->nblocks(0), model->nblocks(1)) << ";\n";
+			os << node_id(rlevel, npx, npy, nx, ny) << " -> "
+			   << node_id(rlevel+1, model->nblocks(0), model->nblocks(1), topoc.nglobal(0), topoc.nglobal(1)) << ";\n";
 			//if ((npx / model->nblocks(0)) > (npy / model->nblocks(1))) {
 			// greedily adding processor blocks by local problem size
 			if (nlx > nly) {
