@@ -12,6 +12,7 @@ namespace boxmg {
 			timer(T&& name): name(std::forward<T>(name)) {};
 		void begin();
 		void end();
+		double time();
 	private:
 		std::string name;
 		double starttime, endtime;

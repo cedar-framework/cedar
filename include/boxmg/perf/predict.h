@@ -6,8 +6,9 @@
 #include <boxmg/types.h>
 
 namespace boxmg {
-std::vector<int> predict_redist(int nprocx, int nprocy,
-                                len_t ngx, len_t ngy);
+	std::vector<int> predict_redist(config::reader & conf,
+	                                int nprocx, int nprocy,
+	                                len_t ngx, len_t ngy);
 }
 
 #endif

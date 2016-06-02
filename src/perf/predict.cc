@@ -4,12 +4,12 @@
 
 namespace boxmg {
 
-std::vector<int> predict_redist(int nprocx, int nprocy,
+std::vector<int> predict_redist(config::reader & conf, int nprocx, int nprocy,
                                 len_t ngx, len_t ngy)
 {
 	std::vector<int> nblocks({1,1});
 
-	auto model = perf_factory::dfs_vcycle(nprocx, nprocy, ngx, ngy, false);
+	auto model = perf_factory::dfs_vcycle(conf, nprocx, nprocy, ngx, ngy, false);
 
 	nblocks[0] = model->nblocks(0);
 	nblocks[1] = model->nblocks(1);

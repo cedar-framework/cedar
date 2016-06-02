@@ -19,3 +19,9 @@ void timer::end()
 		log::timer << name << " time: " << (endtime - starttime) << std::endl;
 	}
 }
+
+
+double timer::time()
+{
+	return endtime - starttime;
+}

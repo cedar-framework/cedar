@@ -33,7 +33,7 @@ perf_state perf_problem::result(perf_state & state, std::array<int,2> action)
 	model->nblocks(1) = action[1];
 	auto & topoc = model->grid(0);
 
-	auto cg_model = perf_factory::produce_vcycle(action[0], action[1],
+	auto cg_model = perf_factory::produce_vcycle(conf, action[0], action[1],
 	                                             topoc.nglobal(0), topoc.nglobal(1));
 
 	model->set_cgperf(cg_model);

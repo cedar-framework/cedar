@@ -10,6 +10,7 @@ class perf_model
 public:
 	virtual float time() const = 0;
 	virtual void set_comp_param(float tc) { this->tc = tc; }
+	virtual float get_comp_param() { return this->tc; }
 	virtual void set_comm_param(float ts, float tw) { this->ts = ts; this->tw = tw; }
 	virtual void rep(std::ostream &os) const = 0;
 	friend std::ostream & operator<<(std::ostream &os, const perf_model & pm);

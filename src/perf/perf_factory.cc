@@ -28,13 +28,11 @@ static bool keep_refining(int npx, int npy, int nbx, int nby, len_t nlx, len_t n
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len_t nx, len_t ny)
+std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny)
 {
 	using namespace boxmg::bmg2d;
 
 	auto np = npx*npy;
-
-	config::reader conf("config.json");
 
 	int min_coarse = conf.get<int>("solver.min-coarse");
 	float ts = conf.get<float>("machine.bandwidth");
@@ -68,13 +66,11 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, len
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(int npx, int npy, len_t nx, len_t ny, bool terminate, int rlevel)
+std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny, bool terminate, int rlevel)
 {
 	using namespace boxmg::bmg2d;
 
 	auto np = npx*npy;
-
-	config::reader conf("config.json");
 
 	int min_coarse = conf.get<int>("solver.min-coarse");
 	float ts = conf.get<float>("machine.bandwidth");
@@ -99,7 +95,7 @@ std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(int npx, int npy, len_t n
 
 	auto & topoc = model->grid(0);
 	if (terminate and np != 1) {
-		auto cg_model = perf_factory::dfs_vcycle(1,1, topoc.nglobal(0), topoc.nglobal(1), true);
+		auto cg_model = perf_factory::dfs_vcycle(conf, 1,1, topoc.nglobal(0), topoc.nglobal(1), true);
 		cg_model->set_comm_param(0, 0); // Since this is serial
 		model->nblocks(0) = 1;
 		model->nblocks(1) = 1;
@@ -118,7 +114,7 @@ std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(int npx, int npy, len_t n
 		len_t nlx = topoc.nglobal(0);
 		len_t nly = topoc.nglobal(1);
 		do {
-			auto cg_model = perf_factory::dfs_vcycle(model->nblocks(0), model->nblocks(1),
+			auto cg_model = perf_factory::dfs_vcycle(conf, model->nblocks(0), model->nblocks(1),
 			                                         topoc.nglobal(0), topoc.nglobal(1),false,rlevel+1);
 			// set coarse solve to 0
 			// cg_model->set_cgperf(std::make_shared<const_model>(0));
@@ -160,13 +156,13 @@ std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(int npx, int npy, len_t n
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::astar_vcycle(int npx, int npy, len_t nx, len_t ny)
+std::shared_ptr<vcycle_model> perf_factory::astar_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny)
 {
 	using namespace boxmg;
-	perf_problem pprob;
+	perf_problem pprob(conf);
 	pprob.initial_state = perf_state();
 
-	pprob.initial_state.model = perf_factory::produce_vcycle(npx,npy,nx,ny);
+	pprob.initial_state.model = perf_factory::produce_vcycle(conf,npx,npy,nx,ny);
 
 	using node_ptr = std::shared_ptr<perf_node>;
 	auto heuristic = [](node_ptr nd) {
