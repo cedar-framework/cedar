@@ -20,7 +20,7 @@ int compute_nlevels(grid_topo & topo, int min_coarse)
 	for (auto dim = 0; dim < ND; dim++) {
 		for (auto i = 0; i < topo.nproc(dim); i++) {
 			int kg = 0;
-			len_t gs_c = (topo.nlocal(dim)-2)*topo.nproc(i) + 1;
+			len_t gs_c = (topo.nlocal(dim)-2)*i + 1;
 			len_t nl_c = topo.nlocal(dim) - 2;
 
 			do {

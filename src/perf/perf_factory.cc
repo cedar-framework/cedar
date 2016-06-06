@@ -178,18 +178,25 @@ std::shared_ptr<vcycle_model> perf_factory::astar_vcycle(config::reader & conf, 
 }
 
 
-void perf_factory::graph_vcycle(std::ostream & os, int npx, int npy, len_t nx, len_t ny, bool terminate, int rlevel)
+std::array<len_t,2> perf_factory::graph_vcycle(std::ostream & os, int npx, int npy, len_t nx, len_t ny, bool terminate, int rlevel)
 {
 	// TODO: replace with graph library (libcgraph)
 	using namespace boxmg::bmg2d;
+
+	const bool FULL = false;
 
 	if (rlevel == 0) {
 		os << "digraph {" << '\n';
 		os << "a [label=\"proc grid\ncoarse grid\"];" << '\n';
 	}
 
-	auto node_id = [](int rlevel, int npx, int npy, len_t ngx, len_t ngy) {
-		return "a" + std::to_string(rlevel) + "_" + std::to_string(npx) + "_" + std::to_string(npy) + "_" + std::to_string(ngx) + "_" + std::to_string(ngy);
+	auto node_id = [](int rlevel, int npx, int npy, len_t ngx, len_t ngy, len_t ngcx, len_t ngcy) {
+		if (FULL)
+			return "a" + std::to_string(rlevel) + "_" + std::to_string(npx) + "_" + std::to_string(npy) + "_" +
+				std::to_string(ngx) + "_" + std::to_string(ngy);
+		else
+			return "a_" + std::to_string(npx) + "_" + std::to_string(npy) + "_" +
+				std::to_string(ngcx) + "_" + std::to_string(ngcy);
 	};
 
 	auto np = npx*npy;
@@ -219,14 +226,14 @@ void perf_factory::graph_vcycle(std::ostream & os, int npx, int npy, len_t nx, l
 
 	auto & topoc = model->grid(0);
 
-	os << node_id(rlevel, npx, npy, nx, ny) << " " << "[label=\""
+	os << node_id(rlevel, npx, npy, nx, ny, topoc.nglobal(0), topoc.nglobal(1)) << " " << "[label=\""
 	   << npx << " x " << npy << "\\n"
 	   << topoc.nglobal(0)-2 << " x " << topoc.nglobal(1)-2 << "\"];\n";
 
 	if (terminate and np != 1) {
-		perf_factory::graph_vcycle(os, 1,1, topoc.nglobal(0), topoc.nglobal(1), true, rlevel+1);
-		os << node_id(rlevel, npx, npy, nx, ny) << " -> "
-		   << node_id(rlevel+1, model->nblocks(0), model->nblocks(1), topoc.nglobal(0), topoc.nglobal(1)) << ";\n";
+		auto ngc = perf_factory::graph_vcycle(os, 1,1, topoc.nglobal(0), topoc.nglobal(1), true, rlevel+1);
+		os << node_id(rlevel, npx, npy, nx, ny, topoc.nglobal(0), topoc.nglobal(1)) << " -> "
+		   << node_id(rlevel+1, model->nblocks(0), model->nblocks(1), topoc.nglobal(0), topoc.nglobal(1), ngc[0], ngc[1]) << ";\n";
 	} else if (np == 1) {
 		auto cg_model = std::make_shared<cholesky_model>(topoc.nglobal(0)*topoc.nglobal(1));
 		cg_model->set_comp_param(tc);
@@ -239,10 +246,10 @@ void perf_factory::graph_vcycle(std::ostream & os, int npx, int npy, len_t nx, l
 		len_t nlx = topoc.nglobal(0);
 		len_t nly = topoc.nglobal(1);
 		do {
-			perf_factory::graph_vcycle(os, model->nblocks(0), model->nblocks(1),
-			                           topoc.nglobal(0), topoc.nglobal(1),false,rlevel+1);
-			os << node_id(rlevel, npx, npy, nx, ny) << " -> "
-			   << node_id(rlevel+1, model->nblocks(0), model->nblocks(1), topoc.nglobal(0), topoc.nglobal(1)) << ";\n";
+			auto ngc = perf_factory::graph_vcycle(os, model->nblocks(0), model->nblocks(1),
+			                                      topoc.nglobal(0), topoc.nglobal(1),false,rlevel+1);
+			os << node_id(rlevel, npx, npy, nx, ny, topoc.nglobal(0), topoc.nglobal(1)) << " -> "
+			   << node_id(rlevel+1, model->nblocks(0), model->nblocks(1), topoc.nglobal(0), topoc.nglobal(1), ngc[0], ngc[1]) << ";\n";
 			//if ((npx / model->nblocks(0)) > (npy / model->nblocks(1))) {
 			// greedily adding processor blocks by local problem size
 			if (nlx > nly) {
@@ -266,6 +273,10 @@ void perf_factory::graph_vcycle(std::ostream & os, int npx, int npy, len_t nx, l
 	if (rlevel == 0) {
 		os << "}";
 	}
+
+	std::array<len_t, 2> ret({topoc.nglobal(0), topoc.nglobal(1)});
+
+	return ret;
 }
 
 // std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, int npz,
