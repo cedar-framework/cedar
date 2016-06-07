@@ -112,6 +112,7 @@ void mpi::solver::setup_cg_solve()
 					);
 				MPI_Bcast(nblocks.data(), 2, MPI_INT, 0, fgrid.comm);
 				predict_timer.end();
+				log::status << "Redistributing to " << nblocks[0] << " x " << nblocks[1] << " cores" << std::endl;
 			}
 		}
 		if (cg_solver_str == "boxmg" or nblocks[0]*nblocks[1] == 1) {
@@ -124,7 +125,6 @@ void mpi::solver::setup_cg_solve()
 				log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
 			};
 		} else if (cg_solver_str == "redist") {
-			// log::status << "using: " << nblocks[0] << " x " << nblocks[1] << std::endl;
 			std::shared_ptr<mpi::redist_solver> cg_bmg;
 			timer redist_setup_timer("Redist Setup");
 			redist_setup_timer.begin();
