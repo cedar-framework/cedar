@@ -63,7 +63,6 @@ std::vector<std::array<int,2>> perf_problem::actions(perf_state & state)
 	len_t nly = topoc.nglobal(1);
 	std::array<int,2> nblocks({1,1});
 
-	config::reader conf("config.json");
 	int min_coarse = conf.get<int>("solver.min-coarse");
 
 	do {
@@ -95,22 +94,20 @@ namespace boxmg {
 		// if (s1.model == nullptr) return true;
 		// else if (s2.model == nullptr) return false;
 
-		// len_t ng[2][2];
-		// len_t nl[2][2];
+		len_t ngc[2][2];
+		len_t np[2][2];
 
-		// for (auto i = 0; i < 2; i++) {
-		// 	ng[0][i] = s1.model->grid(-1).nglobal(i);
-		// 	ng[1][i] = s2.model->grid(-1).nglobal(i);
-		// 	nl[0][i] = s1.model->grid(-1).nlocal(i);
-		// 	nl[1][i] = s2.model->grid(-1).nlocal(i);
-		// }
+		for (auto i = 0; i < 2; i++) {
+			ngc[0][i] = s1.model->grid(0).nglobal(i);
+			ngc[1][i] = s2.model->grid(0).nglobal(i);
+			np[0][i] = s1.model->grid(0).nproc(i);
+			np[1][i] = s2.model->grid(0).nproc(i);
+		}
 
-		// if (ng[0][0] < ng[1][0]) return true;
-		// else if (ng[0][0] == ng[1][0] and ng[0][1] < ng[1][1]) return true;
-		// else if (ng[0][0] == ng[1][0] and ng[0][1] == ng[1][1] and nl[0][0] < nl[1][0]) return true;
-		// else if (ng[0][0] == ng[1][0] and ng[0][1] == ng[1][1] and nl[0][0] == nl[1][0] and nl[0][1] < nl[1][1]) return true;
-		// else if
-		return true;
-
+		if (ngc[0][0] < ngc[1][0]) return true;
+		else if (ngc[0][0] == ngc[1][0] and ngc[0][1] < ngc[1][1]) return true;
+		else if (ngc[0][0] == ngc[1][0] and ngc[0][1] == ngc[1][1] and np[0][0] < np[1][0]) return true;
+		else if (ngc[0][0] == ngc[1][0] and ngc[0][1] == ngc[1][1] and np[0][0] == np[1][0] and np[0][1] < np[1][1]) return true;
+		else return false;
 	}
 }

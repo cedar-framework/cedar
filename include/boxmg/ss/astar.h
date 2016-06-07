@@ -28,18 +28,23 @@ solution_type astar(problem_type & problem,
 		return !(lhs_cost < rhs_cost);
 	};
 	std::priority_queue<node_ptr, std::vector<node_ptr>, decltype(astar_priority)> frontier(astar_priority);
+	std::map<state_type, cost_type> explored;
 	frontier.push(init_node);
+	explored[init_node->state] = 0;
 
 	while (!frontier.empty()) {
-		auto node = frontier.top(); frontier.pop();
+		node_ptr node;
+		do {
+			node = frontier.top(); frontier.pop();
+		} while (node->path_cost > explored[node->state]);
 		if (problem.goal_test(node->state)) return solution_type(node);
-		// explored.insert(node.state);
 		for (auto action : problem.actions(node->state)) {
 			auto child = child_node(problem, node, action);
-			// if (!(child.state in explored or child.state in frontier_map.keys())) {
-			frontier.push(child);
-			// else if child.state in frontier with higher cost {{
-			// replace frontier node with child
+			auto child_cost = child->path_cost;
+			if ((explored.find(child->state) == explored.end()) or (child_cost < explored[child->state])) {
+				explored[child->state] = child_cost;
+				frontier.push(child);
+			}
 		}
 	}
 
