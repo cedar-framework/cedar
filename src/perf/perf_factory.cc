@@ -66,6 +66,36 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(config::reader & conf
 }
 
 
+std::shared_ptr<vcycle_model> perf_factory::manual_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny)
+{
+	using namespace boxmg::bmg2d;
+
+	auto np = npx*npy;
+
+	auto model = perf_factory::produce_vcycle(conf, npx, npy, nx, ny);
+
+	if (np > 1) {
+		auto path = conf.getnvec<int>("redist.search.path");
+		bool found = false;
+		for (auto & proc : path) {
+			if (found) {
+				model->nblocks(0) = proc[0];
+				model->nblocks(1) = proc[1];
+				break;
+			} else if (proc[0] == npx and proc[1] == npy) {
+				found = true;
+			}
+		}
+
+		auto cg_model = perf_factory::manual_vcycle(conf, model->nblocks(0), model->nblocks(1),
+		                                            model->grid(0).nglobal(0), model->grid(0).nglobal(1));
+		model->set_cgperf(cg_model);
+	}
+
+	return model;
+}
+
+
 std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny, bool terminate, int rlevel)
 {
 	using namespace boxmg::bmg2d;
