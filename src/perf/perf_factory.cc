@@ -35,8 +35,8 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(config::reader & conf
 	auto np = npx*npy;
 
 	int min_coarse = conf.get<int>("solver.min-coarse");
-	float ts = conf.get<float>("machine.bandwidth");
-	float tw = conf.get<float>("machine.latency");
+	float tw = (1.0/conf.get<float>("machine.bandwidth")) * sizeof(real_t);
+	float ts = conf.get<float>("machine.latency");
 	float tc = conf.get<float>("machine.fp_perf");
 	auto model = std::make_shared<vcycle_model>(2);
 	model->set_comp_param(params::compute_tc(2, conf));
@@ -103,8 +103,8 @@ std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(config::reader & conf, in
 	auto np = npx*npy;
 
 	int min_coarse = conf.get<int>("solver.min-coarse");
-	float ts = conf.get<float>("machine.bandwidth");
-	float tw = conf.get<float>("machine.latency");
+	float tw = (1.0/conf.get<float>("machine.bandwidth")) * sizeof(real_t);
+	float ts = conf.get<float>("machine.latency");
 	float tc = conf.get<float>("machine.fp_perf");
 	auto model = std::make_shared<vcycle_model>(2);
 	model->set_comp_param(params::compute_tc(2, conf));
@@ -234,8 +234,8 @@ std::array<len_t,2> perf_factory::graph_vcycle(std::ostream & os, int npx, int n
 	config::reader conf("config.json");
 
 	int min_coarse = conf.get<int>("solver.min-coarse");
-	float ts = conf.get<float>("machine.bandwidth");
-	float tw = conf.get<float>("machine.latency");
+	float tw = (1.0/conf.get<float>("machine.bandwidth")) * sizeof(real_t);
+	float ts = conf.get<float>("machine.latency");
 	float tc = conf.get<float>("machine.fp_perf");
 	auto model = std::make_shared<vcycle_model>(2);
 	model->set_comp_param(params::compute_tc(2, conf));
