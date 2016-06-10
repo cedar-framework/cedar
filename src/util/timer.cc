@@ -1,9 +1,8 @@
-#include <mpi.h>
-
 #include <boxmg/util/log.h>
 #include <boxmg/util/timer.h>
 
 using namespace boxmg;
+
 
 void timer::begin()
 {
@@ -25,3 +24,20 @@ double timer::time()
 {
 	return endtime - starttime;
 }
+
+
+void sync_timer::begin()
+{
+	if (log::timer.active())
+		MPI_Barrier(comm);
+	timer::begin();
+}
+
+
+void sync_timer::end()
+{
+	if (log::timer.active())
+		MPI_Barrier(comm);
+	timer::end();
+}
+
