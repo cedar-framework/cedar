@@ -68,9 +68,83 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(config::reader & conf
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::random_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny)
+std::vector<std::vector<int>> get_choices(config::reader & conf, int npx, int npy, len_t nx, len_t ny)
 {
 	using namespace boxmg::bmg2d;
+
+	auto np = npx*npy;
+
+	int min_coarse = conf.get<int>("solver.min-coarse");
+	auto model = std::make_shared<vcycle_model>(2);
+
+	auto topo = util::model_topo(npx, npy, nx, ny);
+
+	auto nlx = topo->nlocal(0);
+	auto nly = topo->nlocal(1);
+
+	int nlevels = compute_nlevels<2>(*topo, min_coarse);
+
+	for (auto i = 0; i < nlevels; i++) {
+		model->add_level(topo);
+		topo = util::coarsen_topo(model->grid_ptr(0));
+		nlx = topo->nlocal(0);
+		nly = topo->nlocal(1);
+	}
+
+	auto & topoc = model->grid(0);
+	if (np == 1) {
+		return {{0}};
+	} else {
+		// predict the best number of processor blocks
+		model->nblocks(0) = 1;
+		model->nblocks(1) = 1;
+		std::vector<std::vector<int>> choices;
+		len_t nlx = topoc.nglobal(0);
+		len_t nly = topoc.nglobal(1);
+		int choice_num = 0;
+		do {
+			auto paths = get_choices(conf, model->nblocks(0), model->nblocks(1),
+			                         topoc.nglobal(0), topoc.nglobal(1));
+			for (auto path : paths) {
+				path.push_back(choice_num);
+				choices.push_back(path);
+			}
+			choice_num++;
+			//if ((npx / model->nblocks(0)) > (npy / model->nblocks(1))) {
+			// greedily adding processor blocks by local problem size
+			if (nlx > nly) {
+				if (((topoc.nglobal(0) / (model->nblocks(0)*2)) <= 2*min_coarse) or (npx / (model->nblocks(0)*2) <= 0))
+					model->nblocks(1) *= 2;
+				else
+					model->nblocks(0) *= 2;
+			} else {
+				if (((topoc.nglobal(1) / (model->nblocks(1)*2)) <= 2*min_coarse) or (npy / (model->nblocks(1)*2) <=0))
+					model->nblocks(0) *=2;
+				else
+					model->nblocks(1) *= 2;
+			}
+
+			nlx = topoc.nglobal(0) / model->nblocks(0);
+			nly = topoc.nglobal(1) / model->nblocks(1);
+		} while (keep_refining(npx, npy, model->nblocks(0), model->nblocks(1),
+		                       nlx, nly, min_coarse));
+		return choices;
+	}
+}
+
+
+std::shared_ptr<vcycle_model> perf_factory::random_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny, std::vector<int> path)
+{
+	using namespace boxmg::bmg2d;
+
+	if (path.size() == 0) {
+		auto choices = get_choices(conf, npx, npy, nx, ny);
+		std::random_device rd;
+		std::mt19937 rng(rd());
+		std::uniform_int_distribution<int> uni(0, choices.size()-1);
+		auto rand_choice = uni(rng);
+		path = choices[rand_choice];
+	}
 
 	auto np = npx*npy;
 
@@ -105,14 +179,10 @@ std::shared_ptr<vcycle_model> perf_factory::random_vcycle(config::reader & conf,
 		model->nblocks(0) = 1;
 		model->nblocks(1) = 1;
 		std::vector<std::array<int,2>> choices;
-		std::vector<std::shared_ptr<vcycle_model>> models;
 		len_t nlx = topoc.nglobal(0);
 		len_t nly = topoc.nglobal(1);
 		do {
-			auto cg_model = perf_factory::random_vcycle(conf, model->nblocks(0), model->nblocks(1),
-			                                            topoc.nglobal(0), topoc.nglobal(1));
 			choices.push_back(std::array<int,2>({model->nblocks(0), model->nblocks(1)}));
-			models.push_back(cg_model);
 			//if ((npx / model->nblocks(0)) > (npy / model->nblocks(1))) {
 			// greedily adding processor blocks by local problem size
 			if (nlx > nly) {
@@ -132,14 +202,15 @@ std::shared_ptr<vcycle_model> perf_factory::random_vcycle(config::reader & conf,
 		} while (keep_refining(npx, npy, model->nblocks(0), model->nblocks(1),
 		                       nlx, nly, min_coarse));
 
-		std::random_device rd;
-		std::mt19937 rng(rd());
-		std::uniform_int_distribution<int> uni(0, choices.size()-1);
-		auto rand_choice = uni(rng);
+		auto rand_choice = path.back();
+		path.pop_back();
 
 		model->nblocks(0) = choices[rand_choice][0];
 		model->nblocks(1) = choices[rand_choice][1];
-		model->set_cgperf(models[rand_choice]);
+
+		auto cg_model = perf_factory::random_vcycle(conf, model->nblocks(0), model->nblocks(1),
+		                                            topoc.nglobal(0), topoc.nglobal(1), path);
+		model->set_cgperf(cg_model);
 	}
 
 	return model;
