@@ -2,6 +2,7 @@
 #include "boxmg/2d/ftn/mpi/BMG_workspace_c.h"
 #include "boxmg/2d/mpi/stencil_op.h"
 
+#include <boxmg/util/timer.h>
 #include "boxmg/2d/mpi/halo.h"
 #include "boxmg/2d/relax/relax.h"
 
@@ -184,11 +185,14 @@ namespace impls
 		// ibc = BMG_BCs_definite;
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
+		sync_timer rtimer(topo.comm, "Relaxation");
+		rtimer.begin();
 		MPI_BMG2_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
 		                         sten.len(0), sten.len(1), kf, ifd, nstencil, BMG_RELAX_SYM,
 		                         updown, topo.is(0), topo.is(1), ctx->msg_geom.data(),
 		                         ctx->msg_geom.size(), ctx->pMSG.data(), ctx->msg_buffer.data(),
 		                         ctx->msg_buffer.size(), fcomm);
+		rtimer.end();
 	}
 
 

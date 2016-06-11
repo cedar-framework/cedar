@@ -1,5 +1,6 @@
 #include "boxmg/2d/mpi/stencil_op.h"
 #include "boxmg/2d/mpi/halo.h"
+#include <boxmg/util/timer.h>
 
 #include "boxmg/2d/residual.h"
 
@@ -95,6 +96,8 @@ namespace impls
 		k = topo.level()+1;
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+		sync_timer rtimer(topo.comm, "Residual");
+		rtimer.begin();
 		MPI_BMG2_SymStd_residual(k, kf, nog,
 		                         Ad.data(), bd.data(), xd.data(), r.data(),
 		                         r.len(0), r.len(1), ifd, nstencil,
@@ -102,6 +105,7 @@ namespace impls
 		                         ctx->msg_geom.data(), ctx->msg_geom.size(),
 		                         ctx->pMSG.data(), ctx->msg_buffer.data(),
 		                         ctx->msg_buffer.size(), fcomm);
+		rtimer.end();
 	}
 }
 

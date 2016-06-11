@@ -1,6 +1,7 @@
 #include "boxmg/2d/ftn/BMG_parameters_c.h"
 #include "boxmg/2d/inter/mpi/prolong_op.h"
 #include "boxmg/2d/mpi/halo.h"
+#include <boxmg/util/timer.h>
 
 #include "boxmg/2d/inter/interp.h"
 
@@ -74,6 +75,8 @@ namespace impls
 		kf = kc + 1;
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+		sync_timer itimer(topo.comm, "Interpolation");
+		itimer.begin();
 		MPI_BMG2_SymStd_interp_add(kc, kf, nog,
 		                           fine.data(), coarsed.data(), res.data(),
 		                           Pd.fine_op->data(), nstencil,
@@ -84,6 +87,7 @@ namespace impls
 		                           ctx->msg_geom.data(), ctx->msg_geom.size(),
 		                           ctx->pMSG.data(), ctx->msg_buffer.data(),
 		                           ctx->msg_buffer.size(), fcomm);
+		itimer.end();
 	}
 }
 

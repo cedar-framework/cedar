@@ -3,6 +3,7 @@
 #include "boxmg/2d/mpi/grid_func.h"
 #include "boxmg/2d/ftn/BMG_parameters_c.h"
 #include "boxmg/2d/ftn/mpi/BMG_workspace_c.h"
+#include <boxmg/util/timer.h>
 
 #include "boxmg/2d/cg/solve_cg.h"
 
@@ -59,6 +60,9 @@ namespace impls
 	{
 		int rank;
 
+		sync_timer btimer(x_par.comm, "cg-solve");
+		btimer.begin();
+
 		mpi::grid_func & b_par = const_cast<mpi::grid_func&>(b);
 		auto &coarse_solver = const_cast<solver&>(cg_solver);
 
@@ -100,6 +104,7 @@ namespace impls
 		                            topo.nproc(0), topo.nproc(1),
 		                            topo.nproc(), rank,
 		                            ctx->proc_coord.data(), fcomm);
+		btimer.end();
 
 	}
 
