@@ -55,12 +55,18 @@ int main(int argc, char *argv[])
 	config::reader conf;
 
 	auto islocal = conf.get<bool>("grid.local", true);
-	auto nx = conf.get<len_t>("grid.nx", 9);
-	auto ny = conf.get<len_t>("grid.ny", 9);
+	auto ndofs = conf.getvec<len_t>("grid.n");
+	auto nx = ndofs[0];
+	auto ny = ndofs[1];
 	topo_ptr grid;
 	if (islocal) {
-		auto npx = conf.get<int>("grid.npx", 0);
-		auto npy = conf.get<int>("grid.npy", 0);
+		auto nprocs = conf.getvec<int>("grid.np");
+		int npx = 0;
+		int npy = 0;
+		if (nprocs.size() >= 2) {
+			npx = nprocs[0];
+			npy = nprocs[1];
+		}
 		if (npx == 0 or npy == 0) {
 			grid = bmg2d::util::create_topo(MPI_COMM_WORLD, nx, ny);
 		} else {
