@@ -13,6 +13,7 @@ public:
 	virtual float get_comp_param() { return this->tc; }
 	virtual void set_comm_param(float ts, float tw) { this->ts = ts; this->tw = tw; }
 	virtual void rep(std::ostream &os) const = 0;
+	virtual int nproc() const = 0;
 	friend std::ostream & operator<<(std::ostream &os, const perf_model & pm);
 
 

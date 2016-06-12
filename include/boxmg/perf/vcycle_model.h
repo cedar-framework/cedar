@@ -30,6 +30,7 @@ public:
 	int & nblocks(int dim);
 	int nblocks(int dim) const;
 	virtual void rep(std::ostream & os) const;
+	virtual int nproc() const;
 
 protected:
 	short nd;

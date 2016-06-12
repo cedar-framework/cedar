@@ -12,6 +12,7 @@ public:
 	cholesky_model(len_t n);
 	virtual float time() const;
 	virtual void rep(std::ostream & os) const;
+	virtual int nproc() const { return 1; }
 
 private:
 	len_t n;

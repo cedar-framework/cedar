@@ -207,6 +207,12 @@ std::shared_ptr<perf_model> vcycle_model::get_cgperf()
 }
 
 
+int vcycle_model::nproc() const
+{
+	return grid(0).nproc();
+}
+
+
 void vcycle_model::save_levels()
 {
 	std::ofstream smooth_file;
