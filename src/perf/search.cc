@@ -1,22 +1,11 @@
 #include <memory>
 
+#include <boxmg/perf/redist_generator.h>
 #include <boxmg/perf/perf_factory.h>
 #include <boxmg/perf/const_model.h>
 #include <boxmg/perf/search.h>
 
 using namespace boxmg;
-
-static bool keep_refining(int npx, int npy, int nbx, int nby, len_t nlx, len_t nly,
-                          int min_coarse)
-{
-	bool ret = ((npx / nbx) > 0 and (npy / nby) > 0);
-	ret = ret and ((npx / nbx) * (npy / nby) > 1);
-	ret = ret and (nlx > 2*min_coarse);
-	ret = ret and (nly > 2*min_coarse);
-
-	return ret;
-}
-
 
 bool perf_problem::goal_test(perf_state & state)
 {
@@ -59,29 +48,13 @@ std::vector<std::array<int,2>> perf_problem::actions(perf_state & state)
 	auto & topoc = model->grid(0);
 	auto npx = topoc.nproc(0);
 	auto npy = topoc.nproc(1);
-	len_t nlx = topoc.nglobal(0);
-	len_t nly = topoc.nglobal(1);
-	std::array<int,2> nblocks({1,1});
 
 	int min_coarse = conf.get<int>("solver.min-coarse");
 
-	do {
+	auto redist_subsets = redist_generator({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse);
+	for (auto nblocks : redist_subsets) {
 		ret.push_back(nblocks);
-		if (nlx > nly) {
-			if (((topoc.nglobal(0) / (nblocks[0]*2)) <= 2*min_coarse) or (npx / (nblocks[0]*2) <= 0))
-				nblocks[1] *= 2;
-			else
-				nblocks[0] *= 2;
-		} else {
-			if (((topoc.nglobal(1) / (nblocks[1]*2)) <= 2*min_coarse) or (npy / (nblocks[1]*2) <=0))
-				nblocks[0] *=2;
-			else
-				nblocks[1] *= 2;
-		}
-
-		nlx = topoc.nglobal(0) / nblocks[0];
-		nly = topoc.nglobal(1) / nblocks[1];
-	} while (keep_refining(npx, npy, nblocks[0], nblocks[1], nlx, nly, min_coarse));
+	}
 
 	return ret;
 }

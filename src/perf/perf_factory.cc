@@ -1,6 +1,7 @@
 #include <limits>
 #include <random>
 
+#include <boxmg/perf/redist_generator.h>
 #include <boxmg/2d/util/topo.h>
 #include <boxmg/3d/util/topo.h>
 #include <boxmg/config/reader.h>
@@ -16,19 +17,6 @@
 
 
 using namespace boxmg;
-
-
-static bool keep_refining(int npx, int npy, int nbx, int nby, len_t nlx, len_t nly,
-                          int min_coarse)
-{
-	bool ret = ((npx / nbx) > 0 and (npy / nby) > 0);
-	ret = ret and ((npx / nbx) * (npy / nby) > 1);
-	ret = ret and (nlx > 2*min_coarse);
-	ret = ret and (nly > 2*min_coarse);
-
-	return ret;
-}
-
 
 std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny)
 {
@@ -96,13 +84,11 @@ std::vector<std::vector<int>> get_choices(config::reader & conf, int npx, int np
 		return {{0}};
 	} else {
 		// predict the best number of processor blocks
-		model->nblocks(0) = 1;
-		model->nblocks(1) = 1;
 		std::vector<std::vector<int>> choices;
-		len_t nlx = topoc.nglobal(0);
-		len_t nly = topoc.nglobal(1);
 		int choice_num = 0;
-		do {
+		for (auto nblocks : redist_generator({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse)) {
+			for (auto i : range(2))
+				model->nblocks(i) = nblocks[i];
 			auto paths = get_choices(conf, model->nblocks(0), model->nblocks(1),
 			                         topoc.nglobal(0), topoc.nglobal(1));
 			for (auto path : paths) {
@@ -110,24 +96,7 @@ std::vector<std::vector<int>> get_choices(config::reader & conf, int npx, int np
 				choices.push_back(path);
 			}
 			choice_num++;
-			//if ((npx / model->nblocks(0)) > (npy / model->nblocks(1))) {
-			// greedily adding processor blocks by local problem size
-			if (nlx > nly) {
-				if (((topoc.nglobal(0) / (model->nblocks(0)*2)) <= 2*min_coarse) or (npx / (model->nblocks(0)*2) <= 0))
-					model->nblocks(1) *= 2;
-				else
-					model->nblocks(0) *= 2;
-			} else {
-				if (((topoc.nglobal(1) / (model->nblocks(1)*2)) <= 2*min_coarse) or (npy / (model->nblocks(1)*2) <=0))
-					model->nblocks(0) *=2;
-				else
-					model->nblocks(1) *= 2;
-			}
-
-			nlx = topoc.nglobal(0) / model->nblocks(0);
-			nly = topoc.nglobal(1) / model->nblocks(1);
-		} while (keep_refining(npx, npy, model->nblocks(0), model->nblocks(1),
-		                       nlx, nly, min_coarse));
+		}
 		return choices;
 	}
 }
@@ -176,31 +145,14 @@ std::shared_ptr<vcycle_model> perf_factory::random_vcycle(config::reader & conf,
 		model->set_cgperf(cg_model);
 	} else {
 		// predict the best number of processor blocks
-		model->nblocks(0) = 1;
-		model->nblocks(1) = 1;
 		std::vector<std::array<int,2>> choices;
-		len_t nlx = topoc.nglobal(0);
-		len_t nly = topoc.nglobal(1);
-		do {
-			choices.push_back(std::array<int,2>({model->nblocks(0), model->nblocks(1)}));
-			//if ((npx / model->nblocks(0)) > (npy / model->nblocks(1))) {
-			// greedily adding processor blocks by local problem size
-			if (nlx > nly) {
-				if (((topoc.nglobal(0) / (model->nblocks(0)*2)) <= 2*min_coarse) or (npx / (model->nblocks(0)*2) <= 0))
-					model->nblocks(1) *= 2;
-				else
-					model->nblocks(0) *= 2;
-			} else {
-				if (((topoc.nglobal(1) / (model->nblocks(1)*2)) <= 2*min_coarse) or (npy / (model->nblocks(1)*2) <=0))
-					model->nblocks(0) *=2;
-				else
-					model->nblocks(1) *= 2;
-			}
+		auto redist_subsets = redist_generator({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse);
+		for (auto nblocks : redist_subsets) {
+			for (auto i : range(2))
+				model->nblocks(i) = nblocks[i];
 
-			nlx = topoc.nglobal(0) / model->nblocks(0);
-			nly = topoc.nglobal(1) / model->nblocks(1);
-		} while (keep_refining(npx, npy, model->nblocks(0), model->nblocks(1),
-		                       nlx, nly, min_coarse));
+			choices.push_back(std::array<int,2>({model->nblocks(0), model->nblocks(1)}));
+		}
 
 		auto rand_choice = path.back();
 		path.pop_back();
@@ -287,14 +239,14 @@ std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(config::reader & conf, in
 		model->set_cgperf(cg_model);
 	} else {
 		// predict the best number of processor blocks
-		model->nblocks(0) = 1;
-		model->nblocks(1) = 1;
 		std::array<int,2> best_blocks;
 		float best_time = std::numeric_limits<float>::max();
 		std::shared_ptr<vcycle_model> best_cg;
-		len_t nlx = topoc.nglobal(0);
-		len_t nly = topoc.nglobal(1);
-		do {
+		for (auto nblocks : redist_generator({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)},
+		                                     min_coarse))
+		{
+			model->nblocks(0) = nblocks[0];
+			model->nblocks(1) = nblocks[1];
 			auto cg_model = perf_factory::dfs_vcycle(conf, model->nblocks(0), model->nblocks(1),
 			                                         topoc.nglobal(0), topoc.nglobal(1),false,rlevel+1);
 			// set coarse solve to 0
@@ -308,25 +260,7 @@ std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(config::reader & conf, in
 				best_blocks[1] = model->nblocks(1);
 				best_cg = cg_model;
 			}
-			//if ((npx / model->nblocks(0)) > (npy / model->nblocks(1))) {
-			// greedily adding processor blocks by local problem size
-			if (nlx > nly) {
-				if (((topoc.nglobal(0) / (model->nblocks(0)*2)) <= 2*min_coarse) or (npx / (model->nblocks(0)*2) <= 0))
-					model->nblocks(1) *= 2;
-				else
-					model->nblocks(0) *= 2;
-			} else {
-				if (((topoc.nglobal(1) / (model->nblocks(1)*2)) <= 2*min_coarse) or (npy / (model->nblocks(1)*2) <=0))
-					model->nblocks(0) *=2;
-				else
-					model->nblocks(1) *= 2;
-			}
-
-			nlx = topoc.nglobal(0) / model->nblocks(0);
-			nly = topoc.nglobal(1) / model->nblocks(1);
-		} while (keep_refining(npx, npy, model->nblocks(0), model->nblocks(1),
-		                       nlx, nly, min_coarse));
-
+		}
 
 		model->nblocks(0) = best_blocks[0];
 		model->nblocks(1) = best_blocks[1];
@@ -421,34 +355,15 @@ std::array<len_t,2> perf_factory::graph_vcycle(std::ostream & os, int npx, int n
 		model->set_cgperf(cg_model);
 	} else {
 		// predict the best number of processor blocks
-		int nblocks[2];
-		model->nblocks(0) = 1;
-		model->nblocks(1) = 1;
-		len_t nlx = topoc.nglobal(0);
-		len_t nly = topoc.nglobal(1);
-		do {
+		for (auto nblocks : redist_generator({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse)) {
+			for (auto i : range(2))
+				model->nblocks(i) = nblocks[i];
+
 			auto ngc = perf_factory::graph_vcycle(os, model->nblocks(0), model->nblocks(1),
 			                                      topoc.nglobal(0), topoc.nglobal(1),false,rlevel+1);
 			os << node_id(rlevel, npx, npy, nx, ny, topoc.nglobal(0), topoc.nglobal(1)) << " -> "
 			   << node_id(rlevel+1, model->nblocks(0), model->nblocks(1), topoc.nglobal(0), topoc.nglobal(1), ngc[0], ngc[1]) << ";\n";
-			//if ((npx / model->nblocks(0)) > (npy / model->nblocks(1))) {
-			// greedily adding processor blocks by local problem size
-			if (nlx > nly) {
-				if (((topoc.nglobal(0) / (model->nblocks(0)*2)) <= 2*min_coarse) or (npx / (model->nblocks(0)*2) <= 0))
-					model->nblocks(1) *= 2;
-				else
-					model->nblocks(0) *= 2;
-			} else {
-				if (((topoc.nglobal(1) / (model->nblocks(1)*2)) <= 2*min_coarse) or (npy / (model->nblocks(1)*2) <=0))
-					model->nblocks(0) *=2;
-				else
-					model->nblocks(1) *= 2;
-			}
-
-			nlx = topoc.nglobal(0) / model->nblocks(0);
-			nly = topoc.nglobal(1) / model->nblocks(1);
-		} while (keep_refining(npx, npy, model->nblocks(0), model->nblocks(1),
-		                       nlx, nly, min_coarse));
+		}
 	}
 
 	if (rlevel == 0) {
