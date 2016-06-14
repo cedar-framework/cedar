@@ -10,7 +10,7 @@ static inline bool keep_refining(int npx, int npy, int nbx, int nby, len_t nlx, 
                           int min_coarse)
 {
 	bool ret = ((npx / nbx) > 0 and (npy / nby) > 0);
-	ret = ret and ((npx / nbx) * (npy / nby) > 1);
+	//ret = ret and ((npx / nbx) * (npy / nby) > 1);
 	ret = ret and (nlx > 2*min_coarse);
 	ret = ret and (nly > 2*min_coarse);
 
@@ -34,12 +34,12 @@ redist_iterator() : nblocks({0,0}) {}
 
 	redist_iterator & operator++() {
 		if (nlocal[0] > nlocal[1]) {
-			if (((nglobal[0] / (nblocks[0]*2)) <= 2*min_coarse) or (nlocal[0] / (nblocks[0]*2) <= 0))
+			if (((nglobal[0] / (nblocks[0]*2)) <= 2*min_coarse) or (np[0] / (nblocks[0]*2) <= 0))
 				nblocks[1] *= 2;
 			else
 				nblocks[0] *= 2;
 		} else {
-			if (((nglobal[1] / (nblocks[1]*2)) <= 2*min_coarse) or (nlocal[1] / (nblocks[1]*2) <=0))
+			if (((nglobal[1] / (nblocks[1]*2)) <= 2*min_coarse) or (np[1] / (nblocks[1]*2) <=0))
 				nblocks[0] *= 2;
 			else
 				nblocks[1] *= 2;
@@ -47,7 +47,7 @@ redist_iterator() : nblocks({0,0}) {}
 		for (int i = 0; i < 2; i++) {
 			nlocal[i] = nglobal[i] / nblocks[i];
 		}
-		if (!(keep_refining(np[0], np[1], nblocks[0], nblocks[1], nlocal[0], nlocal[1], min_coarse))) {
+		if (!keep_refining(np[0], np[1], nblocks[0], nblocks[1], nlocal[0], nlocal[1], min_coarse)) {
 			nblocks[0] = 0; nblocks[1] = 0;
 		}
 	}
