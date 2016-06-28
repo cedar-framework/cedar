@@ -20,6 +20,7 @@ subroutine putf(so, qf,&
   igs, jgs, hx, hy) BIND(C, NAME='putf')
 
   use ModInterface
+  use diffusion
   implicit none
   include "BMG_stencils_f90.h"
 
@@ -36,7 +37,6 @@ subroutine putf(so, qf,&
        igf, jgf, i, j,&
        ibeg, iend, jbeg, jend, is, js
   real(real_t) :: h2, xh, yh, fs
-
 
   !
   !  Standard halo with depth = [1,1]
@@ -100,7 +100,7 @@ subroutine putf(so, qf,&
   !
   DO j=jBEG,jEND
      DO i=2, iEND
-        SO(i,j,ks) = 1.0*yh
+        SO(i,j,ks) = da(i, j, hx, hy) * yh
      ENDDO
   ENDDO
 
@@ -110,7 +110,7 @@ subroutine putf(so, qf,&
   DO j=2, jEND
      DO i=iBEG, iEND
 
-        SO(i,j,kw) = 1.0*xh
+        SO(i,j,kw) = dr(i, j, hx, hy) * xh
      ENDDO
   ENDDO
 
@@ -122,7 +122,7 @@ subroutine putf(so, qf,&
 
         call rhs(is,js,hx,hy,fs)
         qf(i,j) = fs*h2
-        so(i,j,ko) = 2*xh + 2*yh
+        so(i,j,ko) = 2*xh*da(i,j,hx,hy) + 2*yh*dr(i,j,hx,hy)
      enddo
   enddo
 
