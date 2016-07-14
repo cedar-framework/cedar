@@ -122,7 +122,7 @@ subroutine putf(so, qf,&
 
         call rhs(is,js,hx,hy,fs)
         qf(i,j) = fs*h2
-        so(i,j,ko) = 2*xh*da(i,j,hx,hy) + 2*yh*dr(i,j,hx,hy)
+        so(i,j,ko) = 2*xh*dr(i,j,hx,hy) + 2*yh*da(i,j,hx,hy)
      enddo
   enddo
 
