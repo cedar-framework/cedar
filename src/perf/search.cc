@@ -1,6 +1,7 @@
 #include <memory>
 
 #include <boxmg/perf/redist_generator.h>
+#include <boxmg/perf/greedy_iterator.h>
 #include <boxmg/perf/perf_factory.h>
 #include <boxmg/perf/const_model.h>
 #include <boxmg/perf/search.h>
@@ -51,7 +52,7 @@ std::vector<std::array<int,2>> perf_problem::actions(perf_state & state)
 
 	int min_coarse = conf.get<int>("solver.min-coarse");
 
-	auto redist_subsets = redist_generator({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse);
+	auto redist_subsets = redist_generator<greedy_iterator>({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse);
 	for (auto nblocks : redist_subsets) {
 		ret.push_back(nblocks);
 	}

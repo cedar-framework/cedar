@@ -2,6 +2,8 @@
 #include <random>
 
 #include <boxmg/perf/redist_generator.h>
+#include <boxmg/perf/greedy_iterator.h>
+#include <boxmg/perf/full_iterator.h>
 #include <boxmg/2d/util/topo.h>
 #include <boxmg/3d/util/topo.h>
 #include <boxmg/config/reader.h>
@@ -86,7 +88,7 @@ std::vector<std::vector<int>> get_choices(config::reader & conf, int npx, int np
 		// predict the best number of processor blocks
 		std::vector<std::vector<int>> choices;
 		int choice_num = 0;
-		for (auto nblocks : redist_generator({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse)) {
+		for (auto nblocks : redist_generator<full_iterator>({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse)) {
 			for (auto i : range(2))
 				model->nblocks(i) = nblocks[i];
 			auto paths = get_choices(conf, model->nblocks(0), model->nblocks(1),
@@ -146,7 +148,7 @@ std::shared_ptr<vcycle_model> perf_factory::random_vcycle(config::reader & conf,
 	} else {
 		// predict the best number of processor blocks
 		std::vector<std::array<int,2>> choices;
-		auto redist_subsets = redist_generator({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse);
+		auto redist_subsets = redist_generator<full_iterator>({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse);
 		for (auto nblocks : redist_subsets) {
 			for (auto i : range(2))
 				model->nblocks(i) = nblocks[i];
@@ -242,8 +244,8 @@ std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(config::reader & conf, in
 		std::array<int,2> best_blocks;
 		float best_time = std::numeric_limits<float>::max();
 		std::shared_ptr<vcycle_model> best_cg;
-		for (auto nblocks : redist_generator({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)},
-		                                     min_coarse))
+		for (auto nblocks : redist_generator<greedy_iterator>({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)},
+		                                                      min_coarse))
 		{
 			model->nblocks(0) = nblocks[0];
 			model->nblocks(1) = nblocks[1];
@@ -353,7 +355,7 @@ std::array<len_t,2> perf_factory::graph_vcycle(std::ostream & os, int npx, int n
 		model->set_cgperf(cg_model);
 	} else {
 		// predict the best number of processor blocks
-		for (auto nblocks : redist_generator({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse)) {
+		for (auto nblocks : redist_generator<greedy_iterator>({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse)) {
 			for (auto i : range(2))
 				model->nblocks(i) = nblocks[i];
 
