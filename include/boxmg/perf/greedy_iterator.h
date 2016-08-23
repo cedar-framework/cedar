@@ -32,6 +32,8 @@ greedy_iterator() : redist_iterator() {}
 		if (!keep_refining(np[0], np[1], nblocks[0], nblocks[1], nlocal[0], nlocal[1], min_coarse)) {
 			nblocks[0] = 0; nblocks[1] = 0;
 		}
+
+		return *this;
 	}
 };
 
