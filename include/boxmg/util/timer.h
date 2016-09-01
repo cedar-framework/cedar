@@ -3,6 +3,7 @@
 
 #include <mpi.h>
 #include <string>
+#include <boxmg/util/time_log.h>
 
 namespace boxmg {
 

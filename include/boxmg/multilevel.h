@@ -176,21 +176,31 @@ multilevel() : conf("config.json") {};
 	{
 		auto & A = levels[lvl].A;
 
+		timer_begin("relaxation");
 		levels[lvl].presmoother(A, x, b);
+		timer_end("relaxation");
 
 		grid_func & residual = levels[lvl].res;
+		timer_begin("residual");
 		A.residual(x, b, residual);
+		timer_end("residual");
 
 		levels[lvl].P.residual = &levels[lvl].res;
 		log_residual(lvl, residual);
 
 		auto & coarse_b = levels[lvl+1].b;
 		auto & coarse_x = levels[lvl+1].x;
+		timer_begin("restrict");
 		levels[lvl].R.apply(residual, coarse_b);
+		timer_end("restrict");
 		coarse_x.set(0.0);
 
+		timer_down();
+
 		if (lvl == levels.size() - 2) {
+			timer_begin("coarse-solve");
 			coarse_solver(levels[levels.size()-1].A, coarse_x, coarse_b);
+			timer_end("coarse-solve");
 		} else {
 			for (auto i : range(n)) {
 				(void)i;
@@ -198,9 +208,15 @@ multilevel() : conf("config.json") {};
 			}
 		}
 
-		x += levels[lvl].P * coarse_x;
+		timer_up();
 
+		timer_begin("interp-add");
+		x += levels[lvl].P * coarse_x;
+		timer_end("interp-add");
+
+		timer_begin("relaxation");
 		levels[lvl].postsmoother(A, x, b);
+		timer_end("relaxation");
 
 		if (log::info.active()) {
 			A.residual(x,b,residual);
@@ -218,9 +234,7 @@ multilevel() : conf("config.json") {};
 		real_t res0_l2 = levels[0].res.template lp_norm<2>();
 		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
 
-		timer solve_timer("Solve");
-		solve_timer.begin();
-
+		timer_begin("solve");
 		for (auto i: range(maxiter)) {
 			if (levels.size() == 1)
 				coarse_solver(levels[0].A, x, b);
@@ -232,8 +246,7 @@ multilevel() : conf("config.json") {};
 			log::status << "Iteration " << i << " relative l2 norm: " << rel_l2 << std::endl;
 			if (rel_l2 < tol) break;
 		}
-
-		solve_timer.end();
+		timer_end("solve");
 
 		return x;
 	}
@@ -247,8 +260,7 @@ multilevel() : conf("config.json") {};
 		real_t res0_l2 = levels[0].res.template lp_norm<2>();
 		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
 
-		timer solve_timer("Solve");
-		solve_timer.begin();
+		timer_begin("solve");
 
 		for (auto i: range(maxiter)) {
 			if (levels.size() == 1)
@@ -261,8 +273,7 @@ multilevel() : conf("config.json") {};
 			log::status << "Iteration " << i << " relative l2 norm: " << rel_l2 << std::endl;
 			if (rel_l2 < tol) break;
 		}
-
-		solve_timer.end();
+		timer_end("solve");
 	}
 
 
