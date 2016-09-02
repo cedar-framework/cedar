@@ -4,6 +4,7 @@
 #include <mpi.h>
 #include <array>
 
+#include <boxmg/mpi/redist_comms.h>
 #include <boxmg/2d/mpi/solver.h>
 #include <boxmg/2d/stencil_op.h>
 #include <boxmg/2d/mpi/halo.h>
@@ -19,7 +20,7 @@ public:
 
 protected:
 	std::unique_ptr<solver> slv;
-	MPI_Comm collcomm; /** Collective communicator for gathering data */
+	redist_comms rcomms;
 	int block_id; /** id within a block */
 	int block_num; /** which block */
 	std::array<int,2> nblock;

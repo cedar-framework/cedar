@@ -64,7 +64,7 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 	}
 	array<len_t,real_t,1> rbuf(rbuf_len);
 	MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
-	               displs.data(), MPI_DOUBLE, collcomm);
+	               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
 
 
 	// Loop through all my blocks
@@ -141,13 +141,13 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 				}
 			}
 
-			MPI_Send(sbuf.data(), sbuf.len(0)*sbuf.len(1), MPI_DOUBLE, send_id, 0, collcomm);
+			MPI_Send(sbuf.data(), sbuf.len(0)*sbuf.len(1), MPI_DOUBLE, send_id, 0, rcomms.pblock_comm);
 		}
 	} else if (recv_id > -1) {
 		int ci = block_id % nbx.len(0);
 		int cj = block_id / nbx.len(0);
 
-		MPI_Recv(x.data(), x.len(0)*x.len(1), MPI_DOUBLE, recv_id, 0, collcomm, MPI_STATUS_IGNORE);
+		MPI_Recv(x.data(), x.len(0)*x.len(1), MPI_DOUBLE, recv_id, 0, rcomms.pblock_comm, MPI_STATUS_IGNORE);
 	}
 }
 
@@ -187,7 +187,7 @@ stencil_op redist_solver::redist_operator(const stencil_op & so, topo_ptr topo)
 	}
 	array<len_t,real_t,1> rbuf(rbuf_len);
 	MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
-	               displs.data(), MPI_DOUBLE, collcomm);
+	               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
 
 	// Loop through all my blocks
 	len_t igs, jgs;
@@ -299,9 +299,12 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 
 	int color = grid->coord(0) + grid->nproc(0)*grid->coord(1);
 	int key = (fine_topo.coord(0) - lowi) + (fine_topo.coord(1) - lowj)*parti.size(grid->coord(0));
-	MPI_Comm_split(fine_topo.comm, color, key, &this->collcomm);
+	MPI_Comm_split(fine_topo.comm, color, key, &this->rcomms.pblock_comm);
 
 	MPI_Comm_split(fine_topo.comm, key, color, &grid->comm);
+
+	rcomms.redist_comm = grid->comm;
+	rcomms.parent_comm = fine_topo.comm;
 
 	block_num = color;
 	block_id = key;
@@ -316,6 +319,7 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 	if (block_id > (nactive-1)) {
 		active = false;
 		recv_id = block_id % nactive;
+		color = grid->nproc(0)*grid->nproc(1);  // color for inactive processors
 	} else {
 		int send_id = block_id + nactive;
 		while (send_id < (nbx.len(0)*nby.len(0))) {
@@ -323,6 +327,10 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 			send_id += nactive;
 		}
 	}
+
+	MPI_Comm_split(fine_topo.comm, color, key, &this->rcomms.active_pblock_comm);
+
+	timer_redist(rcomms);
 
 	return grid;
 }

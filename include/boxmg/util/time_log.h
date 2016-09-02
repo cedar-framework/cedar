@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <boxmg/mpi/redist_comms.h>
 
 namespace boxmg {
 	class time_log
@@ -13,13 +14,14 @@ namespace boxmg {
 		void end(std::string end);
 		void up();
 		void down();
-		void add_comm(MPI_Comm comm) {comms.push_back(comm);}
-		void redist(MPI_Comm comm) {add_comm(comm);redist_levels.push_back(lvl);}
+		void init(MPI_Comm comm) { this->comm = comm; }
+		void redist(redist_comms comm) {rcomms.push_back(comm);redist_levels.push_back(lvl);}
 		void save(std::string fname);
 
 	private:
-		std::vector<MPI_Comm> comms;
+		MPI_Comm comm;
 		std::vector<int> redist_levels;
+		std::vector<redist_comms> rcomms;
 		std::vector<std::map<std::string, double>> ltimes;
 		std::vector<std::map<std::string, double>> stimes;
 		int lvl;
@@ -35,8 +37,8 @@ namespace boxmg {
 	}
 	inline void timer_up() {tlog.up();}
 	inline void timer_down(){tlog.down();}
-	inline void timer_redist(MPI_Comm comm) {tlog.redist(comm);}
-	inline void timer_init(MPI_Comm comm){tlog.add_comm(comm);}
+	inline void timer_redist(redist_comms comm) {tlog.redist(comm);}
+	inline void timer_init(MPI_Comm comm){tlog.init(comm);}
 	inline void timer_save(std::string fname){tlog.save(fname);}
 }
 
