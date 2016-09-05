@@ -9,6 +9,8 @@
 #include <boxmg/2d/util/mpi_grid.h>
 #include <boxmg/2d/mpi/solver.h>
 
+#include <boxmg/util/time_log.h>
+
 extern "C" {
 	using namespace boxmg;
 	void putf(real_t *so, real_t *qf,
@@ -51,6 +53,8 @@ int main(int argc, char *argv[])
 	int provided;
 
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
+
+	timer_init(MPI_COMM_WORLD);
 
 	config::reader conf;
 
@@ -100,6 +104,7 @@ int main(int argc, char *argv[])
 
 	auto sol = bmg.solve(b);
 
+
 	mpi::grid_func exact_sol(sol.grid_ptr());
 
 	real_t y = sol.grid().is(1)*hy;
@@ -115,6 +120,8 @@ int main(int argc, char *argv[])
 	mpi::grid_func diff = exact_sol - sol;
 
 	log::status << "Solution norm: " << diff.inf_norm() << std::endl;
+
+	timer_save("timings.json");
 
 	log::status << "Finished Test" << std::endl;
 

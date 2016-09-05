@@ -41,6 +41,7 @@ redist_solver::redist_solver(const stencil_op & so, std::array<int, 2> nblock) :
 
 void redist_solver::solve(const grid_func & b, grid_func & x)
 {
+	timer_begin("agglomerate");
 	array<len_t,real_t,1> sbuf(b.shape(0)*b.shape(1));
 	int idx = 0;
 	for (auto j : b.range(1)) {
@@ -88,6 +89,8 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 		jgs += ny;
 	}
 
+	timer_end("agglomerate");
+
 	if (active) {
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
@@ -96,6 +99,8 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 		slv->solve(b_redist, x_redist);
 		log::set_header_msg("");
 		MSG_play(parent_comm);
+
+		timer_begin("remainder");
 
 		// copy local part from redistributed solution
 		int ci = block_id % nbx.len(0);
@@ -143,11 +148,15 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 
 			MPI_Send(sbuf.data(), sbuf.len(0)*sbuf.len(1), MPI_DOUBLE, send_id, 0, rcomms.pblock_comm);
 		}
+
+		timer_end("remainder");
 	} else if (recv_id > -1) {
+		timer_begin("remainder");
 		int ci = block_id % nbx.len(0);
 		int cj = block_id / nbx.len(0);
 
 		MPI_Recv(x.data(), x.len(0)*x.len(1), MPI_DOUBLE, recv_id, 0, rcomms.pblock_comm, MPI_STATUS_IGNORE);
+		timer_end("remainder");
 	}
 }
 

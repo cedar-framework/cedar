@@ -158,11 +158,13 @@ namespace impls
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
+		timer_begin("halo-stencil");
 		BMG2_SymStd_SETUP_fine_stencil(topo.level()+1, sop.data(),
 		                               sten.len(0), sten.len(1), nstencil,
 		                               ctx->msg_geom.data(), ctx->msg_geom.size(),
 		                               ctx->pMSGSO.data(), ctx->msg_buffer.data(),
 		                               ctx->msg_buffer.size(), fcomm);
+		timer_end("halo-stencil");
 	}
 
 
@@ -173,9 +175,11 @@ namespace impls
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
+		timer_begin("halo");
 		BMG2_SymStd_UTILS_update_ghosts(topo.level()+1, f.data(), f.len(0), f.len(1), ctx->msg_geom.data(),
 		                                ctx->msg_geom.size(), ctx->pMSG.data(), ctx->msg_buffer.data(),
 		                                ctx->msg_buffer.size(), topo.nlevel(), fcomm);
+		timer_end("halo");
 	}
 }
 }}}
