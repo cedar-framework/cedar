@@ -129,8 +129,10 @@ void time_log::save(std::string fname)
 	}
 	pt.add_child("levels", children);
 
-	int rank;
+	int rank, size;
 	MPI_Comm_rank(comm, &rank);
+	MPI_Comm_size(comm, &size);
+	pt.put("np", size);
 	if (rank == 0)
 		json_parser::write_json(fname, pt);
 }
