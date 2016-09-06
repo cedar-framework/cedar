@@ -72,7 +72,6 @@ namespace config
 
             for (typename std::vector<OptionType>::iterator it=vec.begin();it != vec.end();++it){
                 pt.put(path + ".", *it);
-                std::cout << *it << std::endl;
             }
 
         }

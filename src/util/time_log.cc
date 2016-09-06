@@ -81,7 +81,7 @@ void time_log::save(std::string fname)
 	for (auto i = 0; i < ltimes.size(); ++i) {
 		loc_linfo[TIMING_COUNT] += ltimes[i].size();
 	}
-	MPI_Allreduce(&loc_linfo, &linfo, 2, MPI_INT, MPI_MAX, comm);
+	MPI_Allreduce(loc_linfo, linfo, 2, MPI_INT, MPI_MAX, comm);
 
 	for (auto i = 0; i < linfo[TIMING_COUNT] - loc_linfo[TIMING_COUNT]; ++i) {
 		double max, min, ratio, avg;
