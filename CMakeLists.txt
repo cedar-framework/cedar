@@ -30,4 +30,5 @@ include_directories(${CMAKE_BINARY_DIR}/include/boxmg/2d)
 
 add_subdirectory(src)
 add_library(boxmg ${boxmg_src})
+install(TARGETS boxmg LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 add_subdirectory(app)
