@@ -19,6 +19,7 @@ public:
 	void solve(const grid_func & b, grid_func & x);
 
 protected:
+	bool redundant;
 	std::unique_ptr<solver> slv;
 	redist_comms rcomms;
 	int block_id; /** id within a block */
@@ -32,8 +33,11 @@ protected:
 	MPI_Fint msg_comm;
 	grid_func b_redist;
 	grid_func x_redist;
+
 	std::shared_ptr<grid_topo> redist_topo(const grid_topo & fine_topo, msg_ctx & ctx);
 	stencil_op redist_operator(const stencil_op & so, topo_ptr topo);
+	void gather_rhs(const grid_func & b);
+	void scatter_sol(grid_func & x);
 };
 
 }}}

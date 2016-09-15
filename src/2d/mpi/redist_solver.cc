@@ -14,8 +14,8 @@ extern "C" {
 using namespace boxmg;
 using namespace boxmg::bmg2d::mpi;
 
-redist_solver::redist_solver(const stencil_op & so, std::array<int, 2> nblock) : nblock(nblock), active(true),
-	           recv_id(-1)
+redist_solver::redist_solver(const stencil_op & so, std::array<int, 2> nblock) :
+	redundant(false), nblock(nblock), active(true), recv_id(-1)
 {
 	// Split communicator into collective processor blocks
 	auto & topo = so.grid();
@@ -25,7 +25,7 @@ redist_solver::redist_solver(const stencil_op & so, std::array<int, 2> nblock) :
 	b_redist = grid_func(ctopo);
 	x_redist = grid_func(ctopo);
 
-	if (active) {
+	if ((redundant and active) or (not redundant and block_id == 0)) {
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
 		log::set_header_msg(" (redist)");
@@ -42,56 +42,10 @@ redist_solver::redist_solver(const stencil_op & so, std::array<int, 2> nblock) :
 void redist_solver::solve(const grid_func & b, grid_func & x)
 {
 	timer_begin("agglomerate");
-	array<len_t,real_t,1> sbuf(b.shape(0)*b.shape(1));
-	int idx = 0;
-	for (auto j : b.range(1)) {
-		for (auto i : b.range(0)) {
-			sbuf(idx) = b(i,j);
-			idx++;
-		}
-	}
-
-
-	std::vector<int> rcounts(nbx.len(0)*nby.len(0));
-	std::vector<int> displs(nbx.len(0)*nby.len(0));
-	len_t rbuf_len = 0;
-	for (auto j : range(nby.len(0))) {
-		for (auto i : range(nbx.len(0))) {
-			int idx = i+j*nbx.len(0);
-			displs[idx] = rbuf_len;
-			rcounts[idx] = nbx(i)*nby(j);
-			rbuf_len += rcounts[idx];
-		}
-	}
-	array<len_t,real_t,1> rbuf(rbuf_len);
-	MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
-	               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
-
-
-	// Loop through all my blocks
-	len_t igs, jgs;
-	idx = 0;
-	jgs = 1;
-	for (auto j : range(nby.len(0))) {
-		auto ny = 0;
-		igs = 1;
-		for (auto i : range(nbx.len(0))) {
-			auto nx = nbx(i);
-			ny = nby(j);
-			for (auto jj: range(ny)) {
-				for (auto ii : range(nx)) {
-					b_redist(igs+ii,jgs+jj) = rbuf(idx);
-					idx++;
-				}
-			}
-			igs += nx;
-		}
-		jgs += ny;
-	}
-
+	gather_rhs(b);
 	timer_end("agglomerate");
 
-	if (active) {
+	if ((redundant and active) or (not redundant and block_id == 0)) {
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
 		MSG_play(msg_comm);
@@ -99,65 +53,9 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 		slv->solve(b_redist, x_redist);
 		log::set_header_msg("");
 		MSG_play(parent_comm);
-
-		timer_begin("remainder");
-
-		// copy local part from redistributed solution
-		int ci = block_id % nbx.len(0);
-		int cj = block_id / nbx.len(0);
-
-		igs = 1;
-		for (auto i = 0; i < ci; i++) {
-			igs += nbx(i);
-		}
-		jgs = 1;
-		for (auto j = 0; j < cj; j++) {
-			jgs += nby(j);
-		}
-
-		igs--; jgs--; // include ghosts
-
-		for (auto jj : range(x.len(1))) {
-			for (auto ii : range(x.len(0))) {
-				x(ii,jj) = x_redist(igs+ii,jgs+jj);
-			}
-		}
-
-
-		for (auto send_id : send_ids) {
-			ci = send_id % nbx.len(0);
-			cj = send_id / nbx.len(0);
-
-			igs = 1;
-			for (auto i = 0; i < ci; i++) {
-				igs += nbx(i);
-			}
-			jgs = 1;
-			for (auto j = 0; j < cj; j++) {
-				jgs += nby(j);
-			}
-
-			igs--; jgs--; // include ghosts
-
-			array<len_t,real_t,2> sbuf(nbx(ci)+2, nby(cj)+2);
-			for (auto jj : range(sbuf.len(1))) {
-				for (auto ii : range(sbuf.len(0))) {
-					sbuf(ii,jj) = x_redist(igs+ii,jgs+jj);
-				}
-			}
-
-			MPI_Send(sbuf.data(), sbuf.len(0)*sbuf.len(1), MPI_DOUBLE, send_id, 0, rcomms.pblock_comm);
-		}
-
-		timer_end("remainder");
-	} else if (recv_id > -1) {
-		timer_begin("remainder");
-		int ci = block_id % nbx.len(0);
-		int cj = block_id / nbx.len(0);
-
-		MPI_Recv(x.data(), x.len(0)*x.len(1), MPI_DOUBLE, recv_id, 0, rcomms.pblock_comm, MPI_STATUS_IGNORE);
-		timer_end("remainder");
 	}
+
+	scatter_sol(x);
 }
 
 
@@ -195,32 +93,40 @@ stencil_op redist_solver::redist_operator(const stencil_op & so, topo_ptr topo)
 		}
 	}
 	array<len_t,real_t,1> rbuf(rbuf_len);
-	MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
-	               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
 
-	// Loop through all my blocks
-	len_t igs, jgs;
-	idx = 0;
-	jgs = 1;
-	for (auto j : range(nby.len(0))) {
-		auto ny = 0;
-		igs = 1;
-		for (auto i : range(nbx.len(0))) {
-			auto nx = nbx(i);
-			ny = nby(j);
-			for (auto jj: range(ny)) {
-				for (auto ii : range(nx)) {
-					rsten(igs+ii,jgs+jj,dir::C) = rbuf(idx);
-					rsten(igs+ii,jgs+jj,dir::W) = rbuf(idx+1);
-					rsten(igs+ii,jgs+jj,4) = rbuf(idx+2);
-					rsten(igs+ii,jgs+jj,dir::S) = rbuf(idx+3);
-					rsten(igs+ii,jgs+jj,dir::SW) = rbuf(idx+4);
-					idx += 5;
+	if (redundant) {
+		MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
+		               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
+	} else {
+		MPI_Gatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
+		            displs.data(), MPI_DOUBLE, 0, rcomms.pblock_comm);
+	}
+
+	if (redundant or (block_id == 0)) {
+		// Loop through all my blocks
+		len_t igs, jgs;
+		idx = 0;
+		jgs = 1;
+		for (auto j : range(nby.len(0))) {
+			auto ny = 0;
+			igs = 1;
+			for (auto i : range(nbx.len(0))) {
+				auto nx = nbx(i);
+				ny = nby(j);
+				for (auto jj: range(ny)) {
+					for (auto ii : range(nx)) {
+						rsten(igs+ii,jgs+jj,dir::C) = rbuf(idx);
+						rsten(igs+ii,jgs+jj,dir::W) = rbuf(idx+1);
+						rsten(igs+ii,jgs+jj,4) = rbuf(idx+2);
+						rsten(igs+ii,jgs+jj,dir::S) = rbuf(idx+3);
+						rsten(igs+ii,jgs+jj,dir::SW) = rbuf(idx+4);
+						idx += 5;
+					}
 				}
+				igs += nx;
 			}
-			igs += nx;
+			jgs += ny;
 		}
-		jgs += ny;
 	}
 
 	return rop;
@@ -342,4 +248,166 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 	timer_redist(rcomms);
 
 	return grid;
+}
+
+
+void redist_solver::gather_rhs(const grid_func & b)
+{
+	array<len_t,real_t,1> sbuf(b.shape(0)*b.shape(1));
+	int idx = 0;
+	for (auto j : b.range(1)) {
+		for (auto i : b.range(0)) {
+			sbuf(idx) = b(i,j);
+			idx++;
+		}
+	}
+
+
+	std::vector<int> rcounts(nbx.len(0)*nby.len(0));
+	std::vector<int> displs(nbx.len(0)*nby.len(0));
+	len_t rbuf_len = 0;
+	for (auto j : range(nby.len(0))) {
+		for (auto i : range(nbx.len(0))) {
+			int idx = i+j*nbx.len(0);
+			displs[idx] = rbuf_len;
+			rcounts[idx] = nbx(i)*nby(j);
+			rbuf_len += rcounts[idx];
+		}
+	}
+	array<len_t,real_t,1> rbuf(rbuf_len);
+	if (redundant) {
+		MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
+		               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
+	} else {
+		MPI_Gatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
+		            displs.data(), MPI_DOUBLE, 0, rcomms.pblock_comm);
+	}
+
+	if (redundant or (block_id == 0)) {
+		// Loop through all my blocks
+		len_t igs, jgs;
+		idx = 0;
+		jgs = 1;
+		for (auto j : range(nby.len(0))) {
+			auto ny = 0;
+			igs = 1;
+			for (auto i : range(nbx.len(0))) {
+				auto nx = nbx(i);
+				ny = nby(j);
+				for (auto jj: range(ny)) {
+					for (auto ii : range(nx)) {
+						b_redist(igs+ii,jgs+jj) = rbuf(idx);
+						idx++;
+					}
+				}
+				igs += nx;
+			}
+			jgs += ny;
+		}
+	}
+}
+
+
+
+void redist_solver::scatter_sol(grid_func & x)
+{
+	if (not redundant) {
+		len_t sbuf_len = 0;
+		for (auto j : range(nby.len(0))) {
+			for (auto i : range(nbx.len(0))) {
+				sbuf_len += (nbx(i)+2)*(nby(j) + 2);
+			}
+		}
+
+		array<len_t, real_t, 1> sbuf(sbuf_len);
+		std::vector<int> scounts(nbx.len(0)*nby.len(0));
+		std::vector<int> displs(nbx.len(0)*nby.len(0));
+
+		{
+			len_t igs, jgs;
+			jgs = 1;
+			len_t idx = 0;
+			for (auto j : range(nby.len(0))) {
+				auto ny = 0;
+				igs = 1;
+				for (auto i : range(nbx.len(0))) {
+					auto nx = nbx(i);
+					ny = nby(j);
+
+					int block_ind = i+j*nbx.len(0);
+					displs[block_ind] = idx;
+					scounts[block_ind] = (nx+2)*(ny+2);
+
+					for (auto jj : range(ny+2)) {
+						for (auto ii : range(nx+2)) {
+							sbuf(idx) = x_redist(igs+ii-1,jgs+jj-1);
+							idx++;
+						}
+					}
+					igs += nx;
+				}
+				jgs += ny;
+			}
+		}
+		MPI_Scatterv(sbuf.data(), scounts.data(), displs.data(),
+		             MPI_DOUBLE, x.data(), x.len(0)*x.len(1),
+		             MPI_DOUBLE, 0, rcomms.pblock_comm);
+	}
+
+	if (redundant and active) {
+
+		// copy local part from redistributed solution
+		int ci = block_id % nbx.len(0);
+		int cj = block_id / nbx.len(0);
+
+		len_t igs, jgs;
+
+		igs = 1;
+		for (auto i = 0; i < ci; i++) {
+			igs += nbx(i);
+		}
+		jgs = 1;
+		for (auto j = 0; j < cj; j++) {
+			jgs += nby(j);
+		}
+
+		igs--; jgs--; // include ghosts
+
+		for (auto jj : range(x.len(1))) {
+			for (auto ii : range(x.len(0))) {
+				x(ii,jj) = x_redist(igs+ii,jgs+jj);
+			}
+		}
+
+		for (auto send_id : send_ids) {
+			ci = send_id % nbx.len(0);
+			cj = send_id / nbx.len(0);
+
+			igs = 1;
+			for (auto i = 0; i < ci; i++) {
+				igs += nbx(i);
+			}
+			jgs = 1;
+			for (auto j = 0; j < cj; j++) {
+				jgs += nby(j);
+			}
+
+			igs--; jgs--; // include ghosts
+
+			array<len_t,real_t,2> sbuf(nbx(ci)+2, nby(cj)+2);
+			for (auto jj : range(sbuf.len(1))) {
+				for (auto ii : range(sbuf.len(0))) {
+					sbuf(ii,jj) = x_redist(igs+ii,jgs+jj);
+				}
+			}
+
+			MPI_Send(sbuf.data(), sbuf.len(0)*sbuf.len(1), MPI_DOUBLE, send_id, 0, rcomms.pblock_comm);
+		}
+
+	} else if (redundant and (recv_id > -1)) {
+		int ci = block_id % nbx.len(0);
+		int cj = block_id / nbx.len(0);
+
+		MPI_Recv(x.data(), x.len(0)*x.len(1), MPI_DOUBLE, recv_id, 0, rcomms.pblock_comm, MPI_STATUS_IGNORE);
+	}
 }
