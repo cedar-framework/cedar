@@ -46,6 +46,7 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 	timer_end("agglomerate");
 
 	if ((redundant and active) or (not redundant and block_id == 0)) {
+		timer_down();
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
 		MSG_play(msg_comm);
@@ -53,9 +54,12 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 		slv->solve(b_redist, x_redist);
 		log::set_header_msg("");
 		MSG_play(parent_comm);
+		timer_up();
 	}
 
+	timer_begin("agglomerate");
 	scatter_sol(x);
+	timer_end("agglomerate");
 }
 
 
