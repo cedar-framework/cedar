@@ -67,39 +67,40 @@ int main(int argc, char *argv[])
 
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
 
+	timer_init(MPI_COMM_WORLD);
 	config::reader conf;
 
 	auto islocal = conf.get<bool>("grid.local", true);
-	auto nx = conf.get<len_t>("grid.nx", 31);
-	auto ny = conf.get<len_t>("grid.ny", 31);
-	auto nz = conf.get<len_t>("grid.nz", 31);
+	auto ndofs = conf.getvec<len_t>("grid.n");
+	auto nx = ndofs[0];
+	auto ny = ndofs[1];
+	auto nz = ndofs[2];
 	topo_ptr grid;
 	if (islocal) {
-		auto npx = conf.get<int>("grid.npx", 0);
-		auto npy = conf.get<int>("grid.npy", 0);
-		auto npz = conf.get<int>("grid.npz", 0);
-		if (npx == 0 or npy == 0 or npz == 0) {
-			grid = bmg3::util::create_topo(MPI_COMM_WORLD, nx, ny, nz);
-		} else {
+		auto np = conf.getvec<int>("grid.np");
+		if (np.size() >= 3) {
 			int size;
 			MPI_Comm_size(MPI_COMM_WORLD, &size);
-			assert(size == npx*npy*npz);
-			grid = bmg3::util::create_topo(MPI_COMM_WORLD, npx, npy, npz,
+			assert(size == np[0]*np[1]*np[2]);
+			grid = bmg3::util::create_topo(MPI_COMM_WORLD, np[0], np[1], np[2],
 			                              nx, ny, nz);
-
+		} else {
+			grid = bmg3::util::create_topo(MPI_COMM_WORLD, nx, ny, nz);
 		}
+
 		log::status << "Running local solve" << std::endl;
 	} else {
 		grid = bmg3::util::create_topo_global(MPI_COMM_WORLD, nx, ny, nz);
 		log::status << "Running global solve" << std::endl;
 	}
-	//auto grid = util::create_topo(MPI_COMM_WORLD, nx, ny, nz);
 
 	auto so = mpi::stencil_op(grid);
 	mpi::grid_func b(so.grid_ptr());
 
 	set_problem(so, b);
 	mpi::solver bmg(std::move(so));
+
+	MPI_Barrier(MPI_COMM_WORLD); // synchronize before timing solve
 	auto x = bmg.solve(b);
 
 	mpi::grid_func exact_sol(x.grid_ptr());
@@ -119,6 +120,7 @@ int main(int argc, char *argv[])
 	// 	ofile.close();
 	// }
 
+	timer_save("timings.json");
 	log::status << "Finished Test" << std::endl;
 
 	MPI_Finalize();
