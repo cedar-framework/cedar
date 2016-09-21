@@ -11,9 +11,7 @@ module diffusion
 
       real(real_t) :: xh
 
-      xh = hy/hx
-
-      dr = 1./xh
+      dr = 1.
 
     end function dr
 
@@ -28,9 +26,7 @@ module diffusion
 
       real(real_t) :: yh
 
-      yh = hx/hy
-
-      da = 1./yh
+      da = 1.
 
     end function da
 
