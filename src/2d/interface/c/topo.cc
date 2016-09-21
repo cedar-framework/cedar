@@ -27,6 +27,7 @@ extern "C"
 
 		grid->nproc(0) = nprocx;
 		grid->nproc(1) = nprocy;
+		grid->nproc(2) = 1;
 
 		grid->coord(0) = rank % nprocx;
 		grid->coord(1) = rank / nprocx;

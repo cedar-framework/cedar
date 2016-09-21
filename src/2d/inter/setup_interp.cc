@@ -2,10 +2,10 @@
 #include "boxmg/2d/inter/setup_interp.h"
 
 extern "C" {
-	void bmg2_symstd_setup_interp_oi(int*, int*, double*, double*, double*,
-	                                  int*, int*, int*, int*, int*, int*, int*, int*);
-
 	using namespace boxmg;
+	void BMG2_SymStd_SETUP_interp_OI(int kf, int kc, real_t *so, real_t *soc, real_t *ci,
+	                                 len_t iif, len_t jjf, len_t iic, len_t jjc,
+	                                 int nog, int ifd, int nstncl, int irelax);
 	void MPI_BMG2_SymStd_SETUP_interp_OI(int kf, int kc, real_t *so, real_t *ci,
 	                                     len_t iif, len_t jjf, len_t iic, len_t jjc,
 	                                     int nog, int ifd, int nstncl, int nogm,
@@ -26,7 +26,7 @@ namespace impls
 	{
 		using namespace boxmg::bmg2d;
 		int ifd;
-		int iif, jjf, iic, jjc;
+		len_t iif, jjf, iic, jjc;
 		int nstencil;
 		int irelax = 0;
 
@@ -53,8 +53,8 @@ namespace impls
 		// std::cout << "fine stencil: " << fopd.data() << std::endl;
 		// std::cout << "coarse stencil: " << copd.data() << std::endl;
 		// std::cout << "interpolation op: " << P.data() << std::endl;
-		bmg2_symstd_setup_interp_oi(&kf, &kc, fopd.data(), copd.data(), P.data(), &iif, &jjf, &iic, &jjc,
-		                            &nog, &ifd, &nstencil, &irelax);
+		BMG2_SymStd_SETUP_interp_OI(kf, kc, fopd.data(), copd.data(), P.data(), iif, jjf, iic, jjc,
+		                            nog, ifd, nstencil, irelax);
 	}
 
 	void mpi_setup_interp(int kf, int kc, int nog,

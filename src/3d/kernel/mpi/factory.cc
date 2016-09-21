@@ -11,6 +11,7 @@
 #include <boxmg/3d/inter/restrict.h>
 #include <boxmg/3d/kernel/setup_nog.h>
 #include <boxmg/3d/cg/setup_cg_lu.h>
+#include "boxmg/3d/cg/setup_cg_redist.h"
 #include <boxmg/3d/cg/solve_cg.h>
 
 #include <boxmg/3d/kernel/mpi/factory.h>
@@ -88,6 +89,16 @@ namespace factory
 		          const mpi::grid_func&,
 		          real_t*>(impls::mpi_solve_cg_lu));
 
+		kreg->add(kernel_name::setup_cg_redist, "c++",
+		          boxmg::kernel<const mpi::stencil_op &,
+		          std::shared_ptr<mpi::redist_solver>*,
+		          std::vector<int>&>(impls::setup_cg_redist));
+
+		kreg->add(kernel_name::solve_cg_redist, "c++",
+		          boxmg::kernel<const mpi::redist_solver &,
+		          mpi::grid_func &,
+		          const mpi::grid_func &>(impls::solve_cg_redist));
+
 		std::vector<std::tuple<std::string, std::string, std::string>> defaults = {
 			std::make_tuple(kernel_name::residual, "kernels.residual", "fortran-msg"),
 			std::make_tuple(kernel_name::halo_setup, "kernels.halo-setup", "fortran-msg"),
@@ -101,7 +112,9 @@ namespace factory
 			std::make_tuple(kernel_name::restriction, "kernels.restrict", "fortran-msg"),
 			std::make_tuple(kernel_name::setup_nog, "kernels.setup-nog", "fortran"),
 			std::make_tuple(kernel_name::setup_cg_lu, "kernels.setup-cg-lu", "fortran-msg"),
-			std::make_tuple(kernel_name::solve_cg, "kernels.solve-cg", "fortran-msg")
+			std::make_tuple(kernel_name::solve_cg, "kernels.solve-cg", "fortran-msg"),
+			std::make_tuple(kernel_name::setup_cg_redist, "kernels.setup-cg-redist", "c++"),
+			std::make_tuple(kernel_name::solve_cg_redist, "kernels.solve-cg-redist", "c++")
 		};
 
 		for (auto&& v : defaults) {

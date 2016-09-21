@@ -59,6 +59,12 @@ solver::solver(stencil_op&& fop)
 }
 
 
+solver::~solver()
+{
+	delete[] bbd;
+}
+
+
 int solver::compute_num_levels(stencil_op & fop)
 {
 	float nxc, nyc;

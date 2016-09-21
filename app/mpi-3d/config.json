@@ -1,23 +1,21 @@
 {
-	"log": ["error", "status", "info", "debug"],
-	"kernels":
-	{
-		"residual": "fortran"
-	},
+	"log": ["error", "status","info"],
 	"solver":
 	{
 		"cycle":
 		{
-			"nrelax-pre": 1,
-			"nrelax-post": 1
+			"nrelax-pre": 2,
+			"nrelax-post": 2
 		},
 		"tol": 1e-10,
 		"max-iter": 10,
-		"min-coarse": 3
+		"min-coarse": 3,
+		"cg-solver": "LU"
 	},
 	"grid":
 	{
-		"nx": 17,
-		"ny" : 17
+		"nx": 31,
+		"ny" : 31,
+		"nz": 31
 	}
 }

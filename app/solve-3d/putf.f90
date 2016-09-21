@@ -29,7 +29,7 @@ subroutine putf(so, qf,&
   integer :: kb, kp, kpw, kps
   parameter ( kp=1, kpw=2, kps=3, kb=4 )
 
-  integer :: i, i1, i2, j, j1, j2, k, k1
+  integer(len_t) :: i, i1, i2, j, j1, j2, k, k1
   real(real_t) :: xh, yh, zh, h2, fs
 
   h2=hx*hy*hz
@@ -69,8 +69,7 @@ subroutine putf(so, qf,&
   do k=2,k1
      do j=2,j1
         do i=2,i1
-           so(i,j,k,kp) = so(i,j+1,k,kps) + so(i,j,k+1,kb) + so(i,j,k,kpw)&
-                + so(i+1,j,k,kpw) + so(i,j,k,kb) + so(i,j,k,kps)
+           so(i,j,k,kp) = 2*xh + 2*yh + 2*zh
            call rhs(i,j,k,hx,hy,hz,fs)
            qf(i,j,k) = fs*h2
         enddo

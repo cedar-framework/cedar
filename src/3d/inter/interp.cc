@@ -65,6 +65,7 @@ namespace impls
 		mpi::grid_func & coarsed = const_cast<mpi::grid_func&>(coarse);
 		mpi::grid_func & res = const_cast<mpi::grid_func&>(residual);
 		grid_topo & topo = Pd.grid();
+		grid_topo & topof = Pd.fine_op->grid();
 		MsgCtx *ctx = (MsgCtx*) Pd.halo_ctx;
 
 		if (Pd.stencil().five_pt()) {
@@ -83,7 +84,7 @@ namespace impls
 		                           Pd.fine_op->data(), nstencil, Pd.data(),
 		                           coarsed.len(0), coarsed.len(1), coarsed.len(2),
 		                           fine.len(0), fine.len(1), fine.len(2),
-		                           topo.is(0), topo.is(1), topo.is(2),
+		                           topof.is(0), topof.is(1), topof.is(2),
 		                           ctx->msg_geom.data(), ctx->msg_geom.size(),
 		                           ctx->pMSG.data(), ctx->msg_buffer.data(),
 		                           ctx->msg_buffer.size(), fcomm);

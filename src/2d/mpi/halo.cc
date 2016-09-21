@@ -11,7 +11,7 @@ extern "C" {
 	void BMG2_SymStd_SETUP_MSG(int *pMSG, int *pMSGSO, len_t *iMSG_Geom,
 	                           len_t NMSGi, int *pSI_MSG, int IBC, len_t *IGRD,
 	                           int nog, int nogm, int nproc, int myproc,
-	                           int* dimx, int *dimy, int *dimxfine, int *dimyfine,
+	                           len_t* dimx, len_t *dimy, len_t *dimxfine, len_t *dimyfine,
 	                           int *procgrid, int nproci, int nprocj, int mpicomm);
 	void BMG2_SymStd_SETUP_LS(len_t *iWorkMSG, len_t NMSGi, int *pMSG, int *pLS, int *pSI_MSG,
 	                          int *procgrid, int nproci, int nprocj, int nog);
@@ -158,11 +158,13 @@ namespace impls
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
+		timer_begin("halo-stencil");
 		BMG2_SymStd_SETUP_fine_stencil(topo.level()+1, sop.data(),
 		                               sten.len(0), sten.len(1), nstencil,
 		                               ctx->msg_geom.data(), ctx->msg_geom.size(),
 		                               ctx->pMSGSO.data(), ctx->msg_buffer.data(),
 		                               ctx->msg_buffer.size(), fcomm);
+		timer_end("halo-stencil");
 	}
 
 
@@ -173,9 +175,11 @@ namespace impls
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
+		timer_begin("halo");
 		BMG2_SymStd_UTILS_update_ghosts(topo.level()+1, f.data(), f.len(0), f.len(1), ctx->msg_geom.data(),
 		                                ctx->msg_geom.size(), ctx->pMSG.data(), ctx->msg_buffer.data(),
 		                                ctx->msg_buffer.size(), topo.nlevel(), fcomm);
+		timer_end("halo");
 	}
 }
 }}}

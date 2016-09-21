@@ -38,6 +38,8 @@ namespace config
              */
             template <typename OptionType>
 	            std::vector<OptionType> getvec(std::string path);
+            template <typename OptionType>
+	            std::vector<std::vector<OptionType>> getnvec(std::string path);
             /**
              * Sets a new config file for future Config::get calls.
              *
@@ -70,7 +72,6 @@ namespace config
 
             for (typename std::vector<OptionType>::iterator it=vec.begin();it != vec.end();++it){
                 pt.put(path + ".", *it);
-                std::cout << *it << std::endl;
             }
 
         }
@@ -101,6 +102,25 @@ namespace config
             }
             return retvec;
         }
+
+    template <typename OptionType>
+	    std::vector<std::vector<OptionType>> reader::getnvec(std::string path)
+    {
+	    std::vector<std::vector<OptionType>> retvec;
+	    using boost::property_tree::ptree;
+	    boost::optional<ptree&> child = pt.get_child_optional(path);
+	    if (child) {
+		    ptree &pos = pt.get_child(path);
+		    std::for_each(pos.begin(), pos.end(), [&retvec](ptree::value_type &v) {
+				    std::vector<OptionType> toadd;
+				    std::for_each(v.second.begin(), v.second.end(), [&toadd](ptree::value_type &v) {
+						    toadd.push_back(v.second.get_value<OptionType>());
+					    });
+				    retvec.push_back(toadd);
+			    });
+	    }
+	    return retvec;
+    }
 }
 }
 #endif

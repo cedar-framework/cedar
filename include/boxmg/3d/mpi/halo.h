@@ -1,6 +1,8 @@
 #ifndef BOXMG_3D_HALO_H
 #define BOXMG_3D_HALO_H
 
+#include "boxmg/2d/ftn/mpi/BMG_workspace_c.h"
+
 #include <boxmg/array.h>
 #include <boxmg/mpi/grid_topo.h>
 #include <boxmg/3d/mpi/stencil_op.h>
@@ -19,12 +21,12 @@ namespace impls
 		std::vector<len_t> msg_geom;
 		array<int,int,3> proc_grid;
 		std::vector<int> proc_coord;
-		std::vector<int> dimxfine;
-		std::vector<int> dimyfine;
-		std::vector<int> dimzfine;
-		array<int,int,2> dimx;
-		array<int,int,2> dimy;
-		array<int,int,2> dimz;
+		std::vector<len_t> dimxfine;
+		std::vector<len_t> dimyfine;
+		std::vector<len_t> dimzfine;
+		array<int,len_t,2> dimx;
+		array<int,len_t,2> dimy;
+		array<int,len_t,2> dimz;
 		std::vector<real_t> msg_buffer;
 		int pSI_MSG;
 		int p_NLx_kg, p_NLy_kg, p_NLz_kg;
@@ -34,6 +36,18 @@ namespace impls
 		/* int pmsg[nbmg_pmsg,nog]; */
 		/* int msgbuffer[nmsgr]; */
 		/* int nmsgr; */
+		len_t nlocal(int kg, int dim, int ijkrank) {
+			len_t local_arr_ptr = pMSG(ipL_MSG_LocalArraySize,kg) - 1;  // 1 vs 0 based indexing
+			len_t idx = local_arr_ptr;
+			ijkrank--; // 1 vs 0 based indexing
+			idx += ijkrank*3 + dim;
+
+			return msg_geom[idx];
+		}
+
+		len_t cg_nlocal(int dim, int ijkrank) {
+			return nlocal(0, dim, ijkrank);
+		}
 	};
 
 	void setup_msg(grid_topo &topo, void **msg_ctx);

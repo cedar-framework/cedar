@@ -7,9 +7,9 @@ subroutine rhs(i, j, k, hx, hy, hz, fs)
   real(real_t) :: hx, hy, hz, fs, x, y, z
   real(real_t), parameter :: pi=4*atan(1.d0)
 
-  x = i + hx
-  y = j + hy
-  z = k + hz
+  x = (i-1)*hx
+  y = (j-1)*hy
+  z = (k-1)*hz
 
   fs = 12*(pi**2) * sin(2*pi*x)*sin(2*pi*y)*sin(2*pi*z)
 
@@ -119,11 +119,6 @@ subroutine putf(so, qf,&
   DO k=2, kEND
      DO j=jBEG,jEND
         DO i=2, iEND
-
-           is = iGs+i-1
-           js = jGs+j-1
-           kss = kGs+k-1
-
            SO(i,j,k,kps) = yh
         ENDDO
      ENDDO
@@ -135,11 +130,6 @@ subroutine putf(so, qf,&
   DO k=2, kEND
      DO j=2, jEND
         DO i=iBEG, iEND
-
-           is = iGs+i-1
-           js = jGs+j-1
-           kss = kGs+k-1
-
            SO(i,j,k,kpw) = xh
         ENDDO
      ENDDO
@@ -151,11 +141,6 @@ subroutine putf(so, qf,&
   DO k=kBEG, kEND
      DO j=2, jEND
         DO i=2, iEND
-
-           is = iGs+i-1
-           js = jGs+j-1
-           kss = kGs+k-1
-
            SO(i,j,k,kb) = zh
         ENDDO
      ENDDO
@@ -170,11 +155,9 @@ subroutine putf(so, qf,&
 
            call rhs(is,js,kss,hx,hy,hz,fs)
            qf(i,j,k) = fs*h2
-           so(i,j,k,kp) = so(i,j+1,k,kps) + so(i,j,k+1,kb) + so(i,j,k,kpw)&
-                + so(i+1,j,k,kpw) + so(i,j,k,kb) + so(i,j,k,kps)
+           so(i,j,k,kp) = 2*xh + 2*yh + 2*zh
         enddo
      enddo
   enddo
 
 end subroutine putf
-

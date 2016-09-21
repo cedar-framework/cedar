@@ -6,8 +6,10 @@
 #include "boxmg/mpi/grid_topo.h"
 
 namespace boxmg { namespace bmg2d { namespace util {
-
 			topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny);
-
+			topo_ptr create_topo(MPI_Comm comm, int npx, int npy, len_t nlx, len_t nly);
+			topo_ptr model_topo(int nprocx, int nprocy, len_t ngx, len_t ngy);
+			topo_ptr coarsen_topo(topo_ptr topof);
+			topo_ptr create_topo_global(MPI_Comm comm, len_t ngx, len_t ngy);
 }}}
 #endif

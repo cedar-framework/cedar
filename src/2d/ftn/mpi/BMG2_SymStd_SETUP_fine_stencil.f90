@@ -56,7 +56,8 @@
 !
       INTEGER(C_INT), VALUE :: KF, NStncl, MPICOMM
       INTEGER(len_t), VALUE :: IIF, JJF, NMSGi, NMSGr
-      INTEGER(C_INT) :: iWork(NMSGi), pMSGSO(NBMG_pMSG,KF)
+      INTEGER(len_t) :: iWork(NMSGi)
+      integer(c_int) :: pMSGSO(NBMG_pMSG,KF)
       REAL(real_t) :: SO(IIF+1,JJF+1,NStncl), BUFFER(NMSGr)
 
 ! --------------------------

@@ -13,12 +13,14 @@
 #include "boxmg/2d/mpi/grid_func.h"
 
 
+
 namespace boxmg { namespace bmg2d {
 			class solver;
 }}
 
 namespace boxmg { namespace bmg2d { namespace mpi {
 			class stencil_op;
+			class redist_solver;
 		}
 		namespace inter {
 			namespace mpi {
@@ -31,7 +33,7 @@ namespace boxmg { namespace bmg2d { namespace mpi {
 
 namespace boxmg { namespace bmg2d { namespace kernel { namespace mpi {
 namespace mpi = boxmg::bmg2d::mpi;
-class registry : public mpi_registry<mpi::stencil_op, relax_stencil, inter::mpi::prolong_op, mpi::grid_func, solver>
+class registry : public mpi_registry<mpi::stencil_op, relax_stencil, inter::mpi::prolong_op, mpi::grid_func, mpi::redist_solver, solver>
 {
 };
 

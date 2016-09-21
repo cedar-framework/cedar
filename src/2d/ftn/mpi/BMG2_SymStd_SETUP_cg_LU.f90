@@ -75,10 +75,10 @@
 ! ----------------------------
 !     Local Declarations
 !
-      INTEGER  I, IBC, INFO, I1, I2, J, J1, KK, N, INT_TEMP, IERR, K, &
-     &         IIG, JJG, proc, p_WS
-      INTEGER  LARGESTNODES, KKMAX
-      INTEGER  INT_TEMP1, INT_TEMP2, P1, P2, P1SUM, P2SUM, PXP1, PYP2
+      INTEGER  IBC, INFO, N, IERR, proc
+      integer(len_t) :: I, I1, I2, J, J1, INT_TEMP, IIG, JJG, p_WS
+      integer(len_t) :: KK, K, KKMAX, LARGESTNODES
+      integer(len_t) :: INT_TEMP1, INT_TEMP2, P1, P2, P1SUM, P2SUM, PXP1, PYP2
       integer cg_comm_type
 
 ! ======================================================================

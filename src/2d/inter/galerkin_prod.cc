@@ -7,9 +7,10 @@
 
 
 extern "C" {
-	void bmg2_symstd_setup_itli_ex(int*,int*,double*,double*,double*,
-	                               int*,int*,int*,int*, int*, int*, int*,int*);
 	using namespace boxmg;
+	void BMG2_SymStd_SETUP_ITLI_ex(int kf, int kc, real_t *so, real_t *soc, real_t *ci,
+	                               len_t iif, len_t jjf, len_t iic, len_t jjc, int nog,
+	                               int ifd, int nstncl, int ipn);
 	void MPI_BMG2_SymStd_SETUP_ITLI_ex(int kf, int kc, real_t *SO, real_t *SOC, real_t *CI,
 	                                   len_t IIF, len_t JJF, len_t IIC, len_t JJC, len_t iGs, len_t jGs,
 	                                   int nog, int ifd, int nstencil,
@@ -30,8 +31,8 @@ namespace impls
 	                   stencil_op & cop)
 	{
 		using namespace boxmg::bmg2d;
-		int iif, jjf, iic, jjc, ifd;
-		int nstencil, ipn;
+		len_t iif, jjf, iic, jjc;
+		int nstencil, ipn, ifd;
 
 		const grid_stencil &fsten = fop.stencil();
 		grid_stencil & csten = cop.stencil();
@@ -53,8 +54,8 @@ namespace impls
 
 		ipn = BMG_BCs_definite;
 
-		bmg2_symstd_setup_itli_ex(&kf, &kc, fopd.data(), cop.data(), Pd.data(),
-		                          &iif, &jjf, &iic, &jjc, &nog, &ifd, &nstencil, &ipn);
+		BMG2_SymStd_SETUP_ITLI_ex(kf, kc, fopd.data(), cop.data(), Pd.data(),
+		                          iif, jjf, iic, jjc, nog, ifd, nstencil, ipn);
 
 	}
 

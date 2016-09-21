@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <tuple>
+#include <array>
 #include <boxmg/types.h>
 #include <boxmg/array_base.h>
 

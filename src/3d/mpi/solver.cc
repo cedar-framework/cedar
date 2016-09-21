@@ -6,6 +6,7 @@
 #include <boxmg/3d/kernel/mpi/factory.h>
 #include <boxmg/3d/mpi/solver.h>
 #include <boxmg/3d/solver.h>
+#include <boxmg/3d/mpi/redist_solver.h>
 
 using namespace boxmg;
 using namespace boxmg::bmg3;
@@ -88,17 +89,19 @@ void mpi::solver::setup_space(int nlevels)
 	}
 
 	setup_halo();
+}
 
+
+void mpi::solver::setup_cg_solve()
+{
 	auto & cop = levels.back().A;
-	{
-		std::string cg_solver_str = conf.get<std::string>("solver.cg-solver", "LU");
-		if (cg_solver_str == "LU")
-			cg_solver_lu = true;
-		else
-			cg_solver_lu = false;
-	}
+	std::string cg_solver_str = conf.get<std::string>("solver.cg-solver", "LU");
 
-	std::shared_ptr<bmg3::solver> cg_bmg;
+	if (cg_solver_str == "LU" or cop.grid().nproc() == 1)
+		cg_solver_lu = true;
+	else
+		cg_solver_lu = false;
+
 	if (cg_solver_lu) {
 		auto & coarse_topo = cop.grid();
 		auto nxc = coarse_topo.nglobal(0);
@@ -106,8 +109,22 @@ void mpi::solver::setup_space(int nlevels)
 		auto nzc = coarse_topo.nglobal(2);
 		ABD = mpi::grid_func(nxc*(nyc+1)+2, nxc*nyc*nzc, 0);
 		bbd = new real_t[ABD.len(1)];
+		multilevel::setup_cg_solve();
+	} else {
+		auto kernels = kernel_registry();
+		std::vector<int> nblocks({1,1,1});
+
+		std::shared_ptr<mpi::redist_solver> cg_bmg;
+		kernels->setup_cg_redist(cop, &cg_bmg, nblocks);
+		coarse_solver = [&,cg_bmg,kernels](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
+			const bmg3::mpi::stencil_op &av = dynamic_cast<const bmg3::mpi::stencil_op&>(A);
+			kernels->solve_cg_redist(*cg_bmg, x, b);
+			bmg3::mpi::grid_func residual = av.residual(x,b);
+			log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
+		};
 	}
 }
+
 
 mpi::solver::solver(bmg3::mpi::stencil_op&& fop) : comm(fop.grid().comm)
 {

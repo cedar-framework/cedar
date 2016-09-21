@@ -7,7 +7,7 @@
 
 namespace boxmg {
 
-template <class stencil_op, class relax_stencil, class prolong_op, class grid_func, class serial_solver>
+template <class stencil_op, class relax_stencil, class prolong_op, class grid_func, class redist_solver, class serial_solver>
 
 class mpi_registry : public kernel_registry<stencil_op, relax_stencil, prolong_op, grid_func>
 {
@@ -69,6 +69,24 @@ public:
 	                    const grid_func &b)
 	{
 		active.run(kernel_name::solve_cg_boxmg, bmg, x, b);
+	}
+
+
+	void setup_cg_redist(const stencil_op & so,
+	                     std::shared_ptr<redist_solver> * bmg,
+	                     std::vector<int> & nblocks)
+	{
+		active.run(kernel_name::setup_cg_redist, so,
+		           static_cast<std::shared_ptr<redist_solver>*>(bmg), nblocks);
+	}
+
+
+	void solve_cg_redist(const redist_solver &bmg,
+	                     grid_func & x,
+	                     const grid_func & b)
+	{
+		active.run(kernel_name::solve_cg_redist,
+		           bmg, x, b);
 	}
 
 

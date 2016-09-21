@@ -90,9 +90,10 @@ namespace impls
 		// log::set_header_msg(" (serial)");
 		auto tmp = log::lvl();
 		log::lvl() = 0;
+		coarse_solver.get_config().set<int>("solver.max-iter", 1);
 		auto x_ser = coarse_solver.solve(bser);
 		log::lvl() = tmp;
-		//log::set_header_msg("");
+		// log::set_header_msg("");
 		BMG2_SymStd_SOLVE_cg_unpack(x_par.data(), x_ser.data(),
 		                            b.len(0), b.len(1),
 		                            topo.nglobal(0), topo.nglobal(1),
@@ -137,6 +138,18 @@ namespace impls
 
 	}
 
+
+	void solve_cg_redist(const mpi::redist_solver & cg_solver,
+	                     mpi::grid_func &x,
+	                     const mpi::grid_func &b)
+	{
+		/*
+		  should move work vectors outside redist_solver
+		  to eliminate need for this const_cast
+		*/
+		auto & slv = const_cast<mpi::redist_solver&>(cg_solver);
+		slv.solve(b,x);
+	}
 }
 
 }}}
