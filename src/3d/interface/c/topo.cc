@@ -33,8 +33,9 @@ extern "C"
 		grid->nproc(1) = nprocy;
 		grid->nproc(2) = nprocz;
 
-		grid->coord(0) = rank % nprocx;
-		grid->coord(1) = rank / nprocx;
+		grid->coord(0) = (rank % (nprocx * nprocy)) % nprocx;
+		grid->coord(1) = (rank % (nprocx * nprocy)) / nprocx;
+		grid->coord(2) = rank / (nprocx * nprocy);
 
 		grid->is(0) = 1; grid->is(1) = 1; grid->is(2) = 1;
 		for (auto i : range(grid->coord(0))) {

@@ -37,7 +37,7 @@ extern "C"
 	}
 
 
-	void bmg2_operator_set(bmg2_operator op, unsigned int nvals, grid_coord coords[], double vals[])
+	void bmg2_operator_set(bmg2_operator op, unsigned int nvals, grid_coord_2d coords[], double vals[])
 	{
 		using namespace boxmg;
 		using namespace boxmg::bmg2d;

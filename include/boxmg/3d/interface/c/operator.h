@@ -17,13 +17,13 @@ typedef struct {
 	unsigned int j;
 	unsigned int k;
 	bmg3_dir dir;
-} grid_coord;
+} grid_coord_3d;
 
 bmg3_operator bmg3_operator_create(bmg3_topo topo);
 
 bmg3_operator bmg3_operator_create_sevenpt(bmg3_topo topo);
 
-void bmg3_operator_set(bmg3_operator, unsigned int nvals, grid_coord coords[], double vals[]);
+void bmg3_operator_set(bmg3_operator, unsigned int nvals, grid_coord_3d coords[], double vals[]);
 
 void bmg3_operator_apply(bmg3_operator, const double *x, double *b);
 
