@@ -12,3 +12,5 @@ target_link_libraries(mpi-test-3 boxmg ${boxmg-deps})
 
 # add_executable(timer-test timer-test/timer_test.cc)
 # target_link_libraries(timer-test boxmg ${boxmg-deps})
+
+configure_file(mpi/config.json ${CMAKE_BINARY_DIR}/config.json COPYONLY)

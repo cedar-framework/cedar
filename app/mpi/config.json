@@ -1,9 +1,5 @@
 {
-	"log": ["error", "status", "info", "debug"],
-	"kernels":
-	{
-		"residual": "fortran"
-	},
+	"log": ["status","error"],
 	"solver":
 	{
 		"cycle":
@@ -11,13 +7,16 @@
 			"nrelax-pre": 1,
 			"nrelax-post": 1
 		},
+		"relaxation": "line-y",
 		"tol": 1e-10,
 		"max-iter": 10,
-		"min-coarse": 3
+		"min-coarse": 3,
+		"cg-solver": "LU"
 	},
 	"grid":
 	{
-		"nx": 17,
-		"ny" : 17
+		"local": false,
+		"n": [200,800],
+		"np": [2,2]
 	}
 }

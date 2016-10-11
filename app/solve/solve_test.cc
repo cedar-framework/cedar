@@ -89,8 +89,9 @@ int main(int argc, char *argv[])
 	const double pi = M_PI;
 
 	config::reader conf;
-	auto nx = conf.get<len_t>("grid.nx", 301);
-	auto ny = conf.get<len_t>("grid.ny", 301);
+	auto ndofs = conf.getvec<len_t>("grid.n");
+	auto nx = ndofs[0];
+	auto ny = ndofs[1];
 
 	real_t h2 = (1.0/(nx+1)) * (1.0/(ny+1));
 
