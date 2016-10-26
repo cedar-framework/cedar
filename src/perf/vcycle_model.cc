@@ -129,11 +129,12 @@ float vcycle_model::trestrict(int lvl) const
 float vcycle_model::tinterp(int lvl) const
 {
 	float time = 0;
+	float tc_interp =  2.7828045360610174*tc;
 
 	if (nd == 2) {
-		time += grid(lvl).nlocal(0)*grid(lvl).nlocal(1) * tc;
-		time += 20 * grid(lvl-1).nlocal(0)*grid(lvl-1).nlocal(1) * tc;
-		time += 6 * (grid(lvl-1).nlocal(0) + grid(lvl-1).nlocal(1)) * tc;
+		time += grid(lvl).nlocal(0)*grid(lvl).nlocal(1) * tc_interp;
+		time += 20 * grid(lvl-1).nlocal(0)*grid(lvl-1).nlocal(1) * tc_interp;
+		time += 6 * (grid(lvl-1).nlocal(0) + grid(lvl-1).nlocal(1)) * tc_interp;
 
 		time += 4 * ts;
 		time += 2 * (grid(lvl).nlocal(0) + grid(lvl).nlocal(1)) * tw;
@@ -146,8 +147,8 @@ float vcycle_model::tinterp(int lvl) const
 			prodc *= grid(lvl-1).nlocal(i);
 			sigmaf += grid(lvl).nlocal(i);
 		}
-		time += (prodf + 60 * prodc + 15 * grid(lvl-1).nlocal(0) * grid(lvl-1).nlocal(3)) * tc;
-		time += (6*grid(lvl-1).nlocal(1)*grid(lvl-1).nlocal(2) + grid(lvl-1).nlocal(2)) * tc;
+		time += (prodf + 60 * prodc + 15 * grid(lvl-1).nlocal(0) * grid(lvl-1).nlocal(3)) * tc_interp;
+		time += (6*grid(lvl-1).nlocal(1)*grid(lvl-1).nlocal(2) + grid(lvl-1).nlocal(2)) * tc_interp;
 		time += 6*ts + 2*sigmaf * tw;
 	}
 
@@ -169,6 +170,28 @@ float vcycle_model::tcgsolve() const
 		}
 
 		time += cg_perf->time();
+		time += std::ceil(std::log2(gather_size))*ts;
+		time += cg_size*(1 + std::ceil(std::log2(gather_size)))*tw;
+		// time += cg_size*(gather_size-1)/gather_size*tw;
+	}
+
+	return time;
+}
+
+
+
+float vcycle_model::agglom() const
+{
+	float time = 0;
+
+	if (!isleaf) {
+		int p = grid(0).nproc();
+		int gather_size = 1;
+		len_t cg_size = 1;
+		for (auto i : range(nd)) {
+			gather_size *= std::ceil(static_cast<double>(grid(0).nproc(i)) / static_cast<double>(nb[i]));
+			cg_size *= std::ceil(static_cast<double>(grid(0).nglobal(i))/static_cast<double>(nb[i]));
+		}
 		time += std::ceil(std::log2(gather_size))*ts;
 		time += cg_size*(1 + std::ceil(std::log2(gather_size)))*tw;
 		// time += cg_size*(gather_size-1)/gather_size*tw;
@@ -251,4 +274,51 @@ void vcycle_model::rep(std::ostream & os) const
 	if (!isleaf) {
 		os << *cg_perf;
 	}
+}
+
+
+void vcycle_model::recur_times(boost::property_tree::ptree & children) const
+{
+	using namespace boost::property_tree;
+
+	ptree child;
+
+	float smooth_time = 0;
+	float residual_time = 0;
+	float interp_time = 0;
+	float restrict_time = 0;
+	for (int i=1; i < ngrids(); i++) {
+		smooth_time += tsmooth(i);
+		residual_time += tresidual(i);
+		interp_time += tinterp(i);
+		restrict_time += trestrict(i);
+	}
+
+	child.put("relaxation", smooth_time*10);
+	child.put("residual", residual_time*10);
+	child.put("interp-add", interp_time*10);
+	child.put("solve", time()*10);
+	child.put("restrict", restrict_time*10);
+	child.put("agglomerate", agglom()*10);
+
+	if (!isleaf) {
+		(*cg_perf).recur_times(children);
+	}
+
+	children.push_back(std::make_pair("",child));
+}
+
+
+void vcycle_model::save_times(std::string iname, std::string oname) const
+{
+	using namespace boost::property_tree;
+
+	ptree pt, children;
+
+	json_parser::read_json(iname, pt);
+
+	recur_times(children);
+
+	pt.add_child("model", children);
+	json_parser::write_json(oname, pt);
 }
