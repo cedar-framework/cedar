@@ -169,10 +169,18 @@ float vcycle_model::tcgsolve() const
 			cg_size *= std::ceil(static_cast<double>(grid(0).nglobal(i))/static_cast<double>(nb[i]));
 		}
 
+		// allgather
 		time += cg_perf->time();
 		time += std::ceil(std::log2(gather_size))*ts;
 		time += cg_size*(1 + std::ceil(std::log2(gather_size)))*tw;
 		// time += cg_size*(gather_size-1)/gather_size*tw;
+
+		// gather scatter
+		// time += 2*std::ceil(std::log2(gather_size))*ts;
+		// time += cg_size*tw;
+
+		// time += 2*std::ceil(std::log2(gather_size))*ts;
+		// time += cg_size*tw;
 	}
 
 	return time;
@@ -192,9 +200,18 @@ float vcycle_model::agglom() const
 			gather_size *= std::ceil(static_cast<double>(grid(0).nproc(i)) / static_cast<double>(nb[i]));
 			cg_size *= std::ceil(static_cast<double>(grid(0).nglobal(i))/static_cast<double>(nb[i]));
 		}
+
+		// allgather
 		time += std::ceil(std::log2(gather_size))*ts;
 		time += cg_size*(1 + std::ceil(std::log2(gather_size)))*tw;
 		// time += cg_size*(gather_size-1)/gather_size*tw;
+
+		// gather scatter
+		// time += 2*std::ceil(std::log2(gather_size))*ts;
+		// time += cg_size*tw;
+
+		// time += 2*std::ceil(std::log2(gather_size))*ts;
+		// time += cg_size*tw;
 	}
 
 	return time;
