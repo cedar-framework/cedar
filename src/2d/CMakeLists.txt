@@ -4,8 +4,6 @@ add_subdirectory(inter)
 add_subdirectory(kernel)
 add_subdirectory(relax)
 
-
-
 set(sources
   ${cg_SOURCES}
   ${ftn_SOURCES}
