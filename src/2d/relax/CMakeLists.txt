@@ -1,4 +1,11 @@
-set(relax_SOURCES
+set(sources
   relax/relax.cc
-  relax/setup_relax.cc
-  PARENT_SCOPE)
+  relax/setup_relax.cc)
+
+if(ENABLE_MPI)
+  list(APPEND sources
+	relax/mpi/relax.cc
+	relax/mpi/setup_relax.cc)
+endif()
+
+set(relax_SOURCES ${sources} PARENT_SCOPE)

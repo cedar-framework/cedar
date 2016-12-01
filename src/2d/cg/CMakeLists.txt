@@ -1,6 +1,14 @@
-set(cg_SOURCES
-  cg/setup_cg_boxmg.cc
+set(sources
   cg/setup_cg_lu.cc
-  cg/solve_cg.cc
-  cg/setup_cg_redist.cc
-  PARENT_SCOPE)
+  cg/solve_cg.cc)
+
+
+if (ENABLE_MPI)
+  list(APPEND sources
+	cg/mpi/setup_cg_boxmg.cc
+	cg/mpi/setup_cg_lu.cc
+	cg/mpi/solve_cg.cc
+	cg/mpi/setup_cg_redist.cc)
+endif()
+
+set(cg_SOURCES ${sources} PARENT_SCOPE)
