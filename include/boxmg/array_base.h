@@ -7,7 +7,7 @@ template <typename len_type>
 class array_base
 {
 public:
-	virtual len_type len(int i) const = 0;
+	virtual len_type len(unsigned short i) const = 0;
 };
 
 }

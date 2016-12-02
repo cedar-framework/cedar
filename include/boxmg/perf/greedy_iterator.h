@@ -10,7 +10,7 @@ class greedy_iterator : public redist_iterator
 {
 public:
 greedy_iterator(std::array<int, 2> np, std::array<len_t,2> nglobal,
-	                int min_coarse) : redist_iterator(np, nglobal, min_coarse) {}
+	                len_t min_coarse) : redist_iterator(np, nglobal, min_coarse) {}
 
 greedy_iterator() : redist_iterator() {}
 

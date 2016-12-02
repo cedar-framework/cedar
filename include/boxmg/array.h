@@ -43,19 +43,16 @@ public:
 
 	template <typename... T> void reshape(T... args)
 	{
-		auto pos = unpack_extents(std::forward<decltype(args)>(args)...);
-		#ifdef BOUNDS_CHECK
-		assert(pos == -1);
-		#endif
+		unpack_extents(std::forward<decltype(args)>(args)...);
 		len_type len = 1;
-		for (int i = 0; i < ND; i++)
+		for (unsigned short i = 0; i < ND; i++)
 			len *= extents[i];
 		vec.resize(len);
 
 		strides[0] = 1;
-		for (int i = 1; i < ND; i++) {
+		for (unsigned short i = 1; i < ND; i++) {
 			strides[i] = 1;
-			for (int j = 0; j < i; j++) {
+			for (unsigned short j = 0; j < i; j++) {
 				strides[i] *= extents[j];
 			}
 
@@ -63,7 +60,7 @@ public:
 	}
 
 
-	std::tuple<int, len_type> get_offset(int i) const
+	std::tuple<unsigned short, len_type> get_offset(unsigned short i) const
 	{
 		#ifdef BOUNDS_CHECK
 		assert(i < extents[ND-1]);
@@ -72,7 +69,7 @@ public:
 	}
 
 
-	template<typename... T> std::tuple<int, len_type> get_offset(int i, T... args) const
+	template<typename... T> std::tuple<unsigned short, len_type> get_offset(unsigned short i, T... args) const
 	{
 		auto offset = get_offset(std::forward<decltype(args)>(args)...);
 		auto pos = std::get<0>(offset);
@@ -116,7 +113,7 @@ public:
 	}
 
 
-	virtual len_type len(int i) const
+	virtual len_type len(unsigned short i) const
 	{
 		#ifdef BOUNDS_CHECK
 		assert(i < ND);
@@ -125,7 +122,7 @@ public:
 	}
 
 
-	virtual len_type & len(int i)
+	virtual len_type & len(unsigned short i)
 	{
 		#ifdef BOUNDS_CHECK
 		assert(i < ND);
@@ -134,7 +131,7 @@ public:
 	}
 
 
-	len_type stride(int i) const
+	len_type stride(unsigned short i) const
 	{
 		#ifdef BOUNDS_CHECK
 		assert(i < ND);
@@ -143,7 +140,7 @@ public:
 	}
 
 
-	len_type & stride(int i)
+	len_type & stride(unsigned short i)
 	{
 		#ifdef BOUNDS_CHECK
 		assert(i < ND);

@@ -7,7 +7,7 @@
 
 namespace boxmg {
 template <int ND>
-int compute_nlevels(grid_topo & topo, int min_coarse)
+int compute_nlevels(grid_topo & topo, len_t min_coarse)
 {
 	int minlvl = std::numeric_limits<int>::max();
 

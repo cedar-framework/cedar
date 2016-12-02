@@ -197,7 +197,8 @@ multilevel() : conf("config.json") {};
 
 		timer_down();
 
-		if (lvl == levels.size() - 2) {
+		int coarse_lvl = levels.size() - 1;
+		if (lvl+1 == coarse_lvl) {
 			timer_begin("coarse-solve");
 			coarse_solver(levels[levels.size()-1].A, coarse_x, coarse_b);
 			timer_end("coarse-solve");
