@@ -30,7 +30,7 @@ void time_log::up()
 void time_log::down()
 {
 	lvl++;
-	if (lvl+1 > stimes.size()) {
+	if (static_cast<unsigned int>(lvl)+1 > stimes.size()) {
 		stimes.resize(stimes.size()+1);
 		ltimes.resize(ltimes.size()+1);
 	}
@@ -78,7 +78,7 @@ void time_log::save(std::string fname)
 	int loc_linfo[2];
 	loc_linfo[LEVEL_COUNT] = ltimes.size();
 	loc_linfo[TIMING_COUNT] = 0;
-	for (auto i = 0; i < ltimes.size(); ++i) {
+	for (unsigned int i = 0; i < ltimes.size(); ++i) {
 		loc_linfo[TIMING_COUNT] += ltimes[i].size();
 	}
 	MPI_Allreduce(loc_linfo, linfo, 2, MPI_INT, MPI_MAX, comm);

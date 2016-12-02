@@ -175,11 +175,11 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 	for (auto j = lowj; j <= highj; j++) {
 		grid->nlocal(1) += ctx.cg_nlocal(1, ctx.proc_grid(lowi, j)) - 2; // remove ghosts
 	}
-	for (auto i = 0; i < lowi; i++) {
+	for (unsigned int i = 0; i < lowi; i++) {
 		grid->is(0) += ctx.cg_nlocal(0, ctx.proc_grid(i, lowj)) - 2; // remove ghosts
 	}
 	grid->is(0)++; // 1 based indexing
-	for (auto j = 0; j < lowj; j++) {
+	for (unsigned int j = 0; j < lowj; j++) {
 		grid->is(1) += ctx.cg_nlocal(1, ctx.proc_grid(lowi, j)) - 2; // remove ghosts
 	}
 	grid->is(1)++;
@@ -240,7 +240,7 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 		recv_id = block_id % nactive;
 		color = grid->nproc(0)*grid->nproc(1);  // color for inactive processors
 	} else {
-		int send_id = block_id + nactive;
+		unsigned int send_id = block_id + nactive;
 		while (send_id < (nbx.len(0)*nby.len(0))) {
 			send_ids.push_back(send_id);
 			send_id += nactive;

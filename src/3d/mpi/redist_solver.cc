@@ -312,15 +312,15 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 		grid->nlocal(2) += ctx.cg_nlocal(2, ctx.proc_grid(low(0), low(1), k)) - 2; // remove ghosts
 	}
 
-	for (auto i = 0; i < low(0); i++) {
+	for (len_t i = 0; i < low(0); i++) {
 		grid->is(0) += ctx.cg_nlocal(0, ctx.proc_grid(i, low(1), low(2))) - 2;
 	}
 	grid->is(0)++;
-	for (auto j = 0; j < low(1); j++) {
+	for (len_t j = 0; j < low(1); j++) {
 		grid->is(1) += ctx.cg_nlocal(1, ctx.proc_grid(low(0), j, low(2))) - 2;
 	}
 	grid->is(1)++;
-	for (auto k = 0; k < low(2); k++) {
+	for (len_t k = 0; k < low(2); k++) {
 		grid->is(2) += ctx.cg_nlocal(2, ctx.proc_grid(low(0), low(1), k)) - 2;
 	}
 	grid->is(2)++;
@@ -385,7 +385,7 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 		active = false;
 		recv_id = block_id % nactive;
 	} else {
-		int send_id = block_id + nactive;
+		unsigned int send_id = block_id + nactive;
 		while (send_id < (nbx.len(0)*nby.len(0)*nbz.len(0))) {
 			send_ids.push_back(send_id);
 			send_id += nactive;
