@@ -35,12 +35,12 @@ class solver: public multilevel<boxmg_level,bmg2d::mpi::stencil_op, bmg2d::mpi::
 public:
 	solver(bmg2d::mpi::stencil_op&& fop);
 	~solver() {if (cg_solver_lu) bbd = new real_t[1];}
-	virtual int compute_num_levels(bmg2d::mpi::stencil_op & fop);
+	virtual int compute_num_levels(bmg2d::mpi::stencil_op & fop) override;
 	MPI_Comm comm;
-	virtual bmg2d::mpi::grid_func solve(const bmg2d::mpi::grid_func &b);
-	virtual void solve(const bmg2d::mpi::grid_func &b, bmg2d::mpi::grid_func &x);
+	virtual bmg2d::mpi::grid_func solve(const bmg2d::mpi::grid_func &b) override;
+	virtual void solve(const bmg2d::mpi::grid_func &b, bmg2d::mpi::grid_func &x) override;
 	virtual void setup_cg_solve() override;
-	virtual void setup_space(int nlevels);
+	virtual void setup_space(int nlevels) override;
 	void setup_halo();
 
 private:
