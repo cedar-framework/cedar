@@ -19,6 +19,7 @@ set(sources
   residual.cc
   solver.cc
   stencil_op.cc
+  gallery.cc
   )
 
 if(ENABLE_MPI)

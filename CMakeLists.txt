@@ -6,6 +6,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 include(cxx11)
 include(cxx_config)
 include(options)
+include(testing)
 
 enable_language(C CXX Fortran)
 
@@ -32,3 +33,7 @@ add_subdirectory(src)
 add_library(boxmg ${boxmg_src})
 install(TARGETS boxmg LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 add_subdirectory(app)
+
+if(ENABLE_UNIT_TESTS)
+  add_subdirectory(test)
+endif()

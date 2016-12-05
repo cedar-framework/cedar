@@ -139,7 +139,7 @@ std::ostream & operator<<(std::ostream &os, const grid_func & obj)
 {
 	for (auto j: obj.range(1)) {
 		for (auto i: obj.range(0)) {
-			os << i << " " << j << " " << std::to_string(obj(i,j));
+			os << i << " " << j << " " << std::to_string(obj(i,j)) << '\n';
 		}
 	}
 	return os;
