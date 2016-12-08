@@ -35,7 +35,9 @@ endfunction(add_par_unit)
 
 
 function(add_unit target sources)
-  add_executable(${target} ${sources} ${CMAKE_SOURCE_DIR}/test/ser_main.cc)
+  set(src ${ARGV})
+  list(REMOVE_AT src 0)
+  add_executable(${target} ${src} ${CMAKE_SOURCE_DIR}/test/ser_main.cc)
   target_link_libraries(${target} ${GTEST_BOTH_LIBRARIES} ${boxmg-deps} boxmg)
   set_target_properties(${target}
     PROPERTIES

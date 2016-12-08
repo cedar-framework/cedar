@@ -35,5 +35,11 @@ install(TARGETS boxmg LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 add_subdirectory(app)
 
 if(ENABLE_UNIT_TESTS)
+  find_package(PythonLibs REQUIRED)
+  find_package(NumPy REQUIRED)
+  message(STATUS ${PYTHON_INCLUDE_DIR})
+  list(APPEND boxmg-deps ${PYTHON_LIBRARY})
+  include_directories(${PYTHON_INCLUDE_DIR} ${PYTHON_NUMPY_INCLUDE_DIR})
+
   add_subdirectory(test)
 endif()

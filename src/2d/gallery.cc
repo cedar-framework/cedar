@@ -21,8 +21,8 @@ stencil_op create_poisson(len_t nx, len_t ny)
 	real_t hy = 1.0/(sten.len(1)-1);
 	real_t xh = hy/hx;
 	real_t yh = hx/hy;
-	len_t i1 = sten.len(0);
-	len_t j1 = sten.len(1);
+	len_t i1 = sten.shape(0)+1;
+	len_t j1 = sten.shape(1)+1;
 
 	for (auto j : range<len_t>(2, j1)) {
 		for (auto i : range<len_t>(1, i1)) {
