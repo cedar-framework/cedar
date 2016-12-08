@@ -7,7 +7,7 @@ using namespace boxmg;
 
 stencil_op create_poisson(len_t nx, len_t ny)
 {
-	config::reader conf("config.json");
+	config::reader conf("");
 	auto kreg = kernel::factory::from_config(conf);
 
 	auto so = stencil_op(nx, ny);
