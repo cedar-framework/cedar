@@ -13,7 +13,8 @@ class multilevel
 {
 
 public:
-multilevel() : conf("config.json") {};
+multilevel() : conf("config.json") {}
+multilevel(config::reader &&conf): conf(std::move(conf)) {}
 	virtual ~multilevel() {}
 
 	std::shared_ptr<registry> kernel_registry()
