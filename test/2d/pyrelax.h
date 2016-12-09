@@ -18,7 +18,7 @@
   #define DL_IMPORT(_T) _T
 #endif
 
-__PYX_EXTERN_C DL_IMPORT(double) gs_iter(int, int, int);
+__PYX_EXTERN_C DL_IMPORT(double) gs_iter(int, int, int, int);
 
 #endif /* !__PYX_HAVE_API__pyrelax */
 

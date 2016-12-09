@@ -5,8 +5,12 @@ import scipy.sparse as sparse
 import scipy.sparse.linalg as sla
 cimport numpy as np
 
-cdef public double gs_iter(int nx, int ny, int nsweeps):
-    A = pyamg.gallery.poisson((nx,ny))
+cdef public double gs_iter(int nx, int ny, int nsweeps, int npt_stencil):
+    type = 'FD'
+    if npt_stencil == 9:
+        type = 'FE'
+
+    A = pyamg.gallery.poisson((nx,ny), type=type)
     b = np.zeros(nx*ny)
     x = np.random.rand(nx*ny)
 

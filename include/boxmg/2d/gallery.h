@@ -8,6 +8,8 @@ namespace boxmg { namespace bmg2d {
 
 stencil_op create_poisson(boxmg::len_t nx, boxmg::len_t ny);
 
+stencil_op create_fe(boxmg::len_t nx, boxmg::len_t ny);
+
 }}
 
 #endif

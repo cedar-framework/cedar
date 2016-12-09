@@ -45,4 +45,34 @@ stencil_op create_poisson(len_t nx, len_t ny)
 	return so;
 }
 
+
+stencil_op create_fe(len_t nx, len_t ny)
+{
+	config::reader conf("");
+	auto kreg = kernel::factory::from_config(conf);
+
+	auto so = stencil_op(nx, ny);
+	so.set_registry(kreg);
+	auto & sten = so.stencil();
+	sten.five_pt() = false;
+
+	sten.set(0);
+
+	for (auto j: sten.range(1)) {
+		for (auto i : sten.range(0)) {
+			sten(i,j,dir::S) = 1.0;
+			sten(i,j,dir::N) = 1.0;
+			sten(i,j,dir::W) = 1.0;
+			sten(i,j,dir::E) = 1.0;
+			sten(i,j,dir::SW) = 1.0;
+			sten(i,j,dir::SE) = 1.0;
+			sten(i,j,dir::NW) = 1.0;
+			sten(i,j,dir::NE) = 1.0;
+			sten(i,j,dir::C) = 8.0;
+		}
+	}
+
+	return so;
+}
+
 }}
