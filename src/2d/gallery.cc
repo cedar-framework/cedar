@@ -58,16 +58,30 @@ stencil_op create_fe(len_t nx, len_t ny)
 
 	sten.set(0);
 
+	len_t i1 = sten.shape(0)+1;
+	len_t j1 = sten.shape(1)+1;
+
+	for (auto j : range<len_t>(2, j1)) {
+		for (auto i : range<len_t>(1, i1)) {
+			sten(i,j,dir::S) = 1.0;
+		}
+	}
+
+	for (auto j : range<len_t>(1, j1)) {
+		for (auto i : range<len_t>(2, i1)) {
+			sten(i,j,dir::W) = 1.0;
+		}
+	}
+
+	for (auto j : range<len_t>(2, j1)) {
+		for (auto i : range<len_t>(2, i1)) {
+			sten(i,j,dir::SW) = 1.0;
+			sten(i-1,j,dir::SE) = 1.0;
+		}
+	}
+
 	for (auto j: sten.range(1)) {
 		for (auto i : sten.range(0)) {
-			sten(i,j,dir::S) = 1.0;
-			sten(i,j,dir::N) = 1.0;
-			sten(i,j,dir::W) = 1.0;
-			sten(i,j,dir::E) = 1.0;
-			sten(i,j,dir::SW) = 1.0;
-			sten(i,j,dir::SE) = 1.0;
-			sten(i,j,dir::NW) = 1.0;
-			sten(i,j,dir::NE) = 1.0;
 			sten(i,j,dir::C) = 8.0;
 		}
 	}

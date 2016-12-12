@@ -137,17 +137,29 @@ boxmg::real_t grid_func::inf_norm() const
 		return (std::abs(a) < std::abs(b));
 	};
 
-	auto res = std::max_element(vec.begin(), vec.end(), abs_compare);
-	return *res;
+	real_t cmax = 0;
+
+	for (auto j : this->range(1)) {
+		for (auto i : this->range(0)) {
+			if (abs_compare(cmax, (*this)(i,j)))
+				cmax = (*this)(i,j);
+		}
+	}
+
+	return cmax;
 }
 
 
 grid_func & grid_func::operator-=(const grid_func &rhs)
 {
+	auto jj = rhs.range(1).begin();
 	for (auto j: this->range(1)) {
+		auto ii = rhs.range(0).begin();
 		for (auto i: this->range(0)) {
-			(*this)(i,j) -= rhs(i,j);
+			(*this)(i,j) -= rhs(*ii,*jj);
+			++ii;
 		}
+		++jj;
 	}
 
 	return *this;

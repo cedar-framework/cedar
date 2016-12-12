@@ -9,17 +9,18 @@
 #include <boxmg/2d/gallery.h>
 #include <boxmg/cycle/types.h>
 
+
 TEST(relax_point, serial_2d_fivept) {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
 
-	int nsweeps = 20;
-	len_t nx = 12;
+	int nsweeps = 7;
+	len_t nx = 31;
 	len_t ny = nx;
 
 	auto so = create_poisson(nx, ny);
 	auto b = grid_func::zeros(nx, ny);
-	auto x = grid_func::random(nx, ny);
+	auto x = grid_func::ones(nx, ny);
 
 	relax_stencil sor(nx, ny);
 
@@ -32,18 +33,20 @@ TEST(relax_point, serial_2d_fivept) {
 		kreg->relax(so, x, b, sor, cycle::Dir::DOWN);
 	}
 
-	auto r = so.residual(x, b);
-	auto rnorm = r.inf_norm();
+	for (auto i : range(nsweeps)) {
+		(void)i;
+		kreg->relax(so, x, b, sor, cycle::Dir::UP);
+	}
 
-	Py_Initialize();
-	initpyrelax();
+	grid_func pyx(nx, ny, 0);
 
-	double pynorm = gs_iter(nx, ny, nsweeps, 5);
+	gs_iter(nx, ny, nsweeps, 5, pyx.data());
 
-	// assert same order of magnitude
-	ASSERT_EQ(static_cast<int>(std::log10(std::abs(rnorm))),
-	          static_cast<int>(std::log10(std::abs(pynorm))));
+	auto diff = x - pyx;
 
+	auto tol = 1e-10;
+
+	ASSERT_LT(std::abs(diff.inf_norm()), tol);
 }
 
 
@@ -51,13 +54,13 @@ TEST(relax_point, serial_2d_ninept) {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
 
-	int nsweeps = 100;
-	len_t nx = 12;
+	int nsweeps = 3;
+	len_t nx = 37;
 	len_t ny = nx;
 
 	auto so = create_fe(nx, ny);
 	auto b = grid_func::zeros(nx, ny);
-	auto x = grid_func::random(nx, ny);
+	auto x = grid_func::ones(nx, ny);
 
 	relax_stencil sor(nx, ny);
 
@@ -70,14 +73,32 @@ TEST(relax_point, serial_2d_ninept) {
 		kreg->relax(so, x, b, sor, cycle::Dir::DOWN);
 	}
 
-	auto r = so.residual(x, b);
-	auto rnorm = r.inf_norm();
 
-	double pynorm = gs_iter(nx, ny, nsweeps, 9);
+	for (auto i : range(nsweeps)) {
+		(void)i;
+		kreg->relax(so, x, b, sor, cycle::Dir::UP);
+	}
 
-	// assert same order of magnitude
-	ASSERT_EQ(static_cast<int>(std::log10(std::abs(rnorm))),
-	          static_cast<int>(std::log10(std::abs(pynorm))));
+	grid_func pyx(nx, ny, 0);
+	gs_iter(nx, ny, nsweeps, 9, pyx.data());
+
+
+	auto diff = x - pyx;
+
+	auto tol = 1e-10;
+
+	ASSERT_LT(std::abs(diff.inf_norm()), tol);
+}
+
+
+int main(int argc, char *argv[])
+{
+	Py_Initialize();
+	initpyrelax();
+
+	::testing::InitGoogleTest(&argc, argv);
+	auto ret = RUN_ALL_TESTS();
 
 	Py_Finalize();
+	return ret;
 }
