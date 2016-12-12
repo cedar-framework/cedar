@@ -19,6 +19,7 @@
 #endif
 
 __PYX_EXTERN_C DL_IMPORT(void) gs_iter(int, int, int, int, double *);
+__PYX_EXTERN_C DL_IMPORT(double) get_high_freq(int, int, double *);
 
 #endif /* !__PYX_HAVE_API__pyrelax */
 

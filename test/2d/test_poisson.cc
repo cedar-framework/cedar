@@ -90,3 +90,67 @@ TEST(poisson, serial_2d) {
 	ASSERT_LT(std::abs(diff.inf_norm()),
 	          1e-4);
 }
+
+
+TEST(poisson_x, serial_2d) {
+	using namespace boxmg;
+	using namespace boxmg::bmg2d;
+
+	auto nx = 800;
+	auto ny = 200;
+
+	auto so = create_poisson(nx, ny);
+	grid_func b(nx, ny);
+
+	set_problem(b);
+
+	config::reader conf("");
+	conf.set("solver.relaxation", "line-x");
+	solver bmg(std::move(so), std::move(conf));
+
+	auto sol = bmg.solve(b);
+
+	ASSERT_LT(std::abs(bmg.level(-1).res.lp_norm<2>()),
+	          1e-8);
+
+	grid_func exact_sol(sol.shape(0), sol.shape(1));
+
+	set_solution(exact_sol);
+
+	auto diff = exact_sol - sol;
+
+	ASSERT_LT(std::abs(diff.inf_norm()),
+	          1e-4);
+}
+
+
+TEST(poisson_y, serial_2d) {
+	using namespace boxmg;
+	using namespace boxmg::bmg2d;
+
+	auto nx = 200;
+	auto ny = 800;
+
+	auto so = create_poisson(nx, ny);
+	grid_func b(nx, ny);
+
+	set_problem(b);
+
+	config::reader conf("");
+	conf.set("solver.relaxation", "line-y");
+	solver bmg(std::move(so), std::move(conf));
+
+	auto sol = bmg.solve(b);
+
+	ASSERT_LT(std::abs(bmg.level(-1).res.lp_norm<2>()),
+	          1e-8);
+
+	grid_func exact_sol(sol.shape(0), sol.shape(1));
+
+	set_solution(exact_sol);
+
+	auto diff = exact_sol - sol;
+
+	ASSERT_LT(std::abs(diff.inf_norm()),
+	          1e-4);
+}

@@ -8,6 +8,9 @@ namespace boxmg { namespace bmg2d {
 
 stencil_op create_poisson(boxmg::len_t nx, boxmg::len_t ny);
 
+stencil_op create_diag_diffusion(boxmg::len_t nx, boxmg::len_t ny,
+                                 boxmg::real_t dx, boxmg::real_t dy);
+
 stencil_op create_fe(boxmg::len_t nx, boxmg::len_t ny);
 
 }}
