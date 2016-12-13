@@ -51,9 +51,9 @@ stencil_op poisson(len_t nx, len_t ny, len_t nz)
 		}
 	}
 
-	for (auto k : range<len_t>(2, k1)) {
-		for (auto j : range<len_t>(2, j1)) {
-			for (auto i : range<len_t>(2, i1)) {
+	for (auto k : sten.range(2)) {
+		for (auto j : sten.range(1)) {
+			for (auto i : sten.range(0)) {
 				sten(i,j,k,dir::P) = 2.0*xh + 2.0*yh + 2.0*zh;
 			}
 		}

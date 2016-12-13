@@ -75,14 +75,12 @@ TEST(SerialPoisson3, Isotropic) {
 	using namespace boxmg;
 	using namespace boxmg::bmg3;
 
-	auto nx = 5;
+	auto nx = 200;
 	auto ny = nx;
 	auto nz = nx;
 
 	auto so = gallery::poisson(nx, ny, nz);
 	grid_func b(nx, ny, nz);
-
-	std::cout << so << std::endl;
 
 	set_problem(b);
 
