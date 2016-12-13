@@ -61,14 +61,14 @@ static void set_solution(boxmg::bmg2d::grid_func & q)
 }
 
 
-TEST(poisson, serial_2d) {
+TEST(SerialPoisson2, Isotropic) {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
 
 	auto nx = 200;
 	auto ny = nx;
 
-	auto so = create_poisson(nx, ny);
+	auto so = gallery::poisson(nx, ny);
 	grid_func b(nx, ny);
 
 	set_problem(b);
@@ -92,14 +92,14 @@ TEST(poisson, serial_2d) {
 }
 
 
-TEST(poisson_x, serial_2d) {
+TEST(SerialPoisson2, StretchX) {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
 
 	auto nx = 800;
 	auto ny = 200;
 
-	auto so = create_poisson(nx, ny);
+	auto so = gallery::poisson(nx, ny);
 	grid_func b(nx, ny);
 
 	set_problem(b);
@@ -124,14 +124,14 @@ TEST(poisson_x, serial_2d) {
 }
 
 
-TEST(poisson_y, serial_2d) {
+TEST(SerialPoisson2, StretchY) {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
 
 	auto nx = 200;
 	auto ny = 800;
 
-	auto so = create_poisson(nx, ny);
+	auto so = gallery::poisson(nx, ny);
 	grid_func b(nx, ny);
 
 	set_problem(b);

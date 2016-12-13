@@ -72,9 +72,10 @@ int main(int argc, char *argv[])
 
 	config::reader conf;
 
-	auto nx = conf.get<len_t>("grid.nx", 301);
-	auto ny = conf.get<len_t>("grid.ny", 301);
-	auto nz = conf.get<len_t>("grid.nz", 301);
+	auto ndofs = conf.getvec<len_t>("grid.n");
+	auto nx = ndofs[0];
+	auto ny = ndofs[1];
+	auto nz = ndofs[2];
 
 	auto so = stencil_op(nx, ny, nz);
 	grid_func b(nx, ny, nz);

@@ -18,6 +18,7 @@ set(sources
   relax_stencil.cc
   residual.cc
   solver.cc
+  gallery.cc
   )
 
 if(ENABLE_MPI)

@@ -10,7 +10,7 @@
 #include <boxmg/cycle/types.h>
 
 
-TEST(relax_point, serial_2d_fivept) {
+TEST(SerialRelax2, Point5) {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
 
@@ -18,7 +18,7 @@ TEST(relax_point, serial_2d_fivept) {
 	len_t nx = 31;
 	len_t ny = nx;
 
-	auto so = create_poisson(nx, ny);
+	auto so = gallery::poisson(nx, ny);
 	auto b = grid_func::zeros(nx, ny);
 	auto x = grid_func::ones(nx, ny);
 
@@ -50,7 +50,7 @@ TEST(relax_point, serial_2d_fivept) {
 }
 
 
-TEST(relax_point, serial_2d_ninept) {
+TEST(SerialRelax2, Point9) {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
 
@@ -58,7 +58,7 @@ TEST(relax_point, serial_2d_ninept) {
 	len_t nx = 37;
 	len_t ny = nx;
 
-	auto so = create_fe(nx, ny);
+	auto so = gallery::fe(nx, ny);
 	auto b = grid_func::zeros(nx, ny);
 	auto x = grid_func::ones(nx, ny);
 
@@ -91,7 +91,7 @@ TEST(relax_point, serial_2d_ninept) {
 }
 
 
-TEST(relax_line_x, serial_2d_fivept) {
+TEST(SerialRelax2, LineX5) {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
 
@@ -99,7 +99,7 @@ TEST(relax_line_x, serial_2d_fivept) {
 	len_t nx = 132;
 	len_t ny = 132;
 
-	auto so = create_diag_diffusion(nx, ny, 1, .0001);
+	auto so = gallery::diag_diffusion(nx, ny, 1, .0001);
 	auto b = grid_func::zeros(nx, ny);
 	auto x = grid_func::random(nx, ny);
 
@@ -125,7 +125,7 @@ TEST(relax_line_x, serial_2d_fivept) {
 }
 
 
-TEST(relax_line_y, serial_2d_fivept) {
+TEST(SerialRelax2, LineY5) {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
 
@@ -133,7 +133,7 @@ TEST(relax_line_y, serial_2d_fivept) {
 	len_t nx = 132;
 	len_t ny = 132;
 
-	auto so = create_diag_diffusion(nx, ny, .0001, 1);
+	auto so = gallery::diag_diffusion(nx, ny, .0001, 1);
 	auto b = grid_func::zeros(nx, ny);
 	auto x = grid_func::random(nx, ny);
 

@@ -35,6 +35,7 @@ class solver : public multilevel<bmg_level, stencil_op, grid_func, kernel::regis
 {
 public:
 	solver(stencil_op&& fop);
+	solver(stencil_op&& fop, config::reader&& conf);
 	~solver();
 	virtual int compute_num_levels(stencil_op & fop);
 	virtual void setup_space(int nlevels);

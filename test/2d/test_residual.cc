@@ -2,14 +2,14 @@
 
 #include <boxmg/2d/gallery.h>
 
-TEST(residual, serial_2d) {
+TEST(SerialResidual2, FiveAndNine) {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
 
 	len_t nx = 8;
 	len_t ny = nx;
 	{ // five point stencil
-		auto so = create_poisson(nx, ny);
+		auto so = gallery::poisson(nx, ny);
 		grid_func b(nx, ny);
 		grid_func x(nx, ny);
 		x.set(1);
@@ -31,7 +31,7 @@ TEST(residual, serial_2d) {
 	}
 
 	{ // nine point stencil
-		auto so = create_fe(nx, ny);
+		auto so = gallery::fe(nx, ny);
 		grid_func b(nx, ny);
 		grid_func x(nx, ny);
 		x.set(1);

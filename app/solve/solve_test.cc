@@ -7,9 +7,11 @@
 #include <boxmg/2d/grid_func.h>
 #include <boxmg/2d/stencil_op.h>
 #include <boxmg/2d/solver.h>
+#include <boxmg/2d/gallery.h>
 
 
-static void set_problem(boxmg::bmg2d::stencil_op & so, boxmg::bmg2d::grid_func & b)
+
+static void set_problem(boxmg::bmg2d::grid_func & b)
 {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
@@ -20,38 +22,17 @@ static void set_problem(boxmg::bmg2d::stencil_op & so, boxmg::bmg2d::grid_func &
 		return 8*(pi*pi)*sin(2*pi*x)*sin(2*pi*y);
 	};
 
-	grid_stencil & sten = so.stencil();
-	sten.five_pt() = true;
-
 	b.set(0);
-	sten.set(0);
 
 	real_t hx = 1.0/(b.len(0)-1);
 	real_t hy = 1.0/(b.len(1)-1);
 	real_t h2 = hx*hy;
-	real_t xh = hy/hx;
-	real_t yh = hx/hy;
-	len_t i1 = b.len(0);
-	len_t j1 = b.len(1);
-
-	for (auto j : range<len_t>(2, j1)) {
-		for (auto i : range<len_t>(1, i1)) {
-			sten(i,j,dir::S) = 1.0 * yh;
-		}
-	}
-
-	for (auto j : range<len_t>(1, j1)) {
-		for (auto i : range<len_t>(2, i1)) {
-			sten(i,j,dir::W) = 1.0 * xh;
-		}
-	}
 
 	for (auto j : b.range(1)) {
 		for (auto i : b.range(0)) {
 			real_t x = i*hx;
 			real_t y = j*hy;
 
-			sten(i,j,dir::C) = 2*xh + 2*yh;
 			b(i,j) = rhs(x,y) * h2;
 		}
 	}
@@ -86,19 +67,15 @@ int main(int argc, char *argv[])
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
 
-	const double pi = M_PI;
-
 	config::reader conf;
 	auto ndofs = conf.getvec<len_t>("grid.n");
 	auto nx = ndofs[0];
 	auto ny = ndofs[1];
 
-	real_t h2 = (1.0/(nx+1)) * (1.0/(ny+1));
-
-	auto so = stencil_op(nx,ny);
+	auto so = gallery::poisson(nx, ny);
 	grid_func b(nx, ny);
 
-	set_problem(so, b);
+	set_problem(b);
 
 	solver bmg(std::move(so));
 

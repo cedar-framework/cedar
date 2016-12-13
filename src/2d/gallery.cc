@@ -1,11 +1,11 @@
 #include <boxmg/2d/kernel/factory.h>
 #include <boxmg/2d/gallery.h>
 
-namespace boxmg { namespace bmg2d {
+namespace boxmg { namespace bmg2d { namespace gallery {
 
 using namespace boxmg;
 
-stencil_op create_poisson(len_t nx, len_t ny)
+stencil_op poisson(len_t nx, len_t ny)
 {
 	config::reader conf("");
 	auto kreg = kernel::factory::from_config(conf);
@@ -46,7 +46,7 @@ stencil_op create_poisson(len_t nx, len_t ny)
 }
 
 
-stencil_op create_diag_diffusion(len_t nx, len_t ny, real_t dx, real_t dy)
+stencil_op diag_diffusion(len_t nx, len_t ny, real_t dx, real_t dy)
 {
 	config::reader conf("");
 	auto kreg = kernel::factory::from_config(conf);
@@ -88,7 +88,7 @@ stencil_op create_diag_diffusion(len_t nx, len_t ny, real_t dx, real_t dy)
 }
 
 
-stencil_op create_fe(len_t nx, len_t ny)
+stencil_op fe(len_t nx, len_t ny)
 {
 	config::reader conf("");
 	auto kreg = kernel::factory::from_config(conf);
@@ -131,4 +131,4 @@ stencil_op create_fe(len_t nx, len_t ny)
 	return so;
 }
 
-}}
+}}}
