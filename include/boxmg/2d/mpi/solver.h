@@ -34,6 +34,7 @@ class solver: public multilevel<boxmg_level,bmg2d::mpi::stencil_op, bmg2d::mpi::
 {
 public:
 	solver(bmg2d::mpi::stencil_op&& fop);
+	solver(bmg2d::mpi::stencil_op&& fop, config::reader&& conf);
 	~solver() {if (cg_solver_lu) bbd = new real_t[1];}
 	virtual int compute_num_levels(bmg2d::mpi::stencil_op & fop) override;
 	MPI_Comm comm;

@@ -4,3 +4,7 @@ add_unit(relax-2d ${CMAKE_CURRENT_SOURCE_DIR}/pyrelax.c ${CMAKE_CURRENT_SOURCE_D
 target_link_libraries(relax-2d boxmg ${boxmg-deps})
 add_unit(poisson-2d ${CMAKE_CURRENT_SOURCE_DIR}/test_poisson.cc ${CMAKE_CURRENT_SOURCE_DIR}/../ser_main.cc)
 target_link_libraries(poisson-2d boxmg ${boxmg-deps})
+
+if(ENABLE_MPI)
+  add_subdirectory(mpi)
+endif()

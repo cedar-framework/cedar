@@ -35,6 +35,7 @@ if(ENABLE_MPI)
 	mpi/stencil_op.cc
 	mpi/redist_solver.cc
 	mpi/residual.cc
+	mpi/gallery.cc
 	)
 endif()
 
