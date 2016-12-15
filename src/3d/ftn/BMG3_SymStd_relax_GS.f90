@@ -1,6 +1,6 @@
       SUBROUTINE BMG3_SymStd_relax_GS( &
      &                kg, so, qf, q, sor, ii, jj, kk,&
-     &                NOG, ifd, NStncl, NSORv, &
+     &                ifd, NStncl, NSORv, &
      &                iRELAX_SYM, UPDOWN, JPN &
      &                ) BIND(C, NAME='BMG3_SymStd_relax_GS')
 
@@ -54,7 +54,7 @@
 !     Argument Declarations
 !
       integer(c_int), value :: NSORv, NStncl, ifd,&
-           iRELAX_SYM, JPN, kg, NOG, UPDOWN
+           iRELAX_SYM, JPN, kg, UPDOWN
       integer(len_t), value :: ii, jj, kk
       real(real_t) :: q(ii,jj,kk), qf(ii,jj,kk),&
            so(ii,jj,kk,NStncl), sor(ii,jj,kk,NSORv)
@@ -77,7 +77,7 @@
       IPN = IABS(JPN)
       IF(IPN.EQ.BMG_BCs_definite .OR. IPN.EQ.BMG_BCs_indef_nonper)&
      &     THEN
-      IF ( KG.LT.NOG .OR. ifd.NE.1 ) THEN
+      IF ( ifd.NE.1 ) THEN
          !
          !   27-point relaxation (8-color)
          !
@@ -210,7 +210,7 @@
          PER_sum_z = 1
       ENDIF
 
-      IF ( KG.LT.NOG .OR. ifd.NE.1 ) THEN
+      IF ( ifd.NE.1 ) THEN
          !
          !   27-point relaxation (8-color)
          !

@@ -10,9 +10,9 @@ TEST(MPIRelax3, Point7) {
 	using namespace boxmg;
 	using namespace boxmg::bmg3;
 
-	int nsweeps = 1;
+	int nsweeps = 5;
 
-	auto nx = 5;
+	auto nx = 50;
 	auto ny = nx;
 	auto nz = nx;
 
@@ -48,9 +48,13 @@ TEST(MPIRelax3, Point7) {
 	for (auto i : range(nsweeps)) {
 		(void)i;
 		kreg_ser->relax(so_ser, x_ser, b_ser, sor_ser, cycle::Dir::DOWN);
+		kreg_ser->relax(so_ser, x_ser, b_ser, sor_ser, cycle::Dir::UP);
 		kreg_mpi->relax(so_mpi, x_mpi, b_mpi, sor_mpi, cycle::Dir::DOWN);
+		kreg_mpi->relax(so_mpi, x_mpi, b_mpi, sor_mpi, cycle::Dir::UP);
 	}
 
-	log::status << "SER: " << x_ser.lp_norm<2>() << std::endl;
-	log::status << "MPI: " << x_mpi.lp_norm<2>() << std::endl;
+	auto ndiff = x_mpi.lp_norm<2>() - x_ser.lp_norm<2>();
+
+	real_t tol = 1e-10;
+	ASSERT_LT(std::abs(ndiff), tol);
 }
