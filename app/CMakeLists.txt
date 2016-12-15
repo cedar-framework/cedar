@@ -2,17 +2,17 @@ add_executable(solve-test solve/solve_test.cc)
 target_link_libraries(solve-test boxmg ${boxmg-deps})
 
 if (ENABLE_MPI)
-  add_executable(mpi-test mpi/solve_test.cc mpi/diffusion.f90 mpi/putf.f90)
+  add_executable(mpi-test mpi/solve_test.cc)
   target_link_libraries(mpi-test boxmg ${boxmg-deps})
 
   if (ENABLE_3D)
-	add_executable(mpi-test-3 mpi-3d/solve_test.cc mpi-3d/putf.f90 mpi-3d/put_sol.f90)
+	add_executable(mpi-test-3 mpi-3d/solve_test.cc)
 	target_link_libraries(mpi-test-3 boxmg ${boxmg-deps})
   endif()
 endif()
 
 if (ENABLE_3D)
-  add_executable(solve-test-3 solve-3d/test.cc solve-3d/putf.f90 solve-3d/put_sol.f90)
+  add_executable(solve-test-3 solve-3d/test.cc)
   target_link_libraries(solve-test-3 boxmg ${boxmg-deps})
 endif()
 

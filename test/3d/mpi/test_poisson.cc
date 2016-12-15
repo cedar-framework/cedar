@@ -105,25 +105,22 @@ TEST(MPIPoisson3, Isotropic) {
 	auto ny = nx;
 	auto nz = nx;
 
-	config::reader conf("config-3dmpi.json");
-	log::status << "Beginning test" << std::endl;
-
 	auto grid = util::create_topo_global(MPI_COMM_WORLD, nx, ny, nz);
 
 	auto so = mpi::gallery::poisson(grid);
 	mpi::grid_func b(grid);
 
 	set_problem(b);
-	// config::reader conf("");
-	// conf.set("solver.relaxation", "point");
-	// conf.set("solver.cg-solver", "LU");
+	config::reader conf("");
+	conf.set("solver.relaxation", "point");
+	conf.set("solver.cg-solver", "LU");
 
 	mpi::solver bmg(std::move(so), std::move(conf));
 
 	auto sol = bmg.solve(b);
 
-	// ASSERT_LT(std::abs(bmg.level(-1).res.lp_norm<2>()),
-	//           1e-8);
+	ASSERT_LT(std::abs(bmg.level(-1).res.lp_norm<2>()),
+	          1e-8);
 
 	mpi::grid_func exact_sol(grid);
 
