@@ -28,6 +28,7 @@ if(ENABLE_MPI)
 	mpi/halo.cc
 	mpi/solver.cc
 	mpi/residual.cc
+	mpi/gallery.cc
 	mpi/redist_solver.cc)
 endif()
 

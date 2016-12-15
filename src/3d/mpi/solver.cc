@@ -139,6 +139,19 @@ mpi::solver::solver(bmg3::mpi::stencil_op&& fop) : comm(fop.grid().comm)
 }
 
 
+mpi::solver::solver(bmg3::mpi::stencil_op&& fop, config::reader &&cfg) : multilevel(std::move(cfg)), comm(fop.grid().comm)
+{
+	timer setup_timer("Setup");
+	setup_timer.begin();
+
+	kreg = kernel::mpi::factory::from_config(conf);
+
+	setup(std::move(fop));
+
+	setup_timer.end();
+}
+
+
 int mpi::solver::compute_num_levels(bmg3::mpi::stencil_op & fop)
 {
 	int ng;
