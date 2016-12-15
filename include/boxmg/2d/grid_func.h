@@ -46,7 +46,11 @@ namespace boxmg { namespace bmg2d {
 	{
 		real_t result = 0;
 
-		for (auto &v : vec) result += std::pow(v, p);
+		for (auto j : this->range(1)) {
+			for (auto i : this->range(0)) {
+				result += std::pow((*this)(i,j), p);
+			}
+		}
 
 		return std::pow(result, 1./p);
 	}

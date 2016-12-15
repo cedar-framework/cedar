@@ -37,9 +37,9 @@ stencil_op poisson(topo_ptr grid)
 	real_t nly_g = nly + 2;
 	real_t nlz_g = nlz + 2;
 
-	real_t i1 = nlx + 1;
-	real_t j1 = nly + 1;
-	real_t k1 = nlz + 1;
+	// real_t i1 = nlx + 1;
+	// real_t j1 = nly + 1;
+	// real_t k1 = nlz + 1;
 	real_t i2 = nlx;
 	real_t j2 = nly;
 	real_t k2 = nlz;
