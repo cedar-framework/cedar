@@ -154,6 +154,14 @@ multilevel(config::reader &&conf): conf(std::move(conf)) {}
 		levels.emplace_back(std::move(fop));
 		levels.back().A.set_registry(kreg);
 		auto num_levels = compute_num_levels(levels[0].A);
+		auto nlevels_conf = conf.get<int>("solver.num-levels", -1);
+		if (nlevels_conf > 0) {
+			if (nlevels_conf > num_levels) {
+				log::error << "too many levels specified" << std::endl;
+			} else {
+				num_levels = nlevels_conf;
+			}
+		}
 		log::debug << "Using a " << num_levels << " level heirarchy" << std::endl;
 		levels.reserve(num_levels);
 		setup_space(num_levels);

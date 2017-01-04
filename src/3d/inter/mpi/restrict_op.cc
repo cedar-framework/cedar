@@ -5,6 +5,13 @@
 
 
 namespace boxmg { namespace bmg3 { namespace inter { namespace mpi {
+
+std::ostream & operator<< (std::ostream &os, const restrict_op &R)
+{
+	os << *R.P;
+	return os;
+}
+
 mpi::grid_func operator*(const restrict_op & R, const mpi::grid_func &x)
 {
 	auto & P = R.getP();

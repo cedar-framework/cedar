@@ -36,7 +36,7 @@ namespace impls
 		                         fined.data(), coarse.data(), P.data(),
 		                         fined.len(0), fined.len(1), fined.len(2),
 		                         coarse.len(0), coarse.len(1), coarse.len(2),
-		                         topo.is(0), topo.is(1), topo.is(2));
+		                         fine_topo.is(0), fine_topo.is(1), fine_topo.is(2));
 	}
 }
 
