@@ -34,6 +34,13 @@ namespace impls
 		                        sten.len(0), sten.len(1), sten.len(2),
 		                        nstencil, nsorv);
 	}
+
+
+	void setup_relax_xy(const stencil_op &so,
+	                    relax_stencil &sor)
+	{
+
+	}
 }
 
 }}}

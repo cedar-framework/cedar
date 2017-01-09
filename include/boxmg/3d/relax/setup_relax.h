@@ -14,6 +14,8 @@ namespace impls
 	                      relax_stencil & sor);
 	void mpi_setup_rbgs_point(const mpi::stencil_op & so,
 	                          relax_stencil & sor);
+	void setup_relax_xy(const stencil_op & so,
+	                    relax_stencil & sor);
 }
 
 }}}

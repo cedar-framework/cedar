@@ -80,6 +80,13 @@ public:
 	}
 
 
+	void setup_relax_xy(const stencil_op & so,
+	                    relax_stencil & sor)
+	{
+		active.run(kernel_name::setup_relax_xy, so, sor);
+	}
+
+
 	void setup_cg_lu(const stencil_op & so,
 	                 grid_func & ABD)
 	{

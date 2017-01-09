@@ -102,10 +102,15 @@ multilevel(config::reader &&conf): conf(std::move(conf)) {}
 			kernels->setup_relax_x(sop, level(lvl).SOR[0]);
 		else if (relax_type == "line-y")
 			kernels->setup_relax_y(sop, level(lvl).SOR[0]);
-		else { // line-xy
+		else if (relax_type == "line-xy") {
 			kernels->setup_relax_x(sop, level(lvl).SOR[0]);
 			kernels->setup_relax_y(sop, level(lvl).SOR[1]);
 		}
+		else if (relax_type == "plane") {
+			kernels->setup_relax_xy(sop, level(lvl).SOR[0]);
+		}
+		else
+			log::error << "Invalid relaxation: " << relax_type << std::endl;
 
 		level(lvl).presmoother = [&,lvl,nrelax_pre,kernels,relax_type](const discrete_op<grid_func> &A, grid_func &x, const grid_func&b) {
 			const stencil_op & av = dynamic_cast<const stencil_op &>(A);
@@ -117,10 +122,13 @@ multilevel(config::reader &&conf): conf(std::move(conf)) {}
 					kernels->relax_lines_x(av, x, b, level(lvl).SOR[0], level(lvl).res, cycle::Dir::DOWN);
 				else if (relax_type == "line-y")
 					kernels->relax_lines_y(av, x, b, level(lvl).SOR[0], level(lvl).res, cycle::Dir::DOWN);
-				else {
+				else if (relax_type == "line-xy") {
 					kernels->relax_lines_x(av, x, b, level(lvl).SOR[0], level(lvl).res, cycle::Dir::DOWN);
 					kernels->relax_lines_y(av, x, b, level(lvl).SOR[1], level(lvl).res, cycle::Dir::DOWN);
 				}
+				else if (relax_type == "plane") {}
+				else
+					log::error << "Invalid relaxation: " << relax_type << std::endl;
 			}
 		};
 		level(lvl).postsmoother = [&,lvl,nrelax_post,kernels,relax_type](const discrete_op<grid_func> &A, grid_func &x, const grid_func&b) {
@@ -134,10 +142,13 @@ multilevel(config::reader &&conf): conf(std::move(conf)) {}
 					kernels->relax_lines_x(av, x, b, level(lvl).SOR[0], level(lvl).res, cycle::Dir::UP);
 				else if (relax_type == "line-y")
 					kernels->relax_lines_y(av, x, b, level(lvl).SOR[0], level(lvl).res, cycle::Dir::UP);
-				else {
+				else if (relax_type == "line-xy") {
 					kernels->relax_lines_y(av, x, b, level(lvl).SOR[1], level(lvl).res, cycle::Dir::UP);
 					kernels->relax_lines_x(av, x, b, level(lvl).SOR[0], level(lvl).res, cycle::Dir::UP);
 				}
+				else if (relax_type == "plane") {}
+				else
+					log::error << "Invalid relaxation: " << relax_type << std::endl;
 			}
 		};
 	}

@@ -50,6 +50,10 @@
 				{
 					"type": "integer"
 				},
+				"num-levels":
+				{
+					"type": "integer"
+				},
 				"cg-solver":
 				{
 					"type": "string",
@@ -58,7 +62,7 @@
 				"relaxation":
 				{
 					"type": "string",
-					"pattern": "point|line-x|line-y|line-xy"
+					"pattern": "point|line-x|line-y|line-xy|plane"
 				}
 			}
 		},
