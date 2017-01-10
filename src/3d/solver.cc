@@ -1,5 +1,8 @@
 #include <algorithm>
 
+// TODO: remove include
+#include <boxmg/3d/relax/setup_relax.h>
+
 #include <boxmg/3d/kernel/factory.h>
 #include <boxmg/3d/kernel/registry.h>
 #include <boxmg/3d/solver.h>
@@ -94,4 +97,10 @@ int solver::compute_num_levels(stencil_op & fop)
 	} while(std::min({nxc,nyc,nzc}) >= min_coarse);
 
 	return ng;
+}
+
+
+void solver::setup_relax_plane(stencil_op & sop, bmg_level & level)
+{
+	kernel::impls::setup_relax_xy(sop, level.planes);
 }

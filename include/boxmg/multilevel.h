@@ -107,7 +107,8 @@ multilevel(config::reader &&conf): conf(std::move(conf)) {}
 			kernels->setup_relax_y(sop, level(lvl).SOR[1]);
 		}
 		else if (relax_type == "plane") {
-			kernels->setup_relax_xy(sop, level(lvl).SOR[0]);
+			setup_relax_plane(sop, level(lvl));
+			// kernels->setup_relax_xy(sop, level(lvl).planes);
 		}
 		else
 			log::error << "Invalid relaxation: " << relax_type << std::endl;
@@ -299,6 +300,9 @@ multilevel(config::reader &&conf): conf(std::move(conf)) {}
 
 
 	virtual int compute_num_levels(stencil_op & fop) { return 0; }
+
+
+	virtual void setup_relax_plane(stencil_op & sop, LevelType & level) {}
 
 
 	config::reader & get_config() { return conf; }

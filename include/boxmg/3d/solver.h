@@ -5,6 +5,7 @@
 
 #include <boxmg/multilevel.h>
 #include <boxmg/level.h>
+#include <boxmg/2d/solver.h>
 #include <boxmg/3d/grid_func.h>
 #include <boxmg/3d/stencil_op.h>
 #include <boxmg/3d/relax_stencil.h>
@@ -28,6 +29,7 @@ bmg_level(stencil_op&& A, inter::prolong_op&& P) :
 	grid_func res;
 	grid_func b;
 	std::array<relax_stencil, 2> SOR;
+	std::vector<::boxmg::bmg2d::solver> planes;
 };
 
 
@@ -37,8 +39,9 @@ public:
 	solver(stencil_op&& fop);
 	solver(stencil_op&& fop, config::reader&& conf);
 	~solver();
-	virtual int compute_num_levels(stencil_op & fop);
-	virtual void setup_space(int nlevels);
+	virtual int compute_num_levels(stencil_op & fop) override;
+	virtual void setup_relax_plane(stencil_op & sop, bmg_level & level) override;
+	virtual void setup_space(int nlevels) override;
 };
 
 
