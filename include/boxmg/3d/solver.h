@@ -29,7 +29,7 @@ bmg_level(stencil_op&& A, inter::prolong_op&& P) :
 	grid_func res;
 	grid_func b;
 	std::array<relax_stencil, 2> SOR;
-	std::vector<::boxmg::bmg2d::solver> planes;
+	std::vector<std::unique_ptr<::boxmg::bmg2d::solver>> planes;
 };
 
 
@@ -41,6 +41,9 @@ public:
 	~solver();
 	virtual int compute_num_levels(stencil_op & fop) override;
 	virtual void setup_relax_plane(stencil_op & sop, bmg_level & level) override;
+	virtual void relax_plane(const stencil_op & so, grid_func & x,
+	                         const grid_func & b, cycle::Dir cdir,
+	                         bmg_level & level) override;
 	virtual void setup_space(int nlevels) override;
 };
 

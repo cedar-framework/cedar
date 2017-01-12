@@ -127,7 +127,9 @@ multilevel(config::reader &&conf): conf(std::move(conf)) {}
 					kernels->relax_lines_x(av, x, b, level(lvl).SOR[0], level(lvl).res, cycle::Dir::DOWN);
 					kernels->relax_lines_y(av, x, b, level(lvl).SOR[1], level(lvl).res, cycle::Dir::DOWN);
 				}
-				else if (relax_type == "plane") {}
+				else if (relax_type == "plane") {
+					relax_plane(av, x, b, cycle::Dir::DOWN, level(lvl));
+				}
 				else
 					log::error << "Invalid relaxation: " << relax_type << std::endl;
 			}
@@ -147,7 +149,9 @@ multilevel(config::reader &&conf): conf(std::move(conf)) {}
 					kernels->relax_lines_y(av, x, b, level(lvl).SOR[1], level(lvl).res, cycle::Dir::UP);
 					kernels->relax_lines_x(av, x, b, level(lvl).SOR[0], level(lvl).res, cycle::Dir::UP);
 				}
-				else if (relax_type == "plane") {}
+				else if (relax_type == "plane") {
+					relax_plane(av, x, b, cycle::Dir::UP, level(lvl));
+				}
 				else
 					log::error << "Invalid relaxation: " << relax_type << std::endl;
 			}
@@ -303,6 +307,13 @@ multilevel(config::reader &&conf): conf(std::move(conf)) {}
 
 
 	virtual void setup_relax_plane(stencil_op & sop, LevelType & level) {}
+
+
+	virtual void relax_plane(const stencil_op & so,
+	                         grid_func & x,
+	                         const grid_func & b,
+	                         cycle::Dir cdir,
+	                         LevelType & level) {}
 
 
 	config::reader & get_config() { return conf; }

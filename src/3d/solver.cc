@@ -2,6 +2,7 @@
 
 // TODO: remove include
 #include <boxmg/3d/relax/setup_relax.h>
+#include <boxmg/3d/relax/relax.h>
 
 #include <boxmg/3d/kernel/factory.h>
 #include <boxmg/3d/kernel/registry.h>
@@ -103,4 +104,12 @@ int solver::compute_num_levels(stencil_op & fop)
 void solver::setup_relax_plane(stencil_op & sop, bmg_level & level)
 {
 	kernel::impls::setup_relax_xy(sop, level.planes);
+}
+
+
+void solver::relax_plane(const stencil_op & so, grid_func & x,
+                         const grid_func & b, cycle::Dir cdir,
+                         bmg_level & level)
+{
+	kernel::impls::relax_xy(so, x, b, cdir, level.planes);
 }

@@ -37,7 +37,7 @@ namespace impls
 
 
 	void setup_relax_xy(const stencil_op &so,
-	                    std::vector<::boxmg::bmg2d::solver> & planes)
+	                    std::vector<slv2_ptr> & planes)
 	{
 		auto & sten = so.stencil();
 		for (auto k : sten.range(2)) {
@@ -64,7 +64,9 @@ namespace impls
 				}
 			}
 
-			// planes.emplace_back(std::move(so2));
+			planes.emplace_back(std::make_unique<::boxmg::bmg2d::solver>(std::move(so2)));
+			planes.back()->level(-1).x = bmg2d::grid_func(sten.shape(0), sten.shape(1));
+			planes.back()->level(-1).b = bmg2d::grid_func(sten.shape(0), sten.shape(1));
 		}
 	}
 }
