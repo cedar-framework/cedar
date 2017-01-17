@@ -7,6 +7,26 @@ namespace boxmg { namespace bmg3 { namespace kernel {
 namespace impls
 {
 
+	static int log_begin(bool log_planes, int ipl, std::string suff)
+	{
+		auto tmp = log::lvl();
+		if (log_planes)
+			log::set_header_msg(" (plane-" + suff + " " + std::to_string(ipl) + ")");
+		else
+			log::lvl() = 0;
+		return tmp;
+	}
+
+
+	static void log_end(bool log_planes, int ipl, int lvl)
+	{
+		if (log_planes)
+			log::set_header_msg("");
+		else
+			log::lvl() = lvl;
+	}
+
+
 	static void copy_rhs_xy(const stencil_op & so,
 	                        const grid_func & x,
 	                        const grid_func & b,
@@ -146,7 +166,6 @@ namespace impls
 	              cycle::Dir cycle_dir,
 	              std::vector<slv2_ptr> & planes)
 	{
-
 		auto copy32 = [](grid_func & x, ::boxmg::bmg2d::grid_func & x2, int ipl) {
 			for (auto j : x.grange(1)) {
 				for (auto i : x.grange(0)) {
@@ -164,6 +183,9 @@ namespace impls
 			}
 		};
 
+
+		auto & conf = planes[0]->get_config();
+		bool log_planes = conf.get<bool>("log-planes", false);
 
 		// indices for symmetric red-black relaxation
 		int lstart, lend, lstride;
@@ -189,9 +211,9 @@ namespace impls
 				copy32(x, x2, ipl);
 				copy_rhs_xy(so, x, b, b2, ipl);
 
-				log::set_header_msg(" (plane-xy " + std::to_string(ipl) + ")");
+				auto tmp = log_begin(log_planes, ipl, "xy");
 				planes[ipl-1]->solve(b2, x2);
-				log::set_header_msg("");
+				log_end(log_planes, ipl, tmp);
 
 				copy23(x2, x, ipl);
 			}
@@ -205,7 +227,6 @@ namespace impls
 	              cycle::Dir cycle_dir,
 	              std::vector<slv2_ptr> & planes)
 	{
-
 		auto copy32 = [](grid_func & x, ::boxmg::bmg2d::grid_func & x2, int ipl) {
 			for (auto k : x.grange(2)) {
 				for (auto i : x.grange(0)) {
@@ -223,6 +244,8 @@ namespace impls
 			}
 		};
 
+		auto & conf = planes[0]->get_config();
+		bool log_planes = conf.get<bool>("log-planes", "false");
 
 		// indices for symmetric red-black relaxation
 		int lstart, lend, lstride;
@@ -248,9 +271,9 @@ namespace impls
 				copy32(x, x2, ipl);
 				copy_rhs_xz(so, x, b, b2, ipl);
 
-				log::set_header_msg(" (plane-xz " + std::to_string(ipl) + ")");
+				auto tmp = log_begin(log_planes, ipl, "xz");
 				planes[ipl-1]->solve(b2, x2);
-				log::set_header_msg("");
+				log_end(log_planes, ipl, tmp);
 
 				copy23(x2, x, ipl);
 			}
@@ -282,6 +305,8 @@ namespace impls
 			}
 		};
 
+		auto & conf = planes[0]->get_config();
+		bool log_planes = conf.get<bool>("log-planes", "false");
 
 		// indices for symmetric red-black relaxation
 		int lstart, lend, lstride;
@@ -307,9 +332,9 @@ namespace impls
 				copy32(x, x2, ipl);
 				copy_rhs_yz(so, x, b, b2, ipl);
 
-				log::set_header_msg(" (plane-yz " + std::to_string(ipl) + ")");
+				auto tmp = log_begin(log_planes, ipl, "yz");
 				planes[ipl-1]->solve(b2, x2);
-				log::set_header_msg("");
+				log_end(log_planes, ipl, tmp);
 
 				copy23(x2, x, ipl);
 			}
