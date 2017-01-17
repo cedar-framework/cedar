@@ -1,8 +1,8 @@
 #include <algorithm>
 
 // TODO: remove include
-#include <boxmg/3d/relax/setup_relax.h>
-#include <boxmg/3d/relax/relax.h>
+#include <boxmg/3d/relax/setup_planes.h>
+#include <boxmg/3d/relax/relax_planes.h>
 
 #include <boxmg/3d/kernel/factory.h>
 #include <boxmg/3d/kernel/registry.h>
@@ -103,7 +103,9 @@ int solver::compute_num_levels(stencil_op & fop)
 
 void solver::setup_relax_plane(stencil_op & sop, bmg_level & level)
 {
-	kernel::impls::setup_relax_xy(sop, level.planes);
+	kernel::impls::setup_relax_xy(sop, level.planes_xy);
+	kernel::impls::setup_relax_xz(sop, level.planes_xz);
+	kernel::impls::setup_relax_yz(sop, level.planes_yz);
 }
 
 
@@ -111,5 +113,14 @@ void solver::relax_plane(const stencil_op & so, grid_func & x,
                          const grid_func & b, cycle::Dir cdir,
                          bmg_level & level)
 {
-	kernel::impls::relax_xy(so, x, b, cdir, level.planes);
+	if (cdir == cycle::Dir::DOWN) {
+		kernel::impls::relax_xy(so, x, b, cdir, level.planes_xy);
+		kernel::impls::relax_yz(so, x, b, cdir, level.planes_yz);
+		kernel::impls::relax_xz(so, x, b, cdir, level.planes_xz);
+	} else {
+		kernel::impls::relax_xz(so, x, b, cdir, level.planes_xz);
+		kernel::impls::relax_yz(so, x, b, cdir, level.planes_yz);
+		kernel::impls::relax_xy(so, x, b, cdir, level.planes_xy);
+	}
+
 }

@@ -29,9 +29,9 @@ grid_func::grid_func(len_t nx, len_t ny, len_t nz, unsigned int nghosts) :
 	range_[1] = ::boxmg::range(static_cast<len_t>(nghosts), static_cast<len_t>(ny + nghosts));
 	range_[2] = ::boxmg::range(static_cast<len_t>(nghosts), static_cast<len_t>(nz + nghosts));
 
-	grange_[0] = ::boxmg::range(static_cast<len_t>(0), static_cast<len_t>(nx + 3*nghosts));
-	grange_[1] = ::boxmg::range(static_cast<len_t>(0), static_cast<len_t>(ny + 3*nghosts));
-	grange_[2] = ::boxmg::range(static_cast<len_t>(0), static_cast<len_t>(nz + 3*nghosts));
+	grange_[0] = ::boxmg::range(static_cast<len_t>(0), static_cast<len_t>(nx + 2*nghosts));
+	grange_[1] = ::boxmg::range(static_cast<len_t>(0), static_cast<len_t>(ny + 2*nghosts));
+	grange_[2] = ::boxmg::range(static_cast<len_t>(0), static_cast<len_t>(nz + 2*nghosts));
 }
 
 

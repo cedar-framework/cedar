@@ -49,14 +49,6 @@ namespace impls
 		                     so_sten.len(0), so_sten.len(1), so_sten.len(2), ifd, nstencil, nsorv,
 		                     BMG_RELAX_SYM, updown, jpn);
 	}
-
-	void relax_xy(const stencil_op & so,
-	              grid_func & x,
-	              const grid_func & b,
-	              cycle::Dir cycle_dir,
-	              std::vector<slv2_ptr> & planes)
-	{
-	}
 }
 
 }}}

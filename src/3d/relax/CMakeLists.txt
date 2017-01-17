@@ -1,6 +1,8 @@
 set(sources
   relax/setup_relax.cc
-  relax/relax.cc)
+  relax/setup_planes.cc
+  relax/relax.cc
+  relax/relax_planes.cc)
 
 if(ENABLE_MPI)
   list(APPEND sources

@@ -29,7 +29,9 @@ bmg_level(stencil_op&& A, inter::prolong_op&& P) :
 	grid_func res;
 	grid_func b;
 	std::array<relax_stencil, 2> SOR;
-	std::vector<std::unique_ptr<::boxmg::bmg2d::solver>> planes;
+	std::vector<std::unique_ptr<::boxmg::bmg2d::solver>> planes_xy;
+	std::vector<std::unique_ptr<::boxmg::bmg2d::solver>> planes_xz;
+	std::vector<std::unique_ptr<::boxmg::bmg2d::solver>> planes_yz;
 };
 
 
