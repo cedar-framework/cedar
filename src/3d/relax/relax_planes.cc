@@ -218,6 +218,11 @@ namespace impls
 				copy23(x2, x, ipl);
 			}
 		}
+
+		if (log::info.active()) {
+			auto res = so.residual(x, b);
+			log::info << "residual (l2-norm) after xy sweep: " << res.lp_norm<2>() << std::endl;
+		}
 	}
 
 
@@ -277,6 +282,11 @@ namespace impls
 
 				copy23(x2, x, ipl);
 			}
+		}
+
+		if (log::info.active()) {
+			auto res = so.residual(x, b);
+			log::info << "residual (l2-norm) after xz sweep: " << res.lp_norm<2>() << std::endl;
 		}
 	}
 
@@ -338,6 +348,11 @@ namespace impls
 
 				copy23(x2, x, ipl);
 			}
+		}
+
+		if (log::info.active()) {
+			auto res = so.residual(x, b);
+			log::info << "residual (l2-norm) after yz sweep: " << res.lp_norm<2>() << std::endl;
 		}
 	}
 }

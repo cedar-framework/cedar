@@ -32,7 +32,10 @@ namespace impls
 				}
 			}
 
-			planes.emplace_back(std::make_unique<::boxmg::bmg2d::solver>(std::move(so2)));
+			auto conf2 = config::reader("config.json");
+			conf2.set("solver.relaxation", "line-xy");
+
+			planes.emplace_back(std::make_unique<::boxmg::bmg2d::solver>(std::move(so2), std::move(conf2)));
 			planes.back()->level(-1).x = bmg2d::grid_func(sten.shape(0), sten.shape(1));
 			planes.back()->level(-1).b = bmg2d::grid_func(sten.shape(0), sten.shape(1));
 		}
@@ -69,7 +72,10 @@ namespace impls
 				}
 			}
 
-			planes.emplace_back(std::make_unique<::boxmg::bmg2d::solver>(std::move(so2)));
+			auto conf2 = config::reader("config.json");
+			conf2.set("solver.relaxation", "line-xy");
+
+			planes.emplace_back(std::make_unique<::boxmg::bmg2d::solver>(std::move(so2), std::move(conf2)));
 			planes.back()->level(-1).x = bmg2d::grid_func(o.shape(0), o.shape(2));
 			planes.back()->level(-1).b = bmg2d::grid_func(o.shape(0), o.shape(2));
 		}
@@ -106,7 +112,10 @@ namespace impls
 				}
 			}
 
-			planes.emplace_back(std::make_unique<::boxmg::bmg2d::solver>(std::move(so2)));
+			auto conf2 = config::reader("config.json");
+			conf2.set("solver.relaxation", "line-xy");
+
+			planes.emplace_back(std::make_unique<::boxmg::bmg2d::solver>(std::move(so2), std::move(conf2)));
 			planes.back()->level(-1).x = bmg2d::grid_func(o.shape(1), o.shape(2));
 			planes.back()->level(-1).b = bmg2d::grid_func(o.shape(1), o.shape(2));
 		}
