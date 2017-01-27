@@ -4,6 +4,16 @@ namespace boxmg { namespace bmg3 { namespace kernel {
 
 namespace impls
 {
+	static config::reader plane_config()
+	{
+		config::reader conf("plane.json");
+		conf.set("solver.relaxation", "line-xy");
+		conf.set("solver.max-iter", 1);
+
+		return conf;
+	}
+
+
 	void setup_relax_xy(const stencil_op &so,
 	                    std::vector<slv2_ptr> & planes)
 	{
@@ -32,8 +42,7 @@ namespace impls
 				}
 			}
 
-			auto conf2 = config::reader("config.json");
-			conf2.set("solver.relaxation", "line-xy");
+			auto conf2 = plane_config();
 
 			planes.emplace_back(std::make_unique<::boxmg::bmg2d::solver>(std::move(so2), std::move(conf2)));
 			planes.back()->level(-1).x = bmg2d::grid_func(sten.shape(0), sten.shape(1));
@@ -72,8 +81,7 @@ namespace impls
 				}
 			}
 
-			auto conf2 = config::reader("config.json");
-			conf2.set("solver.relaxation", "line-xy");
+			auto conf2 = plane_config();
 
 			planes.emplace_back(std::make_unique<::boxmg::bmg2d::solver>(std::move(so2), std::move(conf2)));
 			planes.back()->level(-1).x = bmg2d::grid_func(o.shape(0), o.shape(2));
@@ -112,8 +120,7 @@ namespace impls
 				}
 			}
 
-			auto conf2 = config::reader("config.json");
-			conf2.set("solver.relaxation", "line-xy");
+			auto conf2 = plane_config();
 
 			planes.emplace_back(std::make_unique<::boxmg::bmg2d::solver>(std::move(so2), std::move(conf2)));
 			planes.back()->level(-1).x = bmg2d::grid_func(o.shape(1), o.shape(2));
