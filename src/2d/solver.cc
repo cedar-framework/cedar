@@ -53,15 +53,16 @@ void solver::setup_space(int nlevels)
 
 solver::solver(stencil_op&& fop)
 {
-	kreg = kernel::factory::from_config(conf);
+	kreg = kernel::factory::from_config(*conf);
 
 	setup(std::move(fop));
 }
 
 
-solver::solver(stencil_op&& fop, config::reader && cfg): multilevel(std::move(cfg))
+solver::solver(stencil_op&& fop,
+               std::shared_ptr<config::reader> cfg): multilevel(cfg)
 {
-	kreg = kernel::factory::from_config(conf);
+	kreg = kernel::factory::from_config(*conf);
 
 	setup(std::move(fop));
 }
@@ -77,7 +78,7 @@ int solver::compute_num_levels(stencil_op & fop)
 {
 	float nxc, nyc;
 	int ng = 0;
-	int min_coarse = conf.get<int>("solver.min-coarse", 3);
+	int min_coarse = conf->get<int>("solver.min-coarse", 3);
 	grid_stencil & sten = fop.stencil();
 
 	auto nx = sten.shape(0);

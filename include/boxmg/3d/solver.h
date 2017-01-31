@@ -39,7 +39,8 @@ class solver : public multilevel<bmg_level, stencil_op, grid_func, kernel::regis
 {
 public:
 	solver(stencil_op&& fop);
-	solver(stencil_op&& fop, config::reader&& conf);
+	solver(stencil_op&& fop,
+	       std::shared_ptr<config::reader> conf);
 	~solver();
 	virtual int compute_num_levels(stencil_op & fop) override;
 	virtual void setup_relax_plane(stencil_op & sop, bmg_level & level) override;

@@ -82,7 +82,7 @@ void mpi::solver::setup_space(int nlevels)
 void mpi::solver::setup_cg_solve()
 {
 	auto & cop = levels.back().A;
-	std::string cg_solver_str = conf.get<std::string>("solver.cg-solver", "LU");
+	std::string cg_solver_str = conf->get<std::string>("solver.cg-solver", "LU");
 
 	if (cg_solver_str == "LU")
 		cg_solver_lu = true;
@@ -108,7 +108,7 @@ void mpi::solver::setup_cg_solve()
 				int rank;
 				MPI_Comm_rank(fgrid.comm, &rank);
 				nblocks = std::move(
-					predict_redist(conf, fgrid.nproc(0), fgrid.nproc(1), fgrid.nglobal(0), fgrid.nglobal(1))
+					predict_redist(*conf, fgrid.nproc(0), fgrid.nproc(1), fgrid.nglobal(0), fgrid.nglobal(1))
 					);
 				MPI_Bcast(nblocks.data(), 2, MPI_INT, 0, fgrid.comm);
 				predict_timer.end();
@@ -166,7 +166,7 @@ mpi::solver::solver(bmg2d::mpi::stencil_op&& fop) : comm(fop.grid().comm)
 	timer setup_timer("Setup");
 	setup_timer.begin();
 
-	kreg = kernel::mpi::factory::from_config(conf);
+	kreg = kernel::mpi::factory::from_config(*conf);
 
 	setup(std::move(fop));
 
@@ -174,12 +174,13 @@ mpi::solver::solver(bmg2d::mpi::stencil_op&& fop) : comm(fop.grid().comm)
 }
 
 
-mpi::solver::solver(bmg2d::mpi::stencil_op&& fop, config::reader &&cfg) : multilevel(std::move(cfg)), comm(fop.grid().comm)
+mpi::solver::solver(bmg2d::mpi::stencil_op&& fop,
+                    std::shared_ptr<config::reader> cfg) : multilevel(cfg), comm(fop.grid().comm)
 {
 	timer setup_timer("Setup");
 	setup_timer.begin();
 
-	kreg = kernel::mpi::factory::from_config(conf);
+	kreg = kernel::mpi::factory::from_config(*conf);
 
 	setup(std::move(fop));
 
@@ -190,7 +191,7 @@ mpi::solver::solver(bmg2d::mpi::stencil_op&& fop, config::reader &&cfg) : multil
 int mpi::solver::compute_num_levels(bmg2d::mpi::stencil_op & fop)
 {
 	int ng;
-	auto min_coarse = conf.get<len_t>("solver.min-coarse", 3);
+	auto min_coarse = conf->get<len_t>("solver.min-coarse", 3);
 
 	auto kernels = kernel_registry();
 

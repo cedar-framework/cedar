@@ -111,11 +111,11 @@ TEST(MPIPoisson3, Isotropic) {
 	mpi::grid_func b(grid);
 
 	set_problem(b);
-	config::reader conf("");
-	conf.set("solver.relaxation", "point");
-	conf.set("solver.cg-solver", "LU");
+	auto conf = std::make_shared<config::reader>("");
+	conf->set("solver.relaxation", "point");
+	conf->set("solver.cg-solver", "LU");
 
-	mpi::solver bmg(std::move(so), std::move(conf));
+	mpi::solver bmg(std::move(so), conf);
 
 	auto sol = bmg.solve(b);
 

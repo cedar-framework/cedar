@@ -97,8 +97,8 @@ TEST(MPIPoisson2, Isotropic) {
 
 	set_problem(b);
 
-	config::reader conf("");
-	mpi::solver bmg(std::move(so), std::move(conf));
+	auto conf = std::make_shared<config::reader>("");
+	mpi::solver bmg(std::move(so), conf);
 
 	auto sol = bmg.solve(b);
 

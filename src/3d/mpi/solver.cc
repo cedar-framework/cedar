@@ -95,7 +95,7 @@ void mpi::solver::setup_space(int nlevels)
 void mpi::solver::setup_cg_solve()
 {
 	auto & cop = levels.back().A;
-	std::string cg_solver_str = conf.get<std::string>("solver.cg-solver", "LU");
+	std::string cg_solver_str = conf->get<std::string>("solver.cg-solver", "LU");
 
 	if (cg_solver_str == "LU" or cop.grid().nproc() == 1)
 		cg_solver_lu = true;
@@ -131,7 +131,7 @@ mpi::solver::solver(bmg3::mpi::stencil_op&& fop) : comm(fop.grid().comm)
 	timer setup_timer("Setup");
 	setup_timer.begin();
 
-	kreg = kernel::mpi::factory::from_config(conf);
+	kreg = kernel::mpi::factory::from_config(*conf);
 
 	setup(std::move(fop));
 
@@ -139,12 +139,13 @@ mpi::solver::solver(bmg3::mpi::stencil_op&& fop) : comm(fop.grid().comm)
 }
 
 
-mpi::solver::solver(bmg3::mpi::stencil_op&& fop, config::reader &&cfg) : multilevel(std::move(cfg)), comm(fop.grid().comm)
+mpi::solver::solver(bmg3::mpi::stencil_op&& fop,
+                    std::shared_ptr<config::reader> cfg) : multilevel(cfg), comm(fop.grid().comm)
 {
 	timer setup_timer("Setup");
 	setup_timer.begin();
 
-	kreg = kernel::mpi::factory::from_config(conf);
+	kreg = kernel::mpi::factory::from_config(*conf);
 
 	setup(std::move(fop));
 
@@ -155,7 +156,7 @@ mpi::solver::solver(bmg3::mpi::stencil_op&& fop, config::reader &&cfg) : multile
 int mpi::solver::compute_num_levels(bmg3::mpi::stencil_op & fop)
 {
 	int ng;
-	auto min_coarse = conf.get<len_t>("solver.min-coarse", 3);
+	auto min_coarse = conf->get<len_t>("solver.min-coarse", 3);
 
 	auto kernels = kernel_registry();
 

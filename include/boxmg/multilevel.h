@@ -8,13 +8,14 @@
 
 namespace boxmg {
 
+
 template <class LevelType,class stencil_op, class grid_func,class registry>
 class multilevel
 {
-
 public:
-multilevel() : conf("config.json") {}
-multilevel(config::reader &&conf): conf(std::move(conf)) {}
+	using conf_ptr = std::shared_ptr<config::reader>;
+multilevel() : conf(std::make_shared<config::reader>("config.json")) {}
+multilevel(conf_ptr cfg): conf(cfg) {}
 	virtual ~multilevel() {}
 
 	std::shared_ptr<registry> kernel_registry()
@@ -91,9 +92,9 @@ multilevel(config::reader &&conf): conf(std::move(conf)) {}
 	{
 		auto & sop = level(lvl).A;
 
-		std::string relax_type = conf.get<std::string>("solver.relaxation", "point");
-		int nrelax_pre = conf.get<int>("solver.cycle.nrelax-pre", 2);
-		int nrelax_post = conf.get<int>("solver.cycle.nrelax-post", 1);
+		std::string relax_type = conf->get<std::string>("solver.relaxation", "point");
+		int nrelax_pre = conf->get<int>("solver.cycle.nrelax-pre", 2);
+		int nrelax_post = conf->get<int>("solver.cycle.nrelax-post", 1);
 		auto kernels = kernel_registry();
 
 		if (relax_type == "point")
@@ -170,7 +171,7 @@ multilevel(config::reader &&conf): conf(std::move(conf)) {}
 		levels.emplace_back(std::move(fop));
 		levels.back().A.set_registry(kreg);
 		auto num_levels = compute_num_levels(levels[0].A);
-		auto nlevels_conf = conf.get<int>("solver.num-levels", -1);
+		auto nlevels_conf = conf->get<int>("solver.num-levels", -1);
 		if (nlevels_conf > 0) {
 			if (nlevels_conf > num_levels) {
 				log::error << "too many levels specified" << std::endl;
@@ -254,8 +255,8 @@ multilevel(config::reader &&conf): conf(std::move(conf)) {}
 	virtual grid_func solve(const grid_func & b)
 	{
 		grid_func x = grid_func::zeros_like(b);
-		int maxiter = conf.get<int>("solver.max-iter", 10);
-		real_t tol = conf.get<real_t>("solver.tol", 1e-8);
+		int maxiter = conf->get<int>("solver.max-iter", 10);
+		real_t tol = conf->get<real_t>("solver.tol", 1e-8);
 		levels[0].A.residual(x,b,levels[0].res);
 		real_t res0_l2 = levels[0].res.template lp_norm<2>();
 		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
@@ -280,8 +281,8 @@ multilevel(config::reader &&conf): conf(std::move(conf)) {}
 
 	virtual void solve(const grid_func & b, grid_func & x)
 	{
-		int maxiter = conf.get<int>("solver.max-iter", 10);
-		real_t tol = conf.get<real_t>("solver.tol", 1e-8);
+		int maxiter = conf->get<int>("solver.max-iter", 10);
+		real_t tol = conf->get<real_t>("solver.tol", 1e-8);
 		levels[0].A.residual(x,b,levels[0].res);
 		real_t res0_l2 = levels[0].res.template lp_norm<2>();
 		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
@@ -316,12 +317,12 @@ multilevel(config::reader &&conf): conf(std::move(conf)) {}
 	                         LevelType & level) {}
 
 
-	config::reader & get_config() { return conf; }
+	config::reader & get_config() { return *conf; }
 
 protected:
 	std::vector<LevelType> levels;
 	std::function<void(const discrete_op<grid_func> & A, grid_func &x, const grid_func &b)> coarse_solver;
-	config::reader conf;
+	std::shared_ptr<config::reader> conf;
 	std::shared_ptr<registry> kreg;
 	grid_func ABD;
 	real_t *bbd;
