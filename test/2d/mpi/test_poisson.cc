@@ -7,16 +7,10 @@
 #include <boxmg/2d/mpi/solver.h>
 
 
-static void set_problem(boxmg::bmg2d::mpi::grid_func & b)
+static void set_problem(boxmg::bmg2d::mpi::grid_func & b, std::function<boxmg::real_t(boxmg::real_t,boxmg::real_t)> rhs)
 {
 	using namespace boxmg;
 	using namespace boxmg::bmg2d;
-
-	const double pi = M_PI;
-
-	auto rhs = [pi](real_t x, real_t y) {
-		return 8*(pi*pi)*sin(2*pi*x)*sin(2*pi*y);
-	};
 
 	auto & topo = b.grid();
 
@@ -95,9 +89,93 @@ TEST(MPIPoisson2, Isotropic) {
 	auto so = mpi::gallery::poisson(grid);
 	mpi::grid_func b(grid);
 
-	set_problem(b);
+	set_problem(b,
+	            [](real_t x, real_t y) {
+		            const double pi = M_PI;
+		            return 8*(pi*pi)*sin(2*pi*x)*sin(2*pi*y);
+	            });
 
 	config::reader conf("");
+	mpi::solver bmg(std::move(so), std::move(conf));
+
+	auto sol = bmg.solve(b);
+
+	ASSERT_LT(std::abs(bmg.level(-1).res.lp_norm<2>()),
+	          1e-8);
+
+	mpi::grid_func exact_sol(grid);
+
+	set_solution(exact_sol);
+
+	auto diff = exact_sol - sol;
+
+	ASSERT_LT(std::abs(diff.inf_norm()),
+	          1e-4);
+}
+
+
+TEST(MPIPoisson2, StrongX) {
+	using namespace boxmg;
+	using namespace boxmg::bmg2d;
+
+	real_t eps = 0.0001;
+
+	auto nx = 200;
+	auto ny = nx;
+
+	auto grid = util::create_topo_global(MPI_COMM_WORLD, nx, ny);
+
+	auto so = mpi::gallery::diag_diffusion(grid, 1, eps);
+	mpi::grid_func b(grid);
+
+	set_problem(b,
+	            [eps](real_t x, real_t y) {
+		            const double pi = M_PI;
+		            return 4*(pi*pi)*eps*sin(2*pi*x)*sin(2*pi*y) + 4*(pi*pi)*sin(2*pi*x)*sin(2*pi*y);
+	            });
+
+	config::reader conf("");
+	conf.set("solver.relaxation", "line-x");
+	mpi::solver bmg(std::move(so), std::move(conf));
+
+	auto sol = bmg.solve(b);
+
+	ASSERT_LT(std::abs(bmg.level(-1).res.lp_norm<2>()),
+	          1e-8);
+
+	mpi::grid_func exact_sol(grid);
+
+	set_solution(exact_sol);
+
+	auto diff = exact_sol - sol;
+
+	ASSERT_LT(std::abs(diff.inf_norm()),
+	          1e-4);
+}
+
+
+TEST(MPIPoisson2, StrongY) {
+	using namespace boxmg;
+	using namespace boxmg::bmg2d;
+
+	real_t eps = 0.0001;
+
+	auto nx = 200;
+	auto ny = nx;
+
+	auto grid = util::create_topo_global(MPI_COMM_WORLD, nx, ny);
+
+	auto so = mpi::gallery::diag_diffusion(grid, eps, 1);
+	mpi::grid_func b(grid);
+
+	set_problem(b,
+	            [eps](real_t x, real_t y) {
+		            const double pi = M_PI;
+		            return 4*(pi*pi)*eps*sin(2*pi*x)*sin(2*pi*y) + 4*(pi*pi)*sin(2*pi*x)*sin(2*pi*y);
+	            });
+
+	config::reader conf("");
+	conf.set("solver.relaxation", "line-y");
 	mpi::solver bmg(std::move(so), std::move(conf));
 
 	auto sol = bmg.solve(b);
