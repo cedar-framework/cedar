@@ -168,7 +168,7 @@
             else
                CALL MPI_GATHER(RWORK,NLINES*8,&
                     &           MPI_DOUBLE_PRECISION,&
-                    &           RWORK,NLINES*8,MPI_DOUBLE_PRECISION,&
+                    &           0.0d0,NLINES*8,MPI_DOUBLE_PRECISION,&
                     &           0, XLINECOMM, IERR)
             endif
          ENDIF
@@ -197,7 +197,7 @@
                     &           MPI_DOUBLE_PRECISION,MPI_IN_PLACE, NLINES*8, &
                     &           MPI_DOUBLE_PRECISION,0,XLINECOMM,IERR)
             else
-               CALL MPI_SCATTER(RWORK(MYID*NLINES*8+1),NLINES*8,&
+               CALL MPI_SCATTER(0.0d0,NLINES*8,&
                     &           MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
                     &           MPI_DOUBLE_PRECISION,0,XLINECOMM,IERR)
             endif
