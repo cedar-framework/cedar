@@ -11,7 +11,7 @@ class par_object
 public:
 	par_object() {}
 par_object(topo_ptr grd) : grid_(grd) {}
-par_object(topo_ptr grd, MPI_Comm comm) : grid_(grd), comm(comm) {}
+par_object(topo_ptr grd, MPI_Comm comm) : comm(comm), grid_(grd) {}
 	MPI_Comm comm;
 	grid_topo & grid() { return *grid_; }
 	const grid_topo & grid() const { return *grid_; }

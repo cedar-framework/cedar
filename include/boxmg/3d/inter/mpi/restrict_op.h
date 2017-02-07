@@ -17,6 +17,7 @@ restrict_op(prolong_op * P) : P(P) {}
 	const prolong_op & getP() const { return *P; }
 	virtual void apply(const mpi::grid_func &x, mpi::grid_func &y) const;
 	virtual void residual(const mpi::grid_func &x, const mpi::grid_func &b, mpi::grid_func &r) const{}
+	friend std::ostream & operator<< (std::ostream &os, const restrict_op & R);
 	friend mpi::grid_func operator*(const restrict_op &R, const mpi::grid_func &x);
 private:
 	prolong_op * P;

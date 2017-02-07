@@ -9,7 +9,6 @@ std::ostream & operator<< (std::ostream & os, const stencil_op & op)
 	auto & sten = op.stencil();
 	auto nx = sten.len(0);
 	auto ny = sten.len(1);
-	auto nz = sten.len(2);
 
 	unsigned int width = 4;
 

@@ -40,7 +40,7 @@ inline std::vector<int> factor(int np)
 	std::vector<int> primes = sieve(np);
 
 	int p = 0;
-	for (int i = 0; i < primes.size(); i++) {
+	for (unsigned int i = 0; i < primes.size(); i++) {
 		if (np % primes[p] == 0) {
 			facs.push_back(primes[p]);
 			np = np / primes[p];
@@ -67,7 +67,8 @@ std::array<int, ND> grid_decomp(std::array<len_t,ND> n, int np)
 
 	std::vector<int> facs = factor(np);
 
-	int curr,ind;
+	len_t curr;
+	int ind;
 	for (auto fac : facs) {
 		curr = 0;
 		ind = 0;

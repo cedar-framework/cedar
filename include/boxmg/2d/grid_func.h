@@ -29,6 +29,7 @@ namespace boxmg { namespace bmg2d {
 		grid_func & operator=(const grid_func & gf) = default;
 		static grid_func ones(len_t nx, len_t ny);
 		static grid_func zeros(len_t nx, len_t ny);
+		static grid_func random(len_t nx, len_t ny);
 		static grid_func like(const grid_func &likeable);
 		static grid_func zeros_like(const grid_func &likeable);
 		static grid_func ones_like(const grid_func &likeable);
@@ -45,7 +46,11 @@ namespace boxmg { namespace bmg2d {
 	{
 		real_t result = 0;
 
-		for (auto &v : vec) result += std::pow(v, p);
+		for (auto j : this->range(1)) {
+			for (auto i : this->range(0)) {
+				result += std::pow((*this)(i,j), p);
+			}
+		}
 
 		return std::pow(result, 1./p);
 	}

@@ -2,6 +2,8 @@
 #define BOXMG_PERF_MODEL_H
 
 #include <iostream>
+#include <boost/property_tree/ptree.hpp>
+
 
 namespace boxmg {
 
@@ -14,6 +16,7 @@ public:
 	virtual void set_comm_param(float ts, float tw) { this->ts = ts; this->tw = tw; }
 	virtual void rep(std::ostream &os) const = 0;
 	virtual int nproc() const = 0;
+	virtual void recur_times(boost::property_tree::ptree &) const = 0;
 	friend std::ostream & operator<<(std::ostream &os, const perf_model & pm);
 
 

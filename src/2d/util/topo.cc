@@ -148,7 +148,7 @@ topo_ptr create_topo_global(MPI_Comm comm, len_t ngx, len_t ngy)
 	grid->nproc(1) = decomp[1];
 	grid->nproc(2) = 1;
 
-	assert(size == grid->nproc());
+	assert(static_cast<unsigned int>(size) == grid->nproc());
 
 	grid->coord(0) = rank % grid->nproc(0);
 	grid->coord(1) = rank / grid->nproc(0);

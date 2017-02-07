@@ -1,5 +1,11 @@
-set(kernel_SOURCES
+set(sources
   kernel/factory.cc
-  kernel/mpi/factory.cc
   kernel/setup_nog.cc
-  PARENT_SCOPE)
+)
+
+if (ENABLE_MPI)
+  list(APPEND sources
+	kernel/mpi/factory.cc)
+endif()
+
+set(kernel_SOURCES ${sources} PARENT_SCOPE)

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <random>
 
 #include <boxmg/kernel_name.h>
 #include <boxmg/2d/inter/prolong_op.h>
@@ -62,6 +63,25 @@ grid_func grid_func::zeros(len_t nx, len_t ny)
 }
 
 
+grid_func grid_func::random(len_t nx, len_t ny)
+{
+	grid_func ret(nx,ny);
+
+	std::uniform_real_distribution<double> unif(0, 1);
+	std::random_device rand_dev;
+
+	std::default_random_engine rand_engine(rand_dev());
+
+	for (auto j: ret.grange(1)) {
+		for (auto i: ret.grange(0)) {
+			ret(i,j) = unif(rand_engine);
+		}
+	}
+
+	return ret;
+}
+
+
 grid_func grid_func::like(const grid_func &likeable)
 {
 	grid_func ret(likeable.shape(0), likeable.shape(1));
@@ -117,17 +137,29 @@ boxmg::real_t grid_func::inf_norm() const
 		return (std::abs(a) < std::abs(b));
 	};
 
-	auto res = std::max_element(vec.begin(), vec.end(), abs_compare);
-	return *res;
+	real_t cmax = 0;
+
+	for (auto j : this->range(1)) {
+		for (auto i : this->range(0)) {
+			if (abs_compare(cmax, (*this)(i,j)))
+				cmax = (*this)(i,j);
+		}
+	}
+
+	return cmax;
 }
 
 
 grid_func & grid_func::operator-=(const grid_func &rhs)
 {
+	auto jj = rhs.range(1).begin();
 	for (auto j: this->range(1)) {
+		auto ii = rhs.range(0).begin();
 		for (auto i: this->range(0)) {
-			(*this)(i,j) -= rhs(i,j);
+			(*this)(i,j) -= rhs(*ii,*jj);
+			++ii;
 		}
+		++jj;
 	}
 
 	return *this;
@@ -139,7 +171,7 @@ std::ostream & operator<<(std::ostream &os, const grid_func & obj)
 {
 	for (auto j: obj.range(1)) {
 		for (auto i: obj.range(0)) {
-			os << i << " " << j << " " << std::to_string(obj(i,j));
+			os << i << " " << j << " " << std::to_string(obj(i,j)) << '\n';
 		}
 	}
 	return os;

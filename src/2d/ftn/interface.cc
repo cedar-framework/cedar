@@ -1,4 +1,5 @@
 #include "boxmg/util/log.h"
+#include <boxmg/util/time_log.h>
 
 extern "C" {
 
@@ -7,4 +8,13 @@ extern "C" {
 		boxmg::log::error << string << std::endl;
 	}
 
+	void ftimer_begin(char *string)
+	{
+		boxmg::timer_begin(string);
+	}
+
+	void ftimer_end(char *string)
+	{
+		boxmg::timer_end(string);
+	}
 }

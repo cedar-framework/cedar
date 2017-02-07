@@ -23,6 +23,7 @@ public:
 	float trestrict(int lvl) const;
 	float tinterp(int lvl) const;
 	float tcgsolve() const;
+	float agglom() const;
 	void set_cgperf(std::shared_ptr<perf_model> mod);
 	std::shared_ptr<perf_model> get_cgperf();
 	virtual float time() const;
@@ -31,6 +32,8 @@ public:
 	int nblocks(int dim) const;
 	virtual void rep(std::ostream & os) const;
 	virtual int nproc() const;
+	virtual void recur_times(boost::property_tree::ptree&) const;
+	void save_times(std::string iname, std::string oname) const;
 
 protected:
 	short nd;

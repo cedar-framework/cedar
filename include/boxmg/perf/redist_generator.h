@@ -7,7 +7,7 @@
 namespace boxmg {
 
 static inline bool keep_refining(int npx, int npy, int nbx, int nby, len_t nlx, len_t nly,
-                          int min_coarse)
+                                 len_t min_coarse)
 {
 	bool ret = ((npx / nbx) > 0 and (npy / nby) > 0);
 	//ret = ret and ((npx / nbx) * (npy / nby) > 1);
@@ -23,7 +23,7 @@ public:
 	typedef std::array<int,2> value_type;
 
 redist_iterator(std::array<int, 2> np, std::array<len_t,2> nglobal,
-                int min_coarse):
+                len_t min_coarse):
 	nblocks({1,1}), nglobal(nglobal), nlocal(nglobal), np(np), min_coarse(min_coarse) {}
 redist_iterator() : nblocks({0,0}) {}
 
@@ -49,7 +49,7 @@ protected:
 	std::array<len_t,2> nglobal;
 	std::array<len_t,2> nlocal;
 	std::array<int,2> np;
-	int min_coarse;
+	len_t min_coarse;
 };
 
 
@@ -58,7 +58,7 @@ class redist_generator
 {
 public:
 	redist_generator(std::array<int, 2> np, std::array<len_t, 2> nglobal,
-	                 int min_coarse) :
+	                 len_t min_coarse) :
 	np(np), nglobal(nglobal), min_coarse(min_coarse) {}
 
 	rit begin() {
@@ -73,7 +73,7 @@ public:
 private:
 	std::array<int,2> np;
 	std::array<len_t,2> nglobal;
-	int min_coarse;
+	len_t min_coarse;
 };
 
 }

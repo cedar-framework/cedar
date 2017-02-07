@@ -13,7 +13,8 @@ class multilevel
 {
 
 public:
-multilevel() : conf("config.json") {};
+multilevel() : conf("config.json") {}
+multilevel(config::reader &&conf): conf(std::move(conf)) {}
 	virtual ~multilevel() {}
 
 	std::shared_ptr<registry> kernel_registry()
@@ -153,6 +154,14 @@ multilevel() : conf("config.json") {};
 		levels.emplace_back(std::move(fop));
 		levels.back().A.set_registry(kreg);
 		auto num_levels = compute_num_levels(levels[0].A);
+		auto nlevels_conf = conf.get<int>("solver.num-levels", -1);
+		if (nlevels_conf > 0) {
+			if (nlevels_conf > num_levels) {
+				log::error << "too many levels specified" << std::endl;
+			} else {
+				num_levels = nlevels_conf;
+			}
+		}
 		log::debug << "Using a " << num_levels << " level heirarchy" << std::endl;
 		levels.reserve(num_levels);
 		setup_space(num_levels);
@@ -197,7 +206,8 @@ multilevel() : conf("config.json") {};
 
 		timer_down();
 
-		if (lvl == levels.size() - 2) {
+		int coarse_lvl = levels.size() - 1;
+		if (lvl+1 == coarse_lvl) {
 			timer_begin("coarse-solve");
 			coarse_solver(levels[levels.size()-1].A, coarse_x, coarse_b);
 			timer_end("coarse-solve");

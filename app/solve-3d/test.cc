@@ -3,63 +3,68 @@
 #include <iostream>
 
 #include <boxmg/types.h>
-#include <boxmg/3d/grid_func.h>
-#include <boxmg/3d/stencil_op.h>
+#include <boxmg/3d/gallery.h>
 #include <boxmg/3d/solver.h>
 
-extern "C" {
-	using namespace boxmg;
-	void putf(real_t *so, real_t *qf,
-	          len_t ii, len_t jj, len_t kk,
-	          real_t hx, real_t hy, real_t hz);
-	void put_sol(real_t *q,
-	             len_t ii, len_t jj, len_t kk,
-	             real_t hx, real_t hy, real_t hz);
-}
 
-
-static void set_problem(boxmg::bmg3::stencil_op & so, boxmg::bmg3::grid_func & b)
+static void set_problem(boxmg::bmg3::grid_func & b)
 {
 	using namespace boxmg;
 	using namespace boxmg::bmg3;
 
 	const double pi = M_PI;
 
-	auto nx = b.shape(0);
-	auto ny = b.shape(1);
-	auto nz = b.shape(2);
+	auto rhs = [pi](real_t x, real_t y, real_t z) {
+		return 12*(pi*pi)*sin(2*pi*x)*sin(2*pi*y)*sin(2*pi*z);
+	};
 
-	real_t hx = 1.0/(nx+1);
-	real_t hy = 1.0/(ny+1);
-	real_t hz = 1.0/(nz+1);
-
-	auto & sten = so.stencil();
-	sten.five_pt() = true;
-	sten.set(0);
 	b.set(0);
 
-	putf(so.data(), b.data(),
-	     b.len(0), b.len(1), b.len(2),
-	     hx, hy, hz);
+	real_t hx = 1.0 / (b.len(0) - 1);
+	real_t hy = 1.0 / (b.len(1) - 1);
+	real_t hz = 1.0 / (b.len(2) - 1);
+
+	real_t h2 = hx*hy*hz;
+
+	for (auto k : b.range(2)) {
+		for (auto j : b.range(1)) {
+			for (auto i : b.range(0)) {
+				real_t x = i*hx;
+				real_t y = j*hy;
+				real_t z = k*hz;
+
+				b(i,j,k) = rhs(x,y,z) * h2;
+			}
+		}
+	}
 }
 
 
-static void set_solution(boxmg::bmg3::grid_func & x)
+static void set_solution(boxmg::bmg3::grid_func & q)
 {
 	using namespace boxmg;
-	using namespace boxmg::bmg3;
 
-	auto nx = x.shape(0);
-	auto ny = x.shape(1);
-	auto nz = x.shape(2);
+	const double pi = M_PI;
 
-	real_t hx = 1.0/(nx+1);
-	real_t hy = 1.0/(ny+1);
-	real_t hz = 1.0/(nz+1);
+	auto sol = [pi](real_t x, real_t y, real_t z) {
+		return sin(2*pi*x)*sin(2*pi*y)*sin(2*pi*z);
+	};
 
-	put_sol(x.data(),
-	        x.len(0), x.len(1), x.len(2),
-	        hx, hy, hz);
+	real_t hx = 1.0 / (q.len(0) - 1);
+	real_t hy = 1.0 / (q.len(1) - 1);
+	real_t hz = 1.0 / (q.len(2) - 1);
+
+	for (auto k : q.range(2)) {
+		for (auto j : q.range(1)) {
+			for (auto i : q.range(0)) {
+				real_t x = i*hx;
+				real_t y = j*hy;
+				real_t z = k*hz;
+
+				q(i,j,k) = sol(x,y,z);
+			}
+		}
+	}
 }
 
 
@@ -72,13 +77,14 @@ int main(int argc, char *argv[])
 
 	config::reader conf;
 
-	auto nx = conf.get<len_t>("grid.nx", 301);
-	auto ny = conf.get<len_t>("grid.ny", 301);
-	auto nz = conf.get<len_t>("grid.nz", 301);
+	auto ndofs = conf.getvec<len_t>("grid.n");
+	auto nx = ndofs[0];
+	auto ny = ndofs[1];
+	auto nz = ndofs[2];
 
-	auto so = stencil_op(nx, ny, nz);
+	auto so = gallery::poisson(nx, ny, nz);
 	grid_func b(nx, ny, nz);
-	set_problem(so, b);
+	set_problem(b);
 
 	solver bmg(std::move(so));
 

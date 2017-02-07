@@ -1,4 +1,12 @@
-set(dirs 2d 3d config mpi perf util)
+set(dirs 2d config perf util)
+
+if (ENABLE_3D)
+  list(APPEND dirs 3d)
+endif()
+
+if(ENABLE_MPI)
+  list(APPEND dirs mpi)
+endif()
 
 foreach(dir ${dirs})
   add_subdirectory(${dir})

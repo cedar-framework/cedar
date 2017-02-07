@@ -3,17 +3,13 @@ add_subdirectory(ftn)
 add_subdirectory(inter)
 add_subdirectory(kernel)
 add_subdirectory(relax)
-add_subdirectory(util)
-add_subdirectory(interface)
 
-set(2d_SOURCES
+set(sources
   ${cg_SOURCES}
   ${ftn_SOURCES}
   ${inter_SOURCES}
   ${kernel_SOURCES}
   ${relax_SOURCES}
-  ${util_SOURCES}
-  ${interface_SOURCES}
   grid_func.cc
   grid_stencil.cc
   stencil_op.cc
@@ -23,10 +19,24 @@ set(2d_SOURCES
   residual.cc
   solver.cc
   stencil_op.cc
-  mpi/grid_func.cc
-  mpi/halo.cc
-  mpi/solver.cc
-  mpi/stencil_op.cc
-  mpi/redist_solver.cc
-  PARENT_SCOPE
+  gallery.cc
   )
+
+if(ENABLE_MPI)
+  add_subdirectory(interface)
+  add_subdirectory(util)
+
+  list(APPEND sources
+	${interface_SOURCES}
+	${util_SOURCES}
+	mpi/grid_func.cc
+	mpi/halo.cc
+	mpi/solver.cc
+	mpi/stencil_op.cc
+	mpi/redist_solver.cc
+	mpi/residual.cc
+	mpi/gallery.cc
+	)
+endif()
+
+set(2d_SOURCES ${sources} PARENT_SCOPE)

@@ -23,6 +23,8 @@ public:
 	grid_func(topo_ptr grid);
 	grid_func(len_t nx, len_t ny, len_t nz);
 	using ::boxmg::bmg3::grid_func::operator();
+	static grid_func ones(topo_ptr grid);
+	static grid_func zeros(topo_ptr grid);
 	static grid_func like(const grid_func &likeable);
 	static grid_func zeros_like(const grid_func &likeable);
 	static grid_func ones_like(const grid_func &likeable);

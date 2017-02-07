@@ -12,9 +12,11 @@ namespace boxmg { namespace config
 
     void reader::read()
     {
-        if (!boost::filesystem::exists(fname))
-            fname = "../" + fname;
-        boost::property_tree::json_parser::read_json(fname, pt);
+	    if (!(fname == "")) {
+		    if (!boost::filesystem::exists(fname))
+			    fname = "../" + fname;
+		    boost::property_tree::json_parser::read_json(fname, pt);
+	    }
     }
 
     void reader::set_config(std::string fname)

@@ -61,6 +61,14 @@ solver::solver(stencil_op&& fop)
 }
 
 
+solver::solver(stencil_op&& fop, config::reader && cfg): multilevel(std::move(cfg))
+{
+	kreg = kernel::factory::from_config(conf);
+
+	setup(std::move(fop));
+}
+
+
 solver::~solver()
 {
 	delete[] bbd;
