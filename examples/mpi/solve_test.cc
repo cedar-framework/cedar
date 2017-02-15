@@ -134,9 +134,6 @@ int main(int argc, char *argv[])
 
 	set_problem(b);
 
-	int rank;
-	MPI_Comm_rank(so.grid().comm, &rank);
-
 	mpi::solver bmg(std::move(so));
 
 	MPI_Barrier(MPI_COMM_WORLD); // synchronize before timing solve
