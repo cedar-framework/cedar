@@ -41,13 +41,17 @@ void init()
 	}
 
 	config::reader conf;
+	init_level(conf);
+}
+
+void init_level(config::reader & conf)
+{
+	level = 0;
 
 	std::vector<std::string> clevels = conf.getvec<std::string>("log");
 
 	for (auto clvl : clevels) level |= (*log_level)[clvl];
-
 }
-
 
 std::string header()
 {

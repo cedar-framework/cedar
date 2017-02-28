@@ -24,6 +24,7 @@ namespace boxmg { namespace bmg2d { namespace kernel {
 namespace impls
 {
 	void setup_cg_boxmg(const mpi::stencil_op & so,
+	                    std::shared_ptr<config::reader> conf,
 	                    std::shared_ptr<solver> *bmg)
 	{
 		int nstencil, nog, rank;
@@ -59,7 +60,7 @@ namespace impls
 		                           &ctx->msg_geom.data()[local_arr_ptr],
 		                           fcomm);
 
-		*bmg = std::make_shared<solver>(std::move(so_ser));
+		*bmg = std::make_shared<solver>(std::move(so_ser), conf);
 	}
 }
 

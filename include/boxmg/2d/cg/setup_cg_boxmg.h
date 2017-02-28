@@ -13,6 +13,7 @@ namespace impls
 {
 	namespace mpi = boxmg::bmg2d::mpi;
 	void setup_cg_boxmg(const mpi::stencil_op & so,
+	                    std::shared_ptr<config::reader> conf,
 	                    std::shared_ptr<solver> *slv);
 }
 

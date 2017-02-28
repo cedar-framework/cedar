@@ -121,6 +121,7 @@ namespace factory
 
 		kreg->add(kernel_name::setup_cg_boxmg, "fortran-msg",
 		          boxmg::kernel<const mpi::stencil_op &,
+		          std::shared_ptr<config::reader>,
 		          std::shared_ptr<solver>*>(impls::setup_cg_boxmg));
 
 		kreg->add(kernel_name::solve_cg_boxmg, "fortran-msg",

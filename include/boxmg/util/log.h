@@ -20,6 +20,7 @@ void init();
 unsigned int & lvl();
 void set_comm(MPI_Comm comm);
 void set_header_msg(std::string header_msg);
+void init_level(config::reader & conf);
 
 std::string header();
 
