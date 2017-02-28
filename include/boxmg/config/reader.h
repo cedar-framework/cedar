@@ -5,6 +5,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace boxmg {
 namespace config
@@ -13,6 +14,7 @@ namespace config
     {
         public:
             reader();
+            reader(boost::property_tree::ptree && ptri): pt(std::move(ptri)), fname("") {}
             template <typename T>
 	            reader(T&& fname);
             template <typename OptionType>
@@ -40,6 +42,7 @@ namespace config
 	            std::vector<OptionType> getvec(std::string path);
             template <typename OptionType>
 	            std::vector<std::vector<OptionType>> getnvec(std::string path);
+            std::shared_ptr<reader> getconf(std::string path);
             /**
              * Sets a new config file for future Config::get calls.
              *

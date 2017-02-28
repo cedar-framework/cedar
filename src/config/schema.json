@@ -25,6 +25,10 @@
 			}
 		},
 		"log-planes": {"type": "bool"},
+		"cg-config":
+		{
+			"type": "object"
+		},
 		"solver":
 		{
 			"type": "object",
