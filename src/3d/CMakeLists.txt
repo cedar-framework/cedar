@@ -4,6 +4,7 @@ add_subdirectory(relax)
 add_subdirectory(kernel)
 add_subdirectory(cg)
 add_subdirectory(util)
+add_subdirectory(interface)
 
 set(sources
   ${ftn_SOURCES}
@@ -12,6 +13,7 @@ set(sources
   ${kernel_SOURCES}
   ${cg_SOURCES}
   ${util_SOURCES}
+  ${interface_SOURCES}
   grid_func.cc
   grid_stencil.cc
   stencil_op.cc

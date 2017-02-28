@@ -6,6 +6,7 @@
 namespace boxmg { namespace bmg2d { namespace mpi { namespace gallery {
 
 stencil_op poisson(topo_ptr grid);
+stencil_op diag_diffusion(topo_ptr grid, real_t dx, real_t dy);
 
 }}}}
 

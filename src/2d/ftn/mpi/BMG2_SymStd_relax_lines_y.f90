@@ -156,10 +156,17 @@
          ! =====================================================
 
          IF (SIZE .GT. 1) THEN
-            CALL MPI_GATHER(RWORK,NLINES*8,&
-     &           MPI_DOUBLE_PRECISION,&
-     &           RWORK,NLINES*8,MPI_DOUBLE_PRECISION,&
-     &           0, YLINECOMM, IERR)
+            if (myid .eq. 0) then
+               CALL MPI_GATHER(MPI_IN_PLACE,NLINES*8,&
+                    &           MPI_DOUBLE_PRECISION,&
+                    &           RWORK,NLINES*8,MPI_DOUBLE_PRECISION,&
+                    &           0, YLINECOMM, IERR)
+            else
+               CALL MPI_GATHER(RWORK,NLINES*8,&
+                    &           MPI_DOUBLE_PRECISION,&
+                    &           0.0d0,NLINES*8,MPI_DOUBLE_PRECISION,&
+                    &           0, YLINECOMM, IERR)
+            endif
          ENDIF
 
          ! ======================================================
@@ -183,9 +190,15 @@
          ! ====================================================
 
          IF (SIZE .GT. 1) THEN
-            CALL MPI_SCATTER(RWORK(MYID*NLINES*8+1),NLINES*8,&
-     &           MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
-     &           MPI_DOUBLE_PRECISION,0,YLINECOMM,IERR)
+            if (myid .eq. 0) then
+               CALL MPI_SCATTER(RWORK(MYID*NLINES*8+1),NLINES*8,&
+                    &           MPI_DOUBLE_PRECISION,MPI_IN_PLACE,NLINES*8, &
+                    &           MPI_DOUBLE_PRECISION,0,YLINECOMM,IERR)
+            else
+               CALL MPI_SCATTER(0.0d0,NLINES*8,&
+                    &           MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
+                    &           MPI_DOUBLE_PRECISION,0,YLINECOMM,IERR)
+            endif
          ENDIF
 
          ! ====================================================
