@@ -175,6 +175,7 @@ TEST(MPIPoisson2, StrongY) {
 	            });
 
 	auto conf = std::make_shared<config::reader>("");
+	conf->set("solver.relaxation", "line-y");
 	mpi::solver bmg(std::move(so), conf);
 
 	auto sol = bmg.solve(b);
