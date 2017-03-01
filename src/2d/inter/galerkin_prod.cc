@@ -36,10 +36,10 @@ namespace impls
 		jjc = csten.len(1);
 
 		if (fsten.five_pt()) {
-			ifd = 0;
+			ifd = 1;
 			nstencil = 5;
 		} else {
-			ifd = 1;
+			ifd = 0;
 			nstencil = 9;
 		}
 

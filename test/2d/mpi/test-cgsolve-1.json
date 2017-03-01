@@ -1,0 +1,37 @@
+{
+	"log": ["status","error","info"],
+	"cg-config":
+	{
+		"log": ["status","error","info"],
+		"solver":
+		{
+			"cycle":
+			{
+				"nrelax-pre": 2,
+				"nrelax-post": 1
+			},
+			"relaxation": "point",
+			"num-levels": 5
+		}
+	},
+	"solver":
+	{
+		"cycle":
+		{
+			"nrelax-pre": 2,
+			"nrelax-post": 1
+		},
+		"relaxation": "point",
+		"tol": 1e-10,
+		"max-iter": 1,
+		"min-coarse": 3,
+		"num-levels": 3,
+		"cg-solver": "boxmg"
+	},
+	"grid":
+	{
+		"local": false,
+		"n": [400,400],
+		"np": [2,2]
+	}
+}

@@ -34,6 +34,7 @@ namespace impls
 		auto & sten = sod.stencil();
 
 		stencil_op so_ser(topo.nglobal(0)-2, topo.nglobal(1)-2);
+		so_ser.stencil().five_pt() = sten.five_pt();
 
 		if (sten.five_pt()) nstencil = 3;
 		else nstencil = 5;
@@ -61,6 +62,7 @@ namespace impls
 		                           fcomm);
 
 		*bmg = std::make_shared<solver>(std::move(so_ser), conf);
+		(*bmg)->level(-1).x = grid_func::like((*bmg)->level(-1).res);
 	}
 }
 

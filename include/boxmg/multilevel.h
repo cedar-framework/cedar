@@ -263,10 +263,7 @@ multilevel(conf_ptr cfg): conf(cfg) {}
 
 		timer_begin("solve");
 		for (auto i: range(maxiter)) {
-			if (levels.size() == 1)
-				coarse_solver(levels[0].A, x, b);
-			else
-				ncycle(0, x, b);
+			vcycle(x, b);
 			levels[0].A.residual(x,b,levels[0].res);
 			real_t res_l2 = levels[0].res.template lp_norm<2>();
 			real_t rel_l2 = res_l2 / res0_l2;
@@ -290,10 +287,7 @@ multilevel(conf_ptr cfg): conf(cfg) {}
 		timer_begin("solve");
 
 		for (auto i: range(maxiter)) {
-			if (levels.size() == 1)
-				coarse_solver(levels[0].A, x, b);
-			else
-				ncycle(0, x, b);
+			vcycle(x, b);
 			levels[0].A.residual(x,b,levels[0].res);
 			real_t res_l2 = levels[0].res.template lp_norm<2>();
 			real_t rel_l2 = res_l2 / res0_l2;
@@ -303,6 +297,13 @@ multilevel(conf_ptr cfg): conf(cfg) {}
 		timer_end("solve");
 	}
 
+	virtual void vcycle(grid_func & x, const grid_func & b)
+	{
+		if (levels.size() == 1)
+			coarse_solver(levels[0].A, x, b);
+		else
+			ncycle(0, x, b);
+	}
 
 	virtual int compute_num_levels(stencil_op & fop) { return 0; }
 
