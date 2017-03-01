@@ -4,6 +4,7 @@
 #include <mpi.h>
 #include <array>
 
+#include <boxmg/config/reader.h>
 #include <boxmg/mpi/redist_comms.h>
 #include <boxmg/2d/mpi/solver.h>
 #include <boxmg/2d/stencil_op.h>
@@ -15,7 +16,7 @@ class redist_solver
 {
 public:
 	using msg_ctx = boxmg::bmg2d::kernel::impls::MsgCtx;
-	redist_solver(const stencil_op & so, std::array<int, 2> nblock);
+	redist_solver(const stencil_op & so, std::shared_ptr<config::reader> conf, std::array<int, 2> nblock);
 	void solve(const grid_func & b, grid_func & x);
 
 protected:

@@ -21,6 +21,8 @@ unsigned int & lvl();
 void set_comm(MPI_Comm comm);
 void set_header_msg(std::string header_msg);
 void init_level(config::reader & conf);
+void push_level(config::reader & conf);
+void pop_level();
 
 std::string header();
 

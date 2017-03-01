@@ -14,7 +14,9 @@ extern "C" {
 using namespace boxmg;
 using namespace boxmg::bmg2d::mpi;
 
-redist_solver::redist_solver(const stencil_op & so, std::array<int, 2> nblock) :
+redist_solver::redist_solver(const stencil_op & so,
+                             std::shared_ptr<config::reader> conf,
+                             std::array<int, 2> nblock) :
 	redundant(false), nblock(nblock), active(true), recv_id(-1)
 {
 	// Split communicator into collective processor blocks
@@ -29,9 +31,9 @@ redist_solver::redist_solver(const stencil_op & so, std::array<int, 2> nblock) :
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
 		log::set_header_msg(" (redist)");
-		slv = std::make_unique<solver>(std::move(rop));
-		auto & cnf = slv->get_config();
-		cnf.set<int>("solver.max-iter", 1);
+		log::push_level(*conf);
+		slv = std::make_unique<solver>(std::move(rop), conf);
+		log::pop_level();
 		log::set_header_msg("");
 		MSG_pause(&msg_comm);
 		MSG_play(parent_comm);
@@ -51,7 +53,9 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 		MSG_pause(&parent_comm);
 		MSG_play(msg_comm);
 		log::set_header_msg(" (redist)");
-		slv->solve(b_redist, x_redist);
+		log::push_level(slv->get_config());
+		slv->vcycle(x_redist, b_redist);
+		log::pop_level();
 		log::set_header_msg("");
 		MSG_play(parent_comm);
 		timer_up();

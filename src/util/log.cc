@@ -1,3 +1,5 @@
+#include <stack>
+
 #include <boxmg/types.h>
 #include <boxmg/util/log.h>
 
@@ -6,6 +8,7 @@ namespace boxmg { namespace log {
 using lmap_t = std::map<std::string, unsigned int>;
 std::unique_ptr<lmap_t> log_level = nullptr;
 unsigned int level = 0;
+std::stack<unsigned int> saved_levels;
 
 LevelLogger memory("memory", Color::Modifier(Color::FG_BLUE));
 LevelLogger status("status", Color::Modifier(Color::FG_DEFAULT));
@@ -51,6 +54,18 @@ void init_level(config::reader & conf)
 	std::vector<std::string> clevels = conf.getvec<std::string>("log");
 
 	for (auto clvl : clevels) level |= (*log_level)[clvl];
+}
+
+void push_level(config::reader & conf)
+{
+	saved_levels.push(level);
+	init_level(conf);
+}
+
+void pop_level()
+{
+	level = saved_levels.top();
+	saved_levels.pop();
 }
 
 std::string header()

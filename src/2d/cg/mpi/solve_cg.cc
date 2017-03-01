@@ -67,12 +67,11 @@ namespace impls
 		                          fcomm);
 
 		log::set_header_msg(" (serial)");
-		auto tmp = log::lvl();
-		log::init_level(coarse_solver.get_config());
+		log::push_level(coarse_solver.get_config());
 		auto & x_ser = coarse_solver.level(-1).x;
 		x_ser.set(0.0);
 		coarse_solver.vcycle(x_ser, bser);
-		log::lvl() = tmp;
+		log::pop_level();
 		log::set_header_msg("");
 		BMG2_SymStd_SOLVE_cg_unpack(x_par.data(), x_ser.data(),
 		                            b.len(0), b.len(1),

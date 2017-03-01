@@ -135,6 +135,7 @@ namespace factory
 
 		kreg->add(kernel_name::setup_cg_redist, "c++",
 		          boxmg::kernel<const mpi::stencil_op &,
+		          std::shared_ptr<config::reader>,
 		          std::shared_ptr<mpi::redist_solver>*,
 		          std::vector<int>&>(impls::setup_cg_redist));
 

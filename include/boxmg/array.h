@@ -60,22 +60,22 @@ public:
 	}
 
 
-	std::tuple<short, len_type> get_offset(short i) const
+	std::tuple<short, len_type> get_offset(len_type i) const
 	{
 		#ifdef BOUNDS_CHECK
-		assert(static_cast<unsigned short>(i) < extents[ND-1]);
+		assert(i < extents[ND-1]);
 		#endif
 		return std::make_tuple(ND-2, i*strides[ND-1]);
 	}
 
 
-	template<typename... T> std::tuple<short, len_type> get_offset(short i, T... args) const
+	template<typename... T> std::tuple<short, len_type> get_offset(len_type i, T... args) const
 	{
 		auto offset = get_offset(std::forward<decltype(args)>(args)...);
 		auto pos = std::get<0>(offset);
 		#ifdef BOUNDS_CHECK
 		assert(pos >= 0);
-		assert(static_cast<unsigned short>(i) < extents[pos]);
+		assert(i < extents[pos]);
 		#endif
 		return std::make_tuple(pos-1,
 		                       std::get<1>(offset) + i*strides[pos]);
