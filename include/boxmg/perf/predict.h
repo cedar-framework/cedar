@@ -37,6 +37,11 @@ namespace boxmg {
 						found = true;
 				}
 			}
+		} else if (search_strat == "coarsen") {
+			for (unsigned short i = 0; i < ND; ++i) {
+				nblocks[i] = nproc[i] / 2;
+				if (nblocks[i] < 1) nblocks[i] = 1;
+			}
 		} else {
 			log::error << "Search strategy not implemented: " << search_strat << std::endl;
 		}
