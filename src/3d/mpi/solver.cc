@@ -5,6 +5,7 @@
 #include <boxmg/3d/mpi/halo.h>
 #include <boxmg/3d/kernel/mpi/factory.h>
 #include <boxmg/3d/mpi/solver.h>
+#include <boxmg/perf/predict.h>
 #include <boxmg/3d/solver.h>
 #include <boxmg/3d/mpi/redist_solver.h>
 
@@ -112,18 +113,27 @@ void mpi::solver::setup_cg_solve()
 		multilevel::setup_cg_solve();
 	} else {
 		auto kernels = kernel_registry();
-		std::vector<int> nblocks({1,1,1});
+		auto & fgrid = levels[0].A.grid();
+
+		auto choice = choose_redist<3>(*conf,
+		                               std::array<int, 3>({fgrid.nproc(0), fgrid.nproc(1), fgrid.nproc(2)}),
+		                               std::array<len_t, 3>({fgrid.nglobal(0), fgrid.nglobal(1), fgrid.nglobal(2)}));
+
+		MPI_Bcast(choice.data(), 3, MPI_INT, 0, fgrid.comm);
+		log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " x " << choice[2]
+		            << " cores" << std::endl;
 
 		std::shared_ptr<mpi::redist_solver> cg_bmg;
 		auto cg_conf = conf->getconf("cg-config");
 		if (!cg_conf)
 			cg_conf = conf;
+		std::vector<int> nblocks(choice.begin(), choice.end());
 		kernels->setup_cg_redist(cop, cg_conf, &cg_bmg, nblocks);
 		coarse_solver = [&,cg_bmg,kernels](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
 			const bmg3::mpi::stencil_op &av = dynamic_cast<const bmg3::mpi::stencil_op&>(A);
 			kernels->solve_cg_redist(*cg_bmg, x, b);
-			bmg3::mpi::grid_func residual = av.residual(x,b);
-			log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
+			// bmg3::mpi::grid_func residual = av.residual(x,b);
+			// log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
 		};
 	}
 }
