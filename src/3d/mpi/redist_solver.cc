@@ -13,7 +13,9 @@ extern "C" {
 using namespace boxmg;
 using namespace boxmg::bmg3::mpi;
 
-redist_solver::redist_solver(const stencil_op & so, std::array<int, 3> nblock) : nblock(nblock), active(true),
+redist_solver::redist_solver(const stencil_op & so,
+                             std::shared_ptr<config::reader> conf,
+                             std::array<int, 3> nblock) : nblock(nblock), active(true),
 	           recv_id(-1)
 {
 	auto & topo = so.grid();
@@ -26,11 +28,9 @@ redist_solver::redist_solver(const stencil_op & so, std::array<int, 3> nblock) :
 	if (active) {
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
-		log::set_header_msg(" (redist)");
-		slv = std::make_unique<solver>(std::move(rop));
-		auto & cnf = slv->get_config();
-		cnf.set<int>("solver.max-iter", 1);
-		log::set_header_msg("");
+		log::push_level("redist", *conf);
+		slv = std::make_unique<solver>(std::move(rop), conf);
+		log::pop_level();
 		MSG_pause(&msg_comm);
 		MSG_play(parent_comm);
 	}
@@ -105,9 +105,10 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
 		MSG_play(msg_comm);
-		log::set_header_msg(" (redist)");
-		slv->solve(b_redist, x_redist);
-		log::set_header_msg("");
+		log::push_level("redist", slv->get_config());
+		x_redist.set(0.0);
+		slv->vcycle(x_redist, b_redist);
+		log::pop_level();
 		MSG_play(parent_comm);
 
 		// copy local part from redistributed solution

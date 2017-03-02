@@ -7,6 +7,7 @@ namespace impls
 {
 	namespace mpi = boxmg::bmg3::mpi;
 	void setup_cg_redist(const mpi::stencil_op & so,
+	                     std::shared_ptr<config::reader> conf,
 	                     std::shared_ptr<mpi::redist_solver> * slv,
 	                     std::vector<int> & nblocksv)
 	{
@@ -15,7 +16,7 @@ namespace impls
 			nblocks[i] = nblocksv[i];
 		}
 
-		auto ret = std::make_shared<mpi::redist_solver>(so, nblocks);
+		auto ret = std::make_shared<mpi::redist_solver>(so, conf, nblocks);
 
 		*slv = ret;
 	}
