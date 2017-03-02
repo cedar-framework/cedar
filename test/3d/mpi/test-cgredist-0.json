@@ -1,0 +1,16 @@
+{
+	"log": ["status","error","info"],
+	"solver":
+	{
+		"cycle":
+		{
+			"nrelax-pre": 2,
+			"nrelax-post": 1
+		},
+		"relaxation": "point",
+		"tol": 1e-10,
+		"max-iter": 1,
+		"min-coarse": 3,
+		"cg-solver": "LU"
+	}
+}
