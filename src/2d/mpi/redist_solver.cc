@@ -30,11 +30,9 @@ redist_solver::redist_solver(const stencil_op & so,
 	if ((redundant and active) or (not redundant and block_id == 0)) {
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
-		log::set_header_msg(" (redist)");
-		log::push_level(*conf);
+		log::push_level("redist", *conf);
 		slv = std::make_unique<solver>(std::move(rop), conf);
 		log::pop_level();
-		log::set_header_msg("");
 		MSG_pause(&msg_comm);
 		MSG_play(parent_comm);
 	}
@@ -52,11 +50,10 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
 		MSG_play(msg_comm);
-		log::set_header_msg(" (redist)");
-		log::push_level(slv->get_config());
+		log::push_level("redist", slv->get_config());
+		x_redist.set(0.0);
 		slv->vcycle(x_redist, b_redist);
 		log::pop_level();
-		log::set_header_msg("");
 		MSG_play(parent_comm);
 		timer_up();
 	}
@@ -75,6 +72,7 @@ stencil_op redist_solver::redist_operator(const stencil_op & so, topo_ptr topo)
 	auto & rsten = rop.stencil();
 	// save general case for later
 	assert(sten.five_pt() == false);
+	rsten.five_pt() = false;
 
 	array<len_t,real_t,1> sbuf(5*sten.shape(0)*sten.shape(1));
 	int idx = 0;

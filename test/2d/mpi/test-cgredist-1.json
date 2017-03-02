@@ -1,0 +1,77 @@
+{
+	"log": ["status","error","info"],
+	"cg-config":
+	{
+		"log": ["status","error","info"],
+		"cg-config":
+		{
+			"log": ["status","error","info"],
+			"solver":
+			{
+				"cycle":
+				{
+					"nrelax-pre": 2,
+					"nrelax-post": 1
+				},
+				"relaxation": "point",
+				"num-levels": 3,
+				"min-coarse": 3,
+				"cg-solver": "LU"
+			}
+		},
+		"solver":
+		{
+			"cycle":
+			{
+				"nrelax-pre": 2,
+				"nrelax-post": 1
+			},
+			"relaxation": "point",
+			"num-levels": 3,
+			"min-coarse": 3,
+			"cg-solver": "redist"
+		},
+		"machine":
+		{
+			"bandwidth": 177e6,
+			"latency": 65e-8,
+			"fp_perf": 44e-11
+		},
+		"redist":
+		{
+			"search":
+			{
+				"strategy": "manual",
+				"path": [[4,4],[2,2],[2,1],[1,1]]
+			}
+		}
+	},
+	"solver":
+	{
+		"cycle":
+		{
+			"nrelax-pre": 2,
+			"nrelax-post": 1
+		},
+		"relaxation": "point",
+		"tol": 1e-10,
+		"max-iter": 1,
+		"min-coarse": 3,
+		"num-levels": 3,
+		"cg-solver": "redist"
+	},
+	"redist":
+	{
+		"search":
+		{
+			"strategy": "manual",
+			"path": [[4,4],[2,2],[2,1],[1,1]]
+		}
+	},
+    "machine":
+    {
+        "bandwidth": 177e6,
+        "latency": 65e-8,
+        "fp_perf": 44e-11
+    }
+}

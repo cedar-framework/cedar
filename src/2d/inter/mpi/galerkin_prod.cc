@@ -36,10 +36,10 @@ namespace impls
 		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
 
 		if (fsten.five_pt()) {
-			ifd = 0;
+			ifd = 1;
 			nstencil = 3;
 		} else {
-			ifd = 1;
+			ifd = 0;
 			nstencil = 5;
 		}
 

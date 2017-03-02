@@ -1,4 +1,5 @@
 #include <stack>
+#include <tuple>
 
 #include <boxmg/types.h>
 #include <boxmg/util/log.h>
@@ -8,7 +9,7 @@ namespace boxmg { namespace log {
 using lmap_t = std::map<std::string, unsigned int>;
 std::unique_ptr<lmap_t> log_level = nullptr;
 unsigned int level = 0;
-std::stack<unsigned int> saved_levels;
+std::stack<std::tuple<unsigned int, std::string>> saved_levels;
 
 LevelLogger memory("memory", Color::Modifier(Color::FG_BLUE));
 LevelLogger status("status", Color::Modifier(Color::FG_DEFAULT));
@@ -56,15 +57,18 @@ void init_level(config::reader & conf)
 	for (auto clvl : clevels) level |= (*log_level)[clvl];
 }
 
-void push_level(config::reader & conf)
+void push_level(std::string header, config::reader & conf)
 {
-	saved_levels.push(level);
+	saved_levels.emplace(level, header_msg);
 	init_level(conf);
+	set_header_msg(" (" + header + " " + std::to_string(saved_levels.size()-1) + ")");
 }
 
 void pop_level()
 {
-	level = saved_levels.top();
+	auto prev = saved_levels.top();
+	level = std::get<0>(prev);
+	set_header_msg(std::get<1>(prev));
 	saved_levels.pop();
 }
 

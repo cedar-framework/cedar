@@ -121,7 +121,7 @@ namespace factory
 
 		for (auto&& v : defaults) {
 			std::string kname = conf.get<std::string>(std::get<1>(v), std::get<2>(v));
-			log::info << "Using '" + kname + "' for " <<  std::get<0>(v) << "." << std::endl;
+			log::debug << "Using '" + kname + "' for " <<  std::get<0>(v) << "." << std::endl;
 			kreg->set(std::get<0>(v), kname);
 		}
 
