@@ -71,6 +71,35 @@
 				}
 			}
 		},
+		"redist":
+		{
+			"type": "object",
+			"properties":
+			{
+				"search":
+				{
+					"type": "object",
+					"properties":
+					{
+						"strategy":
+						{
+							"type": "string",
+							"pattern": "astar|manual|coarsen"
+						}
+					}
+				}
+			}
+		},
+		"machine":
+		{
+			"type": "object",
+			"properties":
+			{
+				"bandwidth": {"type": "float"},
+				"latency": {"type": "float"},
+				"fp_perf": {"type": "float"}
+			}
+		},
 		"grid":
 		{
 			"type": "object",
