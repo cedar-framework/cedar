@@ -30,6 +30,7 @@ redist_solver::redist_solver(const stencil_op & so,
 		MSG_pause(&parent_comm);
 		log::push_level("redist", *conf);
 		slv = std::make_unique<solver>(std::move(rop), conf);
+		b_redist.halo_ctx = slv->level(-1).A.halo_ctx;
 		log::pop_level();
 		MSG_pause(&msg_comm);
 		MSG_play(parent_comm);
