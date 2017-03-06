@@ -1,4 +1,5 @@
 #include <boxmg/types.h>
+#include <boxmg/util/log.h>
 #include <boxmg/3d/mpi/solver.h>
 #include <boxmg/3d/mpi/stencil_op.h>
 
@@ -12,7 +13,9 @@ extern "C"
 
 		mpi::stencil_op *sop = reinterpret_cast<mpi::stencil_op*>(*op);
 
+		boxmg::log::info << "Beginning setup phase" << std::endl;
 		mpi::solver *bmg = new mpi::solver(std::move(*sop));
+		boxmg::log::info << "Setup phase complete" << std::endl;
 		bmg->level(-1).x = mpi::grid_func::zeros_like(bmg->level(-1).res);
 		bmg->level(-1).b = mpi::grid_func::zeros_like(bmg->level(-1).res);
 		*op = reinterpret_cast<bmg3_operator>(&bmg->level(-1).A);

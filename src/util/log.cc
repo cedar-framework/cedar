@@ -83,7 +83,7 @@ std::string header()
 	Color::Modifier def(Color::FG_DEFAULT);
 
 	strftime(buffer, sizeof(buffer), "%a %b %d %H:%M:%S %Y", &tm);
-	os << green << "[BoxMG <" << buffer << ">" << header_msg << "] " << def;
+	os << green << "[Cedar <" << buffer << ">" << header_msg << "] " << def;
 
 	return os.str();
 }

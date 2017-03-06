@@ -28,6 +28,7 @@ extern "C"
 		auto grid = std::make_shared<grid_topo>(igrd, 0, 1);
 
 		grid->comm = comm;
+		log::set_comm(comm);
 
 		grid->nproc(0) = nprocx;
 		grid->nproc(1) = nprocy;
