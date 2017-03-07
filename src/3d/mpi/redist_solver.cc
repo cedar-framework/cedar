@@ -40,67 +40,7 @@ redist_solver::redist_solver(const stencil_op & so,
 
 void redist_solver::solve(const grid_func & b, grid_func & x)
 {
-	using buf_arr = array<len_t,real_t,1>;
-
-	buf_arr sbuf(b.shape(0)*b.shape(1)*b.shape(2));
-	int idx = 0;
-
-	for (auto k : b.range(2)) {
-		for (auto j : b.range(1)) {
-			for (auto i : b.range(0)) {
-				sbuf(idx) = b(i,j,k);
-				idx++;
-			}
-		}
-	}
-
-	std::vector<int> rcounts(nbx.len(0)*nby.len(0)*nbz.len(0));
-	std::vector<int> displs(nbx.len(0)*nby.len(0)*nbz.len(0));
-	len_t rbuf_len = 0;
-	for (auto k : range(nbz.len(0))) {
-		for (auto j : range(nby.len(0))) {
-			for (auto i : range(nbx.len(0))) {
-				int idx = i + j*nbx.len(0) + k*nbx.len(0)*nby.len(0);
-				displs[idx] = rbuf_len;
-				rcounts[idx] = nbx(i)*nby(j)*nbz(k);
-				rbuf_len += rcounts[idx];
-			}
-		}
-	}
-
-	buf_arr rbuf(rbuf_len);
-	MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
-	               displs.data(), MPI_DOUBLE, collcomm);
-
-	// Loop through all my blocks
-	// TODO: this is unreadable, reduce the number of nestings
-	len_t igs, jgs, kgs;
-	idx = 0;
-	kgs = 1;
-	for (auto k : range(nbz.len(0))) {
-		auto nz = 0;
-		jgs = 1;
-		for (auto j : range(nby.len(0))) {
-			auto ny = 0;
-			igs = 1;
-			for (auto i : range(nbx.len(0))) {
-				auto nx = nbx(i);
-				ny = nby(j);
-				nz = nbz(k);
-				for (auto kk : range(nz)) {
-					for (auto jj : range(ny)) {
-						for (auto ii : range(nx)) {
-							b_redist(igs+ii,jgs+jj,kgs+kk) = rbuf(idx);
-							idx++;
-						}
-					}
-				}
-				igs += nx;
-			}
-			jgs += ny;
-		}
-		kgs += nz;
-	}
+	gather_rhs(b);
 
 	if (active) {
 		MPI_Fint parent_comm;
@@ -112,69 +52,9 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 		log::pop_level();
 		MSG_play(parent_comm);
 
-		// copy local part from redistributed solution
-		int ci = (block_id % (nbx.len(0)*nby.len(0))) % nbx.len(0);
-		int cj = (block_id % (nbx.len(0)*nby.len(0))) / nbx.len(0);
-		int ck = block_id / (nbx.len(0)*nby.len(0));
-
-		igs = 1;
-		for (auto i = 0; i < ci; i++) {
-			igs += nbx(i);
-		}
-		jgs = 1;
-		for (auto j = 0; j < cj; j++) {
-			jgs += nby(j);
-		}
-		kgs = 1;
-		for (auto k = 0; k < ck; k++) {
-			kgs += nbz(k);
-		}
-
-		igs--; jgs--; kgs--;// include ghosts
-
-		for (auto kk : range(x.len(2))) {
-			for (auto jj : range(x.len(1))) {
-				for (auto ii : range(x.len(0))) {
-					x(ii,jj,kk) = x_redist(igs+ii,jgs+jj,kgs+kk);
-				}
-			}
-		}
-
-
-		for (auto send_id : send_ids) {
-			ci = (send_id % (nbx.len(0)*nby.len(0))) % nbx.len(0);
-			cj = (send_id % (nbx.len(0)*nby.len(0))) / nbx.len(0);
-			ck = send_id / (nbx.len(0)*nby.len(0));
-
-			igs = 1;
-			for (auto i = 0; i < ci; i++) {
-				igs += nbx(i);
-			}
-			jgs = 1;
-			for (auto j = 0; j < cj; j++) {
-				jgs += nby(j);
-			}
-			kgs = 1;
-			for (auto k = 0; k < ck; k++) {
-				kgs += nbz(k);
-			}
-
-			igs--; jgs--; kgs--; // include ghosts
-
-			array<len_t,real_t,3> sbuf(nbx(ci)+2, nby(cj)+2, nbz(ck)+2);
-			for (auto kk : range(sbuf.len(2))) {
-				for (auto jj : range(sbuf.len(1))) {
-					for (auto ii : range(sbuf.len(0))) {
-						sbuf(ii,jj,kk) = x_redist(igs+ii,jgs+jj,kgs+kk);
-					}
-				}
-			}
-
-			MPI_Send(sbuf.data(), sbuf.len(0)*sbuf.len(1)*sbuf.len(2), MPI_DOUBLE, send_id, 0, collcomm);
-		}
-	} else if (recv_id > -1) {
-		MPI_Recv(x.data(), x.len(0)*x.len(1)*x.len(2), MPI_DOUBLE, recv_id, 0, collcomm, MPI_STATUS_IGNORE);
 	}
+
+	scatter_sol(x);
 }
 
 
@@ -395,4 +275,139 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 	}
 
 	return grid;
+}
+
+
+void redist_solver::gather_rhs(const grid_func & b)
+{
+	using buf_arr = array<len_t,real_t,1>;
+
+	buf_arr sbuf(b.shape(0)*b.shape(1)*b.shape(2));
+	int idx = 0;
+
+	for (auto k : b.range(2)) {
+		for (auto j : b.range(1)) {
+			for (auto i : b.range(0)) {
+				sbuf(idx) = b(i,j,k);
+				idx++;
+			}
+		}
+	}
+
+	std::vector<int> rcounts(nbx.len(0)*nby.len(0)*nbz.len(0));
+	std::vector<int> displs(nbx.len(0)*nby.len(0)*nbz.len(0));
+	len_t rbuf_len = 0;
+	for (auto k : range(nbz.len(0))) {
+		for (auto j : range(nby.len(0))) {
+			for (auto i : range(nbx.len(0))) {
+				int idx = i + j*nbx.len(0) + k*nbx.len(0)*nby.len(0);
+				displs[idx] = rbuf_len;
+				rcounts[idx] = nbx(i)*nby(j)*nbz(k);
+				rbuf_len += rcounts[idx];
+			}
+		}
+	}
+
+	buf_arr rbuf(rbuf_len);
+	MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
+	               displs.data(), MPI_DOUBLE, collcomm);
+
+	// Loop through all my blocks
+	// TODO: this is unreadable, reduce the number of nestings
+	len_t igs, jgs, kgs;
+	idx = 0;
+	kgs = 1;
+	for (auto k : range(nbz.len(0))) {
+		auto nz = 0;
+		jgs = 1;
+		for (auto j : range(nby.len(0))) {
+			auto ny = 0;
+			igs = 1;
+			for (auto i : range(nbx.len(0))) {
+				auto nx = nbx(i);
+				ny = nby(j);
+				nz = nbz(k);
+				for (auto kk : range(nz)) {
+					for (auto jj : range(ny)) {
+						for (auto ii : range(nx)) {
+							b_redist(igs+ii,jgs+jj,kgs+kk) = rbuf(idx);
+							idx++;
+						}
+					}
+				}
+				igs += nx;
+			}
+			jgs += ny;
+		}
+		kgs += nz;
+	}
+}
+
+
+void redist_solver::scatter_sol(grid_func & x)
+{
+	if (active) {
+		// copy local part from redistributed solution
+		int ci = (block_id % (nbx.len(0)*nby.len(0))) % nbx.len(0);
+		int cj = (block_id % (nbx.len(0)*nby.len(0))) / nbx.len(0);
+		int ck = block_id / (nbx.len(0)*nby.len(0));
+
+		igs = 1;
+		for (auto i = 0; i < ci; i++) {
+			igs += nbx(i);
+		}
+		jgs = 1;
+		for (auto j = 0; j < cj; j++) {
+			jgs += nby(j);
+		}
+		kgs = 1;
+		for (auto k = 0; k < ck; k++) {
+			kgs += nbz(k);
+		}
+
+		igs--; jgs--; kgs--;// include ghosts
+
+		for (auto kk : range(x.len(2))) {
+			for (auto jj : range(x.len(1))) {
+				for (auto ii : range(x.len(0))) {
+					x(ii,jj,kk) = x_redist(igs+ii,jgs+jj,kgs+kk);
+				}
+			}
+		}
+
+
+		for (auto send_id : send_ids) {
+			ci = (send_id % (nbx.len(0)*nby.len(0))) % nbx.len(0);
+			cj = (send_id % (nbx.len(0)*nby.len(0))) / nbx.len(0);
+			ck = send_id / (nbx.len(0)*nby.len(0));
+
+			igs = 1;
+			for (auto i = 0; i < ci; i++) {
+				igs += nbx(i);
+			}
+			jgs = 1;
+			for (auto j = 0; j < cj; j++) {
+				jgs += nby(j);
+			}
+			kgs = 1;
+			for (auto k = 0; k < ck; k++) {
+				kgs += nbz(k);
+			}
+
+			igs--; jgs--; kgs--; // include ghosts
+
+			array<len_t,real_t,3> sbuf(nbx(ci)+2, nby(cj)+2, nbz(ck)+2);
+			for (auto kk : range(sbuf.len(2))) {
+				for (auto jj : range(sbuf.len(1))) {
+					for (auto ii : range(sbuf.len(0))) {
+						sbuf(ii,jj,kk) = x_redist(igs+ii,jgs+jj,kgs+kk);
+					}
+				}
+			}
+
+			MPI_Send(sbuf.data(), sbuf.len(0)*sbuf.len(1)*sbuf.len(2), MPI_DOUBLE, send_id, 0, collcomm);
+		}
+	} else if (recv_id > -1) {
+		MPI_Recv(x.data(), x.len(0)*x.len(1)*x.len(2), MPI_DOUBLE, recv_id, 0, collcomm, MPI_STATUS_IGNORE);
+	}
 }
