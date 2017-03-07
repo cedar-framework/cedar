@@ -141,28 +141,18 @@ void mpi::solver::setup_cg_solve()
 
 mpi::solver::solver(bmg3::mpi::stencil_op&& fop) : comm(fop.grid().comm)
 {
-	timer setup_timer("Setup");
-	setup_timer.begin();
-
 	kreg = kernel::mpi::factory::from_config(*conf);
 
 	setup(std::move(fop));
-
-	setup_timer.end();
 }
 
 
 mpi::solver::solver(bmg3::mpi::stencil_op&& fop,
                     std::shared_ptr<config::reader> cfg) : multilevel(cfg), comm(fop.grid().comm)
 {
-	timer setup_timer("Setup");
-	setup_timer.begin();
-
 	kreg = kernel::mpi::factory::from_config(*conf);
 
 	setup(std::move(fop));
-
-	setup_timer.end();
 }
 
 
