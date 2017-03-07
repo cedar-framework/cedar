@@ -25,6 +25,7 @@ set(sources
 
 if(ENABLE_MPI)
   list(APPEND sources
+	matvec.cc
 	mpi/grid_func.cc
 	mpi/stencil_op.cc
 	mpi/halo.cc

@@ -27,6 +27,7 @@ if(ENABLE_MPI)
 	ftn/mpi/BMG3_SymStd_restrict.f90
 	ftn/mpi/BMG3_SymStd_SETUP_nog.f90
 	ftn/mpi/BMG3_SymStd_SETUP_cg_LU.f90
+	ftn/mpi/BMG3_SymStd_UTILS_matvec.f90
 	ftn/mpi/BMG3_SymStd_SOLVE_cg_LU.f90)
 endif()
 

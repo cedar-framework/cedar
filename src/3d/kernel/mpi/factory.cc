@@ -13,6 +13,7 @@
 #include <boxmg/3d/cg/setup_cg_lu.h>
 #include "boxmg/3d/cg/setup_cg_redist.h"
 #include <boxmg/3d/cg/solve_cg.h>
+#include <boxmg/3d/matvec.h>
 
 #include <boxmg/3d/kernel/mpi/factory.h>
 
@@ -100,6 +101,10 @@ namespace factory
 		          mpi::grid_func &,
 		          const mpi::grid_func &>(impls::solve_cg_redist));
 
+		kreg->add(kernel_name::matvec, "fortran-msg",
+		          boxmg::kernel<const mpi::stencil_op&,
+		          const mpi::grid_func&, mpi::grid_func&>(impls::matvec));
+
 		std::vector<std::tuple<std::string, std::string, std::string>> defaults = {
 			std::make_tuple(kernel_name::residual, "kernels.residual", "fortran-msg"),
 			std::make_tuple(kernel_name::halo_setup, "kernels.halo-setup", "fortran-msg"),
@@ -115,7 +120,8 @@ namespace factory
 			std::make_tuple(kernel_name::setup_cg_lu, "kernels.setup-cg-lu", "fortran-msg"),
 			std::make_tuple(kernel_name::solve_cg, "kernels.solve-cg", "fortran-msg"),
 			std::make_tuple(kernel_name::setup_cg_redist, "kernels.setup-cg-redist", "c++"),
-			std::make_tuple(kernel_name::solve_cg_redist, "kernels.solve-cg-redist", "c++")
+			std::make_tuple(kernel_name::solve_cg_redist, "kernels.solve-cg-redist", "c++"),
+			std::make_tuple(kernel_name::matvec, "kernels.matvec", "fortran-msg")
 		};
 
 		for (auto&& v : defaults) {
