@@ -352,6 +352,8 @@ void redist_solver::scatter_sol(grid_func & x)
 		int cj = (block_id % (nbx.len(0)*nby.len(0))) / nbx.len(0);
 		int ck = block_id / (nbx.len(0)*nby.len(0));
 
+		len_t igs, jgs, kgs;
+
 		igs = 1;
 		for (auto i = 0; i < ci; i++) {
 			igs += nbx(i);

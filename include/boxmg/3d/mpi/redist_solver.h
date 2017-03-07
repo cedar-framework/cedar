@@ -35,6 +35,8 @@ protected:
 	grid_func x_redist;
 	std::shared_ptr<grid_topo> redist_topo(const grid_topo & fine_topo, msg_ctx & ctx);
 	stencil_op redist_operator(const stencil_op & so, topo_ptr topo);
+	void gather_rhs(const grid_func & b);
+	void scatter_sol(grid_func & x);
 };
 
 }}}
