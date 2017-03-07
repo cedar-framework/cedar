@@ -40,9 +40,12 @@ redist_solver::redist_solver(const stencil_op & so,
 
 void redist_solver::solve(const grid_func & b, grid_func & x)
 {
+	timer_begin("agglomerate");
 	gather_rhs(b);
+	timer_end("agglomerate");
 
 	if (active) {
+		timer_down();
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
 		MSG_play(msg_comm);
@@ -51,10 +54,12 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 		slv->vcycle(x_redist, b_redist);
 		log::pop_level();
 		MSG_play(parent_comm);
-
+		timer_up();
 	}
 
+	timer_begin("agglomerate");
 	scatter_sol(x);
+	timer_end("agglomerate");
 }
 
 
@@ -110,7 +115,7 @@ stencil_op redist_solver::redist_operator(const stencil_op & so, topo_ptr topo)
 
 	buf_arr rbuf(rbuf_len);
 	MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
-	               displs.data(), MPI_DOUBLE, collcomm);
+	               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
 
 	// Loop through all my blocks
 	// TODO: this is unreadable, reduce the number of nestings
@@ -253,7 +258,7 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 	int color = grid->coord(0) + grid->nproc(0)*grid->coord(1) + grid->nproc(0)*grid->nproc(1)*grid->coord(2);
 	int key = (fine_topo.coord(0) - low(0)) + (fine_topo.coord(1) - low(1))*part[0].size(grid->coord(0)) +
 		(fine_topo.coord(2) - low(2)) * part[0].size(grid->coord(0))*part[1].size(grid->coord(1));
-	MPI_Comm_split(fine_topo.comm, color, key, &this->collcomm);
+	MPI_Comm_split(fine_topo.comm, color, key, &this->rcomms.pblock_comm);
 	MPI_Comm_split(fine_topo.comm, key, color, &grid->comm);
 
 	block_num = color;
@@ -266,6 +271,7 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 	if (block_id > (nactive-1)) {
 		active = false;
 		recv_id = block_id % nactive;
+		color = grid->nproc(0)*grid->nproc(1)*grid->nproc(2); // color for inactive processors
 	} else {
 		unsigned int send_id = block_id + nactive;
 		while (send_id < (nbx.len(0)*nby.len(0)*nbz.len(0))) {
@@ -273,6 +279,10 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 			send_id += nactive;
 		}
 	}
+
+	MPI_Comm_split(fine_topo.comm, color, key, &this->rcomms.active_pblock_comm);
+
+	timer_redist(rcomms);
 
 	return grid;
 }
@@ -310,7 +320,7 @@ void redist_solver::gather_rhs(const grid_func & b)
 
 	buf_arr rbuf(rbuf_len);
 	MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
-	               displs.data(), MPI_DOUBLE, collcomm);
+	               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
 
 	// Loop through all my blocks
 	// TODO: this is unreadable, reduce the number of nestings
@@ -407,9 +417,9 @@ void redist_solver::scatter_sol(grid_func & x)
 				}
 			}
 
-			MPI_Send(sbuf.data(), sbuf.len(0)*sbuf.len(1)*sbuf.len(2), MPI_DOUBLE, send_id, 0, collcomm);
+			MPI_Send(sbuf.data(), sbuf.len(0)*sbuf.len(1)*sbuf.len(2), MPI_DOUBLE, send_id, 0, rcomms.pblock_comm);
 		}
 	} else if (recv_id > -1) {
-		MPI_Recv(x.data(), x.len(0)*x.len(1)*x.len(2), MPI_DOUBLE, recv_id, 0, collcomm, MPI_STATUS_IGNORE);
+		MPI_Recv(x.data(), x.len(0)*x.len(1)*x.len(2), MPI_DOUBLE, recv_id, 0, rcomms.pblock_comm, MPI_STATUS_IGNORE);
 	}
 }
