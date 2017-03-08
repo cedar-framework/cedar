@@ -135,4 +135,11 @@ void time_log::save(std::string fname)
 	pt.put("np", size);
 	if (rank == 0)
 		json_parser::write_json(fname, pt);
+
+	// Clean up (reinitialize timers)
+	this->ltimes.clear();
+	this->stimes.clear();
+	this->ltimes.resize(1);
+	this->stimes.resize(1);
+	this->lvl = 0;
 }
