@@ -1,4 +1,5 @@
 #include <boxmg/2d/ftn/mpi/BMG_workspace_c.h>
+#include <boxmg/util/time_log.h>
 #include <boxmg/types.h>
 #include <boxmg/mpi/grid_topo.h>
 
@@ -24,6 +25,8 @@ extern "C"
 		auto grid = std::make_shared<grid_topo>(igrd, 0, 1);
 
 		grid->comm = comm;
+		log::set_comm(comm);
+		timer_init(comm);
 
 		grid->nproc(0) = nprocx;
 		grid->nproc(1) = nprocy;

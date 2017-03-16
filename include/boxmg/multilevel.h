@@ -182,6 +182,7 @@ multilevel(conf_ptr cfg): conf(cfg) {}
 		log::debug << "Using a " << num_levels << " level heirarchy" << std::endl;
 		levels.reserve(num_levels);
 		setup_space(num_levels);
+		timer_begin("setup");
 		for (auto i : range(num_levels-1)) {
 			levels[i].R.associate(&levels[i].P);
 			levels[i].P.fine_op = &levels[i].A;
@@ -194,6 +195,7 @@ multilevel(conf_ptr cfg): conf(cfg) {}
 			setup_relax(lvl);
 		}
 		setup_cg_solve();
+		timer_end("setup");
 	}
 
 

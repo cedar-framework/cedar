@@ -29,7 +29,9 @@ redist_solver::redist_solver(const stencil_op & so,
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
 		log::push_level("redist", *conf);
+		timer_down();
 		slv = std::make_unique<solver>(std::move(rop), conf);
+		timer_up();
 		b_redist.halo_ctx = slv->level(-1).A.halo_ctx;
 		log::pop_level();
 		MSG_pause(&msg_comm);
