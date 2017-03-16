@@ -1,0 +1,15 @@
+{
+	"niters": 1000,
+	"log": ["status","error"],
+	"kernels":
+	{
+		"halo-setup": "fortran-msg",
+		"halo-exchange": "fortran-msg"
+	},
+	"grid":
+	{
+		"local": true,
+		"n": [800,800],
+		"np": [2,2]
+	}
+}

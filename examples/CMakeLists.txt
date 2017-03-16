@@ -5,6 +5,9 @@ if (ENABLE_MPI)
   add_executable(mpi-test mpi/solve_test.cc)
   target_link_libraries(mpi-test boxmg ${boxmg-deps})
 
+  add_executable(halo-2d halo/halo_test.cc)
+  target_link_libraries(halo-2d boxmg ${boxmg-deps})
+
   if (ENABLE_3D)
 	add_executable(mpi-test-3 mpi-3d/solve_test.cc)
 	target_link_libraries(mpi-test-3 boxmg ${boxmg-deps})
@@ -20,3 +23,4 @@ endif()
 # target_link_libraries(timer-test boxmg ${boxmg-deps})
 
 configure_file(mpi/config.json ${CMAKE_BINARY_DIR}/config.json COPYONLY)
+configure_file(halo/config.json ${CMAKE_BINARY_DIR}/halo-config.json COPYONLY)

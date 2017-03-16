@@ -28,10 +28,8 @@ namespace mpi = boxmg::bmg2d::mpi;
 
 namespace factory
 {
-	std::shared_ptr<registry> from_config(config::reader &conf)
+	void init(std::shared_ptr<registry> kreg, config::reader & conf)
 	{
-		auto kreg = std::make_shared<registry>();
-
 		kreg->add(kernel_name::residual, "fortran-msg",
 		         boxmg::kernel<const mpi::stencil_op &,
 		          const mpi::grid_func &,
@@ -175,6 +173,14 @@ namespace factory
 			log::debug << "Using '" + kname + "' for " <<  std::get<0>(v) << "." << std::endl;
 			kreg->set(std::get<0>(v), kname);
 		}
+	}
+
+
+	std::shared_ptr<registry> from_config(config::reader &conf)
+	{
+		auto kreg = std::make_shared<registry>();
+
+		init(kreg, conf);
 
 		return kreg;
 	}

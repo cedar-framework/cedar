@@ -33,7 +33,15 @@ void set_header_msg(std::string msg)
 	header_msg = msg;
 }
 
+
 void init()
+{
+	config::reader conf;
+	init(conf);
+}
+
+
+void init(config::reader & conf)
 {
 	log_level = std::make_unique<lmap_t>();
 	std::vector<std::string> levels{"status", "info", "error", "memory", "debug", "timer"};
@@ -43,8 +51,6 @@ void init()
 		(*log_level)[lvl] = 2<<count;
 		count++;
 	}
-
-	config::reader conf;
 	init_level(conf);
 }
 

@@ -73,7 +73,7 @@ public:
 		try {
 			return kmap.at(kname);
 		} catch(const std::out_of_range  &ex) {
-			log::error << "Cound not find kernel: " << kname << std::endl;
+			log::error << "Could not find kernel: " << kname << std::endl;
 			return kmap[kname];
 		}
 	}
