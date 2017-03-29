@@ -18,6 +18,7 @@ time_log::time_log() : lvl(0)
 {
 	stimes.resize(1);
 	ltimes.resize(1);
+	counts.resize(1);
 }
 
 
@@ -33,6 +34,7 @@ void time_log::down()
 	if (static_cast<unsigned int>(lvl)+1 > stimes.size()) {
 		stimes.resize(stimes.size()+1);
 		ltimes.resize(ltimes.size()+1);
+		counts.resize(counts.size()+1);
 	}
 }
 
@@ -53,8 +55,10 @@ void time_log::end(std::string label)
 	double elapsed = endtime - stimes[lvl][label];
 	if (ltimes[lvl].find(label) == ltimes[lvl].end()) {
 		ltimes[lvl][label] = elapsed;
+		counts[lvl][label] = 1;
 	} else {
 		ltimes[lvl][label] += elapsed;
+		counts[lvl][label] += 1;
 	}
 
 
@@ -123,7 +127,7 @@ void time_log::save(std::string fname)
 			child.put(timing.first + ".max", max);
 			child.put(timing.first + ".ratio", ratio);
 			child.put(timing.first + ".avg", avg);
-
+			child.put(timing.first + ".count", counts[i][timing.first]);
 		}
 		children.push_back(std::make_pair("", child));
 	}

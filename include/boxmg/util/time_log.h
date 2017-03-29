@@ -25,6 +25,7 @@ namespace boxmg {
 		std::vector<redist_comms> rcomms;
 		std::vector<std::map<std::string, double>> ltimes;
 		std::vector<std::map<std::string, double>> stimes;
+		std::vector<std::map<std::string, int>> counts;
 		int lvl;
 	};
 
