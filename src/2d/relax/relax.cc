@@ -1,8 +1,8 @@
-#include "boxmg/2d/ftn/BMG_parameters_c.h"
-#include "boxmg/2d/relax/relax.h"
+#include "cedar/2d/ftn/BMG_parameters_c.h"
+#include "cedar/2d/relax/relax.h"
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void BMG2_SymStd_relax_GS(int, real_t*, real_t*, real_t*, real_t*, len_t, len_t,
 	                          int, int, int, int, int, int, int);
 	void BMG2_SymStd_relax_lines_x(int k, real_t *SO, real_t *QF, real_t *Q, real_t *SOR,
@@ -13,7 +13,7 @@ extern "C" {
 	                               int nstencil, int irelax_sym, int updown, int jpn);
 }
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
@@ -23,7 +23,7 @@ namespace impls
 	                      const relax_stencil & sor,
 	                      cycle::Dir cycle_dir)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 		int k, kf, ifd;
 		int updown, nsorv, ibc, nstencil;
 
@@ -62,7 +62,7 @@ namespace impls
 	                   grid_func & res,
 	                   cycle::Dir cycle_dir)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 		int k, kf, ifd;
 		int updown, nsorv, ibc, nstencil;
 
@@ -100,7 +100,7 @@ namespace impls
 	                   grid_func & res,
 	                   cycle::Dir cycle_dir)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 		int k, kf, ifd;
 		int updown, nsorv, ibc, nstencil;
 

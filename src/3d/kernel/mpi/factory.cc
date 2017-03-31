@@ -1,25 +1,25 @@
 #include <memory>
-#include <boxmg/kernel.h>
-#include <boxmg/kernel_name.h>
-#include <boxmg/3d/mpi/halo.h>
-#include <boxmg/3d/residual.h>
-#include <boxmg/3d/relax/setup_relax.h>
-#include <boxmg/3d/inter/setup_interp.h>
-#include <boxmg/3d/inter/galerkin_prod.h>
-#include <boxmg/3d/relax/relax.h>
-#include <boxmg/3d/inter/interp.h>
-#include <boxmg/3d/inter/restrict.h>
-#include <boxmg/3d/kernel/setup_nog.h>
-#include <boxmg/3d/cg/setup_cg_lu.h>
-#include "boxmg/3d/cg/setup_cg_redist.h"
-#include <boxmg/3d/cg/solve_cg.h>
-#include <boxmg/3d/matvec.h>
+#include <cedar/kernel.h>
+#include <cedar/kernel_name.h>
+#include <cedar/3d/mpi/halo.h>
+#include <cedar/3d/residual.h>
+#include <cedar/3d/relax/setup_relax.h>
+#include <cedar/3d/inter/setup_interp.h>
+#include <cedar/3d/inter/galerkin_prod.h>
+#include <cedar/3d/relax/relax.h>
+#include <cedar/3d/inter/interp.h>
+#include <cedar/3d/inter/restrict.h>
+#include <cedar/3d/kernel/setup_nog.h>
+#include <cedar/3d/cg/setup_cg_lu.h>
+#include "cedar/3d/cg/setup_cg_redist.h"
+#include <cedar/3d/cg/solve_cg.h>
+#include <cedar/3d/matvec.h>
 
-#include <boxmg/3d/kernel/mpi/factory.h>
+#include <cedar/3d/kernel/mpi/factory.h>
 
-namespace boxmg { namespace bmg3 { namespace kernel { namespace mpi {
+namespace cedar { namespace cdr3 { namespace kernel { namespace mpi {
 
-namespace mpi = boxmg::bmg3::mpi;
+namespace mpi = cedar::cdr3::mpi;
 
 namespace factory
 {
@@ -28,81 +28,81 @@ namespace factory
 		auto kreg = std::make_shared<registry>();
 
 		kreg->add(kernel_name::halo_setup, "fortran-msg",
-		         boxmg::kernel<grid_topo&,void**>(impls::setup_msg));
+		         cedar::kernel<grid_topo&,void**>(impls::setup_msg));
 
 		kreg->add(kernel_name::halo_exchange, "fortran-msg",
-		          boxmg::kernel<bmg3::mpi::grid_func&>(impls::msg_exchange));
+		          cedar::kernel<cdr3::mpi::grid_func&>(impls::msg_exchange));
 
 		kreg->add(kernel_name::halo_stencil_exchange, "fortran-msg",
-		          boxmg::kernel<bmg3::mpi::stencil_op&>(impls::msg_stencil_exchange));
+		          cedar::kernel<cdr3::mpi::stencil_op&>(impls::msg_stencil_exchange));
 
 		kreg->add(kernel_name::residual, "fortran-msg",
-		         boxmg::kernel<const mpi::stencil_op &,
+		         cedar::kernel<const mpi::stencil_op &,
 		          const mpi::grid_func &,
 		          const mpi::grid_func &,
 		          mpi::grid_func&>(impls::mpi_residual_fortran));
 
 		kreg->add(kernel_name::setup_relax, "fortran-msg-rbgs-point",
-		          boxmg::kernel<const mpi::stencil_op&,
-		          bmg3::relax_stencil&>(impls::mpi_setup_rbgs_point));
+		          cedar::kernel<const mpi::stencil_op&,
+		          cdr3::relax_stencil&>(impls::mpi_setup_rbgs_point));
 
 		kreg->add(kernel_name::setup_interp, "fortran-msg",
-		          boxmg::kernel<int,int,int,
+		          cedar::kernel<int,int,int,
 		          const mpi::stencil_op&,
 		          const mpi::stencil_op&,
 		          inter::mpi::prolong_op&>(impls::mpi_setup_interp));
 
 		kreg->add(kernel_name::galerkin_prod, "fortran-msg",
-		          boxmg::kernel<int,int,int,
+		          cedar::kernel<int,int,int,
 		          const inter::mpi::prolong_op&,
 		          const mpi::stencil_op&,
 		          mpi::stencil_op&>(impls::mpi_galerkin_prod));
 
 		kreg->add(kernel_name::relax, "fortran-msg-rbgs",
-		          boxmg::kernel<const mpi::stencil_op&,
+		          cedar::kernel<const mpi::stencil_op&,
 		          mpi::grid_func&,
 		          const mpi::grid_func&,
-		          const bmg3::relax_stencil&,
+		          const cdr3::relax_stencil&,
 		          cycle::Dir>(impls::mpi_relax_rbgs_point));
 
 		kreg->add(kernel_name::interp_add, "fortran-msg",
-		          boxmg::kernel<const inter::mpi::prolong_op&,
+		          cedar::kernel<const inter::mpi::prolong_op&,
 		         const mpi::grid_func&,
 		         const mpi::grid_func&,
 		         mpi::grid_func&>(impls::mpi_fortran_interp));
 
 		kreg->add(kernel_name::restriction, "fortran-msg",
-		          boxmg::kernel<const inter::mpi::restrict_op&,
+		          cedar::kernel<const inter::mpi::restrict_op&,
 		          const mpi::grid_func&,
 		          mpi::grid_func&>(impls::mpi_fortran_restrict));
 
 		kreg->add(kernel_name::setup_nog, "fortran",
-		         boxmg::kernel<grid_topo&,
+		         cedar::kernel<grid_topo&,
 		         len_t, int*>(impls::fortran_setup_nog));
 
 		kreg->add(kernel_name::setup_cg_lu, "fortran-msg",
-		         boxmg::kernel<const mpi::stencil_op&,
+		         cedar::kernel<const mpi::stencil_op&,
 		         mpi::grid_func&>(impls::mpi_setup_cg_lu));
 
 		kreg->add(kernel_name::solve_cg, "fortran-msg",
-		          boxmg::kernel<mpi::grid_func&,
+		          cedar::kernel<mpi::grid_func&,
 		          const mpi::grid_func&,
 		          const mpi::grid_func&,
 		          real_t*>(impls::mpi_solve_cg_lu));
 
 		kreg->add(kernel_name::setup_cg_redist, "c++",
-		          boxmg::kernel<const mpi::stencil_op &,
+		          cedar::kernel<const mpi::stencil_op &,
 		          std::shared_ptr<config::reader>,
 		          std::shared_ptr<mpi::redist_solver>*,
 		          std::vector<int>&>(impls::setup_cg_redist));
 
 		kreg->add(kernel_name::solve_cg_redist, "c++",
-		          boxmg::kernel<const mpi::redist_solver &,
+		          cedar::kernel<const mpi::redist_solver &,
 		          mpi::grid_func &,
 		          const mpi::grid_func &>(impls::solve_cg_redist));
 
 		kreg->add(kernel_name::matvec, "fortran-msg",
-		          boxmg::kernel<const mpi::stencil_op&,
+		          cedar::kernel<const mpi::stencil_op&,
 		          const mpi::grid_func&, mpi::grid_func&>(impls::matvec));
 
 		std::vector<std::tuple<std::string, std::string, std::string>> defaults = {

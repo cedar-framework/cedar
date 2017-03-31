@@ -5,20 +5,20 @@
 #include <thread>
 #include <math.h>
 
-#include <boxmg/types.h>
-#include <boxmg/kernel.h>
-#include <boxmg/kernel_name.h>
-#include <boxmg/2d/mpi/grid_func.h>
-#include <boxmg/2d/util/topo.h>
-#include <boxmg/2d/util/mpi_grid.h>
-#include <boxmg/2d/mpi/solver.h>
+#include <cedar/types.h>
+#include <cedar/kernel.h>
+#include <cedar/kernel_name.h>
+#include <cedar/2d/mpi/grid_func.h>
+#include <cedar/2d/util/topo.h>
+#include <cedar/2d/util/mpi_grid.h>
+#include <cedar/2d/mpi/solver.h>
 
-#include <boxmg/util/time_log.h>
+#include <cedar/util/time_log.h>
 
 int main(int argc, char *argv[])
 {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	int provided;
 
@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
 	config::reader conf;
 
-	auto grid = bmg2d::util::create_topo_global(MPI_COMM_WORLD, 100, 100);
+	auto grid = cdr2::util::create_topo_global(MPI_COMM_WORLD, 100, 100);
 
 	auto so = mpi::stencil_op(grid);
 
@@ -41,16 +41,16 @@ int main(int argc, char *argv[])
 
 	auto kreg = bmg.kernel_registry();
 
-	using rkern_t = boxmg::kernel<const mpi::stencil_op&,
+	using rkern_t = cedar::kernel<const mpi::stencil_op&,
 	                              mpi::grid_func &,
 	                              const mpi::grid_func&,
-	                              const bmg2d::relax_stencil&,
+	                              const cdr2::relax_stencil&,
 	                              cycle::Dir>;
 
 	kreg->add(kernel_name::relax, "user", rkern_t([](const mpi::stencil_op&,
 	                                                 mpi::grid_func&,
 	                                                 const mpi::grid_func&,
-	                                                 const bmg2d::relax_stencil&,
+	                                                 const cdr2::relax_stencil&,
 	                                                 cycle::Dir) -> void {
 		                                              timer_begin("user");
 		                                              std::this_thread::sleep_for(std::chrono::seconds(1));

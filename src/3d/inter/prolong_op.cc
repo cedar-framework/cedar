@@ -1,14 +1,14 @@
 #include <iomanip>
 
-#include <boxmg/3d/inter/types.h>
-#include <boxmg/3d/inter/prolong_op.h>
+#include <cedar/3d/inter/types.h>
+#include <cedar/3d/inter/prolong_op.h>
 
-using namespace boxmg::bmg3::inter;
+using namespace cedar::cdr3::inter;
 
 
 prolong_op::prolong_op(len_t nx, len_t ny, len_t nz) : stencil_op(nx,ny,nz,true) {}
 
-namespace boxmg { namespace bmg3 { namespace inter {
+namespace cedar { namespace cdr3 { namespace inter {
 
 std::ostream & operator<<(std::ostream & os, const prolong_op & P)
 {

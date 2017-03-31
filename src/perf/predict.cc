@@ -1,8 +1,8 @@
-#include <boxmg/perf/perf_factory.h>
+#include <cedar/perf/perf_factory.h>
 
-#include <boxmg/perf/predict.h>
+#include <cedar/perf/predict.h>
 
-namespace boxmg {
+namespace cedar {
 
 std::vector<int> predict_redist(config::reader & conf, int nprocx, int nprocy,
                                 len_t ngx, len_t ngy)

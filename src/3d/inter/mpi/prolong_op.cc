@@ -1,6 +1,6 @@
-#include <boxmg/3d/inter/mpi/prolong_op.h>
+#include <cedar/3d/inter/mpi/prolong_op.h>
 
-using namespace boxmg::bmg3::inter::mpi;
+using namespace cedar::cdr3::inter::mpi;
 
 prolong_op::prolong_op(topo_ptr topo) : mpi::stencil_op(topo->nlocal(0)-2,
                                                         topo->nlocal(1)-2,
@@ -12,7 +12,7 @@ prolong_op::prolong_op(topo_ptr topo) : mpi::stencil_op(topo->nlocal(0)-2,
 
 
 
-namespace boxmg { namespace bmg3 { namespace inter { namespace mpi {
+namespace cedar { namespace cdr3 { namespace inter { namespace mpi {
 
 std::ostream & operator<< (std::ostream &os, const prolong_op &P)
 {

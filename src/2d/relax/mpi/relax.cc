@@ -1,12 +1,12 @@
-#include "boxmg/2d/ftn/BMG_parameters_c.h"
-#include "boxmg/2d/ftn/mpi/BMG_workspace_c.h"
-#include "boxmg/2d/mpi/stencil_op.h"
+#include "cedar/2d/ftn/BMG_parameters_c.h"
+#include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
+#include "cedar/2d/mpi/stencil_op.h"
 
-#include "boxmg/2d/mpi/halo.h"
-#include "boxmg/2d/relax/relax.h"
+#include "cedar/2d/mpi/halo.h"
+#include "cedar/2d/relax/relax.h"
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void MPI_BMG2_SymStd_relax_GS(int k, real_t *SO, real_t *QF, real_t *Q, real_t *SOR,
 	                              len_t II, len_t JJ, int kf, int ifd, int nstncl, int irelax_sym,
 	                              int updown, len_t iGs, len_t jGs, len_t *iWork, len_t NMSGi,
@@ -25,7 +25,7 @@ extern "C" {
 	                                   int xlinecomm, int ylinecomm);
 }
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
@@ -35,7 +35,7 @@ namespace impls
 	                          const relax_stencil & sor,
 	                          cycle::Dir cycle_dir)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 		int k, kf, ifd;
 		int updown, nstencil;
 
@@ -77,7 +77,7 @@ namespace impls
 	                       mpi::grid_func & res,
 	                       cycle::Dir cycle_dir)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 		int k, kf, ifd;
 		int updown, nstencil;
 
@@ -106,7 +106,7 @@ namespace impls
 		MPI_Fint xlinecomm = MPI_Comm_c2f(ctx->xlinecomm);
 		MPI_Fint ylinecomm = MPI_Comm_c2f(ctx->ylinecomm);
 
-		boxmg::len_t * xdatadist = &ctx->msg_geom.data()[ctx->pLS(ipL_LS_XDataDist,k-1)-1];
+		cedar::len_t * xdatadist = &ctx->msg_geom.data()[ctx->pLS(ipL_LS_XDataDist,k-1)-1];
 
 		MPI_BMG2_SymStd_relax_lines_x(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
 		                              sten.len(0), sten.len(1), topo.is(0), topo.is(1),
@@ -126,7 +126,7 @@ namespace impls
 	                       mpi::grid_func & res,
 	                       cycle::Dir cycle_dir)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 		int k, kf, ifd;
 		int updown, nstencil;
 
@@ -155,7 +155,7 @@ namespace impls
 		MPI_Fint xlinecomm = MPI_Comm_c2f(ctx->xlinecomm);
 		MPI_Fint ylinecomm = MPI_Comm_c2f(ctx->ylinecomm);
 
-		boxmg::len_t * ydatadist = &ctx->msg_geom.data()[ctx->pLS(ipL_LS_YDataDist,k-1)-1];
+		cedar::len_t * ydatadist = &ctx->msg_geom.data()[ctx->pLS(ipL_LS_YDataDist,k-1)-1];
 
 		MPI_BMG2_SymStd_relax_lines_y(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
 		                              sten.len(0), sten.len(1), topo.is(0), topo.is(1),

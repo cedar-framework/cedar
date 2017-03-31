@@ -1,10 +1,10 @@
 #include <cmath>
 #include <iostream>
 
-#include <boxmg/perf/vcycle_model.h>
+#include <cedar/perf/vcycle_model.h>
 
 
-using namespace boxmg;
+using namespace cedar;
 
 vcycle_model::vcycle_model(short nd, int v1, int v2) : nd(nd), v1(v1), v2(v2), isleaf(true)
 {

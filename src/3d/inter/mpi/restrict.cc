@@ -1,10 +1,10 @@
-#include <boxmg/2d/ftn/BMG_parameters_c.h>
-#include <boxmg/3d/mpi/halo.h>
+#include <cedar/2d/ftn/BMG_parameters_c.h>
+#include <cedar/3d/mpi/halo.h>
 
-#include <boxmg/3d/inter/restrict.h>
+#include <cedar/3d/inter/restrict.h>
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void MPI_BMG3_SymStd_restrict(int kfg, int kcg,
 	                              real_t *q, real_t *qc, real_t *ci,
 	                              len_t nx, len_t ny, len_t nz,
@@ -12,7 +12,7 @@ extern "C" {
 	                              len_t igs, len_t jgs, len_t kgs);
 }
 
-namespace boxmg { namespace bmg3 { namespace kernel {
+namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {

@@ -1,8 +1,8 @@
-#include "boxmg/2d/mpi/halo.h"
-#include "boxmg/2d/inter/setup_interp.h"
+#include "cedar/2d/mpi/halo.h"
+#include "cedar/2d/inter/setup_interp.h"
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void MPI_BMG2_SymStd_SETUP_interp_OI(int kf, int kc, real_t *so, real_t *ci,
 	                                     len_t iif, len_t jjf, len_t iic, len_t jjc,
 	                                     int nog, int ifd, int nstncl, int nogm,
@@ -10,11 +10,11 @@ extern "C" {
 	                                     real_t *msg_buffer, len_t nmsgr, int mpicomm);
 }
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	using namespace boxmg::bmg2d;
+	using namespace cedar::cdr2;
 
 	void mpi_setup_interp(int kf, int kc, int nog,
 	                      const mpi::stencil_op & fop,

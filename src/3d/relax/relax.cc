@@ -1,16 +1,16 @@
-#include "boxmg/2d/ftn/BMG_parameters_c.h"
+#include "cedar/2d/ftn/BMG_parameters_c.h"
 
-#include <boxmg/3d/relax/relax.h>
+#include <cedar/3d/relax/relax.h>
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void BMG3_SymStd_relax_GS(int kg, real_t *so, real_t *qf, real_t *q, real_t *sor,
 	                          len_t ii, len_t jj, len_t kk, int ifd, int nstncl, int nsorv,
 	                          int irelax_sym, int updown, int jpn);
 }
 
 
-namespace boxmg { namespace bmg3 { namespace kernel {
+namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
@@ -20,7 +20,7 @@ namespace impls
 	                      const relax_stencil & sor,
 	                      cycle::Dir cycle_dir)
 	{
-		using namespace boxmg::bmg3;
+		using namespace cedar::cdr3;
 		int k, ifd, nstencil, nsorv, jpn, updown;
 
 		const grid_stencil &so_sten = so.stencil();

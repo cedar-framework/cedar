@@ -9,15 +9,15 @@
 
 int main(int argc, char *argv[])
 {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
-	using namespace boxmg::bmg2d::core;
+	using namespace cedar;
+	using namespace cedar::cdr2;
+	using namespace cedar::cdr2::core;
 
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, NULL);
 
 	auto nx = config::get<len_t>("grid.nx", 9);
 	auto ny = config::get<len_t>("grid.ny", 9);
-	auto grid = bmg2d::util::create_topo(MPI_COMM_WORLD, nx, ny);
+	auto grid = cdr2::util::create_topo(MPI_COMM_WORLD, nx, ny);
 	auto so = mpi::StencilOp(grid);
 
 	const double pi = M_PI;

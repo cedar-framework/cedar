@@ -7,8 +7,8 @@
 BOOST_PYTHON_MODULE(core)
 {
 	using namespace boost::python;
-	using namespace boxmg;
-	using namespace boxmg::bmg2d::core;
+	using namespace cedar;
+	using namespace cedar::cdr2::core;
 	class_<GridStencil>("GridStencil", init<len_t,len_t,unsigned int, bool, bool, bool>());
 	enum_<Dir>("Dir")
 		.value("C", Dir::C)

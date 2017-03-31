@@ -1,8 +1,8 @@
 #include <iomanip>
-#include <boxmg/3d/stencil_op.h>
+#include <cedar/3d/stencil_op.h>
 
 
-namespace boxmg { namespace bmg3 {
+namespace cedar { namespace cdr3 {
 
 std::ostream & operator<< (std::ostream & os, const stencil_op & op)
 {

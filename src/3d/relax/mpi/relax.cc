@@ -1,10 +1,10 @@
-#include "boxmg/2d/ftn/BMG_parameters_c.h"
-#include <boxmg/3d/mpi/halo.h>
+#include "cedar/2d/ftn/BMG_parameters_c.h"
+#include <cedar/3d/mpi/halo.h>
 
-#include <boxmg/3d/relax/relax.h>
+#include <cedar/3d/relax/relax.h>
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void MPI_BMG3_SymStd_relax_GS(int kg, real_t *so, real_t *qf, real_t *q, real_t *sor,
 	                              len_t nlx, len_t nly, len_t nlz, len_t ngx, len_t ngy, len_t ngz,
 	                              int nog, int nogm, int ifd, int nstencil, int nsorv,
@@ -17,7 +17,7 @@ extern "C" {
 }
 
 
-namespace boxmg { namespace bmg3 { namespace kernel {
+namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
@@ -27,7 +27,7 @@ namespace impls
 	                          const relax_stencil & sor,
 	                          cycle::Dir cycle_dir)
 	{
-		using namespace boxmg::bmg3;
+		using namespace cedar::cdr3;
 		int k, kf, ifd;
 		int updown, nstencil;
 		int rank;

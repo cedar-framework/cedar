@@ -1,16 +1,16 @@
-#include "boxmg/2d/util/mpi_grid.h"
+#include "cedar/2d/util/mpi_grid.h"
 
-namespace boxmg { namespace bmg2d { namespace util { namespace mpi {
+namespace cedar { namespace cdr2 { namespace util { namespace mpi {
 
-bool has_boundary(grid_topo & grid,bmg2d::dir dir)
+bool has_boundary(grid_topo & grid,cdr2::dir dir)
 {
-	if (dir == bmg2d::dir::N)
+	if (dir == cdr2::dir::N)
 		return grid.is(1) - 1 + grid.nlocal(1) == grid.nglobal(1);
-	if (dir == bmg2d::dir::S)
+	if (dir == cdr2::dir::S)
 		return grid.is(1) == 1;
-	if (dir == bmg2d::dir::E)
+	if (dir == cdr2::dir::E)
 		return grid.is(0) - 1 + grid.nlocal(0) == grid.nglobal(0);
-	if (dir == bmg2d::dir::W)
+	if (dir == cdr2::dir::W)
 		return grid.is(0) == 1;
 	else {
 		log::error << "Invalid direction (boundary check)" << std::endl;

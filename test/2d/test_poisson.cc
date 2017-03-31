@@ -2,18 +2,18 @@
 #include <math.h>
 #include <gtest/gtest.h>
 
-#include <boxmg/types.h>
-#include <boxmg/util/grid.h>
-#include <boxmg/2d/grid_func.h>
-#include <boxmg/2d/stencil_op.h>
-#include <boxmg/2d/gallery.h>
-#include <boxmg/2d/solver.h>
+#include <cedar/types.h>
+#include <cedar/util/grid.h>
+#include <cedar/2d/grid_func.h>
+#include <cedar/2d/stencil_op.h>
+#include <cedar/2d/gallery.h>
+#include <cedar/2d/solver.h>
 
 
-static void set_problem(boxmg::bmg2d::grid_func & b)
+static void set_problem(cedar::cdr2::grid_func & b)
 {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	const double pi = M_PI;
 
@@ -38,9 +38,9 @@ static void set_problem(boxmg::bmg2d::grid_func & b)
 }
 
 
-static void set_solution(boxmg::bmg2d::grid_func & q)
+static void set_solution(cedar::cdr2::grid_func & q)
 {
-	using namespace boxmg;
+	using namespace cedar;
 
 	const double pi = M_PI;
 
@@ -62,8 +62,8 @@ static void set_solution(boxmg::bmg2d::grid_func & q)
 
 
 TEST(SerialPoisson2, Isotropic) {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	auto nx = 200;
 	auto ny = nx;
@@ -93,8 +93,8 @@ TEST(SerialPoisson2, Isotropic) {
 
 
 TEST(SerialPoisson2, StretchX) {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	auto nx = 800;
 	auto ny = 200;
@@ -125,8 +125,8 @@ TEST(SerialPoisson2, StretchX) {
 
 
 TEST(SerialPoisson2, StretchY) {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	auto nx = 200;
 	auto ny = 800;

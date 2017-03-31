@@ -15,4 +15,4 @@ foreach(dir ${dirs})
   endforeach(dsrc)
 endforeach(dir)
 
-set(boxmg_src ${sources} PARENT_SCOPE)
+set(cedar_src ${sources} PARENT_SCOPE)

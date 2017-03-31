@@ -1,16 +1,16 @@
-#include <boxmg/2d/ftn/BMG_parameters_c.h>
+#include <cedar/2d/ftn/BMG_parameters_c.h>
 
-#include <boxmg/3d/inter/restrict.h>
+#include <cedar/3d/inter/restrict.h>
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void BMG3_SymStd_restrict(real_t *q, real_t *qc, real_t *ci,
 	                          len_t nx, len_t ny, len_t nz,
 	                          len_t nxc, len_t nyc, len_t nzc,
 	                          int jpn);
 }
 
-namespace boxmg { namespace bmg3 { namespace kernel {
+namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
@@ -18,7 +18,7 @@ namespace impls
 	                      const grid_func & fine,
 	                      grid_func & coarse)
 	{
-		using namespace boxmg::bmg3;
+		using namespace cedar::cdr3;
 		int ibc;
 
 		auto & fined = const_cast<grid_func&>(fine);

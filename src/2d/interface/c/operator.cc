@@ -1,19 +1,19 @@
 #include <stdbool.h>
 
-#include <boxmg/types.h>
-#include <boxmg/2d/util/topo.h>
-#include <boxmg/2d/mpi/stencil_op.h>
-#include <boxmg/2d/kernel/mpi/registry.h>
+#include <cedar/types.h>
+#include <cedar/2d/util/topo.h>
+#include <cedar/2d/mpi/stencil_op.h>
+#include <cedar/2d/kernel/mpi/registry.h>
 
-#include <boxmg/2d/interface/c/operator.h>
+#include <cedar/2d/interface/c/operator.h>
 
 extern "C"
 {
 	bmg2_operator bmg2_operator_create(bmg2_topo topo)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 
-		auto & grid = *(reinterpret_cast<std::shared_ptr<boxmg::grid_topo>*>(topo));
+		auto & grid = *(reinterpret_cast<std::shared_ptr<cedar::grid_topo>*>(topo));
 
 		mpi::stencil_op *sop = new mpi::stencil_op(grid);
 		auto & sten = sop->stencil();
@@ -24,8 +24,8 @@ extern "C"
 
 	bmg2_operator bmg2_operator_create_fivept(bmg2_topo topo)
 	{
-		using namespace boxmg;
-		using namespace boxmg::bmg2d;
+		using namespace cedar;
+		using namespace cedar::cdr2;
 
 		auto & grid = *(reinterpret_cast<std::shared_ptr<grid_topo>*>(topo));
 
@@ -39,8 +39,8 @@ extern "C"
 
 	void bmg2_operator_set(bmg2_operator op, unsigned int nvals, grid_coord_2d coords[], double vals[])
 	{
-		using namespace boxmg;
-		using namespace boxmg::bmg2d;
+		using namespace cedar;
+		using namespace cedar::cdr2;
 
 		auto & sten = reinterpret_cast<mpi::stencil_op*>(op)->stencil();
 		auto & grid = reinterpret_cast<mpi::stencil_op*>(op)->grid();
@@ -61,7 +61,7 @@ extern "C"
 
 	void bmg2_operator_apply(bmg2_operator op, const double *x, double *b)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 
 		auto *sop = reinterpret_cast<mpi::stencil_op*>(op);
 		auto grid = sop->grid_ptr();
@@ -95,7 +95,7 @@ extern "C"
 
 	void bmg2_operator_dump(bmg2_operator op)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 		std::ofstream ofile;
 
 		auto &grid = reinterpret_cast<mpi::stencil_op*>(op)->grid();
@@ -109,7 +109,7 @@ extern "C"
 
 	void bmg2_operator_destroy(bmg2_operator op)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 
 		delete reinterpret_cast<mpi::stencil_op*>(op);
 	}

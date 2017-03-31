@@ -1,22 +1,22 @@
-#include "boxmg/2d/residual.h"
+#include "cedar/2d/residual.h"
 
 	extern "C" {
-		using namespace boxmg;
+		using namespace cedar;
 		void BMG2_SymStd_residual(int*,real_t*,real_t*,real_t*,real_t*,len_t*,len_t*,
 								  int*,int*,int*,int*,int*,int*,int*);
 	}
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 
 namespace impls
 {
-	using namespace boxmg::bmg2d;
+	using namespace cedar::cdr2;
 
 	void residual(const stencil_op & A, const grid_func & x,
 				  const grid_func & b, grid_func &r)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 
 		const grid_stencil &so = A.stencil();
 
@@ -53,7 +53,7 @@ namespace impls
 		stencil_op &Ad = const_cast<stencil_op&>(A);
 		grid_func &xd = const_cast<grid_func&>(x);
 		grid_func &bd = const_cast<grid_func&>(b);
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 
 		BMG2_SymStd_residual(&k, Ad.data(), bd.data(), xd.data(), r.data(), &ii, &jj,
 							 &kf, &ifd, &nstncl, &ibc, &irelax, &irelax_sym, &updown);

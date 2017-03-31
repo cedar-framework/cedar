@@ -1,10 +1,10 @@
-#include "boxmg/2d/matvec.h"
-#include "boxmg/2d/mpi/stencil_op.h"
+#include "cedar/2d/matvec.h"
+#include "cedar/2d/mpi/stencil_op.h"
 
-#include "boxmg/2d/mpi/halo.h"
+#include "cedar/2d/mpi/halo.h"
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void BMG2_SymStd_UTILS_matvec(int k, real_t *SO, real_t *QF,
 	                              real_t *Q, len_t II, len_t JJ,
 	                              int kf, int ifd, int nstencil,
@@ -13,16 +13,16 @@ extern "C" {
 }
 
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	namespace mpi = boxmg::bmg2d::mpi;
+	namespace mpi = cedar::cdr2::mpi;
 	void matvec(const mpi::stencil_op & so,
 	            const mpi::grid_func & x,
 	            mpi::grid_func & b)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 		int k, kf, ifd;
 		int nstencil;
 

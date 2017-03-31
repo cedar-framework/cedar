@@ -1,23 +1,23 @@
-#include <boxmg/types.h>
-#include <boxmg/3d/stencil_op.h>
-#include <boxmg/3d/grid_func.h>
+#include <cedar/types.h>
+#include <cedar/3d/stencil_op.h>
+#include <cedar/3d/grid_func.h>
 
-#include <boxmg/3d/residual.h>
+#include <cedar/3d/residual.h>
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void BMG3_SymStd_residual(int kg, int NOG, int ifd,
 	                          real_t *q, real_t *qf, real_t *so, real_t *RES,
 	                          len_t ii, len_t jj, len_t kk,
 	                          int NStncl);
 }
 
-namespace boxmg { namespace bmg3 { namespace kernel {
+namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
-	using namespace boxmg;
-	using namespace boxmg::bmg3;
+	using namespace cedar;
+	using namespace cedar::cdr3;
 
 	void residual(const stencil_op & A, const grid_func & x,
 	              const grid_func & b, grid_func & r)

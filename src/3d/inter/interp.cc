@@ -1,9 +1,9 @@
-#include <boxmg/2d/ftn/BMG_parameters_c.h>
+#include <cedar/2d/ftn/BMG_parameters_c.h>
 
-#include <boxmg/3d/inter/interp.h>
+#include <cedar/3d/inter/interp.h>
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void BMG3_SymStd_interp_add(real_t *q, real_t *qc,
 	                            real_t *so, real_t *res, real_t *ci,
 	                            len_t iic, len_t jjc, len_t kkc,
@@ -11,7 +11,7 @@ extern "C" {
 	                            int NStncl, int jpn);
 }
 
-namespace boxmg { namespace bmg3 { namespace kernel {
+namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
@@ -20,7 +20,7 @@ namespace impls
 	                    const grid_func & residual,
 	                    grid_func & fine)
 	{
-		using namespace boxmg::bmg3;
+		using namespace cedar::cdr3;
 
 		int nstencil, ibc;
 

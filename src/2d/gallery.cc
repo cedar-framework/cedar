@@ -1,9 +1,9 @@
-#include <boxmg/2d/kernel/factory.h>
-#include <boxmg/2d/gallery.h>
+#include <cedar/2d/kernel/factory.h>
+#include <cedar/2d/gallery.h>
 
-namespace boxmg { namespace bmg2d { namespace gallery {
+namespace cedar { namespace cdr2 { namespace gallery {
 
-using namespace boxmg;
+using namespace cedar;
 
 stencil_op poisson(len_t nx, len_t ny)
 {

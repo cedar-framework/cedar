@@ -1,13 +1,13 @@
 #include <algorithm>
 #include <random>
 
-#include <boxmg/kernel_name.h>
-#include <boxmg/2d/inter/prolong_op.h>
+#include <cedar/kernel_name.h>
+#include <cedar/2d/inter/prolong_op.h>
 
-#include <boxmg/2d/grid_func.h>
+#include <cedar/2d/grid_func.h>
 
-using namespace boxmg;
-using namespace boxmg::bmg2d;
+using namespace cedar;
+using namespace cedar::cdr2;
 
 
 grid_func & grid_func::operator=(grid_func &&gf)
@@ -27,11 +27,11 @@ grid_func::grid_func(len_t nx, len_t ny, unsigned int nghosts) :
 	array<len_t,real_t,2>(nx+2*nghosts, ny+2*nghosts)
 {
 	num_ghosts = nghosts;
-	range_[0] = boxmg::range(static_cast<len_t>(nghosts), static_cast<len_t>(nx + nghosts));
-	range_[1] = boxmg::range(static_cast<len_t>(nghosts), static_cast<len_t>(ny + nghosts));
+	range_[0] = cedar::range(static_cast<len_t>(nghosts), static_cast<len_t>(nx + nghosts));
+	range_[1] = cedar::range(static_cast<len_t>(nghosts), static_cast<len_t>(ny + nghosts));
 
-	grange_[0] = boxmg::range(static_cast<len_t>(0), nx + 2*nghosts);
-	grange_[1] = boxmg::range(static_cast<len_t>(0), ny + 2*nghosts);
+	grange_[0] = cedar::range(static_cast<len_t>(0), nx + 2*nghosts);
+	grange_[1] = cedar::range(static_cast<len_t>(0), ny + 2*nghosts);
 }
 
 
@@ -131,7 +131,7 @@ grid_func & grid_func::operator+=(iadd_t package)
 }
 
 
-boxmg::real_t grid_func::inf_norm() const
+cedar::real_t grid_func::inf_norm() const
 {
 	auto abs_compare = [](real_t a, real_t b){
 		return (std::abs(a) < std::abs(b));
@@ -166,7 +166,7 @@ grid_func & grid_func::operator-=(const grid_func &rhs)
 }
 
 
-namespace boxmg { namespace bmg2d {
+namespace cedar { namespace cdr2 {
 std::ostream & operator<<(std::ostream &os, const grid_func & obj)
 {
 	for (auto j: obj.range(1)) {

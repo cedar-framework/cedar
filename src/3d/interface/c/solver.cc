@@ -1,32 +1,32 @@
-#include <boxmg/types.h>
-#include <boxmg/util/log.h>
-#include <boxmg/3d/mpi/solver.h>
-#include <boxmg/3d/mpi/stencil_op.h>
+#include <cedar/types.h>
+#include <cedar/util/log.h>
+#include <cedar/3d/mpi/solver.h>
+#include <cedar/3d/mpi/stencil_op.h>
 
-#include <boxmg/3d/interface/c/solver.h>
+#include <cedar/3d/interface/c/solver.h>
 
 extern "C"
 {
-	bmg3_solver bmg3_solver_create(bmg3_operator *op)
+	cdr3_solver cdr3_solver_create(cdr3_operator *op)
 	{
-		using namespace boxmg::bmg3;
+		using namespace cedar::cdr3;
 
 		mpi::stencil_op *sop = reinterpret_cast<mpi::stencil_op*>(*op);
 
-		boxmg::log::info << "Beginning setup phase" << std::endl;
+		cedar::log::info << "Beginning setup phase" << std::endl;
 		mpi::solver *bmg = new mpi::solver(std::move(*sop));
-		boxmg::log::info << "Setup phase complete" << std::endl;
+		cedar::log::info << "Setup phase complete" << std::endl;
 		bmg->level(-1).x = mpi::grid_func::zeros_like(bmg->level(-1).res);
 		bmg->level(-1).b = mpi::grid_func::zeros_like(bmg->level(-1).res);
-		*op = reinterpret_cast<bmg3_operator>(&bmg->level(-1).A);
+		*op = reinterpret_cast<cdr3_operator>(&bmg->level(-1).A);
 
-		return reinterpret_cast<bmg3_solver>(bmg);
+		return reinterpret_cast<cdr3_solver>(bmg);
 	}
 
 
-	void bmg3_solver_run(bmg3_solver op, double *x, const double *b)
+	void cdr3_solver_run(cdr3_solver op, double *x, const double *b)
 	{
-		using namespace boxmg::bmg3;
+		using namespace cedar::cdr3;
 
 		auto *bmg = reinterpret_cast<mpi::solver*>(op);
 		auto grid = bmg->level(-1).A.grid_ptr();
@@ -58,9 +58,9 @@ extern "C"
 		}
 	}
 
-	void bmg3_solver_destroy(bmg3_solver bmg)
+	void cdr3_solver_destroy(cdr3_solver bmg)
 	{
-		using namespace boxmg::bmg3;
+		using namespace cedar::cdr3;
 
 		delete reinterpret_cast<mpi::solver*>(bmg);
 	}

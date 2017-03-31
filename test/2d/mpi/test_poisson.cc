@@ -1,16 +1,16 @@
 #include <gtest/gtest.h>
 #include <mpi.h>
 
-#include <boxmg/2d/mpi/gallery.h>
-#include <boxmg/2d/util/topo.h>
-#include <boxmg/2d/util/mpi_grid.h>
-#include <boxmg/2d/mpi/solver.h>
+#include <cedar/2d/mpi/gallery.h>
+#include <cedar/2d/util/topo.h>
+#include <cedar/2d/util/mpi_grid.h>
+#include <cedar/2d/mpi/solver.h>
 
 
-static void set_problem(boxmg::bmg2d::mpi::grid_func & b, std::function<boxmg::real_t(boxmg::real_t,boxmg::real_t)> rhs)
+static void set_problem(cedar::cdr2::mpi::grid_func & b, std::function<cedar::real_t(cedar::real_t,cedar::real_t)> rhs)
 {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	auto & topo = b.grid();
 
@@ -45,9 +45,9 @@ static void set_problem(boxmg::bmg2d::mpi::grid_func & b, std::function<boxmg::r
 }
 
 
-static void set_solution(boxmg::bmg2d::mpi::grid_func & q)
+static void set_solution(cedar::cdr2::mpi::grid_func & q)
 {
-	using namespace boxmg;
+	using namespace cedar;
 
 	const double pi = M_PI;
 
@@ -78,8 +78,8 @@ static void set_solution(boxmg::bmg2d::mpi::grid_func & q)
 
 
 TEST(MPIPoisson2, Isotropic) {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	auto nx = 200;
 	auto ny = nx;
@@ -115,8 +115,8 @@ TEST(MPIPoisson2, Isotropic) {
 
 
 TEST(MPIPoisson2, StrongX) {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	real_t eps = 0.0001;
 
@@ -155,8 +155,8 @@ TEST(MPIPoisson2, StrongX) {
 
 
 TEST(MPIPoisson2, StrongY) {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	real_t eps = 0.0001;
 

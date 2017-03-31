@@ -1,6 +1,6 @@
-#include <boxmg/util/grid.h>
+#include <cedar/util/grid.h>
 
-namespace boxmg
+namespace cedar
 {
 
 	AlignedVector<real_t> linspace(real_t start, real_t end, len_t num)

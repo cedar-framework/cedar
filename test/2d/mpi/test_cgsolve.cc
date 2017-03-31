@@ -1,16 +1,16 @@
 #include <gtest/gtest.h>
 #include <mpi.h>
 
-#include <boxmg/2d/mpi/gallery.h>
-#include <boxmg/2d/util/topo.h>
-#include <boxmg/2d/util/mpi_grid.h>
-#include <boxmg/2d/mpi/solver.h>
+#include <cedar/2d/mpi/gallery.h>
+#include <cedar/2d/util/topo.h>
+#include <cedar/2d/util/mpi_grid.h>
+#include <cedar/2d/mpi/solver.h>
 
 
-static void set_problem(boxmg::bmg2d::mpi::grid_func & b, std::function<boxmg::real_t(boxmg::real_t,boxmg::real_t)> rhs)
+static void set_problem(cedar::cdr2::mpi::grid_func & b, std::function<cedar::real_t(cedar::real_t,cedar::real_t)> rhs)
 {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	auto & topo = b.grid();
 
@@ -46,8 +46,8 @@ static void set_problem(boxmg::bmg2d::mpi::grid_func & b, std::function<boxmg::r
 
 
 TEST(MPICGSolver, BoxMG) {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	auto nx = 400;
 	auto ny = nx;

@@ -1,27 +1,27 @@
-#include "boxmg/2d/ftn/BMG_parameters_c.h"
-#include "boxmg/2d/inter/galerkin_prod.h"
+#include "cedar/2d/ftn/BMG_parameters_c.h"
+#include "cedar/2d/inter/galerkin_prod.h"
 
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void BMG2_SymStd_SETUP_ITLI_ex(int kf, int kc, real_t *so, real_t *soc, real_t *ci,
 	                               len_t iif, len_t jjf, len_t iic, len_t jjc, int nog,
 	                               int ifd, int nstncl, int ipn);
 }
 
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	using namespace boxmg::bmg2d;
+	using namespace cedar::cdr2;
 
 	void galerkin_prod(int kf, int kc, int nog,
 	                   const inter::prolong_op & P,
 	                   const stencil_op & fop,
 	                   stencil_op & cop)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 		len_t iif, jjf, iic, jjc;
 		int nstencil, ipn, ifd;
 

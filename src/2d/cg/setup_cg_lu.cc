@@ -1,15 +1,15 @@
-#include "boxmg/2d/cg/setup_cg_lu.h"
+#include "cedar/2d/cg/setup_cg_lu.h"
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void BMG2_SymStd_SETUP_cg_LU(real_t*, len_t*, len_t*, int*, real_t*, len_t*,len_t*,int*);
 }
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	using namespace boxmg::bmg2d;
+	using namespace cedar::cdr2;
 	void setup_cg_lu(const stencil_op & so,
 	                 grid_func & ABD)
 	{

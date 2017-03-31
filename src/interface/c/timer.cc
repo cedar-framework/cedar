@@ -1,5 +1,5 @@
-#include <boxmg/interface/c/timer.h>
-#include <boxmg/util/time_log.h>
+#include <cedar/interface/c/timer.h>
+#include <cedar/util/time_log.h>
 
 extern "C"
 {
@@ -7,6 +7,6 @@ extern "C"
 	void bmg_timer_save(const char * fname)
 	{
 		std::string fname_cpp(fname);
-		boxmg::timer_save(fname_cpp);
+		cedar::timer_save(fname_cpp);
 	}
 }

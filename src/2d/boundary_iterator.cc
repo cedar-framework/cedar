@@ -1,8 +1,8 @@
-#include <boxmg/2d/boundary_iterator.h>
-#include <boxmg/2d/grid_stencil.h>
+#include <cedar/2d/boundary_iterator.h>
+#include <cedar/2d/grid_stencil.h>
 
 
-using namespace boxmg::bmg2d;
+using namespace cedar::cdr2;
 
 BoundaryIterator::BoundaryIterator(const grid_stencil &s, dir direction):
 	begin_(s,direction), end_(s,direction)

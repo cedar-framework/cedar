@@ -2,15 +2,15 @@
 #include <memory>
 #include <iostream>
 
-#include <boxmg/types.h>
-#include <boxmg/3d/gallery.h>
-#include <boxmg/3d/solver.h>
+#include <cedar/types.h>
+#include <cedar/3d/gallery.h>
+#include <cedar/3d/solver.h>
 
 
-static void set_problem(boxmg::bmg3::grid_func & b)
+static void set_problem(cedar::cdr3::grid_func & b)
 {
-	using namespace boxmg;
-	using namespace boxmg::bmg3;
+	using namespace cedar;
+	using namespace cedar::cdr3;
 
 	const double pi = M_PI;
 
@@ -40,9 +40,9 @@ static void set_problem(boxmg::bmg3::grid_func & b)
 }
 
 
-static void set_solution(boxmg::bmg3::grid_func & q)
+static void set_solution(cedar::cdr3::grid_func & q)
 {
-	using namespace boxmg;
+	using namespace cedar;
 
 	const double pi = M_PI;
 
@@ -70,8 +70,8 @@ static void set_solution(boxmg::bmg3::grid_func & q)
 
 int main(int argc, char *argv[])
 {
-	using namespace boxmg;
-	using namespace boxmg::bmg3;
+	using namespace cedar;
+	using namespace cedar::cdr3;
 
 	log::status << "Beginning test" << std::endl;
 

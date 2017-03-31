@@ -1,8 +1,8 @@
-#include <boxmg/2d/stencil.h>
-#include <boxmg/types.h>
+#include <cedar/2d/stencil.h>
+#include <cedar/types.h>
 
-using namespace boxmg;
-using namespace boxmg::bmg2d::core;
+using namespace cedar;
+using namespace cedar::cdr2::core;
 
 const real_t & Stencil::C() const { return vals[static_cast<int>(dir::C)]; };
 	real_t & Stencil::C() { return vals[static_cast<int>(dir::C)]; };
@@ -40,7 +40,7 @@ const real_t & Stencil::C() const { return vals[static_cast<int>(dir::C)]; };
 	real_t & Stencil::NW() { return vals[static_cast<int>(dir::NW)]; };
 
 
-namespace boxmg { namespace bmg2d { namespace core {
+namespace cedar { namespace cdr2 { namespace core {
 std::ostream & operator <<(std::ostream &os, const Stencil &sten)
 {
 	int width = 6;

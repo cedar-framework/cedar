@@ -1,7 +1,7 @@
-#include <boxmg/util/log.h>
-#include <boxmg/util/timer.h>
+#include <cedar/util/log.h>
+#include <cedar/util/timer.h>
 
-using namespace boxmg;
+using namespace cedar;
 
 
 void timer::begin()

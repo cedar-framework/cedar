@@ -1,6 +1,6 @@
-#include <boxmg/perf/cholesky_model.h>
+#include <cedar/perf/cholesky_model.h>
 
-using namespace boxmg;
+using namespace cedar;
 
 cholesky_model::cholesky_model(len_t n): n(n) {}
 

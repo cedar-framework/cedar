@@ -1,11 +1,11 @@
-#include <boxmg/kernel_name.h>
-#include <boxmg/3d/inter/prolong_op.h>
+#include <cedar/kernel_name.h>
+#include <cedar/3d/inter/prolong_op.h>
 
-#include <boxmg/3d/grid_func.h>
+#include <cedar/3d/grid_func.h>
 
 
-using namespace boxmg;
-using namespace boxmg::bmg3;
+using namespace cedar;
+using namespace cedar::cdr3;
 
 
 grid_func & grid_func::operator=(grid_func &&gf)
@@ -25,13 +25,13 @@ grid_func::grid_func(len_t nx, len_t ny, len_t nz, unsigned int nghosts) :
 	array<len_t, real_t, 3>(nx+2*nghosts, ny+2*nghosts, nz+2*nghosts)
 {
 	num_ghosts = nghosts;
-	range_[0] = ::boxmg::range(static_cast<len_t>(nghosts), static_cast<len_t>(nx + nghosts));
-	range_[1] = ::boxmg::range(static_cast<len_t>(nghosts), static_cast<len_t>(ny + nghosts));
-	range_[2] = ::boxmg::range(static_cast<len_t>(nghosts), static_cast<len_t>(nz + nghosts));
+	range_[0] = ::cedar::range(static_cast<len_t>(nghosts), static_cast<len_t>(nx + nghosts));
+	range_[1] = ::cedar::range(static_cast<len_t>(nghosts), static_cast<len_t>(ny + nghosts));
+	range_[2] = ::cedar::range(static_cast<len_t>(nghosts), static_cast<len_t>(nz + nghosts));
 
-	grange_[0] = ::boxmg::range(static_cast<len_t>(0), static_cast<len_t>(nx + 2*nghosts));
-	grange_[1] = ::boxmg::range(static_cast<len_t>(0), static_cast<len_t>(ny + 2*nghosts));
-	grange_[2] = ::boxmg::range(static_cast<len_t>(0), static_cast<len_t>(nz + 2*nghosts));
+	grange_[0] = ::cedar::range(static_cast<len_t>(0), static_cast<len_t>(nx + 2*nghosts));
+	grange_[1] = ::cedar::range(static_cast<len_t>(0), static_cast<len_t>(ny + 2*nghosts));
+	grange_[2] = ::cedar::range(static_cast<len_t>(0), static_cast<len_t>(nz + 2*nghosts));
 }
 
 
@@ -83,7 +83,7 @@ grid_func grid_func::ones_like(const grid_func &like)
 }
 
 
-boxmg::real_t grid_func::inf_norm() const
+cedar::real_t grid_func::inf_norm() const
 {
 	auto abs_compare = [](real_t a, real_t b){
 		return (std::abs(a) < std::abs(b));
@@ -130,7 +130,7 @@ grid_func & grid_func::operator+=(iadd_t package)
 }
 
 
-namespace boxmg { namespace bmg3 {
+namespace cedar { namespace cdr3 {
 std::ostream & operator<<(std::ostream &os, const grid_func &obj)
 {
 	for (auto k : obj.range(2)) {

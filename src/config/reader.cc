@@ -1,8 +1,8 @@
-#include <boxmg/config/reader.h>
+#include <cedar/config/reader.h>
 
 #include <boost/filesystem.hpp>
 
-namespace boxmg { namespace config
+namespace cedar { namespace config
 {
 	reader::reader():
         fname("config.json")

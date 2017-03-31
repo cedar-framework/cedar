@@ -1,10 +1,10 @@
 #include <stack>
 #include <tuple>
 
-#include <boxmg/types.h>
-#include <boxmg/util/log.h>
+#include <cedar/types.h>
+#include <cedar/util/log.h>
 
-namespace boxmg { namespace log {
+namespace cedar { namespace log {
 
 using lmap_t = std::map<std::string, unsigned int>;
 std::unique_ptr<lmap_t> log_level = nullptr;

@@ -1,9 +1,9 @@
-#include <boxmg/2d/ftn/mpi/BMG_workspace_c.h>
-#include <boxmg/util/time_log.h>
-#include <boxmg/types.h>
-#include <boxmg/mpi/grid_topo.h>
+#include <cedar/2d/ftn/mpi/BMG_workspace_c.h>
+#include <cedar/util/time_log.h>
+#include <cedar/types.h>
+#include <cedar/mpi/grid_topo.h>
 
-#include <boxmg/2d/interface/c/topo.h>
+#include <cedar/2d/interface/c/topo.h>
 
 extern "C"
 {
@@ -15,7 +15,7 @@ extern "C"
 	                           int nprocx,
 	                           int nprocy)
 	{
-		using namespace boxmg;
+		using namespace cedar;
 		int rank;
 
 		MPI_Comm_rank(comm, &rank);

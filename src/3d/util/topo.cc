@@ -1,12 +1,12 @@
 #include <cmath>
-#include "boxmg/2d/ftn/mpi/BMG_workspace_c.h"
+#include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 
-#include <boxmg/mpi/block_partition.h>
-#include <boxmg/decomp.h>
+#include <cedar/mpi/block_partition.h>
+#include <cedar/decomp.h>
 
-#include "boxmg/3d/util/topo.h"
+#include "cedar/3d/util/topo.h"
 
-namespace boxmg { namespace bmg3 { namespace util {
+namespace cedar { namespace cdr3 { namespace util {
 
 topo_ptr create_topo(MPI_Comm comm, len_t nx, len_t ny, len_t nz)
 {

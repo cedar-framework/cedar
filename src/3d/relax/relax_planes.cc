@@ -1,8 +1,8 @@
-#include <boxmg/3d/relax/relax_planes.h>
+#include <cedar/3d/relax/relax_planes.h>
 
 
 
-namespace boxmg { namespace bmg3 { namespace kernel {
+namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
@@ -30,7 +30,7 @@ namespace impls
 	static void copy_rhs_xy(const stencil_op & so,
 	                        const grid_func & x,
 	                        const grid_func & b,
-	                        bmg2d::grid_func & b2,
+	                        cdr2::grid_func & b2,
 	                        int ipl)
 	{
 		auto & o = so.stencil();
@@ -75,7 +75,7 @@ namespace impls
 	static void copy_rhs_xz(const stencil_op & so,
 	                        const grid_func & x,
 	                        const grid_func & b,
-	                        bmg2d::grid_func & b2,
+	                        cdr2::grid_func & b2,
 	                        int ipl)
 	{
 		auto & o = so.stencil();
@@ -119,7 +119,7 @@ namespace impls
 	static void copy_rhs_yz(const stencil_op & so,
 	                        const grid_func & x,
 	                        const grid_func & b,
-	                        bmg2d::grid_func & b2,
+	                        cdr2::grid_func & b2,
 	                        int ipl)
 	{
 		auto & o = so.stencil();
@@ -166,7 +166,7 @@ namespace impls
 	              cycle::Dir cycle_dir,
 	              std::vector<slv2_ptr> & planes)
 	{
-		auto copy32 = [](grid_func & x, ::boxmg::bmg2d::grid_func & x2, int ipl) {
+		auto copy32 = [](grid_func & x, ::cedar::cdr2::grid_func & x2, int ipl) {
 			for (auto j : x.grange(1)) {
 				for (auto i : x.grange(0)) {
 					x2(i,j) = x(i,j,ipl);
@@ -175,7 +175,7 @@ namespace impls
 		};
 
 
-		auto copy23 = [](::boxmg::bmg2d::grid_func & x2, grid_func & x, int ipl) {
+		auto copy23 = [](::cedar::cdr2::grid_func & x2, grid_func & x, int ipl) {
 			for (auto j : x.grange(1)) {
 				for (auto i : x.grange(0)) {
 					x(i,j,ipl) = x2(i,j);
@@ -232,7 +232,7 @@ namespace impls
 	              cycle::Dir cycle_dir,
 	              std::vector<slv2_ptr> & planes)
 	{
-		auto copy32 = [](grid_func & x, ::boxmg::bmg2d::grid_func & x2, int ipl) {
+		auto copy32 = [](grid_func & x, ::cedar::cdr2::grid_func & x2, int ipl) {
 			for (auto k : x.grange(2)) {
 				for (auto i : x.grange(0)) {
 					x2(i,k) = x(i,ipl,k);
@@ -241,7 +241,7 @@ namespace impls
 		};
 
 
-		auto copy23 = [](::boxmg::bmg2d::grid_func & x2, grid_func & x, int ipl) {
+		auto copy23 = [](::cedar::cdr2::grid_func & x2, grid_func & x, int ipl) {
 			for (auto k : x.grange(2)) {
 				for (auto i : x.grange(0)) {
 					x(i,ipl,k) = x2(i,k);
@@ -298,7 +298,7 @@ namespace impls
 	              std::vector<slv2_ptr> & planes)
 	{
 
-		auto copy32 = [](grid_func & x, ::boxmg::bmg2d::grid_func & x2, int ipl) {
+		auto copy32 = [](grid_func & x, ::cedar::cdr2::grid_func & x2, int ipl) {
 			for (auto k : x.grange(2)) {
 				for (auto j : x.grange(1)) {
 					x2(j,k) = x(ipl,j,k);
@@ -307,7 +307,7 @@ namespace impls
 		};
 
 
-		auto copy23 = [](::boxmg::bmg2d::grid_func & x2, grid_func & x, int ipl) {
+		auto copy23 = [](::cedar::cdr2::grid_func & x2, grid_func & x, int ipl) {
 			for (auto k : x.grange(2)) {
 				for (auto j : x.grange(1)) {
 					x(ipl,j,k) = x2(j,k);

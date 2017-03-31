@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
 
-#include <boxmg/3d/util/topo.h>
-#include <boxmg/3d/mpi/gallery.h>
-#include <boxmg/3d/gallery.h>
-#include <boxmg/cycle/types.h>
+#include <cedar/3d/util/topo.h>
+#include <cedar/3d/mpi/gallery.h>
+#include <cedar/3d/gallery.h>
+#include <cedar/cycle/types.h>
 
 
 TEST(MPIRelax3, Point7) {
-	using namespace boxmg;
-	using namespace boxmg::bmg3;
+	using namespace cedar;
+	using namespace cedar::cdr3;
 
 	int nsweeps = 5;
 

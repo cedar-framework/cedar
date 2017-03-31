@@ -1,31 +1,31 @@
 #include <stdbool.h>
 
-#include <boxmg/types.h>
-#include <boxmg/3d/util/topo.h>
-#include <boxmg/3d/mpi/stencil_op.h>
-#include <boxmg/3d/kernel/mpi/registry.h>
+#include <cedar/types.h>
+#include <cedar/3d/util/topo.h>
+#include <cedar/3d/mpi/stencil_op.h>
+#include <cedar/3d/kernel/mpi/registry.h>
 
-#include <boxmg/3d/interface/c/operator.h>
+#include <cedar/3d/interface/c/operator.h>
 
 extern "C"
 {
-	bmg3_operator bmg3_operator_create(bmg3_topo topo)
+	cdr3_operator cdr3_operator_create(cdr3_topo topo)
 	{
-		using namespace boxmg::bmg3;
+		using namespace cedar::cdr3;
 
-		auto & grid = *(reinterpret_cast<std::shared_ptr<boxmg::grid_topo>*>(topo));
+		auto & grid = *(reinterpret_cast<std::shared_ptr<cedar::grid_topo>*>(topo));
 
 		mpi::stencil_op *sop = new mpi::stencil_op(grid);
 		auto & sten = sop->stencil();
 
-		return reinterpret_cast<bmg3_operator>(sop);
+		return reinterpret_cast<cdr3_operator>(sop);
 	}
 
 
-	bmg3_operator bmg3_operator_create_fivept(bmg3_topo topo)
+	cdr3_operator cdr3_operator_create_fivept(cdr3_topo topo)
 	{
-		using namespace boxmg;
-		using namespace boxmg::bmg3;
+		using namespace cedar;
+		using namespace cedar::cdr3;
 
 		auto & grid = *(reinterpret_cast<std::shared_ptr<grid_topo>*>(topo));
 
@@ -33,14 +33,14 @@ extern "C"
 		auto & sten = sop->stencil();
 		sten.five_pt() = true;
 
-		return reinterpret_cast<bmg3_operator>(sop);
+		return reinterpret_cast<cdr3_operator>(sop);
 	}
 
 
-	void bmg3_operator_set(bmg3_operator op, unsigned int nvals, grid_coord_3d coords[], double vals[])
+	void cdr3_operator_set(cdr3_operator op, unsigned int nvals, grid_coord_3d coords[], double vals[])
 	{
-		using namespace boxmg;
-		using namespace boxmg::bmg3;
+		using namespace cedar;
+		using namespace cedar::cdr3;
 
 		auto & sten = reinterpret_cast<mpi::stencil_op*>(op)->stencil();
 		auto & grid = reinterpret_cast<mpi::stencil_op*>(op)->grid();
@@ -61,9 +61,9 @@ extern "C"
 	}
 
 
-	void bmg3_operator_apply(bmg3_operator op, const double *x, double *b)
+	void cdr3_operator_apply(cdr3_operator op, const double *x, double *b)
 	{
-		using namespace boxmg::bmg3;
+		using namespace cedar::cdr3;
 
 		auto *sop = reinterpret_cast<mpi::stencil_op*>(op);
 		auto grid = sop->grid_ptr();
@@ -99,9 +99,9 @@ extern "C"
 	}
 
 
-	void bmg3_operator_dump(bmg3_operator op)
+	void cdr3_operator_dump(cdr3_operator op)
 	{
-		using namespace boxmg::bmg3;
+		using namespace cedar::cdr3;
 		std::ofstream ofile;
 
 		auto &grid = reinterpret_cast<mpi::stencil_op*>(op)->grid();
@@ -113,9 +113,9 @@ extern "C"
 	}
 
 
-	void bmg3_operator_destroy(bmg3_operator op)
+	void cdr3_operator_destroy(cdr3_operator op)
 	{
-		using namespace boxmg::bmg3;
+		using namespace cedar::cdr3;
 
 		delete reinterpret_cast<mpi::stencil_op*>(op);
 	}

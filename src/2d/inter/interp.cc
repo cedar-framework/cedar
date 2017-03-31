@@ -1,13 +1,13 @@
-#include "boxmg/2d/ftn/BMG_parameters_c.h"
-#include "boxmg/2d/inter/interp.h"
+#include "cedar/2d/ftn/BMG_parameters_c.h"
+#include "cedar/2d/inter/interp.h"
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void BMG2_SymStd_interp_add(real_t*, real_t*, real_t*,real_t*,real_t*,
 	                            len_t, len_t, len_t, len_t, int, int);
 }
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
@@ -16,7 +16,7 @@ namespace impls
 	                    const grid_func & residual,
 	                    grid_func & fine)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 
 		int nstencil, ibc;
 

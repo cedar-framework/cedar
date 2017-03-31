@@ -1,11 +1,11 @@
-#include "boxmg/2d/ftn/BMG_parameters_c.h"
-#include "boxmg/2d/inter/mpi/prolong_op.h"
-#include "boxmg/2d/mpi/halo.h"
+#include "cedar/2d/ftn/BMG_parameters_c.h"
+#include "cedar/2d/inter/mpi/prolong_op.h"
+#include "cedar/2d/mpi/halo.h"
 
-#include "boxmg/2d/inter/interp.h"
+#include "cedar/2d/inter/interp.h"
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void MPI_BMG2_SymStd_interp_add(len_t kc, len_t kf, len_t nog,
 	                                real_t *Q, real_t *QC, real_t *RES, real_t *SO,
 	                                int nstncl, real_t *CI, len_t iic, len_t jjc,
@@ -14,7 +14,7 @@ extern "C" {
 	                                real_t *msg_buffer, len_t nmsgr, int mpicomm);
 }
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
@@ -23,7 +23,7 @@ namespace impls
 	                        const mpi::grid_func & residual,
 	                        mpi::grid_func & fine)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 
 		int nstencil, kf, kc, nog;
 

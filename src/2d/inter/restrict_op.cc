@@ -1,9 +1,9 @@
-#include <boxmg/kernel_name.h>
+#include <cedar/kernel_name.h>
 
-#include <boxmg/2d/inter/restrict_op.h>
+#include <cedar/2d/inter/restrict_op.h>
 
 
-namespace boxmg { namespace bmg2d { namespace inter {
+namespace cedar { namespace cdr2 { namespace inter {
 
 std::ostream & operator<< (std::ostream &os, const restrict_op &R)
 {

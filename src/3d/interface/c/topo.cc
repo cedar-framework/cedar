@@ -1,14 +1,14 @@
-#include "boxmg/2d/ftn/mpi/BMG_workspace_c.h"
-#include <boxmg/util/time_log.h>
-#include <boxmg/types.h>
-#include <boxmg/mpi/grid_topo.h>
+#include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
+#include <cedar/util/time_log.h>
+#include <cedar/types.h>
+#include <cedar/mpi/grid_topo.h>
 
-#include <boxmg/3d/interface/c/topo.h>
+#include <cedar/3d/interface/c/topo.h>
 
 extern "C"
 {
 
-	bmg3_topo bmg3_topo_create(MPI_Comm comm,
+	cdr3_topo cdr3_topo_create(MPI_Comm comm,
 	                           unsigned int ngx,
 	                           unsigned int ngy,
 	                           unsigned int ngz,
@@ -19,7 +19,7 @@ extern "C"
 	                           int nprocy,
 	                           int nprocz)
 	{
-		using namespace boxmg;
+		using namespace cedar;
 		int rank;
 
 		MPI_Comm_rank(comm, &rank);
@@ -77,7 +77,7 @@ extern "C"
 		}
 
 		grid_ptr = new std::shared_ptr<grid_topo>(std::move(grid));
-		return reinterpret_cast<bmg3_topo>(grid_ptr);
+		return reinterpret_cast<cdr3_topo>(grid_ptr);
 	}
 
 }

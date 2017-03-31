@@ -1,10 +1,10 @@
-#include "boxmg/2d/mpi/stencil_op.h"
-#include "boxmg/2d/mpi/halo.h"
+#include "cedar/2d/mpi/stencil_op.h"
+#include "cedar/2d/mpi/halo.h"
 
-#include "boxmg/2d/residual.h"
+#include "cedar/2d/residual.h"
 
 	extern "C" {
-		using namespace boxmg;
+		using namespace cedar;
 		void MPI_BMG2_SymStd_residual(int k, int kf, int nog,
 		                              real_t *SO, real_t *QF, real_t *Q, real_t *RES,
 		                              len_t ii, len_t jj, int ifd, int nstencil,
@@ -13,12 +13,12 @@
 		                              real_t *msg_buffer, len_t nmsgr, int mpicomm);
 	}
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 
 namespace impls
 {
-	using namespace boxmg::bmg2d;
+	using namespace cedar::cdr2;
 	void mpi_residual_fortran(const mpi::stencil_op &A, const mpi::grid_func &x,
 	                          const mpi::grid_func &b, mpi::grid_func &r)
 	{

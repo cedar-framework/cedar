@@ -1,9 +1,9 @@
-#include "boxmg/2d/cg/setup_cg_lu.h"
-#include "boxmg/2d/mpi/halo.h"
-#include "boxmg/2d/ftn/mpi/BMG_workspace_c.h"
+#include "cedar/2d/cg/setup_cg_lu.h"
+#include "cedar/2d/mpi/halo.h"
+#include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void MPI_BMG2_SymStd_SETUP_cg_LU(real_t* SO, len_t II, len_t JJ, int nstncl,
 	                                 len_t iGs, len_t jGs, len_t nGx, len_t nGy,
 	                                 real_t *ABD, len_t NABD1, len_t NABD2,
@@ -12,11 +12,11 @@ extern "C" {
 	                                 int MPICOMM);
 }
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	using namespace boxmg::bmg2d;
+	using namespace cedar::cdr2;
 	void mpi_setup_cg_lu(const mpi::stencil_op & so,
 	                     grid_func & ABD)
 	{

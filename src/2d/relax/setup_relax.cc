@@ -1,19 +1,19 @@
-#include "boxmg/2d/ftn/BMG_parameters_c.h"
-#include "boxmg/2d/relax/setup_relax.h"
+#include "cedar/2d/ftn/BMG_parameters_c.h"
+#include "cedar/2d/relax/setup_relax.h"
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void BMG2_SymStd_SETUP_recip(real_t *so, real_t *sor, len_t nx, len_t ny, int nstncl, int nsor_v);
 	void BMG2_SymStd_SETUP_lines_x(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl, int JPN);
 	void BMG2_SymStd_SETUP_lines_y(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl, int JPN);
 }
 
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	using namespace boxmg::bmg2d;
+	using namespace cedar::cdr2;
 	void setup_rbgs_point(const stencil_op & so,
 	                      relax_stencil & sor)
 	{

@@ -1,11 +1,11 @@
-#include "boxmg/2d/ftn/mpi/BMG_workspace_c.h"
-#include "boxmg/2d/ftn/BMG_parameters_c.h"
-#include <boxmg/3d/mpi/halo.h>
+#include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
+#include "cedar/2d/ftn/BMG_parameters_c.h"
+#include <cedar/3d/mpi/halo.h>
 
-#include <boxmg/3d/cg/setup_cg_lu.h>
+#include <cedar/3d/cg/setup_cg_lu.h>
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void MPI_BMG3_SymStd_SETUP_cg_LU(real_t *so, len_t ii, len_t jj, len_t kk,
 	                                 int nstencil, real_t * abd, len_t nabd1, len_t nabd2,
 	                                 real_t *ws, len_t nmsgr,
@@ -14,7 +14,7 @@ extern "C" {
 }
 
 
-namespace boxmg { namespace bmg3 { namespace kernel {
+namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {

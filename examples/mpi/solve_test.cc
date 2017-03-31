@@ -3,20 +3,20 @@
 #include <memory>
 #include <math.h>
 
-#include <boxmg/types.h>
-#include <boxmg/2d/mpi/grid_func.h>
-#include <boxmg/2d/util/topo.h>
-#include <boxmg/2d/util/mpi_grid.h>
-#include <boxmg/2d/mpi/solver.h>
-#include <boxmg/2d/mpi/gallery.h>
+#include <cedar/types.h>
+#include <cedar/2d/mpi/grid_func.h>
+#include <cedar/2d/util/topo.h>
+#include <cedar/2d/util/mpi_grid.h>
+#include <cedar/2d/mpi/solver.h>
+#include <cedar/2d/mpi/gallery.h>
 
-#include <boxmg/util/time_log.h>
+#include <cedar/util/time_log.h>
 
 
-static void set_problem(boxmg::bmg2d::mpi::grid_func & b)
+static void set_problem(cedar::cdr2::mpi::grid_func & b)
 {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	const double pi = M_PI;
 
@@ -57,9 +57,9 @@ static void set_problem(boxmg::bmg2d::mpi::grid_func & b)
 }
 
 
-static void set_solution(boxmg::bmg2d::mpi::grid_func & q)
+static void set_solution(cedar::cdr2::mpi::grid_func & q)
 {
-	using namespace boxmg;
+	using namespace cedar;
 
 	const double pi = M_PI;
 
@@ -91,8 +91,8 @@ static void set_solution(boxmg::bmg2d::mpi::grid_func & q)
 
 int main(int argc, char *argv[])
 {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	int provided;
 
@@ -116,16 +116,16 @@ int main(int argc, char *argv[])
 			npy = nprocs[1];
 		}
 		if (npx == 0 or npy == 0) {
-			grid = bmg2d::util::create_topo(MPI_COMM_WORLD, nx, ny);
+			grid = cdr2::util::create_topo(MPI_COMM_WORLD, nx, ny);
 		} else {
 			int size;
 			MPI_Comm_size(MPI_COMM_WORLD, &size);
 			assert(size == npx*npy);
-			grid = bmg2d::util::create_topo(MPI_COMM_WORLD, npx, npy, nx, ny);
+			grid = cdr2::util::create_topo(MPI_COMM_WORLD, npx, npy, nx, ny);
 		}
 		log::status << "Running local solve" << std::endl;
 	} else {
-		grid = bmg2d::util::create_topo_global(MPI_COMM_WORLD, nx, ny);
+		grid = cdr2::util::create_topo_global(MPI_COMM_WORLD, nx, ny);
 		log::status << "Running global solve" << std::endl;
 	}
 

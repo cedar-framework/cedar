@@ -1,15 +1,15 @@
 #include <algorithm>
 
 // TODO: remove include
-#include <boxmg/3d/relax/setup_planes.h>
-#include <boxmg/3d/relax/relax_planes.h>
+#include <cedar/3d/relax/setup_planes.h>
+#include <cedar/3d/relax/relax_planes.h>
 
-#include <boxmg/3d/kernel/factory.h>
-#include <boxmg/3d/kernel/registry.h>
-#include <boxmg/3d/solver.h>
+#include <cedar/3d/kernel/factory.h>
+#include <cedar/3d/kernel/registry.h>
+#include <cedar/3d/solver.h>
 
-using namespace boxmg;
-using namespace boxmg::bmg3;
+using namespace cedar;
+using namespace cedar::cdr3;
 
 void solver::setup_space(int nlevels)
 {

@@ -1,9 +1,9 @@
-#include <boxmg/3d/inter/setup_interp.h>
-#include <boxmg/2d/ftn/BMG_parameters_c.h>
-#include <boxmg/3d/mpi/halo.h>
+#include <cedar/3d/inter/setup_interp.h>
+#include <cedar/2d/ftn/BMG_parameters_c.h>
+#include <cedar/3d/mpi/halo.h>
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void MPI_BMG3_SymStd_SETUP_interp_OI(int kgf, int kgc, real_t *so, real_t *soc,
 	                                     real_t *ci, len_t iif, len_t jjf, len_t kkf,
 	                                     len_t iic, len_t jjc, len_t kkc,
@@ -15,11 +15,11 @@ extern "C" {
 }
 
 
-namespace boxmg { namespace bmg3 { namespace kernel {
+namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
-	using namespace boxmg::bmg3;
+	using namespace cedar::cdr3;
 
 	void mpi_setup_interp(int kf, int kc, int nog,
 	                      const mpi::stencil_op & fop,

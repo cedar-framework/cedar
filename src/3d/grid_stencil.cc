@@ -1,16 +1,16 @@
-#include <boxmg/types.h>
-#include <boxmg/util/log.h>
-#include <boxmg/3d/grid_stencil.h>
+#include <cedar/types.h>
+#include <cedar/util/log.h>
+#include <cedar/3d/grid_stencil.h>
 
-using namespace boxmg::bmg3;
+using namespace cedar::cdr3;
 
 grid_stencil::grid_stencil(len_t nx, len_t ny, len_t nz, unsigned int nghosts, bool intergrid, bool symmetric, bool five_pt) : array(), symmetric(not intergrid and symmetric), five_pt_(five_pt)
 {
 	num_ghosts = nghosts;
 	std::vector<len_t> lens = {nx, ny, nz};
-	for (auto i : boxmg::range(3)) {
-		range_[i] = boxmg::range(static_cast<len_t>(nghosts), static_cast<len_t>(lens[i]+nghosts));
-		grange_[i] = boxmg::range(static_cast<len_t>(0), lens[i] + 2*nghosts);
+	for (auto i : cedar::range(3)) {
+		range_[i] = cedar::range(static_cast<len_t>(nghosts), static_cast<len_t>(lens[i]+nghosts));
+		grange_[i] = cedar::range(static_cast<len_t>(0), lens[i] + 2*nghosts);
 		lens[i] += nghosts*2;
 	}
 

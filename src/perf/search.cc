@@ -1,12 +1,12 @@
 #include <memory>
 
-#include <boxmg/perf/redist_generator.h>
-#include <boxmg/perf/greedy_iterator.h>
-#include <boxmg/perf/perf_factory.h>
-#include <boxmg/perf/const_model.h>
-#include <boxmg/perf/search.h>
+#include <cedar/perf/redist_generator.h>
+#include <cedar/perf/greedy_iterator.h>
+#include <cedar/perf/perf_factory.h>
+#include <cedar/perf/const_model.h>
+#include <cedar/perf/search.h>
 
-using namespace boxmg;
+using namespace cedar;
 
 bool perf_problem::goal_test(perf_state & state)
 {
@@ -61,7 +61,7 @@ std::vector<std::array<int,2>> perf_problem::actions(perf_state & state)
 }
 
 
-namespace boxmg {
+namespace cedar {
 	bool operator<(const perf_state & s1, const perf_state & s2)
 	{
 		// TODO: handle this recursively

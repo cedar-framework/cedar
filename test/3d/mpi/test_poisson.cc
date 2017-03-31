@@ -1,17 +1,17 @@
 #include <gtest/gtest.h>
 #include <mpi.h>
 
-#include <boxmg/types.h>
-#include <boxmg/3d/mpi/grid_func.h>
-#include <boxmg/3d/util/topo.h>
-#include <boxmg/3d/mpi/gallery.h>
-#include <boxmg/3d/mpi/solver.h>
+#include <cedar/types.h>
+#include <cedar/3d/mpi/grid_func.h>
+#include <cedar/3d/util/topo.h>
+#include <cedar/3d/mpi/gallery.h>
+#include <cedar/3d/mpi/solver.h>
 
 
-static void set_problem(boxmg::bmg3::mpi::grid_func & b)
+static void set_problem(cedar::cdr3::mpi::grid_func & b)
 {
-	using namespace boxmg;
-	using namespace boxmg::bmg3;
+	using namespace cedar;
+	using namespace cedar::cdr3;
 
 	const double pi = M_PI;
 
@@ -59,9 +59,9 @@ static void set_problem(boxmg::bmg3::mpi::grid_func & b)
 }
 
 
-static void set_solution(boxmg::bmg3::mpi::grid_func & q)
+static void set_solution(cedar::cdr3::mpi::grid_func & q)
 {
-	using namespace boxmg;
+	using namespace cedar;
 
 	const double pi = M_PI;
 
@@ -98,8 +98,8 @@ static void set_solution(boxmg::bmg3::mpi::grid_func & q)
 
 
 TEST(MPIPoisson3, Isotropic) {
-	using namespace boxmg;
-	using namespace boxmg::bmg3;
+	using namespace cedar;
+	using namespace cedar::cdr3;
 
 	auto nx = 200;
 	auto ny = nx;

@@ -1,9 +1,9 @@
-#include <boxmg/3d/matvec.h>
-#include <boxmg/3d/mpi/stencil_op.h>
-#include <boxmg/3d/mpi/halo.h>
+#include <cedar/3d/matvec.h>
+#include <cedar/3d/mpi/stencil_op.h>
+#include <cedar/3d/mpi/halo.h>
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void MPI_BMG3_SymStd_UTILS_matvec(int kg, real_t *so, real_t *qf,
 	                                  real_t *q, len_t ii, len_t jj, len_t kk,
 	                                  int nog, int ifd, int nstncl,
@@ -11,16 +11,16 @@ extern "C" {
 	                                  int mpicomm);
 }
 
-namespace boxmg { namespace bmg3 { namespace kernel {
+namespace cedar { namespace cdr3 { namespace kernel {
 namespace impls
 {
-	namespace mpi = boxmg::bmg3::mpi;
+	namespace mpi = cedar::cdr3::mpi;
 
 	void matvec(const mpi::stencil_op & so,
 	            const mpi::grid_func & x,
 	            mpi::grid_func & b)
 	{
-		using namespace boxmg::bmg3;
+		using namespace cedar::cdr3;
 		int kg, ifd, nstencil, nog;
 
 		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);

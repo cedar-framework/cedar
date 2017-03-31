@@ -4,12 +4,12 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#include <boxmg/util/log.h>
-#include <boxmg/util/time_log.h>
+#include <cedar/util/log.h>
+#include <cedar/util/time_log.h>
 
-using namespace boxmg;
+using namespace cedar;
 
-namespace boxmg {
+namespace cedar {
 	time_log tlog;
 }
 

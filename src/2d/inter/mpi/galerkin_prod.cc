@@ -1,13 +1,13 @@
-#include "boxmg/2d/ftn/BMG_parameters_c.h"
-#include "boxmg/2d/mpi/stencil_op.h"
-#include "boxmg/2d/inter/mpi/prolong_op.h"
+#include "cedar/2d/ftn/BMG_parameters_c.h"
+#include "cedar/2d/mpi/stencil_op.h"
+#include "cedar/2d/inter/mpi/prolong_op.h"
 
-#include "boxmg/2d/mpi/halo.h"
-#include "boxmg/2d/inter/galerkin_prod.h"
+#include "cedar/2d/mpi/halo.h"
+#include "cedar/2d/inter/galerkin_prod.h"
 
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void MPI_BMG2_SymStd_SETUP_ITLI_ex(int kf, int kc, real_t *SO, real_t *SOC, real_t *CI,
 	                                   len_t IIF, len_t JJF, len_t IIC, len_t JJC, len_t iGs, len_t jGs,
 	                                   int nog, int ifd, int nstencil,
@@ -16,11 +16,11 @@ extern "C" {
 }
 
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	using namespace boxmg::bmg2d;
+	using namespace cedar::cdr2;
 
 	void mpi_galerkin_prod(int kf, int kc, int nog,
 	                       const inter::mpi::prolong_op & P,

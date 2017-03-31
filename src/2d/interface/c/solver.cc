@@ -1,14 +1,14 @@
-#include <boxmg/types.h>
-#include <boxmg/2d/mpi/solver.h>
-#include <boxmg/2d/mpi/stencil_op.h>
+#include <cedar/types.h>
+#include <cedar/2d/mpi/solver.h>
+#include <cedar/2d/mpi/stencil_op.h>
 
-#include <boxmg/2d/interface/c/solver.h>
+#include <cedar/2d/interface/c/solver.h>
 
 extern "C"
 {
 	bmg2_solver bmg2_solver_create(bmg2_operator *op)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 
 		mpi::stencil_op *sop = reinterpret_cast<mpi::stencil_op*>(*op);
 
@@ -23,7 +23,7 @@ extern "C"
 
 	void bmg2_solver_run(bmg2_solver op, double *x, const double *b)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 
 		auto *bmg = reinterpret_cast<mpi::solver*>(op);
 		auto grid = bmg->level(-1).A.grid_ptr();
@@ -53,7 +53,7 @@ extern "C"
 
 	void bmg2_solver_destroy(bmg2_solver bmg)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 
 		delete reinterpret_cast<mpi::solver*>(bmg);
 	}

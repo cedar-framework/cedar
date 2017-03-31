@@ -2,19 +2,19 @@
 #include <memory>
 #include <math.h>
 
-#include <boxmg/types.h>
-#include <boxmg/util/grid.h>
-#include <boxmg/2d/grid_func.h>
-#include <boxmg/2d/stencil_op.h>
-#include <boxmg/2d/solver.h>
-#include <boxmg/2d/gallery.h>
+#include <cedar/types.h>
+#include <cedar/util/grid.h>
+#include <cedar/2d/grid_func.h>
+#include <cedar/2d/stencil_op.h>
+#include <cedar/2d/solver.h>
+#include <cedar/2d/gallery.h>
 
 
 
-static void set_problem(boxmg::bmg2d::grid_func & b)
+static void set_problem(cedar::cdr2::grid_func & b)
 {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	const double pi = M_PI;
 
@@ -39,9 +39,9 @@ static void set_problem(boxmg::bmg2d::grid_func & b)
 }
 
 
-static void set_solution(boxmg::bmg2d::grid_func & q)
+static void set_solution(cedar::cdr2::grid_func & q)
 {
-	using namespace boxmg;
+	using namespace cedar;
 
 	const double pi = M_PI;
 
@@ -64,8 +64,8 @@ static void set_solution(boxmg::bmg2d::grid_func & q)
 
 int main(int argc, char *argv[])
 {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	config::reader conf;
 	auto ndofs = conf.getvec<len_t>("grid.n");

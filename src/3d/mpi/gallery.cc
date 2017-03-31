@@ -1,9 +1,9 @@
-#include <boxmg/3d/kernel/mpi/factory.h>
-#include <boxmg/3d/mpi/gallery.h>
+#include <cedar/3d/kernel/mpi/factory.h>
+#include <cedar/3d/mpi/gallery.h>
 
-namespace boxmg { namespace bmg3 { namespace mpi { namespace gallery {
+namespace cedar { namespace cdr3 { namespace mpi { namespace gallery {
 
-using namespace boxmg;
+using namespace cedar;
 
 stencil_op poisson(topo_ptr grid)
 {

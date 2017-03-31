@@ -1,14 +1,14 @@
 #include <cstdlib>
 #include <iostream>
 
-#include <boxmg/types.h>
-#include <boxmg/2d/ftn/mpi/BMG_workspace_c.h>
-#include <boxmg/2d/ftn/mpi/BMG_parameters_c.h>
+#include <cedar/types.h>
+#include <cedar/2d/ftn/mpi/BMG_workspace_c.h>
+#include <cedar/2d/ftn/mpi/BMG_parameters_c.h>
 
-#include <boxmg/3d/mpi/halo.h>
+#include <cedar/3d/mpi/halo.h>
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void BMG3_SymStd_SETUP_MSG(int *pMSG, int *pMSGSO, len_t *imsg_geom,
 	                           len_t nmsgi, int *pSI_MSG, len_t *IGRD,
 	                           int nog, int nogm, int nproc, int myproc,
@@ -30,7 +30,7 @@ extern "C" {
 }
 
 
-namespace boxmg { namespace bmg3 { namespace kernel {
+namespace cedar { namespace cdr3 { namespace kernel {
 namespace impls
 {
 	MsgCtx::MsgCtx(grid_topo & topo) :

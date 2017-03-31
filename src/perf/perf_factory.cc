@@ -1,28 +1,28 @@
 #include <limits>
 #include <random>
 
-#include <boxmg/perf/redist_generator.h>
-#include <boxmg/perf/greedy_iterator.h>
-#include <boxmg/perf/full_iterator.h>
-#include <boxmg/2d/util/topo.h>
-#include <boxmg/3d/util/topo.h>
-#include <boxmg/config/reader.h>
-#include <boxmg/perf/cholesky_model.h>
-#include <boxmg/perf/const_model.h>
-#include <boxmg/perf/params.h>
-#include <boxmg/perf/util.h>
+#include <cedar/perf/redist_generator.h>
+#include <cedar/perf/greedy_iterator.h>
+#include <cedar/perf/full_iterator.h>
+#include <cedar/2d/util/topo.h>
+#include <cedar/3d/util/topo.h>
+#include <cedar/config/reader.h>
+#include <cedar/perf/cholesky_model.h>
+#include <cedar/perf/const_model.h>
+#include <cedar/perf/params.h>
+#include <cedar/perf/util.h>
 
-#include <boxmg/ss/astar.h>
-#include <boxmg/perf/search.h>
+#include <cedar/ss/astar.h>
+#include <cedar/perf/search.h>
 
-#include <boxmg/perf/perf_factory.h>
+#include <cedar/perf/perf_factory.h>
 
 
-using namespace boxmg;
+using namespace cedar;
 
 std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny)
 {
-	using namespace boxmg::bmg2d;
+	using namespace cedar::cdr2;
 
 	auto np = npx*npy;
 
@@ -60,7 +60,7 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(config::reader & conf
 
 std::vector<std::vector<int>> get_choices(config::reader & conf, int npx, int npy, len_t nx, len_t ny)
 {
-	using namespace boxmg::bmg2d;
+	using namespace cedar::cdr2;
 
 	auto np = npx*npy;
 
@@ -106,7 +106,7 @@ std::vector<std::vector<int>> get_choices(config::reader & conf, int npx, int np
 
 std::shared_ptr<vcycle_model> perf_factory::random_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny, std::vector<int> path)
 {
-	using namespace boxmg::bmg2d;
+	using namespace cedar::cdr2;
 
 	if (path.size() == 0) {
 		auto choices = get_choices(conf, npx, npy, nx, ny);
@@ -173,7 +173,7 @@ std::shared_ptr<vcycle_model> perf_factory::random_vcycle(config::reader & conf,
 
 std::shared_ptr<vcycle_model> perf_factory::manual_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny)
 {
-	using namespace boxmg::bmg2d;
+	using namespace cedar::cdr2;
 
 	auto np = npx*npy;
 
@@ -203,7 +203,7 @@ std::shared_ptr<vcycle_model> perf_factory::manual_vcycle(config::reader & conf,
 
 std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny, bool terminate, int rlevel)
 {
-	using namespace boxmg::bmg2d;
+	using namespace cedar::cdr2;
 
 	auto np = npx*npy;
 
@@ -275,7 +275,7 @@ std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(config::reader & conf, in
 
 std::shared_ptr<vcycle_model> perf_factory::astar_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny)
 {
-	using namespace boxmg;
+	using namespace cedar;
 	perf_problem pprob(conf);
 	pprob.initial_state = perf_state();
 
@@ -296,7 +296,7 @@ std::shared_ptr<vcycle_model> perf_factory::astar_vcycle(config::reader & conf, 
 std::array<len_t,2> perf_factory::graph_vcycle(std::ostream & os, int npx, int npy, len_t nx, len_t ny, bool terminate, int rlevel)
 {
 	// TODO: replace with graph library (libcgraph)
-	using namespace boxmg::bmg2d;
+	using namespace cedar::cdr2;
 
 	const bool FULL = false;
 
@@ -378,7 +378,7 @@ std::array<len_t,2> perf_factory::graph_vcycle(std::ostream & os, int npx, int n
 // std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(int npx, int npy, int npz,
 //                                                            len_t nx, len_t ny, len_t nz, bool terminate)
 // {
-// 	using namespace boxmg::bmg3;
+// 	using namespace cedar::cdr3;
 
 // 	config::reader conf("perf.json");
 // 	int min_coarse = conf.get<int>("solver.min-coarse", 3);

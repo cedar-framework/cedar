@@ -1,9 +1,9 @@
 #include <cassert>
-#include "boxmg/2d/ftn/mpi/BMG_workspace_c.h"
+#include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 
-#include <boxmg/array.h>
-#include <boxmg/mpi/block_partition.h>
-#include <boxmg/2d/mpi/redist_solver.h>
+#include <cedar/array.h>
+#include <cedar/mpi/block_partition.h>
+#include <cedar/2d/mpi/redist_solver.h>
 
 
 extern "C" {
@@ -11,8 +11,8 @@ extern "C" {
 	void MSG_play(MPI_Fint msg_comm);
 }
 
-using namespace boxmg;
-using namespace boxmg::bmg2d::mpi;
+using namespace cedar;
+using namespace cedar::cdr2::mpi;
 
 redist_solver::redist_solver(const stencil_op & so,
                              std::shared_ptr<config::reader> conf,

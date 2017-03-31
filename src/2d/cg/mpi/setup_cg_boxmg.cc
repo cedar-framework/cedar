@@ -1,14 +1,14 @@
 #include <mpi.h>
-#include "boxmg/2d/mpi/halo.h"
-#include "boxmg/2d/ftn/mpi/BMG_workspace_c.h"
-#include "boxmg/2d/mpi/stencil_op.h"
-#include "boxmg/types.h"
+#include "cedar/2d/mpi/halo.h"
+#include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
+#include "cedar/2d/mpi/stencil_op.h"
+#include "cedar/types.h"
 
-#include "boxmg/2d/cg/setup_cg_boxmg.h"
+#include "cedar/2d/cg/setup_cg_boxmg.h"
 
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void BMG2_SymStd_SETUP_cg_boxmg(len_t ii, len_t jj, len_t ngx, len_t ngy,
 	                                len_t igs, len_t jgs,
 	                                real_t *so, int nstncl, int nog,
@@ -19,7 +19,7 @@ extern "C" {
 }
 
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {

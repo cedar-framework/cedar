@@ -1,14 +1,14 @@
 #include <mpi.h>
-#include "boxmg/2d/mpi/halo.h"
-#include "boxmg/2d/mpi/grid_func.h"
-#include "boxmg/2d/ftn/BMG_parameters_c.h"
-#include "boxmg/2d/ftn/mpi/BMG_workspace_c.h"
+#include "cedar/2d/mpi/halo.h"
+#include "cedar/2d/mpi/grid_func.h"
+#include "cedar/2d/ftn/BMG_parameters_c.h"
+#include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 
-#include "boxmg/2d/cg/solve_cg.h"
+#include "cedar/2d/cg/solve_cg.h"
 
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void BMG2_SymStd_SOLVE_cg_LU(real_t *Q, real_t *QF, len_t II, len_t JJ,
 	                             real_t *abd, real_t *bbd,
 	                             len_t nabd1, len_t nabd2, int nog,
@@ -28,7 +28,7 @@ extern "C" {
 }
 
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {

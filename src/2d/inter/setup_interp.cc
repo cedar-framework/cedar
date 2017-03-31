@@ -1,24 +1,24 @@
-#include "boxmg/2d/inter/setup_interp.h"
+#include "cedar/2d/inter/setup_interp.h"
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void BMG2_SymStd_SETUP_interp_OI(int kf, int kc, real_t *so, real_t *soc, real_t *ci,
 	                                 len_t iif, len_t jjf, len_t iic, len_t jjc,
 	                                 int nog, int ifd, int nstncl, int irelax);
 }
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	using namespace boxmg::bmg2d;
+	using namespace cedar::cdr2;
 
 	void setup_interp(int kf, int kc, int nog,
 	                  const stencil_op &fop,
 	                  const stencil_op &cop,
 	                  inter::prolong_op &P)
 	{
-		using namespace boxmg::bmg2d;
+		using namespace cedar::cdr2;
 		int ifd;
 		len_t iif, jjf, iic, jjc;
 		int nstencil;

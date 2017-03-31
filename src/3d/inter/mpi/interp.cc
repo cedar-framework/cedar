@@ -1,10 +1,10 @@
-#include <boxmg/2d/ftn/BMG_parameters_c.h>
-#include <boxmg/3d/mpi/halo.h>
+#include <cedar/2d/ftn/BMG_parameters_c.h>
+#include <cedar/3d/mpi/halo.h>
 
-#include <boxmg/3d/inter/interp.h>
+#include <cedar/3d/inter/interp.h>
 
 extern "C" {
-	using namespace boxmg;
+	using namespace cedar;
 	void MPI_BMG3_SymStd_interp_add(int kcg, int kfg, int nog,
 	                                real_t *q, real_t *qc, real_t *res, real_t *so,
 	                                int nstncl, real_t *ci,
@@ -15,7 +15,7 @@ extern "C" {
 	                                real_t *buffer, len_t nmsgr, int mpicomm);
 }
 
-namespace boxmg { namespace bmg3 { namespace kernel {
+namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
@@ -24,7 +24,7 @@ namespace impls
 	                        const mpi::grid_func & residual,
 	                        mpi::grid_func & fine)
 	{
-		using namespace boxmg::bmg3;
+		using namespace cedar::cdr3;
 
 		int nstencil, kf, kc, nog;
 

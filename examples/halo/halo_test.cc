@@ -1,22 +1,22 @@
 #include <mpi.h>
 #include <memory>
 
-#include <boxmg/types.h>
-#include <boxmg/kernel.h>
-#include <boxmg/kernel_name.h>
-#include <boxmg/2d/kernel/mpi/factory.h>
-#include <boxmg/2d/kernel/mpi/registry.h>
-#include <boxmg/2d/mpi/grid_func.h>
-#include <boxmg/2d/util/topo.h>
-#include <boxmg/2d/util/mpi_grid.h>
+#include <cedar/types.h>
+#include <cedar/kernel.h>
+#include <cedar/kernel_name.h>
+#include <cedar/2d/kernel/mpi/factory.h>
+#include <cedar/2d/kernel/mpi/registry.h>
+#include <cedar/2d/mpi/grid_func.h>
+#include <cedar/2d/util/topo.h>
+#include <cedar/2d/util/mpi_grid.h>
 
-#include <boxmg/util/time_log.h>
+#include <cedar/util/time_log.h>
 
 
 int main(int argc, char *argv[])
 {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	int provided;
 
@@ -42,27 +42,27 @@ int main(int argc, char *argv[])
 			npy = nprocs[1];
 		}
 		if (npx == 0 or npy == 0) {
-			grid = bmg2d::util::create_topo(MPI_COMM_WORLD, nx, ny);
+			grid = cdr2::util::create_topo(MPI_COMM_WORLD, nx, ny);
 		} else {
 			int size;
 			MPI_Comm_size(MPI_COMM_WORLD, &size);
 			assert(size == npx*npy);
-			grid = bmg2d::util::create_topo(MPI_COMM_WORLD, npx, npy, nx, ny);
+			grid = cdr2::util::create_topo(MPI_COMM_WORLD, npx, npy, nx, ny);
 		}
 		log::status << "Running local topo" << std::endl;
 	} else {
-		grid = bmg2d::util::create_topo_global(MPI_COMM_WORLD, nx, ny);
+		grid = cdr2::util::create_topo_global(MPI_COMM_WORLD, nx, ny);
 		log::status << "Running global topo" << std::endl;
 	}
 
 	mpi::grid_func b(grid);
 	b.set(0);
 
-	auto kreg = std::make_shared<boxmg::bmg2d::kernel::mpi::registry>();
+	auto kreg = std::make_shared<cedar::cdr2::kernel::mpi::registry>();
 
 	// register alternative kernel setup/exchange kernels
-	using halo_setup_t = boxmg::kernel<grid_topo&, void**>;
-	using halo_exchange_t = boxmg::kernel<mpi::grid_func&>;
+	using halo_setup_t = cedar::kernel<grid_topo&, void**>;
+	using halo_exchange_t = cedar::kernel<mpi::grid_func&>;
 	kreg->add(kernel_name::halo_setup, "user",
 	          halo_setup_t([](grid_topo & topo,
 	                          void **user_ctx) -> void
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 		                       timer_end("halo-exchange");
 	                       }));
 
-	boxmg::bmg2d::kernel::mpi::factory::init(kreg, conf);
+	cedar::cdr2::kernel::mpi::factory::init(kreg, conf);
 
 	void *halo_ctx;
 	kreg->halo_setup(*grid, &halo_ctx);

@@ -1,10 +1,10 @@
 #include <iomanip>
 
-#include <boxmg/2d/stencil_op.h>
+#include <cedar/2d/stencil_op.h>
 
-using namespace boxmg::bmg2d;
+using namespace cedar::cdr2;
 
-namespace boxmg { namespace bmg2d {
+namespace cedar { namespace cdr2 {
 
 std::ostream & operator<< (std::ostream & os, const stencil_op &op)
 {

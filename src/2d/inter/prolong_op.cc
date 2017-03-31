@@ -1,16 +1,16 @@
 #include <iomanip>
 
-#include <boxmg/2d/inter/types.h>
-#include <boxmg/2d/inter/prolong_op.h>
+#include <cedar/2d/inter/types.h>
+#include <cedar/2d/inter/prolong_op.h>
 
 
-using namespace boxmg::bmg2d::inter;
+using namespace cedar::cdr2::inter;
 
 prolong_op::prolong_op(len_t nx, len_t ny) : stencil_op(nx,ny,true)
 {
 }
 
-namespace boxmg { namespace bmg2d { namespace inter {
+namespace cedar { namespace cdr2 { namespace inter {
 std::ostream & operator<< (std::ostream &os, const prolong_op &P)
 {
 	auto & sten = P.stencil();

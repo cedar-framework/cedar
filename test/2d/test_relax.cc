@@ -6,13 +6,13 @@
 #include <numpy/arrayobject.h>
 #include "pyrelax.h"
 
-#include <boxmg/2d/gallery.h>
-#include <boxmg/cycle/types.h>
+#include <cedar/2d/gallery.h>
+#include <cedar/cycle/types.h>
 
 
 TEST(SerialRelax2, Point5) {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	int nsweeps = 7;
 	len_t nx = 31;
@@ -51,8 +51,8 @@ TEST(SerialRelax2, Point5) {
 
 
 TEST(SerialRelax2, Point9) {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	int nsweeps = 3;
 	len_t nx = 37;
@@ -92,8 +92,8 @@ TEST(SerialRelax2, Point9) {
 
 
 TEST(SerialRelax2, LineX5) {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	int nsweeps = 15;
 	len_t nx = 132;
@@ -126,8 +126,8 @@ TEST(SerialRelax2, LineX5) {
 
 
 TEST(SerialRelax2, LineY5) {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	int nsweeps = 15;
 	len_t nx = 132;

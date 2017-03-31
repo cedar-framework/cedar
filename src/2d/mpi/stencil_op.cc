@@ -1,7 +1,7 @@
-#include <boxmg/2d/mpi/stencil_op.h>
+#include <cedar/2d/mpi/stencil_op.h>
 
-using namespace boxmg;
-using namespace boxmg::bmg2d::mpi;
+using namespace cedar;
+using namespace cedar::cdr2::mpi;
 
 stencil_op::stencil_op(topo_ptr grd) :
 	stencil_op_base(grd->nlocal(0)-2, grd->nlocal(1)-2),
@@ -22,7 +22,7 @@ grid_func stencil_op::residual(const grid_func &x, const grid_func &b) const
 }
 
 
-namespace boxmg { namespace bmg2d { namespace mpi {
+namespace cedar { namespace cdr2 { namespace mpi {
 
 std::ostream & operator<< (std::ostream & os, const stencil_op &op)
 {

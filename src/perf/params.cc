@@ -1,11 +1,11 @@
 #include <mpi.h>
 #include <random>
-#include <boxmg/2d/grid_func.h>
-#include <boxmg/2d/stencil_op.h>
-#include <boxmg/2d/kernel/factory.h>
-#include <boxmg/perf/params.h>
+#include <cedar/2d/grid_func.h>
+#include <cedar/2d/stencil_op.h>
+#include <cedar/2d/kernel/factory.h>
+#include <cedar/perf/params.h>
 
-using namespace boxmg;
+using namespace cedar;
 
 
 static void fill_random(real_t * arr, len_t size)
@@ -23,8 +23,8 @@ float params::compute_tc(int nd, config::reader & conf)
 	// int nlocal = 40;
 
 	// if (nd == 2) {
-	// 	using namespace boxmg::bmg2d;
-	// 	auto kreg = boxmg::bmg2d::kernel::factory::from_config(conf);
+	// 	using namespace cedar::cdr2;
+	// 	auto kreg = cedar::cdr2::kernel::factory::from_config(conf);
 	// 	int ns = 9;
 	// 	auto so = stencil_op(nlocal, nlocal);
 	// 	so.set_registry(kreg);

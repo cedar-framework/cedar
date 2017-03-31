@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include <boxmg/2d/gallery.h>
+#include <cedar/2d/gallery.h>
 
 TEST(SerialResidual2, FiveAndNine) {
-	using namespace boxmg;
-	using namespace boxmg::bmg2d;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
 	len_t nx = 8;
 	len_t ny = nx;

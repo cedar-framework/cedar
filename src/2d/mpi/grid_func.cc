@@ -1,12 +1,12 @@
-#include <boxmg/2d/mpi/grid_func.h>
-#include <boxmg/2d/inter/mpi/prolong_op.h>
+#include <cedar/2d/mpi/grid_func.h>
+#include <cedar/2d/inter/mpi/prolong_op.h>
 
-using namespace boxmg::bmg2d::mpi;
+using namespace cedar::cdr2::mpi;
 
 grid_func::grid_func(topo_ptr grid) :
-	::boxmg::bmg2d::grid_func(grid->nlocal(0)-2,grid->nlocal(1)-2), par_object(grid, grid->comm) {}
+	::cedar::cdr2::grid_func(grid->nlocal(0)-2,grid->nlocal(1)-2), par_object(grid, grid->comm) {}
 
-grid_func::grid_func(len_t nx, len_t ny): ::boxmg::bmg2d::grid_func(nx,ny)
+grid_func::grid_func(len_t nx, len_t ny): ::cedar::cdr2::grid_func(nx,ny)
 {}
 
 
@@ -58,9 +58,9 @@ grid_func & grid_func::operator-=(const grid_func &rhs)
 }
 
 
-boxmg::real_t grid_func::inf_norm() const
+cedar::real_t grid_func::inf_norm() const
 {
-	auto mval = bmg2d::grid_func::inf_norm();
+	auto mval = cdr2::grid_func::inf_norm();
 
 	MPI_Allreduce(MPI_IN_PLACE, &mval, 1, MPI_DOUBLE, MPI_MAX, grid_->comm);
 
@@ -79,7 +79,7 @@ grid_func & grid_func::operator+=(iadd_t package)
 	return *this;
 }
 
-namespace boxmg { namespace bmg2d { namespace mpi {
+namespace cedar { namespace cdr2 { namespace mpi {
 std::ostream & operator<< (std::ostream &os, const grid_func & obj)
 {
 	auto & topo = obj.grid();

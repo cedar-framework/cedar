@@ -1,11 +1,11 @@
 #include <algorithm>
 
-#include <boxmg/2d/kernel/factory.h>
-#include <boxmg/2d/solver.h>
-#include <boxmg/2d/kernel/registry.h>
+#include <cedar/2d/kernel/factory.h>
+#include <cedar/2d/solver.h>
+#include <cedar/2d/kernel/registry.h>
 
-using namespace boxmg;
-using namespace boxmg::bmg2d;
+using namespace cedar;
+using namespace cedar::cdr2;
 
 
 void solver::setup_space(int nlevels)

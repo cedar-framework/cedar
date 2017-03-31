@@ -1,10 +1,10 @@
-#include <boxmg/kernel_name.h>
-#include <boxmg/2d/inter/mpi/prolong_op.h>
-#include <boxmg/2d/inter/mpi/restrict_op.h>
-#include <boxmg/2d/mpi/grid_func.h>
+#include <cedar/kernel_name.h>
+#include <cedar/2d/inter/mpi/prolong_op.h>
+#include <cedar/2d/inter/mpi/restrict_op.h>
+#include <cedar/2d/mpi/grid_func.h>
 
 
-namespace boxmg { namespace bmg2d { namespace inter { namespace mpi {
+namespace cedar { namespace cdr2 { namespace inter { namespace mpi {
 mpi::grid_func operator*(const restrict_op & R, const mpi::grid_func &x)
 {
 	auto & P = R.getP();

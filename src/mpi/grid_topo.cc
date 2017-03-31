@@ -1,8 +1,8 @@
-#include <boxmg/2d/ftn/mpi/BMG_workspace_c.h>
+#include <cedar/2d/ftn/mpi/BMG_workspace_c.h>
 
-#include <boxmg/mpi/grid_topo.h>
+#include <cedar/mpi/grid_topo.h>
 
-using namespace boxmg;
+using namespace cedar;
 
 grid_topo::grid_topo() : igrd(nullptr) {}
 

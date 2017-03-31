@@ -1,11 +1,11 @@
-#include <boxmg/2d/cg/setup_cg_redist.h>
+#include <cedar/2d/cg/setup_cg_redist.h>
 
 
-namespace boxmg { namespace bmg2d { namespace kernel {
+namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	namespace mpi = boxmg::bmg2d::mpi;
+	namespace mpi = cedar::cdr2::mpi;
 	void setup_cg_redist(const mpi::stencil_op & so,
 	                     std::shared_ptr<config::reader> conf,
 	                     std::shared_ptr<mpi::redist_solver> * slv,

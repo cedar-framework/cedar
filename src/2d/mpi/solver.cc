@@ -1,21 +1,21 @@
 #include <algorithm>
 
-#include <boxmg/types.h>
+#include <cedar/types.h>
 
-#include <boxmg/2d/mpi/halo.h>
-#include <boxmg/2d/kernel/mpi/factory.h>
-#include <boxmg/2d/mpi/solver.h>
-#include <boxmg/perf/predict.h>
-#include <boxmg/2d/solver.h>
+#include <cedar/2d/mpi/halo.h>
+#include <cedar/2d/kernel/mpi/factory.h>
+#include <cedar/2d/mpi/solver.h>
+#include <cedar/perf/predict.h>
+#include <cedar/2d/solver.h>
 
-using namespace boxmg;
-using namespace boxmg::bmg2d;
+using namespace cedar;
+using namespace cedar::cdr2;
 
 
 void mpi::solver::setup_space(int nlevels)
 {
 	levels.back().A.grid().grow(nlevels);
-	levels[0].res = bmg2d::mpi::grid_func(levels[0].A.grid_ptr());
+	levels[0].res = cdr2::mpi::grid_func(levels[0].A.grid_ptr());
 	for (auto i : range(nlevels-1)) {
 		auto & fop = levels.back().A;
 		int kc = nlevels - levels.size() - 1;
@@ -60,19 +60,19 @@ void mpi::solver::setup_space(int nlevels)
 		cgrid->coord(1) = fgrid.coord(1);
 
 
-		auto cop = bmg2d::mpi::stencil_op(cgrid);
+		auto cop = cdr2::mpi::stencil_op(cgrid);
 		levels.back().P = inter::mpi::prolong_op(cgrid);
-		std::array<bmg2d::relax_stencil,2> SOR{{bmg2d::relax_stencil(levels[i].A.stencil().shape(0),
+		std::array<cdr2::relax_stencil,2> SOR{{cdr2::relax_stencil(levels[i].A.stencil().shape(0),
 		                                                             levels[i].A.stencil().shape(1)),
-					bmg2d::relax_stencil(levels[i].A.stencil().shape(0), levels[i].A.stencil().shape(1))}};
+					cdr2::relax_stencil(levels[i].A.stencil().shape(0), levels[i].A.stencil().shape(1))}};
 		levels.back().SOR = std::move(SOR);
 
 		cop.set_registry(kreg);
 
 		levels.emplace_back(std::move(cop),inter::mpi::prolong_op());
-		levels.back().x = bmg2d::mpi::grid_func(levels.back().A.grid_ptr());
-		levels.back().b = bmg2d::mpi::grid_func(levels.back().A.grid_ptr());
-		levels.back().res = bmg2d::mpi::grid_func(levels.back().A.grid_ptr());
+		levels.back().x = cdr2::mpi::grid_func(levels.back().A.grid_ptr());
+		levels.back().b = cdr2::mpi::grid_func(levels.back().A.grid_ptr());
+		levels.back().res = cdr2::mpi::grid_func(levels.back().A.grid_ptr());
 	}
 
 	setup_halo();
@@ -113,15 +113,15 @@ void mpi::solver::setup_cg_solve()
 			}
 		}
 		if (cg_solver_str == "boxmg" or nblocks[0]*nblocks[1] == 1) {
-			std::shared_ptr<bmg2d::solver> cg_bmg;
+			std::shared_ptr<cdr2::solver> cg_bmg;
 			auto cg_conf = conf->getconf("cg-config");
 			if (!cg_conf)
 				cg_conf = conf;
 			kernels->setup_cg_boxmg(cop, cg_conf, &cg_bmg);
 			coarse_solver = [&,cg_bmg,kernels](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
-				const bmg2d::mpi::stencil_op &av = dynamic_cast<const bmg2d::mpi::stencil_op&>(A);
+				const cdr2::mpi::stencil_op &av = dynamic_cast<const cdr2::mpi::stencil_op&>(A);
 				kernels->solve_cg_boxmg(*cg_bmg, x, b);
-				bmg2d::mpi::grid_func residual = av.residual(x,b);
+				cdr2::mpi::grid_func residual = av.residual(x,b);
 				log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
 			};
 		} else if (cg_solver_str == "redist") {
@@ -131,9 +131,9 @@ void mpi::solver::setup_cg_solve()
 				cg_conf = conf;
 			kernels->setup_cg_redist(cop, cg_conf, &cg_bmg, nblocks);
 			coarse_solver = [&,cg_bmg,kernels](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
-				const bmg2d::mpi::stencil_op &av = dynamic_cast<const bmg2d::mpi::stencil_op&>(A);
+				const cdr2::mpi::stencil_op &av = dynamic_cast<const cdr2::mpi::stencil_op&>(A);
 				kernels->solve_cg_redist(*cg_bmg, x, b);
-				bmg2d::mpi::grid_func residual = av.residual(x,b);
+				cdr2::mpi::grid_func residual = av.residual(x,b);
 				log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
 			};
 		}
@@ -161,7 +161,7 @@ void mpi::solver::setup_halo()
 
 
 
-mpi::solver::solver(bmg2d::mpi::stencil_op&& fop) : comm(fop.grid().comm)
+mpi::solver::solver(cdr2::mpi::stencil_op&& fop) : comm(fop.grid().comm)
 {
 	kreg = kernel::mpi::factory::from_config(*conf);
 
@@ -169,7 +169,7 @@ mpi::solver::solver(bmg2d::mpi::stencil_op&& fop) : comm(fop.grid().comm)
 }
 
 
-mpi::solver::solver(bmg2d::mpi::stencil_op&& fop,
+mpi::solver::solver(cdr2::mpi::stencil_op&& fop,
                     std::shared_ptr<config::reader> cfg) : multilevel(cfg), comm(fop.grid().comm)
 {
 	kreg = kernel::mpi::factory::from_config(*conf);
@@ -178,7 +178,7 @@ mpi::solver::solver(bmg2d::mpi::stencil_op&& fop,
 }
 
 
-int mpi::solver::compute_num_levels(bmg2d::mpi::stencil_op & fop)
+int mpi::solver::compute_num_levels(cdr2::mpi::stencil_op & fop)
 {
 	int ng;
 	auto min_coarse = conf->get<len_t>("solver.min-coarse", 3);
@@ -191,7 +191,7 @@ int mpi::solver::compute_num_levels(bmg2d::mpi::stencil_op & fop)
 }
 
 
-bmg2d::mpi::grid_func mpi::solver::solve(const bmg2d::mpi::grid_func & b)
+cdr2::mpi::grid_func mpi::solver::solve(const cdr2::mpi::grid_func & b)
 {
 	auto kernels = kernel_registry();
 	kernels->halo_exchange(b, halo_ctx);
@@ -199,7 +199,7 @@ bmg2d::mpi::grid_func mpi::solver::solve(const bmg2d::mpi::grid_func & b)
 }
 
 
-void mpi::solver::solve(const bmg2d::mpi::grid_func & b, bmg2d::mpi::grid_func & x)
+void mpi::solver::solve(const cdr2::mpi::grid_func & b, cdr2::mpi::grid_func & x)
 {
 	auto kernels = kernel_registry();
 	kernels->halo_exchange(b, halo_ctx);
