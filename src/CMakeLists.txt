@@ -15,4 +15,4 @@ foreach(dir ${dirs})
   endforeach(dsrc)
 endforeach(dir)
 
-set(cedar_src ${sources} PARENT_SCOPE)
+set(cedar_src ${sources} src/kernel_params.cc PARENT_SCOPE)

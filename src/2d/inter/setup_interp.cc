@@ -13,7 +13,8 @@ namespace impls
 {
 	using namespace cedar::cdr2;
 
-	void setup_interp(int kf, int kc, int nog,
+	void setup_interp(const kernel_params & params,
+	                  int kf, int kc, int nog,
 	                  const stencil_op &fop,
 	                  const stencil_op &cop,
 	                  inter::prolong_op &P)

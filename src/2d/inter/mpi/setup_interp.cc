@@ -16,7 +16,8 @@ namespace impls
 {
 	using namespace cedar::cdr2;
 
-	void mpi_setup_interp(int kf, int kc, int nog,
+	void mpi_setup_interp(const kernel_params & params,
+	                      int kf, int kc, int nog,
 	                      const mpi::stencil_op & fop,
 	                      const mpi::stencil_op & cop,
 	                      inter::mpi::prolong_op & P)

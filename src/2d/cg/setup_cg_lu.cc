@@ -10,7 +10,7 @@ namespace cedar { namespace cdr2 { namespace kernel {
 namespace impls
 {
 	using namespace cedar::cdr2;
-	void setup_cg_lu(const stencil_op & so,
+	void setup_cg_lu(const kernel_params & params, const stencil_op & so,
 	                 grid_func & ABD)
 	{
 		len_t nx, ny;

@@ -23,7 +23,8 @@ namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	void setup_cg_boxmg(const mpi::stencil_op & so,
+	void setup_cg_boxmg(const kernel_params & params,
+	                    const mpi::stencil_op & so,
 	                    std::shared_ptr<config::reader> conf,
 	                    std::shared_ptr<solver> *bmg)
 	{

@@ -14,7 +14,8 @@ namespace cedar { namespace cdr2 { namespace kernel {
 namespace impls
 {
 	using namespace cedar::cdr2;
-	void setup_rbgs_point(const stencil_op & so,
+	void setup_rbgs_point(const kernel_params & params,
+	                      const stencil_op & so,
 	                      relax_stencil & sor)
 	{
 		len_t nx, ny;
@@ -35,7 +36,8 @@ namespace impls
 	}
 
 
-	void setup_rbgs_x(const stencil_op & so,
+	void setup_rbgs_x(const kernel_params & params,
+	                  const stencil_op & so,
 	                  relax_stencil & sor)
 	{
 		int nx, ny, nstencil, jpn;
@@ -55,7 +57,8 @@ namespace impls
 	}
 
 
-	void setup_rbgs_y(const stencil_op & so,
+	void setup_rbgs_y(const kernel_params & params,
+	                  const stencil_op & so,
 	                  relax_stencil & sor)
 	{
 		int nx, ny, nstencil, jpn;

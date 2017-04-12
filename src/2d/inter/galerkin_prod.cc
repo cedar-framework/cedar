@@ -16,7 +16,8 @@ namespace impls
 {
 	using namespace cedar::cdr2;
 
-	void galerkin_prod(int kf, int kc, int nog,
+	void galerkin_prod(const kernel_params & params,
+	                   int kf, int kc, int nog,
 	                   const inter::prolong_op & P,
 	                   const stencil_op & fop,
 	                   stencil_op & cop)

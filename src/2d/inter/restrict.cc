@@ -12,7 +12,8 @@ namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	void fortran_restrict(const inter::restrict_op & R,
+	void fortran_restrict(const kernel_params & params,
+	                      const inter::restrict_op & R,
 	                      const grid_func & fine,
 	                      grid_func & coarse)
 	{

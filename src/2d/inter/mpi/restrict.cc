@@ -18,7 +18,8 @@ namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	void mpi_fortran_restrict(const inter::mpi::restrict_op & R,
+	void mpi_fortran_restrict(const kernel_params & params,
+	                          const inter::mpi::restrict_op & R,
 	                          const mpi::grid_func & fine,
 	                          mpi::grid_func & coarse)
 	{

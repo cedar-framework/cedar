@@ -113,7 +113,7 @@ namespace impls
 	}
 
 
-	void setup_msg(grid_topo & topo, void **msg_ctx)
+	void setup_msg(const kernel_params & params, grid_topo & topo, void **msg_ctx)
 	{
 		MsgCtx *ctx = new MsgCtx(topo);
 		int rank;
@@ -143,7 +143,7 @@ namespace impls
 	}
 
 
-	void msg_stencil_exchange(mpi::stencil_op & sop)
+	void msg_stencil_exchange(const kernel_params & params, mpi::stencil_op & sop)
 	{
 		MsgCtx *ctx = (MsgCtx*) sop.halo_ctx;
 		grid_topo &topo = sop.grid();
@@ -168,7 +168,7 @@ namespace impls
 	}
 
 
-	void msg_exchange(mpi::grid_func & f)
+	void msg_exchange(const kernel_params & params, mpi::grid_func & f)
 	{
 		MsgCtx *ctx = (MsgCtx*) f.halo_ctx;
 		grid_topo &topo = f.grid();

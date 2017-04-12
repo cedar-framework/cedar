@@ -32,7 +32,7 @@ namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	void solve_cg_boxmg(const solver &cg_solver,
+	void solve_cg_boxmg(const kernel_params & params, const solver &cg_solver,
 	                    mpi::grid_func &x_par,
 	                    const mpi::grid_func &b)
 	{
@@ -82,7 +82,8 @@ namespace impls
 	}
 
 
-	void mpi_solve_cg_lu(mpi::grid_func &x_par,
+	void mpi_solve_cg_lu(const kernel_params & params,
+	                     mpi::grid_func &x_par,
 	                     const mpi::grid_func &b,
 	                     const mpi::grid_func & ABD,
 	                     real_t *bbd)
@@ -116,7 +117,8 @@ namespace impls
 	}
 
 
-	void solve_cg_redist(const mpi::redist_solver & cg_solver,
+	void solve_cg_redist(const kernel_params & params,
+	                     const mpi::redist_solver & cg_solver,
 	                     mpi::grid_func &x,
 	                     const mpi::grid_func &b)
 	{

@@ -13,7 +13,8 @@ namespace impls
 {
 	using namespace cedar::cdr2;
 
-	void residual(const stencil_op & A, const grid_func & x,
+	void residual(const kernel_params & params,
+	              const stencil_op & A, const grid_func & x,
 				  const grid_func & b, grid_func &r)
 	{
 		using namespace cedar::cdr2;
@@ -36,7 +37,8 @@ namespace impls
 		}
 	}
 
-	void residual_fortran(const stencil_op &A, const grid_func &x,
+	void residual_fortran(const kernel_params & params,
+	                      const stencil_op &A, const grid_func &x,
 						  const grid_func &b, grid_func &r)
 	{
 		int k = 0;

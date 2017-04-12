@@ -17,7 +17,8 @@ namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	void relax_rbgs_point(const stencil_op & so,
+	void relax_rbgs_point(const kernel_params & params,
+	                      const stencil_op & so,
 	                      grid_func & x,
 	                      const grid_func & b,
 	                      const relax_stencil & sor,
@@ -55,7 +56,8 @@ namespace impls
 
 
 
-	void relax_lines_x(const stencil_op & so,
+	void relax_lines_x(const kernel_params & params,
+	                   const stencil_op & so,
 	                   grid_func & x,
 	                   const grid_func & b,
 	                   const relax_stencil & sor,
@@ -93,7 +95,8 @@ namespace impls
 	}
 
 
-	void relax_lines_y(const stencil_op & so,
+	void relax_lines_y(const kernel_params & params,
+	                   const stencil_op & so,
 	                   grid_func & x,
 	                   const grid_func & b,
 	                   const relax_stencil & sor,

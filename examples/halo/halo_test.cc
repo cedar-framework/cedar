@@ -1,6 +1,7 @@
 #include <mpi.h>
 #include <memory>
 
+#include <cedar/kernel_params.h>
 #include <cedar/types.h>
 #include <cedar/kernel.h>
 #include <cedar/kernel_name.h>
@@ -64,21 +65,22 @@ int main(int argc, char *argv[])
 	using halo_setup_t = cedar::kernel<grid_topo&, void**>;
 	using halo_exchange_t = cedar::kernel<mpi::grid_func&>;
 	kreg->add(kernel_name::halo_setup, "user",
-	          halo_setup_t([](grid_topo & topo,
+	          halo_setup_t([](const kernel_params & params,
+	                          grid_topo & topo,
 	                          void **user_ctx) -> void
 	                       {
 		                       timer_begin("halo-setup");
 		                       // custom halo setup
 		                       timer_end("halo-setup");
-	                       }));
+	                       }, nullptr));
 
 	kreg->add(kernel_name::halo_exchange, "user",
-	          halo_exchange_t([](mpi::grid_func & f) -> void
+	          halo_exchange_t([](const kernel_params & params, mpi::grid_func & f) -> void
 	                          {
 		                       timer_begin("halo-exchange");
 		                       // custom halo exchange
 		                       timer_end("halo-exchange");
-	                       }));
+	                          }, nullptr));
 
 	cedar::cdr2::kernel::mpi::factory::init(kreg, conf);
 

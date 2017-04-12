@@ -11,7 +11,8 @@ namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	void fortran_interp(const inter::prolong_op & P,
+	void fortran_interp(const kernel_params & params,
+	                    const inter::prolong_op & P,
 	                    const grid_func & coarse,
 	                    const grid_func & residual,
 	                    grid_func & fine)
