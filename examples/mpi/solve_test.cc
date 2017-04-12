@@ -102,32 +102,7 @@ int main(int argc, char *argv[])
 
 	config::reader conf;
 
-	auto islocal = conf.get<bool>("grid.local", true);
-	auto ndofs = conf.getvec<len_t>("grid.n");
-	auto nx = ndofs[0];
-	auto ny = ndofs[1];
-	topo_ptr grid;
-	if (islocal) {
-		auto nprocs = conf.getvec<int>("grid.np");
-		int npx = 0;
-		int npy = 0;
-		if (nprocs.size() >= 2) {
-			npx = nprocs[0];
-			npy = nprocs[1];
-		}
-		if (npx == 0 or npy == 0) {
-			grid = cdr2::util::create_topo(MPI_COMM_WORLD, nx, ny);
-		} else {
-			int size;
-			MPI_Comm_size(MPI_COMM_WORLD, &size);
-			assert(size == npx*npy);
-			grid = cdr2::util::create_topo(MPI_COMM_WORLD, npx, npy, nx, ny);
-		}
-		log::status << "Running local solve" << std::endl;
-	} else {
-		grid = cdr2::util::create_topo_global(MPI_COMM_WORLD, nx, ny);
-		log::status << "Running global solve" << std::endl;
-	}
+	auto grid = util::create_topo(conf);
 
 	auto so = mpi::gallery::poisson(grid);
 	mpi::grid_func b(grid);

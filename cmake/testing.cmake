@@ -15,7 +15,7 @@ function(add_par_unit target sources)
   set(src ${ARGV})
   list(REMOVE_AT src 0)
   add_executable(${target} ${src})
-  target_link_libraries(${target} ${GTEST_BOTH_LIBRARIES} ${boxmg-deps} boxmg)
+  target_link_libraries(${target} ${GTEST_BOTH_LIBRARIES} ${cedar-deps} cedar)
   set_target_properties(${target}
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
@@ -36,7 +36,7 @@ function(add_unit target sources)
   set(src ${ARGV})
   list(REMOVE_AT src 0)
   add_executable(${target} ${src})
-  target_link_libraries(${target} ${GTEST_BOTH_LIBRARIES} ${boxmg-deps} boxmg)
+  target_link_libraries(${target} ${GTEST_BOTH_LIBRARIES} ${cedar-deps} cedar)
   set_target_properties(${target}
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test)
