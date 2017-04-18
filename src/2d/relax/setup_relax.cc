@@ -6,6 +6,7 @@ extern "C" {
 	void BMG2_SymStd_SETUP_recip(real_t *so, real_t *sor, len_t nx, len_t ny, int nstncl, int nsor_v);
 	void BMG2_SymStd_SETUP_lines_x(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl, int JPN);
 	void BMG2_SymStd_SETUP_lines_y(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl, int JPN);
+	void BMG_get_bc(int, int*);
 }
 
 
@@ -51,7 +52,7 @@ namespace impls
 		if (so_sten.five_pt()) nstencil = 3;
 		else nstencil = 5;
 
-		jpn = BMG_BCs_definite;
+		BMG_get_bc(params.per_mask(), &jpn);
 
 		BMG2_SymStd_SETUP_lines_x(sod.data(), sor.data(), nx, ny, nstencil, jpn);
 	}
@@ -72,7 +73,7 @@ namespace impls
 		if (so_sten.five_pt()) nstencil = 3;
 		else nstencil = 5;
 
-		jpn = BMG_BCs_definite;
+		BMG_get_bc(params.per_mask(), &jpn);
 
 		BMG2_SymStd_SETUP_lines_y(sod.data(), sor.data(), nx, ny, nstencil, jpn);
 	}

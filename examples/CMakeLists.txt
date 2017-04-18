@@ -1,6 +1,9 @@
 add_executable(solve-test solve/solve_test.cc)
 target_link_libraries(solve-test cedar ${cedar-deps})
 
+add_executable(periodic per/solve_test.cc)
+target_link_libraries(periodic cedar ${cedar-deps})
+
 if (ENABLE_MPI)
   add_executable(mpi-test mpi/solve_test.cc)
   target_link_libraries(mpi-test cedar ${cedar-deps})

@@ -6,6 +6,7 @@
 extern "C" {
 	using namespace cedar;
 	void BMG2_SymStd_SOLVE_cg(real_t*, real_t*, len_t, len_t, real_t*, real_t*, len_t, len_t, int);
+	void BMG_get_bc(int, int*);
 }
 
 
@@ -26,7 +27,7 @@ namespace impls
 		grid_func & abd_data = const_cast<grid_func&>(ABD);
 
 
-		ibc = BMG_BCs_definite;
+		BMG_get_bc(params.per_mask(), &ibc);
 
 		BMG2_SymStd_SOLVE_cg(x.data(), bd.data(), x.len(0), x.len(1),
 		                    abd_data.data(), &bbd[0], ABD.len(0), ABD.len(1), ibc);
