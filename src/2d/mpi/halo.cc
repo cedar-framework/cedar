@@ -21,6 +21,7 @@ extern "C" {
 	void BMG2_SymStd_UTILS_update_ghosts(int K, real_t *x, len_t Nx, len_t Ny, len_t *iWork,
 	                                     len_t NMSGi, int *pMSG,
 	                                     real_t *buffer, len_t NMSGr, int nog, int mpicomm);
+	void BMG_get_bc(int, int*);
 }
 
 namespace cedar { namespace cdr2 { namespace kernel {
@@ -123,7 +124,7 @@ namespace impls
 		MPI_Comm_rank(topo.comm, &rank);
 		rank++; // Fortran likes to be difficult...
 
-		ibc = BMG_BCs_definite;
+		BMG_get_bc(params.per_mask(), &ibc);
 
 		BMG2_SymStd_SETUP_MSG(ctx->pMSG.data(), ctx->pMSGSO.data(),
 		                      ctx->msg_geom.data(), ctx->msg_geom.size(),

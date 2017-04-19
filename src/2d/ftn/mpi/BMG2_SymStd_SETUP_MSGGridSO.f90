@@ -1,5 +1,5 @@
       SUBROUTINE BMG2_SymStd_SETUP_MSGGridSO(&
-     &                NGx, NGy, &
+     &                NGx, NGy, IBC,&
      &                LocalArraySize, GlobalCoordLocalData,&
      &                GlobalCoordActData, ActDataStart,&
      &                DimX, DimY, ProcGrid, &
@@ -64,11 +64,12 @@
 !
       INCLUDE    'BMG_workspace_f90.h'
       INCLUDE    'BMG_constants_f90.h'
+      INCLUDE    'BMG_parameters_f90.h'
 
 ! ---------------------------
 !     Argument Declarations:
 !
-      INTEGER  MPICOMM
+      INTEGER  MPICOMM, IBC
       integer(len_t) :: NGx, NGy
       INTEGER  NProc, NProcI, NProcJ, NOGm, KG
 
@@ -83,8 +84,37 @@
 !
       integer(len_t) :: I,J, II, JJ, iGs, jGs
       integer :: IJRank
+      LOGICAL PERIODIC_X, PERIODIC_Y
 
 ! ======================================================================
+
+! --------------------------------------------
+!     Test Periodicity
+! --------------------------------------------
+
+      PERIODIC_X = ( IBC.EQ.BMG_BCs_def_per_x    .OR.&
+     &               IBC.EQ.BMG_BCs_def_per_xy   .OR.&
+     &               IBC.EQ.BMG_BCs_indef_per_x  .OR.&
+     &               IBC.EQ.BMG_BCs_indef_per_xy&
+     &              )
+
+      PERIODIC_Y = ( IBC.EQ.BMG_BCs_def_per_y    .OR.&
+     &               IBC.EQ.BMG_BCs_def_per_xy   .OR.&
+     &               IBC.EQ.BMG_BCs_indef_per_y  .OR.&
+     &               IBC.EQ.BMG_BCs_indef_per_xy&
+     &              )
+
+
+!$$$      IF ( PERIODIC_X .OR. PERIODIC_Y ) THEN
+!$$$         IF ( MyProc .EQ. 1 ) THEN
+!$$$            WRITE(*,*) "PERIODIC_X = ", PERIODIC_X
+!$$$            WRITE(*,*) "PERIODIC_Y = ", PERIODIC_Y
+!$$$         ENDIF
+!$$$      ELSE
+!$$$         IF ( MyProc.EQ.1 ) THEN
+!$$$            WRITE(*,*) "IBC = ", IBC
+!$$$         ENDIF
+!$$$      ENDIF
 
 ! --------------------------------------------
 !    initialize the MSG grid information
@@ -133,13 +163,29 @@
             GlobalCoordActData(1,2,IJRank) = jGs
             GlobalCoordActData(1,3,IJRank) = 1
 
-            GlobalCoordActData(2,1,IJRank) = &
+            GlobalCoordActData(2,1,IJRank) =&
      &           GlobalCoordActData(1,1,IJRank)&
      &           + LocalArraySize(1,IJRank)-1
-            GlobalCoordActData(2,2,IJRank) = &
+            GlobalCoordActData(2,2,IJRank) =&
      &           GlobalCoordActData(1,2,IJRank)&
      &           + LocalArraySize(2,IJRank)-1
             GlobalCoordActData(2,3,IJRank) = 1
+
+            IF (PERIODIC_X .and. iGs .eq. 1) THEN
+               GlobalCoordActData(1,1,IJRank) = NGx - 1
+            ENDIF
+
+            IF (PERIODIC_Y .and. jGs .eq. 1) THEN
+               GlobalCoordActData(1,2,IJRank) = NGy - 1
+            ENDIF
+
+            IF (PERIODIC_X .and. NGx .eq. iGs+DimX(I,KG)+1) THEN
+               GlobalCoordActData(2,1,IJRank) = 3
+            ENDIF
+
+            IF (PERIODIC_Y .and. NGy .eq. jGs+DimY(J,KG)+1) THEN
+               GlobalCoordActData(2,2,IJRank) = 3
+            ENDIF
 
          END DO
       END DO

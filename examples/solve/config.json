@@ -1,7 +1,0 @@
-{
-	"kernels":
-	{
-		"residual": "fortran"
-	},
-	"log": ["info", "status", "error", "memory"]
-}

@@ -167,7 +167,7 @@
       DO N=NOG, 1, -1
          !
          CALL BMG2_SymStd_SETUP_MSGGridSO(&
-     &        IGRD(N,idL_BMG_NGx), IGRD(N,idL_BMG_NGy),&
+     &        IGRD(N,idL_BMG_NGx), IGRD(N,idL_BMG_NGy), IBC,&
      &        iMSG_Geom(pMSGSO(ipL_MSG_LocalArraySize,N)),&
      &        iMSG_Geom(pMSGSO(ipL_MSG_GlobalCoordLocalData,N)),&
      &        iMSG_Geom(pMSGSO(ipL_MSG_GlobalCoordActData,N)),&
