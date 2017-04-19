@@ -16,7 +16,8 @@ namespace impls
 {
 	namespace mpi = cedar::cdr3::mpi;
 
-	void matvec(const mpi::stencil_op & so,
+	void matvec(const kernel_params & params,
+	            const mpi::stencil_op & so,
 	            const mpi::grid_func & x,
 	            mpi::grid_func & b)
 	{

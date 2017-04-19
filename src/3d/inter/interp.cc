@@ -9,13 +9,15 @@ extern "C" {
 	                            len_t iic, len_t jjc, len_t kkc,
 	                            len_t iif, len_t jjf, len_t kkf,
 	                            int NStncl, int jpn);
+	void BMG_get_bc(int, int*);
 }
 
 namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
-	void fortran_interp(const inter::prolong_op & P,
+	void fortran_interp(const kernel_params & params,
+	                    const inter::prolong_op & P,
 	                    const grid_func & coarse,
 	                    const grid_func & residual,
 	                    grid_func & fine)
@@ -34,7 +36,7 @@ namespace impls
 			nstencil = 14;
 		}
 
-		ibc = BMG_BCs_definite;
+		BMG_get_bc(params.per_mask(), &ibc);
 
 		BMG3_SymStd_interp_add(fine.data(), coarsed.data(), Pd.fine_op->data(), res.data(), Pd.data(),
 		                       coarsed.len(0), coarsed.len(1), coarsed.len(2),

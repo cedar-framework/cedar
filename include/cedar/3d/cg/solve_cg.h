@@ -10,17 +10,20 @@ namespace cedar { namespace cdr3 { namespace kernel {
 namespace impls
 {
 	namespace mpi = cedar::cdr3::mpi;
-	void fortran_solve_cg(grid_func & x,
+	void fortran_solve_cg(const kernel_params & params,
+	                      grid_func & x,
 	                      const grid_func & b,
 	                      const grid_func & ABD,
 	                      real_t *bbd);
 
-	void mpi_solve_cg_lu(mpi::grid_func &x,
+	void mpi_solve_cg_lu(const kernel_params & params,
+	                     mpi::grid_func &x,
 	                     const mpi::grid_func &b,
 	                     const mpi::grid_func & ABD,
 	                     real_t *bbd);
 
-	void solve_cg_redist(const mpi::redist_solver & cg_solver,
+	void solve_cg_redist(const kernel_params & params,
+	                     const mpi::redist_solver & cg_solver,
 	                     mpi::grid_func &x,
 	                     const mpi::grid_func &b);
 }

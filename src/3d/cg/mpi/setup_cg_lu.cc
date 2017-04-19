@@ -18,7 +18,8 @@ namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
-	void mpi_setup_cg_lu(const mpi::stencil_op & so,
+	void mpi_setup_cg_lu(const kernel_params & params,
+	                     const mpi::stencil_op & so,
 	                     grid_func & ABD)
 	{
 		mpi::stencil_op & copd = const_cast<mpi::stencil_op&>(so);

@@ -22,7 +22,8 @@ namespace impls
 	using namespace cedar;
 	using namespace cedar::cdr3;
 
-	void mpi_residual_fortran(const mpi::stencil_op & A, const mpi::grid_func & x,
+	void mpi_residual_fortran(const kernel_params & params,
+	                          const mpi::stencil_op & A, const mpi::grid_func & x,
 	                          const mpi::grid_func & b, mpi::grid_func &r)
 	{
 		int k, kf, nog, ifd, nstencil;
