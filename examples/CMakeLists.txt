@@ -20,6 +20,9 @@ endif()
 if (ENABLE_3D)
   add_executable(solve-test-3 solve-3d/test.cc)
   target_link_libraries(solve-test-3 cedar ${cedar-deps})
+
+  add_executable(periodic-3 per-3d/test.cc)
+  target_link_libraries(periodic-3 cedar ${cedar-deps})
 endif()
 
 # add_executable(timer-test timer-test/timer_test.cc)
