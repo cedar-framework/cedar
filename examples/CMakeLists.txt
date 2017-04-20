@@ -8,8 +8,9 @@ if (ENABLE_MPI)
   add_executable(mpi-poisson-2d 2d/mpi/poisson.cc)
   target_link_libraries(mpi-poisson-2d cedar ${cedar-deps})
 
-  # add_executable(mpi-per mpi-per/test.cc)
-  # target_link_libraries(mpi-per cedar ${cedar-deps})
+  add_executable(mpi-periodic-2d 2d/mpi/periodic.cc)
+  target_link_libraries(mpi-periodic-2d cedar ${cedar-deps})
+
   add_executable(periodic-halo-2d 2d/mpi/per_halo.cc)
   target_link_libraries(periodic-halo-2d cedar ${cedar-deps})
 
