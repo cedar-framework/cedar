@@ -206,10 +206,13 @@ int main(int argc, char *argv[])
 		                   std::to_string(grid->coord(1)));
 		std::ofstream ffile("output/stencil-" + suffix);
 		std::ofstream rfile("output/restrict-" + suffix);
+		std::ofstream cfile("output/coarse-" + suffix);
 		ffile << bmg.level(-1).A;
 		rfile << bmg.level(-1).P;
+		cfile << bmg.level(-2).A;
 		rfile.close();
 		ffile.close();
+		cfile.close();
 	}
 
 	// auto sol = bmg.solve(b);
