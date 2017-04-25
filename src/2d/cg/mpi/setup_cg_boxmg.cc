@@ -23,6 +23,50 @@ namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
+	void update_periodic(stencil_op & so, const std::array<bool, 3> & per)
+	{
+		auto & o = so.stencil();
+
+		if (per[0]) {
+			len_t ibeg = 1;
+			len_t iend = o.shape(0);
+
+			for (auto j : o.grange(1)) {
+				o(ibeg-1,j,dir::C ) = o(iend,j,dir::C );
+				o(ibeg-1,j,dir::W ) = o(iend,j,dir::W );
+				o(ibeg-1,j,dir::S ) = o(iend,j,dir::S );
+				o(ibeg-1,j,dir::SW) = o(iend,j,dir::SW);
+				o(ibeg,j,4) = o(iend+1,j,4);
+				o(ibeg-1,j,4) = o(iend,j,4);
+
+				o(iend+1,j,dir::C ) = o(ibeg,j,dir::C );
+				o(iend+1,j,dir::W ) = o(ibeg,j,dir::W );
+				o(iend+1,j,dir::S ) = o(ibeg,j,dir::S );
+				o(iend+1,j,dir::SW) = o(ibeg,j,dir::SW);
+			}
+		}
+
+		if (per[1]) {
+			len_t jbeg = 1;
+			len_t jend = o.shape(1);
+
+			for (auto i : o.range(0)) {
+				o(i,jbeg-1,dir::C ) = o(i,jend,dir::C );
+				o(i,jbeg-1,dir::W ) = o(i,jend,dir::W );
+				o(i,jbeg-1,dir::S ) = o(i,jend,dir::S );
+				o(i,jbeg-1,dir::SW) = o(i,jend,dir::SW);
+				o(i+1,jbeg-1,4) = o(i+1,jend,4);
+
+				o(i,jend+1,dir::C ) = o(i,jbeg,dir::C );
+				o(i,jend+1,dir::W ) = o(i,jbeg,dir::W );
+				o(i,jend+1,dir::S ) = o(i,jbeg,dir::S );
+				o(i,jend+1,dir::SW) = o(i,jbeg,dir::SW);
+				o(i+1,jend+1,4) = o(i+1,jbeg,4);
+			}
+		}
+	}
+
+
 	void setup_cg_boxmg(const kernel_params & params,
 	                    const mpi::stencil_op & so,
 	                    std::shared_ptr<config::reader> conf,
@@ -61,6 +105,8 @@ namespace impls
 		                           ctx->proc_coord.data(),
 		                           &ctx->msg_geom.data()[local_arr_ptr],
 		                           fcomm);
+
+		if (params.per_mask()) update_periodic(so_ser, params.periodic);
 
 		*bmg = std::make_shared<solver>(std::move(so_ser), conf);
 		(*bmg)->level(-1).x = grid_func::like((*bmg)->level(-1).res);

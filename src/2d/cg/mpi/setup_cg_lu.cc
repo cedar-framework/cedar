@@ -42,6 +42,10 @@ namespace impls
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
+		if (params.per_mask()) {
+			log::error << "MPI LU cg solver does not support periodic BCs" << std::endl;
+		}
+
 		MPI_BMG2_SymStd_SETUP_cg_LU(csten.data(), csten.len(0), csten.len(1),
 		                            nstencil, topo.is(0), topo.is(1),
 		                            topo.nglobal(0), topo.nglobal(1),
