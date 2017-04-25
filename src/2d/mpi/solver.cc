@@ -81,6 +81,7 @@ void mpi::solver::setup_space(int nlevels)
 
 void mpi::solver::setup_cg_solve()
 {
+	auto params = build_kernel_params(*conf);
 	auto & cop = levels.back().A;
 	std::string cg_solver_str = conf->get<std::string>("solver.cg-solver", "LU");
 
@@ -121,6 +122,8 @@ void mpi::solver::setup_cg_solve()
 			coarse_solver = [&,cg_bmg,kernels](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
 				const cdr2::mpi::stencil_op &av = dynamic_cast<const cdr2::mpi::stencil_op&>(A);
 				kernels->solve_cg_boxmg(*cg_bmg, x, b);
+				if (params->per_mask())
+					kernels->halo_exchange(x);
 				cdr2::mpi::grid_func residual = av.residual(x,b);
 				log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
 			};

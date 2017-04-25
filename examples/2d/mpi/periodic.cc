@@ -145,7 +145,7 @@ static void set_problem(cedar::cdr2::mpi::grid_func & b, std::array<bool, 3> per
 }
 
 
-static void set_solution(cedar::cdr2::mpi::grid_func & q)
+static void set_solution(cedar::cdr2::mpi::grid_func & q, std::array<bool, 3> periodic)
 {
 	using namespace cedar;
 
@@ -160,8 +160,14 @@ static void set_solution(cedar::cdr2::mpi::grid_func & q)
 	real_t igs = topo.is(0);
 	real_t jgs = topo.is(1);
 
-	real_t hx = 1.0 / (topo.nglobal(0) - 1);
-	real_t hy = 1.0 / (topo.nglobal(1) - 1);
+	auto ngx = topo.nglobal(0) - 2;
+	auto ngy = topo.nglobal(1) - 2;
+
+	if (periodic[0]) ngx--;
+	if (periodic[1]) ngy--;
+
+	real_t hx = 1.0 / (ngx + 1);
+	real_t hy = 1.0 / (ngy + 1);
 
 	for (auto j : q.range(1)) {
 		for (auto i : q.range(0)) {
@@ -209,22 +215,20 @@ int main(int argc, char *argv[])
 		std::ofstream cfile("output/coarse-" + suffix);
 		ffile << bmg.level(-1).A;
 		rfile << bmg.level(-1).P;
-		cfile << bmg.level(-2).A;
+		cfile << bmg.level(0).A;
 		rfile.close();
 		ffile.close();
 		cfile.close();
 	}
 
-	// auto sol = bmg.solve(b);
+	auto sol = bmg.solve(b);
 
-	// mpi::grid_func exact_sol(sol.grid_ptr());
-	// set_solution(exact_sol);
+	mpi::grid_func exact_sol(sol.grid_ptr());
+	set_solution(exact_sol, params->periodic);
 
-	// mpi::grid_func diff = exact_sol - sol;
+	mpi::grid_func diff = exact_sol - sol;
 
-	// log::status << "Solution norm: " << diff.inf_norm() << std::endl;
-
-	// timer_save("timings.json");
+	log::status << "Solution norm: " << diff.inf_norm() << std::endl;
 
 	log::status << "Finished Test" << std::endl;
 

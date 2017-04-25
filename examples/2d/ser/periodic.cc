@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
 		std::ofstream cfile("coarse.txt");
 		std::ofstream rfile("restrict.txt");
 		ffile << bmg.level(-1).A;
-		cfile << bmg.level(-2).A;
+		cfile << bmg.level(0).A;
 		rfile << bmg.level(-1).P;
 		ffile.close();
 		cfile.close();
