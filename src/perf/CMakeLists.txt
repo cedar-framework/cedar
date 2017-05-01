@@ -3,6 +3,5 @@ set(perf_SOURCES
   perf_factory.cc
   cholesky_model.cc
   params.cc
-  predict.cc
   search.cc
   PARENT_SCOPE)

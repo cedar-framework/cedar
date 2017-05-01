@@ -74,10 +74,10 @@ stencil_op redist_solver::redist_operator(const stencil_op & so, topo_ptr topo)
 	assert(sten.five_pt() == false);
 	rsten.five_pt() = false;
 
-	array<len_t,real_t,1> sbuf(5*sten.shape(0)*sten.shape(1));
+	array<len_t,real_t,1> sbuf(5*sten.len(0)*sten.len(1));
 	int idx = 0;
-	for (auto j : sten.range(1)) {
-		for (auto i : sten.range(0)) {
+	for (auto j : sten.grange(1)) {
+		for (auto i : sten.grange(0)) {
 			sbuf(idx) = sten(i,j,dir::C);
 			sbuf(idx+1) = sten(i,j,dir::W);
 			sbuf(idx+2) = sten(i,j,4);
@@ -94,7 +94,7 @@ stencil_op redist_solver::redist_operator(const stencil_op & so, topo_ptr topo)
 		for (auto i : range(nbx.len(0))) {
 			int idx = i+j*nbx.len(0);
 			displs[idx] = rbuf_len;
-			rcounts[idx] = nbx(i)*nby(j)*5;
+			rcounts[idx] = (nbx(i)+2)*(nby(j)+2)*5;
 			rbuf_len += rcounts[idx];
 		}
 	}
@@ -119,13 +119,13 @@ stencil_op redist_solver::redist_operator(const stencil_op & so, topo_ptr topo)
 			for (auto i : range(nbx.len(0))) {
 				auto nx = nbx(i);
 				ny = nby(j);
-				for (auto jj: range(ny)) {
-					for (auto ii : range(nx)) {
-						rsten(igs+ii,jgs+jj,dir::C) = rbuf(idx);
-						rsten(igs+ii,jgs+jj,dir::W) = rbuf(idx+1);
-						rsten(igs+ii,jgs+jj,4) = rbuf(idx+2);
-						rsten(igs+ii,jgs+jj,dir::S) = rbuf(idx+3);
-						rsten(igs+ii,jgs+jj,dir::SW) = rbuf(idx+4);
+				for (auto jj: range(ny+2)) {
+					for (auto ii : range(nx+2)) {
+						rsten(igs+ii-1,jgs+jj-1,dir::C) = rbuf(idx);
+						rsten(igs+ii-1,jgs+jj-1,dir::W) = rbuf(idx+1);
+						rsten(igs+ii-1,jgs+jj-1,4) = rbuf(idx+2);
+						rsten(igs+ii-1,jgs+jj-1,dir::S) = rbuf(idx+3);
+						rsten(igs+ii-1,jgs+jj-1,dir::SW) = rbuf(idx+4);
 						idx += 5;
 					}
 				}

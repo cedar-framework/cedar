@@ -183,32 +183,26 @@ int main(int argc, char *argv[])
 	set_problem(b, params->periodic);
 
 	solver bmg(std::move(so), conf);
-	{
-		std::ofstream ffile("fine.txt");
-		std::ofstream cfile("coarse.txt");
-		std::ofstream rfile("restrict.txt");
-		ffile << bmg.level(-1).A;
-		cfile << bmg.level(0).A;
-		rfile << bmg.level(-1).P;
-		ffile.close();
-		cfile.close();
-		rfile.close();
-	}
+	// {
+	// 	std::ofstream ffile("fine.txt");
+	// 	std::ofstream cfile("coarse.txt");
+	// 	std::ofstream rfile("restrict.txt");
+	// 	ffile << bmg.level(-1).A;
+	// 	cfile << bmg.level(-4).A;//bmg.level(-3).A;
+	// 	rfile << bmg.level(-1).P;
+	// 	ffile.close();
+	// 	cfile.close();
+	// 	rfile.close();
+	// }
 
 
 	auto sol = bmg.solve(b);
 
 	grid_func exact_sol(sol.shape(0), sol.shape(1));
 
-	// std::ofstream dfile;
-	// dfile.open("sol.txt", std::ios::out | std::ios::trunc | std::ios::binary);
-
 	set_solution(exact_sol, params->periodic);
 
 	auto diff = exact_sol - sol;
-	// dfile << diff << std::endl;
-
-	// dfile.close();
 
 	log::status << "Solution norm: " << diff.inf_norm() << std::endl;
 
