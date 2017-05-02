@@ -119,8 +119,6 @@ int main(int argc, char *argv[])
 
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
 
-	timer_init(MPI_COMM_WORLD);
-
 	config::reader conf;
 	log::init(conf);
 	log::status << "Beginning test" << std::endl;

@@ -23,10 +23,8 @@ namespace mpi = cedar::cdr3::mpi;
 
 namespace factory
 {
-	std::shared_ptr<registry> from_config(config::reader &conf)
+	void init(std::shared_ptr<registry> kreg, config::reader &conf)
 	{
-		auto kreg = std::make_shared<registry>();
-
 		auto params = build_kernel_params(conf);
 
 		kreg->add(kernel_name::halo_setup, "fortran-msg",
@@ -131,9 +129,18 @@ namespace factory
 			log::debug << "Using '" + kname + " ' for " <<  std::get<0>(v) << "." << std::endl;
 			kreg->set(std::get<0>(v), kname);
 		}
+	}
+
+
+	std::shared_ptr<registry> from_config(config::reader &conf)
+	{
+		auto kreg = std::make_shared<registry>();
+
+		init(kreg, conf);
 
 		return kreg;
 	}
+
 }
 
 }}}}

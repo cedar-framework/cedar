@@ -20,6 +20,12 @@ if (ENABLE_MPI)
   if (ENABLE_3D)
 	add_executable(mpi-poisson-3d 3d/mpi/poisson.cc)
 	target_link_libraries(mpi-poisson-3d cedar ${cedar-deps})
+
+	add_executable(mpi-periodic-3d 3d/mpi/periodic.cc)
+	target_link_libraries(mpi-periodic-3d cedar ${cedar-deps})
+
+	add_executable(periodic-halo-3d 3d/mpi/per_halo.cc)
+	target_link_libraries(periodic-halo-3d cedar ${cedar-deps})
   endif()
 endif()
 

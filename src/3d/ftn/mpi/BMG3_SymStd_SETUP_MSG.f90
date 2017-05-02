@@ -1,5 +1,5 @@
       SUBROUTINE BMG3_SymStd_SETUP_MSG( &
-     &                pMSG, pMSGSO, iMSG_Geom, NMSGi, pSI_MSG, &
+     &                pMSG, pMSGSO, iMSG_Geom, NMSGi, pSI_MSG, IBC,&
      &                IGRD, NOG, NOGm, NProc, MyProc, &
      &                DimX, DimY, DimZ, DimXfine, DimYfine, DimZfine,&
      &                ProcGrid, NProcI, NProcJ, NProcK,&
@@ -58,7 +58,7 @@
 ! ------------------------------------------------
 !     Argument Declarations
 !
-      integer(c_int), value :: NOG, NOGm, NProcI, NProcJ, NProck
+      integer(c_int), value :: NOG, NOGm, NProcI, NProcJ, NProck, IBC
       integer, value :: MPICOMM
       integer(len_t), value :: NMSGi
       integer(c_int), value :: NProc, MyProc
@@ -187,7 +187,7 @@
 
          CALL BMG3_SymStd_SETUP_MSGGrid(&
      &        IGRD(N,idL_BMG_NGx), IGRD(N,idL_BMG_NGy),&
-     &        IGRD(N,idL_BMG_NGz),&
+     &        IGRD(N,idL_BMG_NGz),IBC,&
      &        iZERO, iZERO, iZERO, &
      &        iMSG_Geom(pMSG(ipL_MSG_LocalArraySize,N)),&
      &        iMSG_Geom(pMSG(ipL_MSG_GlobalCoordLocalData,N)),&
@@ -203,7 +203,7 @@
 
          CALL BMG3_SymStd_SETUP_MSGGrid(&
      &        IGRD(N,idL_BMG_NGx), IGRD(N,idL_BMG_NGy),&
-     &        IGRD(N,idL_BMG_NGz),     &
+     &        IGRD(N,idL_BMG_NGz),IBC, &
      &        iONE, iONE, iONE, &
      &        iMSG_Geom(pMSGSO(ipL_MSG_LocalArraySize,N)),&
      &        iMSG_Geom(pMSGSO(ipL_MSG_GlobalCoordLocalData,N)),&

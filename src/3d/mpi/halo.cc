@@ -10,7 +10,7 @@
 extern "C" {
 	using namespace cedar;
 	void BMG3_SymStd_SETUP_MSG(int *pMSG, int *pMSGSO, len_t *imsg_geom,
-	                           len_t nmsgi, int *pSI_MSG, len_t *IGRD,
+	                           len_t nmsgi, int *pSI_MSG, int IBC, len_t *IGRD,
 	                           int nog, int nogm, int nproc, int myproc,
 	                           len_t *dimx, len_t *dimy, len_t *dimz,
 	                           len_t *dimxfine, len_t *dimyfine, len_t *dimzfine,
@@ -27,6 +27,7 @@ extern "C" {
 	                                     len_t *iwork, len_t nmsgi, int *pMSG,
 	                                     real_t *buffer, len_t nmsgr, int nog,
 	                                     int mpicomm);
+	void BMG_get_bc(int, int*);
 }
 
 
@@ -137,15 +138,18 @@ namespace impls
 	{
 		MsgCtx *ctx = new MsgCtx(topo);
 		int rank;
+		int ibc;
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
 		MPI_Comm_rank(topo.comm, &rank);
 		rank++; // Fortran likes to be difficult...
 
+		BMG_get_bc(params.per_mask(), &ibc);
+
 		BMG3_SymStd_SETUP_MSG(ctx->pMSG.data(), ctx->pMSGSO.data(),
 		                      ctx->msg_geom.data(), ctx->msg_geom.size(),
-		                      &ctx->pSI_MSG, topo.IGRD(), topo.nlevel(),
+		                      &ctx->pSI_MSG, ibc, topo.IGRD(), topo.nlevel(),
 		                      topo.nlevel(), topo.nproc(), rank,
 		                      ctx->dimx.data(), ctx->dimy.data(), ctx->dimz.data(),
 		                      ctx->dimxfine.data(), ctx->dimyfine.data(), ctx->dimzfine.data(),
