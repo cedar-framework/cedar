@@ -13,29 +13,69 @@ extern "C" {
 using namespace cedar;
 using namespace cedar::cdr3::mpi;
 
+namespace cedar { namespace cdr3 { namespace mpi {
+template<>
+stencil_op redist_solver::redist_operator<stencil_op>(const stencil_op & so, topo_ptr topo)
+{
+	auto rop = stencil_op(topo);
+
+	gather_operator<stencil_op>(so, rop);
+
+	return rop;
+}
+
+template<>
+cdr3::stencil_op redist_solver::redist_operator<cdr3::stencil_op>(const stencil_op & so, topo_ptr topo)
+{
+	assert(topo->nproc() == 1);
+
+	auto rop = cdr3::stencil_op(topo->nlocal(0) - 2,
+	                            topo->nlocal(1) - 2,
+	                            topo->nlocal(2) - 2);
+
+	gather_operator<cdr3::stencil_op>(so, rop);
+
+	return rop;
+}
+}}}
+
+
 redist_solver::redist_solver(const stencil_op & so,
                              std::shared_ptr<config::reader> conf,
-                             std::array<int, 3> nblock) : nblock(nblock), active(true),
-	           recv_id(-1)
+                             std::array<int, 3> nblock) :
+	ser_cg(nblock[0]*nblock[1]*nblock[2] == 1), nblock(nblock), active(true), recv_id(-1)
 {
 	auto & topo = so.grid();
 	msg_ctx * ctx = (msg_ctx*) so.halo_ctx;
 	auto ctopo = redist_topo(topo, *ctx);
-	auto rop = redist_operator(so, ctopo);
-	b_redist = grid_func(ctopo);
-	x_redist = grid_func(ctopo);
+
+	if (ser_cg) {
+		b_redist_ser = grid_func(ctopo->nlocal(0)-2, ctopo->nlocal(1)-2, ctopo->nlocal(2)-2);
+		x_redist_ser = grid_func(ctopo->nlocal(0)-2, ctopo->nlocal(1)-2, ctopo->nlocal(2)-2);
+	} else {
+		b_redist = grid_func(ctopo);
+		x_redist = grid_func(ctopo);
+	}
 
 	if (active) {
-		MPI_Fint parent_comm;
-		MSG_pause(&parent_comm);
-		log::push_level("redist", *conf);
-		timer_down();
-		slv = std::make_unique<solver>(std::move(rop), conf);
-		timer_up();
-		b_redist.halo_ctx = slv->level(-1).A.halo_ctx;
-		log::pop_level();
-		MSG_pause(&msg_comm);
-		MSG_play(parent_comm);
+		if (ser_cg) {
+			auto rop = redist_operator<cdr3::stencil_op>(so, ctopo);
+			log::push_level("serial", *conf);
+			slv_ser = std::make_unique<cdr3::solver>(std::move(rop), conf);
+			log::pop_level();
+		} else {
+			auto rop = redist_operator<mpi::stencil_op>(so, ctopo);
+			MPI_Fint parent_comm;
+			MSG_pause(&parent_comm);
+			log::push_level("redist", *conf);
+			timer_down();
+			slv = std::make_unique<solver>(std::move(rop), conf);
+			timer_up();
+			b_redist.halo_ctx = slv->level(-1).A.halo_ctx;
+			log::pop_level();
+			MSG_pause(&msg_comm);
+			MSG_play(parent_comm);
+		}
 	}
 }
 
@@ -48,121 +88,27 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 
 	if (active) {
 		timer_down();
-		MPI_Fint parent_comm;
-		MSG_pause(&parent_comm);
-		MSG_play(msg_comm);
-		log::push_level("redist", slv->get_config());
-		x_redist.set(0.0);
-		slv->vcycle(x_redist, b_redist);
-		log::pop_level();
-		MSG_play(parent_comm);
+		if (ser_cg) {
+			log::push_level("serial", slv_ser->get_config());
+			x_redist_ser.set(0.0);
+			slv_ser->vcycle(x_redist_ser, b_redist_ser);
+			log::pop_level();
+		} else {
+			MPI_Fint parent_comm;
+			MSG_pause(&parent_comm);
+			MSG_play(msg_comm);
+			log::push_level("redist", slv->get_config());
+			x_redist.set(0.0);
+			slv->vcycle(x_redist, b_redist);
+			log::pop_level();
+			MSG_play(parent_comm);
+		}
 		timer_up();
 	}
 
 	timer_begin("agglomerate");
 	scatter_sol(x);
 	timer_end("agglomerate");
-}
-
-
-stencil_op redist_solver::redist_operator(const stencil_op & so, topo_ptr topo)
-{
-	using buf_arr = array<len_t,real_t,1>;
-
-	auto rop = stencil_op(topo);
-
-	auto & sten = so.stencil();
-	auto & rsten = rop.stencil();
-	// save general case for later
-	assert(sten.five_pt() == false);
-
-	// Pack the operator
-	buf_arr sbuf(14*sten.shape(0)*sten.shape(1)*sten.shape(2));
-	int idx = 0;
-	for (auto k : sten.range(2)) {
-		for (auto j : sten.range(1)) {
-			for (auto i : sten.range(0)) {
-				sbuf(idx)   = sten(i,j,k,dir::P);
-				sbuf(idx+1) = sten(i,j,k,dir::PW);
-				sbuf(idx+2) = sten(i,j,k,dir::PNW);
-				sbuf(idx+3) = sten(i,j,k,dir::PS);
-				sbuf(idx+4) = sten(i,j,k,dir::PSW);
-				sbuf(idx+5) = sten(i,j,k,dir::BNE);
-				sbuf(idx+6) = sten(i,j,k,dir::BN);
-				sbuf(idx+7) = sten(i,j,k,dir::BNW);
-				sbuf(idx+8) = sten(i,j,k,dir::BE);
-				sbuf(idx+9) = sten(i,j,k,dir::B);
-				sbuf(idx+10) = sten(i,j,k,dir::BW);
-				sbuf(idx+11) = sten(i,j,k,dir::BSE);
-				sbuf(idx+12) = sten(i,j,k,dir::BS);
-				sbuf(idx+13) = sten(i,j,k,dir::BSW);
-				idx += 14;
-			}
-		}
-	}
-
-	std::vector<int> rcounts(nbx.len(0)*nby.len(0)*nbz.len(0));
-	std::vector<int> displs(nbx.len(0)*nby.len(0)*nbz.len(0));
-	len_t rbuf_len = 0;
-	for (auto k : range(nbz.len(0))) {
-		for (auto j : range(nby.len(0))) {
-			for (auto i : range(nbx.len(0))) {
-				int idx = i + j*nbx.len(0) + k*nbx.len(0)*nby.len(0);
-				displs[idx] = rbuf_len;
-				rcounts[idx] = nbx(i)*nby(j)*nbz(k)*14;
-				rbuf_len += rcounts[idx];
-			}
-		}
-	}
-
-	buf_arr rbuf(rbuf_len);
-	MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
-	               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
-
-	// Loop through all my blocks
-	// TODO: this is unreadable, reduce the number of nestings
-	len_t igs, jgs, kgs;
-	idx = 0;
-	kgs = 1;
-	for (auto k : range(nbz.len(0))) {
-		auto nz = 0;
-		jgs = 1;
-		for (auto j : range(nby.len(0))) {
-			auto ny = 0;
-			igs = 1;
-			for (auto i : range(nbx.len(0))) {
-				auto nx = nbx(i);
-				ny = nby(j);
-				nz = nbz(k);
-				for (auto kk : range(nz)) {
-					for (auto jj : range(ny)) {
-						for (auto ii : range(nx)) {
-							rsten(igs+ii,jgs+jj,kgs+kk,dir::P) = rbuf(idx);
-							rsten(igs+ii,jgs+jj,kgs+kk,dir::PW) = rbuf(idx+1);
-							rsten(igs+ii,jgs+jj,kgs+kk,dir::PNW) = rbuf(idx+2);
-							rsten(igs+ii,jgs+jj,kgs+kk,dir::PS) = rbuf(idx+3);
-							rsten(igs+ii,jgs+jj,kgs+kk,dir::PSW) = rbuf(idx+4);
-							rsten(igs+ii,jgs+jj,kgs+kk,dir::BNE) = rbuf(idx+5);
-							rsten(igs+ii,jgs+jj,kgs+kk,dir::BN) = rbuf(idx+6);
-							rsten(igs+ii,jgs+jj,kgs+kk,dir::BNW) = rbuf(idx+7);
-							rsten(igs+ii,jgs+jj,kgs+kk,dir::BE) = rbuf(idx+8);
-							rsten(igs+ii,jgs+jj,kgs+kk,dir::B) = rbuf(idx+9);
-							rsten(igs+ii,jgs+jj,kgs+kk,dir::BW) = rbuf(idx+10);
-							rsten(igs+ii,jgs+jj,kgs+kk,dir::BSE) = rbuf(idx+11);
-							rsten(igs+ii,jgs+jj,kgs+kk,dir::BS) = rbuf(idx+12);
-							rsten(igs+ii,jgs+jj,kgs+kk,dir::BSW) = rbuf(idx+13);
-							idx += 14;
-						}
-					}
-				}
-				igs += nx;
-			}
-			jgs += ny;
-		}
-		kgs += nz;
-	}
-
-	return rop;
 }
 
 
@@ -324,6 +270,9 @@ void redist_solver::gather_rhs(const grid_func & b)
 	MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
 	               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
 
+	// Currently upcasting to make generic...
+	cdr3::grid_func & bgen = (ser_cg) ? b_redist_ser : b_redist;
+
 	// Loop through all my blocks
 	// TODO: this is unreadable, reduce the number of nestings
 	len_t igs, jgs, kgs;
@@ -342,7 +291,7 @@ void redist_solver::gather_rhs(const grid_func & b)
 				for (auto kk : range(nz)) {
 					for (auto jj : range(ny)) {
 						for (auto ii : range(nx)) {
-							b_redist(igs+ii,jgs+jj,kgs+kk) = rbuf(idx);
+							bgen(igs+ii,jgs+jj,kgs+kk) = rbuf(idx);
 							idx++;
 						}
 					}
@@ -358,6 +307,8 @@ void redist_solver::gather_rhs(const grid_func & b)
 
 void redist_solver::scatter_sol(grid_func & x)
 {
+	auto & xgen = (ser_cg) ? x_redist_ser : x_redist;
+
 	if (active) {
 		// copy local part from redistributed solution
 		int ci = (block_id % (nbx.len(0)*nby.len(0))) % nbx.len(0);
@@ -384,7 +335,7 @@ void redist_solver::scatter_sol(grid_func & x)
 		for (auto kk : range(x.len(2))) {
 			for (auto jj : range(x.len(1))) {
 				for (auto ii : range(x.len(0))) {
-					x(ii,jj,kk) = x_redist(igs+ii,jgs+jj,kgs+kk);
+					x(ii,jj,kk) = xgen(igs+ii,jgs+jj,kgs+kk);
 				}
 			}
 		}
@@ -414,7 +365,7 @@ void redist_solver::scatter_sol(grid_func & x)
 			for (auto kk : range(sbuf.len(2))) {
 				for (auto jj : range(sbuf.len(1))) {
 					for (auto ii : range(sbuf.len(0))) {
-						sbuf(ii,jj,kk) = x_redist(igs+ii,jgs+jj,kgs+kk);
+						sbuf(ii,jj,kk) = xgen(igs+ii,jgs+jj,kgs+kk);
 					}
 				}
 			}
