@@ -78,8 +78,8 @@ static cedar::cdr3::stencil_op create_op(cedar::len_t nx, cedar::len_t ny, cedar
 	}
 
 	if (periodic[0]) {
-		for (auto k : sten.range(2)) {
-			for (auto j : sten.range(1)) {
+		for (auto k : sten.grange(2)) {
+			for (auto j : sten.grange(1)) {
 				o(ibeg-1,j,k,dir::P ) = o(l,j,k,dir::P );
 				o(ibeg-1,j,k,dir::PW) = o(l,j,k,dir::PW);
 				o(ibeg-1,j,k,dir::PS) = o(l,j,k,dir::PS);
@@ -94,8 +94,8 @@ static cedar::cdr3::stencil_op create_op(cedar::len_t nx, cedar::len_t ny, cedar
 	}
 
 	if (periodic[1]) {
-		for (auto k : sten.range(2)) {
-			for (auto i : sten.range(0)) {
+		for (auto k : sten.grange(2)) {
+			for (auto i : sten.grange(0)) {
 				o(i,jbeg-1,k,dir::P ) = o(i,m,k,dir::P );
 				o(i,jbeg-1,k,dir::PW) = o(i,m,k,dir::PW);
 				o(i,jbeg-1,k,dir::PS) = o(i,m,k,dir::PS);
@@ -110,8 +110,8 @@ static cedar::cdr3::stencil_op create_op(cedar::len_t nx, cedar::len_t ny, cedar
 	}
 
 	if (periodic[2]) {
-		for (auto j: sten.range(1)) {
-			for (auto i :sten.range(0)) {
+		for (auto j: sten.grange(1)) {
+			for (auto i :sten.grange(0)) {
 				o(i,j,kbeg-1,dir::P ) = o(i,j,n,dir::P );
 				o(i,j,kbeg-1,dir::PW) = o(i,j,n,dir::PW);
 				o(i,j,kbeg-1,dir::PS) = o(i,j,n,dir::PS);
@@ -254,6 +254,20 @@ int main(int argc, char *argv[])
 	set_problem(b, params->periodic);
 
 	solver bmg(std::move(so), conf);
+
+	{
+		std::ofstream ffile("output/ser-fine");
+		std::ofstream rfile("output/ser-restrict");
+		std::ofstream cfile("output/ser-coarse");
+
+		ffile << bmg.level(-1).A;
+		rfile << bmg.level(-1).P;
+		cfile << bmg.level(-2).A;
+
+		ffile.close();
+		rfile.close();
+		cfile.close();
+	}
 
 	auto sol = bmg.solve(b);
 

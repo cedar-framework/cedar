@@ -10,8 +10,8 @@ extern "C" {
 	                                     int nog, int ifd, int nstencil, int irelax, real_t *yo,
 	                                     int nogm, len_t *IGRD, len_t *iwork, len_t NMSGi,
 	                                     int *pMSG, real_t *buffer, len_t nmsgr, int myproc,
-	                                     int mpicomm);
-
+	                                     int mpicomm, int jpn);
+	void BMG_get_bc(int, int*);
 }
 
 
@@ -48,7 +48,12 @@ namespace impls
 		MPI_Comm_rank(topo.comm, &rank);
 		rank++;
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+
+		// TODO: preallocate this
 		array<len_t, real_t, 4> yo(fsten.len(0), fsten.len(1), 2, 14);
+		int jpn;
+		BMG_get_bc(params.per_mask(), &jpn);
+
 		MPI_BMG3_SymStd_SETUP_interp_OI(kf, kc, fopd.data(), copd.data(),
 		                                P.data(), fsten.len(0), fsten.len(1), fsten.len(2),
 		                                csten.len(0), csten.len(1), csten.len(2),
@@ -56,7 +61,7 @@ namespace impls
 		                                yo.data(), nog, topo.IGRD(),
 		                                ctx->msg_geom.data(), ctx->msg_geom.size(),
 		                                ctx->pMSG.data(), ctx->msg_buffer.data(), ctx->msg_buffer.size(),
-		                                rank, fcomm);
+		                                rank, fcomm, jpn);
 
 	}
 }

@@ -3,7 +3,7 @@
      &                IIF, JJF, KKF, IIC, JJC, KKC, &
      &                NOG, ifd, NStncl, irelax, yo, &
      &                NOGm, IGRD, iWork, NMSGi, pMSG,&
-     &                BUFFER, NMSGr, MyProc, MPICOMM&
+     &                BUFFER, NMSGr, MyProc, MPICOMM, JPN&
      &                ) BIND(C, NAME='MPI_BMG3_SymStd_SETUP_interp_OI')
 
 ! ======================================================================
@@ -57,12 +57,13 @@
       INCLUDE 'BMG_constants_f90.h'
       INCLUDE 'BMG_stencils_f90.h'
       INCLUDE 'BMG_workspace_f90.h'
+      INCLUDE 'BMG_parameters_f90.h'
 
 ! ---------------------------
 !     Argument Declarations:
 !
       integer(c_int), value :: NOG, NOGm, NStncl, KGF, KGC, ifd, irelax
-      integer(c_int), value :: MPICOMM, myproc
+      integer(c_int), value :: MPICOMM, myproc, JPN
       integer(len_t), value :: IIF, JJF, KKF, IIC, JJC, KKC, NMSGi, NMSGr
       integer(len_t) :: iWork(NMSGi), IGRD(NOGm,NBMG_pIGRD)
       integer(c_int) :: pMSG(NBMG_pMSG,NOG)
@@ -85,8 +86,41 @@
      &
 
       INTEGER ierror, ptrn, iGs_c, jGs_c, kGs_c
+      LOGICAL  PERIODIC_X, PERIODIC_Y, PERIODIC_Z
 
 ! ======================================================================
+
+! --------------------------------------------
+!     Test Periodicity
+! --------------------------------------------
+
+      PERIODIC_X = (JPN.EQ.BMG_BCs_def_per_x     .OR.&
+                    JPN.EQ.BMG_BCs_def_per_xy    .OR.&
+                    JPN.EQ.BMG_BCs_def_per_xz    .OR.&
+                    JPN.EQ.BMG_BCs_def_per_xyz   .OR.&
+                    JPN.EQ.BMG_BCs_indef_per_x   .OR.&
+                    JPN.EQ.BMG_BCs_indef_per_xy  .OR.&
+                    JPN.EQ.BMG_BCs_indef_per_xz  .OR.&
+                    JPN.EQ.BMG_BCs_indef_per_xyz)
+
+
+      PERIODIC_Y = (JPN.EQ.BMG_BCs_def_per_y    .OR.&
+                    JPN.EQ.BMG_BCs_def_per_xy   .OR.&
+                    JPN.EQ.BMG_BCs_def_per_yz   .OR.&
+                    JPN.EQ.BMG_BCs_def_per_xyz  .OR.&
+                    JPN.EQ.BMG_BCs_indef_per_y  .OR.&
+                    JPN.EQ.BMG_BCs_indef_per_xy .OR.&
+                    JPN.EQ.BMG_BCs_indef_per_yz .OR.&
+                    JPN.EQ.BMG_BCs_indef_per_xyz)
+
+      PERIODIC_Z = (JPN.EQ.BMG_BCs_def_per_z     .OR.&
+                    JPN.EQ.BMG_BCs_def_per_xz    .OR.&
+                    JPN.EQ.BMG_BCs_def_per_yz    .OR.&
+                    JPN.EQ.BMG_BCs_def_per_xyz   .OR.&
+                    JPN.EQ.BMG_BCs_indef_per_z   .OR.&
+                    JPN.EQ.BMG_BCs_indef_per_xz  .OR.&
+                    JPN.EQ.BMG_BCs_indef_per_yz  .OR.&
+                    JPN.EQ.BMG_BCs_indef_per_xyz)
 
       eMACH = 1.d-13
 
@@ -136,16 +170,16 @@
       jGs_c = IGRD(KGC,idL_BMG_JCoord)
       kGs_c = IGRD(KGC,idL_BMG_KCoord)
 
-      LEFTPLANE   = (IGRD(KGF,idL_BMG_ICoord).EQ.1)
-      BOTTOMPLANE = (IGRD(KGF,idL_BMG_JCoord).EQ.1)
-      FRONTPLANE  = (IGRD(KGF,idL_BMG_KCoord).EQ.1)
+      LEFTPLANE   = (IGRD(KGF,idL_BMG_ICoord).EQ.1 .and. .not. PERIODIC_X)
+      BOTTOMPLANE = (IGRD(KGF,idL_BMG_JCoord).EQ.1 .and. .not. PERIODIC_Y)
+      FRONTPLANE  = (IGRD(KGF,idL_BMG_KCoord).EQ.1 .and. .not. PERIODIC_Z)
 
-      RIGHTPLANE  = (IGRD(KGF,idL_BMG_ICoord)+IGRD(KGF,idL_BMG_NLx)-1)&
-     &     .EQ.IGRD(KGF,idL_BMG_NGx)
-      TOPPLANE    = (IGRD(KGF,idL_BMG_JCoord)+IGRD(KGF,idL_BMG_NLy)-1)&
-     &     .EQ.IGRD(KGF,idL_BMG_NGy)
-      BACKPLANE   = (IGRD(KGF,idL_BMG_KCoord)+IGRD(KGF,idL_BMG_NLz)-1)&
-     &     .EQ.IGRD(KGF,idL_BMG_NGz)
+      RIGHTPLANE  = ((IGRD(KGF,idL_BMG_ICoord)+IGRD(KGF,idL_BMG_NLx)-1)&
+     &     .EQ.IGRD(KGF,idL_BMG_NGx) .and. .not. PERIODIC_X)
+      TOPPLANE    = ((IGRD(KGF,idL_BMG_JCoord)+IGRD(KGF,idL_BMG_NLy)-1)&
+     &     .EQ.IGRD(KGF,idL_BMG_NGy) .and. .not. PERIODIC_Y)
+      BACKPLANE   = ((IGRD(KGF,idL_BMG_KCoord)+IGRD(KGF,idL_BMG_NLz)-1)&
+     &     .EQ.IGRD(KGF,idL_BMG_NGz) .and. .not. PERIODIC_Z)
 
 
       IF (LEFTPLANE) THEN
