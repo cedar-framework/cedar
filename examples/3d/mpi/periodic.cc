@@ -185,6 +185,52 @@ static void set_problem(cedar::cdr3::mpi::grid_func & b, std::array<bool, 3> per
 }
 
 
+static void set_solution(cedar::cdr3::mpi::grid_func & q, std::array<bool, 3> periodic)
+{
+	using namespace cedar;
+
+	const double pi = M_PI;
+
+	auto sol = [pi](real_t x, real_t y, real_t z) {
+		return sin(2*pi*x)*sin(2*pi*y)*sin(2*pi*z);
+	};
+
+	auto & topo = q.grid();
+
+	real_t igs = topo.is(0);
+	real_t jgs = topo.is(1);
+	real_t kgs = topo.is(2);
+
+	auto ngx = topo.nglobal(0) - 2;
+	auto ngy = topo.nglobal(1) - 2;
+	auto ngz = topo.nglobal(2) - 2;
+
+	if (periodic[0]) ngx--;
+	if (periodic[1]) ngy--;
+	if (periodic[2]) ngz--;
+
+	real_t hx = 1.0 / (ngx + 1);
+	real_t hy = 1.0 / (ngy + 1);
+	real_t hz = 1.0 / (ngz + 1);
+
+	for (auto k : q.range(2)) {
+		for (auto j : q.range(1)) {
+			for (auto i : q.range(0)) {
+				len_t is = igs + i;
+				len_t js = jgs + j;
+				len_t ks = kgs + k;
+
+				real_t x = (is-1)*hx;
+				real_t y = (js-1)*hy;
+				real_t z = (ks-1)*hz;
+
+				q(i,j,k) = sol(x,y,z);
+			}
+		}
+	}
+}
+
+
 int main(int argc, char *argv[])
 {
 	using namespace cedar;
@@ -224,14 +270,14 @@ int main(int argc, char *argv[])
 		cfile.close();
 	}
 
-	// auto sol = bmg.solve(b);
+	auto sol = bmg.solve(b);
 
-	// mpi::grid_func exact_sol(sol.grid_ptr());
-	// set_solution(exact_sol, params->periodic);
+	mpi::grid_func exact_sol(sol.grid_ptr());
+	set_solution(exact_sol, params->periodic);
 
-	// mpi::grid_func diff = exact_sol - sol;
+	mpi::grid_func diff = exact_sol - sol;
 
-	// log::status << "Solution norm: " << diff.inf_norm() << std::endl;
+	log::status << "Solution norm: " << diff.inf_norm() << std::endl;
 
 	log::status << "Finished Test" << std::endl;
 
