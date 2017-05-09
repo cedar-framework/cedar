@@ -24,6 +24,7 @@ FIND_PACKAGE(LAPACK REQUIRED)
 
 find_package(MPI REQUIRED)
 include_directories(${MPI_C_INCLUDE_PATH})
+include_directories(${MPI_Fortran_INCLUDE_PATH})
 
 set(cedar-deps ${Boost_LIBRARIES} ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${MPI_CXX_LIBRARIES} ${MPI_C_LIBRARIES} ${MPI_Fortran_LIBRARIES})
 
