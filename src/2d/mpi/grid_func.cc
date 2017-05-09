@@ -92,7 +92,7 @@ std::ostream & operator<< (std::ostream &os, const grid_func & obj)
 
 	for (auto j: obj.range(1)) {
 		for (auto i: obj.range(0)) {
-			os << std::setw(width) << (jGs+j-2)*NGx + iGs+i-2 << " "
+			os << std::setw(width) << (jGs+j-2)*NGx + iGs+i-2 << ", "
 			   << std::setw(width) << iGs + i << ", " << std::setw(width) << jGs + j << ", "
 			   << std::scientific << obj(i,j) << '\n';
 		}
