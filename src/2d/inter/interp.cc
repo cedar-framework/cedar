@@ -5,13 +5,15 @@ extern "C" {
 	using namespace cedar;
 	void BMG2_SymStd_interp_add(real_t*, real_t*, real_t*,real_t*,real_t*,
 	                            len_t, len_t, len_t, len_t, int, int);
+	void BMG_get_bc(int, int*);
 }
 
 namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	void fortran_interp(const inter::prolong_op & P,
+	void fortran_interp(const kernel_params & params,
+	                    const inter::prolong_op & P,
 	                    const grid_func & coarse,
 	                    const grid_func & residual,
 	                    grid_func & fine)
@@ -30,7 +32,7 @@ namespace impls
 			nstencil = 5;
 		}
 
-		ibc = BMG_BCs_definite;
+		BMG_get_bc(params.per_mask(), &ibc);
 
 		BMG2_SymStd_interp_add(fine.data(), coarsed.data(), res.data(), Pd.fine_op->data(), Pd.data(),
 		                       coarsed.len(0), coarsed.len(1), fine.len(0), fine.len(1),

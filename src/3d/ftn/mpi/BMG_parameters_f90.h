@@ -300,19 +300,35 @@
       INTEGER  BMG_BCs_definite,                                           &
                BMG_BCs_def_per_x,                                          &
                BMG_BCs_def_per_y,                                          &
+               BMG_BCs_def_per_z,                                          &
                BMG_BCs_def_per_xy,                                         &
+               BMG_BCs_def_per_xz,                                         &
+               BMG_BCs_def_per_yz,                                         &
+               BMG_BCs_def_per_xyz,                                        &
                BMG_BCs_indef_per_x,                                        &
                BMG_BCs_indef_per_y,                                        &
+               BMG_BCs_indef_per_z,                                        &
                BMG_BCs_indef_per_xy,                                       &
+               BMG_BCs_indef_per_xz,                                       &
+               BMG_BCs_indef_per_yz,                                       &
+               BMG_BCs_indef_per_xyz,                                      &
                BMG_BCs_indef_nonper
 
       PARAMETER ( BMG_BCs_definite     =  0,                               &
                   BMG_BCs_def_per_x    =  2,                               &
                   BMG_BCs_def_per_y    =  1,                               &
+                  BMG_BCs_def_per_z    =  5,                               &
                   BMG_BCs_def_per_xy   =  3,                               &
+                  BMG_BCs_def_per_xz   =  6,                               &
+                  BMG_BCs_def_per_yz   =  7,                               &
+                  BMG_BCs_def_per_xyz  =  8,                               &
                   BMG_BCs_indef_per_x  = -2,                               &
                   BMG_BCs_indef_per_y  = -1,                               &
+                  BMG_BCs_indef_per_z  = -5,                               &
                   BMG_BCs_indef_per_xy = -3,                               &
+                  BMG_BCs_indef_per_xz = -6,                               &
+                  BMG_BCs_indef_per_yz = -7,                               &
+                  BMG_BCs_indef_per_xyz= -8,                               &
                   BMG_BCs_indef_nonper = -4  )
 
       INTEGER BMG_SETUP_only,                                              &

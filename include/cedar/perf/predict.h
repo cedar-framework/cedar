@@ -5,12 +5,9 @@
 #include <array>
 
 #include <cedar/types.h>
+#include <cedar/perf/perf_factory.h>
 
 namespace cedar {
-	std::vector<int> predict_redist(config::reader & conf,
-	                                int nprocx, int nprocy,
-	                                len_t ngx, len_t ngy);
-
 	template <unsigned short ND>
 		std::array<int, ND> choose_redist(config::reader & conf,
 		                                  std::array<int, ND> nproc,
@@ -42,6 +39,13 @@ namespace cedar {
 				nblocks[i] = nproc[i] / 2;
 				if (nblocks[i] < 1) nblocks[i] = 1;
 			}
+		} else if (search_strat == "astar") {
+			if (ND == 2) {
+				auto model = perf_factory::astar_vcycle(conf, nproc[0], nproc[1], nglobal[0], nglobal[1]);
+				nblocks[0] = model->nblocks(0);
+				nblocks[1] = model->nblocks(1);
+			} else
+				log::error << search_strat << " search strategy not implemented for dimension: " << ND << std::endl;
 		} else {
 			log::error << "Search strategy not implemented: " << search_strat << std::endl;
 		}

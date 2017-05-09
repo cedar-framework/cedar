@@ -7,6 +7,7 @@ extern "C" {
 	void BMG3_SymStd_relax_GS(int kg, real_t *so, real_t *qf, real_t *q, real_t *sor,
 	                          len_t ii, len_t jj, len_t kk, int ifd, int nstncl, int nsorv,
 	                          int irelax_sym, int updown, int jpn);
+	void BMG_get_bc(int, int*);
 }
 
 
@@ -14,7 +15,8 @@ namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
-	void relax_rbgs_point(const stencil_op & so,
+	void relax_rbgs_point(const kernel_params & params,
+	                      const stencil_op & so,
 	                      grid_func &x,
 	                      const grid_func &b,
 	                      const relax_stencil & sor,
@@ -43,7 +45,7 @@ namespace impls
 		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
 		else updown = BMG_DOWN;
 
-		jpn = BMG_BCs_definite;
+		BMG_get_bc(params.per_mask(), &jpn);
 
 		BMG3_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
 		                     so_sten.len(0), so_sten.len(1), so_sten.len(2), ifd, nstencil, nsorv,

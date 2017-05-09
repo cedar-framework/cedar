@@ -14,7 +14,8 @@ namespace cedar { namespace cdr2 { namespace kernel {
 namespace impls
 {
 	using namespace cedar::cdr2;
-	void mpi_setup_rbgs_point(const mpi::stencil_op & so,
+	void mpi_setup_rbgs_point(const kernel_params & params,
+	                          const mpi::stencil_op & so,
 	                          relax_stencil & sor)
 	{
 		int nx, ny, nstencil;
@@ -32,7 +33,8 @@ namespace impls
 	}
 
 
-	void mpi_setup_rbgs_x(const mpi::stencil_op & so,
+	void mpi_setup_rbgs_x(const kernel_params & params,
+	                      const mpi::stencil_op & so,
 	                      relax_stencil & sor)
 	{
 		int nx, ny, nstencil;
@@ -50,7 +52,8 @@ namespace impls
 	}
 
 
-	void mpi_setup_rbgs_y(const mpi::stencil_op & so,
+	void mpi_setup_rbgs_y(const kernel_params & params,
+	                      const mpi::stencil_op & so,
 	                      relax_stencil & sor)
 	{
 		int nx, ny, nstencil;

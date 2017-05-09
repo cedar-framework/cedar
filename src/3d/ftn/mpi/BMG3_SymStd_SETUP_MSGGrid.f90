@@ -1,5 +1,5 @@
       SUBROUTINE BMG3_SymStd_SETUP_MSGGrid(&
-     &                NGX, NGY, NGz,&
+     &                NGX, NGY, NGz,IBC,&
      &                OFFX, OFFY, OFFZ,&
      &                LocalArraySize, GlobalCoordLocalData,&
      &                GlobalCoordActData, ActDataStart,&
@@ -77,13 +77,14 @@
 !
       INCLUDE  'BMG_workspace_f90.h'
       INCLUDE  'BMG_constants_f90.h'
+      INCLUDE  'BMG_parameters_f90.h'
 
 ! ---------------------------
 !     Argument Declarations:
 !
       INTEGER(len_t) :: NGX, NGY, NGz
       INTEGER(len_t) :: OFFX, OFFY, OFFZ
-      INTEGER  MPICOMM
+      INTEGER  IBC, MPICOMM
       INTEGER(c_int)  NProc, NProcI, NProcJ, NProcK, NOGm, KG
 
       INTEGER(len_t) :: LocalArraySize(3,NProc), ActDataStart(3,NProc)
@@ -98,8 +99,41 @@
 !
       integer(len_t) :: I, J, K, II, JJ, KK, iGs, jGs, kGs
       integer :: IJKRank
+      LOGICAL  PERIODIC_X, PERIODIC_Y, PERIODIC_Z
 
 ! ======================================================================
+
+! --------------------------------------------
+!     Test Periodicity
+! --------------------------------------------
+
+      PERIODIC_X = (IBC.EQ.BMG_BCs_def_per_x     .OR.&
+                    IBC.EQ.BMG_BCs_def_per_xy    .OR.&
+                    IBC.EQ.BMG_BCs_def_per_xz    .OR.&
+                    IBC.EQ.BMG_BCs_def_per_xyz   .OR.&
+                    IBC.EQ.BMG_BCs_indef_per_x   .OR.&
+                    IBC.EQ.BMG_BCs_indef_per_xy  .OR.&
+                    IBC.EQ.BMG_BCs_indef_per_xz  .OR.&
+                    IBC.EQ.BMG_BCs_indef_per_xyz)
+
+
+      PERIODIC_Y = (IBC.EQ.BMG_BCs_def_per_y    .OR.&
+                    IBC.EQ.BMG_BCs_def_per_xy   .OR.&
+                    IBC.EQ.BMG_BCs_def_per_yz   .OR.&
+                    IBC.EQ.BMG_BCs_def_per_xyz  .OR.&
+                    IBC.EQ.BMG_BCs_indef_per_y  .OR.&
+                    IBC.EQ.BMG_BCs_indef_per_xy .OR.&
+                    IBC.EQ.BMG_BCs_indef_per_yz .OR.&
+                    IBC.EQ.BMG_BCs_indef_per_xyz)
+
+      PERIODIC_Z = (IBC.EQ.BMG_BCs_def_per_z     .OR.&
+                    IBC.EQ.BMG_BCs_def_per_xz    .OR.&
+                    IBC.EQ.BMG_BCs_def_per_yz    .OR.&
+                    IBC.EQ.BMG_BCs_def_per_xyz   .OR.&
+                    IBC.EQ.BMG_BCs_indef_per_z   .OR.&
+                    IBC.EQ.BMG_BCs_indef_per_xz  .OR.&
+                    IBC.EQ.BMG_BCs_indef_per_yz  .OR.&
+                    IBC.EQ.BMG_BCs_indef_per_xyz)
 
 ! --------------------------------------------
 !    initialize the MSG grid information
@@ -153,36 +187,36 @@
      &              + LocalArraySize(3,IJKRank)-3-OFFZ
 
                IF( OFFX.EQ.0 ) THEN
-                  IF (iGs .eq. 1) THEN
+                  IF (.not. PERIODIC_X .and. iGs .eq. 1) THEN
                      GlobalCoordLocalData(1,1,IJKRank) = &
      &                    GlobalCoordLocalData(1,1,IJKRank) - 1
                   ENDIF
 
-                  IF (NGX .eq. iGs+DimX(I,KG)+1) THEN
+                  IF (.not. PERIODIC_X .and. NGX .eq. iGs+DimX(I,KG)+1) THEN
                      GlobalCoordLocalData(2,1,IJKRank) = &
      &                    GlobalCoordLocalData(2,1,IJKRank) + 1
                   ENDIF
                ENDIF
 
                IF( OFFY.EQ.0 ) THEN
-                  IF (jGs .eq. 1) THEN
+                  IF (.not. PERIODIC_Y .and. jGs .eq. 1) THEN
                      GlobalCoordLocalData(1,2,IJKRank) = &
      &                    GlobalCoordLocalData(1,2,IJKRank) - 1
                   ENDIF
 
-                  IF (NGY .eq. jGs+DimY(J,KG)+1) THEN
+                  IF (.not. PERIODIC_Y .and. NGY .eq. jGs+DimY(J,KG)+1) THEN
                      GlobalCoordLocalData(2,2,IJKRank) =&
      &                    GlobalCoordLocalData(2,2,IJKRank) + 1
                   ENDIF
                ENDIF
 
                IF( OFFZ.EQ.0 ) THEN
-                  IF (kGs .eq. 1) THEN
+                  IF (.not. PERIODIC_Z .and. kGs .eq. 1) THEN
                      GlobalCoordLocalData(1,3,IJKRank) = &
      &                    GlobalCoordLocalData(1,3,IJKRank) - 1
                   ENDIF
 
-                  IF (NGZ .eq. kGs+DimZ(K,KG)+1) THEN
+                  IF (.not. PERIODIC_Z .and. NGZ .eq. kGs+DimZ(K,KG)+1) THEN
                      GlobalCoordLocalData(2,3,IJKRank) =&
      &                    GlobalCoordLocalData(2,3,IJKRank) + 1
                   ENDIF
@@ -204,6 +238,48 @@
      &              = GlobalCoordActData(1,3,IJKRank)&
      &              + LocalArraySize(3,IJKRank)-1
 
+
+               if (PERIODIC_X) then
+                  if (iGs .eq. 1) then
+                     GlobalCoordActData(1,1,IJKRank) = NGX-1
+                  endif
+
+                  if (NGX .eq. iGs+DimX(I,KG)+1) then
+                     if (OFFX .eq. 0) then
+                        GlobalCoordActData(2,1,IJKRank) = 2
+                     else
+                        GlobalCoordActData(2,1,IJKRank) = 3
+                     endif
+                  endif
+               endif
+
+               if (PERIODIC_Y) then
+                  if (jGs .eq. 1) then
+                     GlobalCoordActData(1,2,IJKRank) = NGY-1
+                  endif
+
+                  if (NGY .eq. jGs+DimY(J,KG)+1) then
+                     if (OFFY .eq. 0) then
+                        GlobalCoordActData(2,2,IJKRank) = 2
+                     else
+                        GlobalCoordActData(2,2,IJKRank) = 3
+                     endif
+                  endif
+               endif
+
+               if (PERIODIC_Z) then
+                  if (kGs .eq. 1) then
+                     GlobalCoordActData(1,3,IJKRank) = NGZ-1
+                  endif
+
+                  if (NGZ .eq. kGs+DimZ(K,KG)+1) then
+                     if (OFFZ .eq. 0) then
+                        GlobalCoordActData(2,3,IJKRank) = 2
+                     else
+                        GlobalCoordActData(2,3,IJKRank) = 3
+                     endif
+                  endif
+               endif
 
             END DO
          END DO

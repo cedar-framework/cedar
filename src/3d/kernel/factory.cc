@@ -22,21 +22,23 @@ namespace factory
 	{
 		auto kreg = std::make_shared<registry>();
 
+		auto params = build_kernel_params(conf);
+
 		kreg->add(name::residual, "fortran",
 		          cedar::kernel<const stencil_op &,
 		          const grid_func &,
 		          const grid_func &,
-		          grid_func&>(impls::residual));
+		          grid_func&>(impls::residual, params));
 
 		kreg->add(name::setup_interp, "fortran",
 		          cedar::kernel<int, int, int,
 		          const stencil_op &,
 		          const stencil_op &,
-		          inter::prolong_op &>(impls::setup_interp));
+		          inter::prolong_op &>(impls::setup_interp, params));
 
 		kreg->add(name::setup_relax, "fortran-rbgs-point",
 		          cedar::kernel<const stencil_op&,
-		          relax_stencil&>(impls::setup_rbgs_point));
+		          relax_stencil&>(impls::setup_rbgs_point, params));
 
 		// kreg->add(name::setup_relax_xy, "c++",
 		//           cedar::kernel<const stencil_op &,
@@ -46,35 +48,35 @@ namespace factory
 		         cedar::kernel<int,int,int,
 		         const inter::prolong_op&,
 		         const stencil_op&,
-		         stencil_op&>(impls::galerkin_prod));
+		          stencil_op&>(impls::galerkin_prod, params));
 
 		kreg->add(name::relax, "fortran-rbgs-point",
 		          cedar::kernel<const stencil_op&,
 		          grid_func&,
 		          const grid_func&,
 		          const relax_stencil&,
-		          cycle::Dir>(impls::relax_rbgs_point));
+		          cycle::Dir>(impls::relax_rbgs_point, params));
 
 		kreg->add(name::setup_cg_lu, "fortran",
 		         cedar::kernel<const stencil_op&,
-		         grid_func&>(impls::setup_cg_lu));
+		          grid_func&>(impls::setup_cg_lu, params));
 
 		kreg->add(name::solve_cg, "fortran",
 		          cedar::kernel<grid_func&,
 		          const grid_func&,
 		          const grid_func&,
-		          real_t*>(impls::fortran_solve_cg));
+		          real_t*>(impls::fortran_solve_cg, params));
 
 		kreg->add(name::restriction, "fortran",
 		         cedar::kernel<const inter::restrict_op&,
 		         const grid_func&,
-		         grid_func&>(impls::fortran_restrict));
+		          grid_func&>(impls::fortran_restrict, params));
 
 		kreg->add(name::interp_add,"fortran",
 		         cedar::kernel<const inter::prolong_op&,
 		         const grid_func&,
 		         const grid_func&,
-		         grid_func&>(impls::fortran_interp));
+		          grid_func&>(impls::fortran_interp, params));
 
 		std::vector<std::tuple<std::string, std::string, std::string>> defaults = {
 			std::make_tuple(name::residual, "kernels.residual", "fortran"),

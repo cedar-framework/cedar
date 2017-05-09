@@ -81,6 +81,8 @@ void mpi::solver::setup_space(int nlevels)
 
 void mpi::solver::setup_cg_solve()
 {
+	auto params = build_kernel_params(*conf);
+	auto kernels = kernel_registry();
 	auto & cop = levels.back().A;
 	std::string cg_solver_str = conf->get<std::string>("solver.cg-solver", "LU");
 
@@ -98,41 +100,42 @@ void mpi::solver::setup_cg_solve()
 		bbd = new real_t[ABD.len(1)];
 		multilevel::setup_cg_solve();
 	} else {
-		auto kernels = kernel_registry();
-		std::vector<int> nblocks({1,1});
+		auto cg_conf = conf->getconf("cg-config");
+		if (!cg_conf)
+			cg_conf = conf;
+
 		if (cg_solver_str == "redist") {
 			auto & fgrid = levels[0].A.grid();
-			{
-				int rank;
-				MPI_Comm_rank(fgrid.comm, &rank);
-				nblocks = std::move(
-					predict_redist(*conf, fgrid.nproc(0), fgrid.nproc(1), fgrid.nglobal(0), fgrid.nglobal(1))
-					);
-				MPI_Bcast(nblocks.data(), 2, MPI_INT, 0, fgrid.comm);
-				log::status << "Redistributing to " << nblocks[0] << " x " << nblocks[1] << " cores" << std::endl;
+			auto choice = choose_redist<2>(*conf,
+			                               std::array<int,2>({fgrid.nproc(0), fgrid.nproc(1)}),
+			                               std::array<len_t,2>({fgrid.nglobal(0), fgrid.nglobal(1)}));
+			MPI_Bcast(choice.data(), 2, MPI_INT, 0, fgrid.comm);
+			if ((choice[0] == 1) or (choice[1] == 1)) {
+				cg_solver_str = "boxmg";
+			} else {
+				log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " cores" << std::endl;
+				std::shared_ptr<mpi::redist_solver> cg_bmg;
+				std::vector<int> nblocks(choice.begin(), choice.end());
+				kernels->setup_cg_redist(cop, cg_conf, &cg_bmg, nblocks);
+				coarse_solver = [&,cg_bmg,kernels,params](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
+					const cdr2::mpi::stencil_op &av = dynamic_cast<const cdr2::mpi::stencil_op&>(A);
+					kernels->solve_cg_redist(*cg_bmg, x, b);
+					if (params->per_mask())
+						kernels->halo_exchange(x);
+					cdr2::mpi::grid_func residual = av.residual(x,b);
+					log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
+				};
 			}
 		}
-		if (cg_solver_str == "boxmg" or nblocks[0]*nblocks[1] == 1) {
+
+		if (cg_solver_str == "boxmg") {
 			std::shared_ptr<cdr2::solver> cg_bmg;
-			auto cg_conf = conf->getconf("cg-config");
-			if (!cg_conf)
-				cg_conf = conf;
 			kernels->setup_cg_boxmg(cop, cg_conf, &cg_bmg);
-			coarse_solver = [&,cg_bmg,kernels](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
+			coarse_solver = [&,cg_bmg,kernels,params](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
 				const cdr2::mpi::stencil_op &av = dynamic_cast<const cdr2::mpi::stencil_op&>(A);
 				kernels->solve_cg_boxmg(*cg_bmg, x, b);
-				cdr2::mpi::grid_func residual = av.residual(x,b);
-				log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
-			};
-		} else if (cg_solver_str == "redist") {
-			std::shared_ptr<mpi::redist_solver> cg_bmg;
-			auto cg_conf = conf->getconf("cg-config");
-			if (!cg_conf)
-				cg_conf = conf;
-			kernels->setup_cg_redist(cop, cg_conf, &cg_bmg, nblocks);
-			coarse_solver = [&,cg_bmg,kernels](const discrete_op<mpi::grid_func> &A, mpi::grid_func &x, const mpi::grid_func &b) {
-				const cdr2::mpi::stencil_op &av = dynamic_cast<const cdr2::mpi::stencil_op&>(A);
-				kernels->solve_cg_redist(*cg_bmg, x, b);
+				if (params->per_mask())
+					kernels->halo_exchange(x);
 				cdr2::mpi::grid_func residual = av.residual(x,b);
 				log::info << "Level 0 residual norm: " << residual.lp_norm<2>() << std::endl;
 			};

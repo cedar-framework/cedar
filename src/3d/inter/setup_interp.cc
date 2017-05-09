@@ -8,7 +8,7 @@ extern "C" {
 	                                 len_t iic, len_t jjc, len_t kkc,
 	                                 int nog, int ifd, int nstncl, int irelax, int jpn,
 	                                 real_t *yo);
-
+	void BMG_get_bc(int, int*);
 }
 
 
@@ -18,14 +18,14 @@ namespace impls
 {
 	using namespace cedar::cdr3;
 
-	void setup_interp(int kf, int kc, int nog,
+	void setup_interp(const kernel_params & params,
+	                  int kf, int kc, int nog,
 	                  const stencil_op & fop,
 	                  const stencil_op & cop,
 	                  inter::prolong_op &P)
 	{
 		int nstencil;
 		int irelax = BMG_RELAX_SYM;
-		int jpn = BMG_BCs_definite;
 		int ifd;
 
 		const grid_stencil &fsten = fop.stencil();
@@ -45,6 +45,8 @@ namespace impls
 
 		// TODO: preallocate this?
 		array<len_t, real_t, 4> yo(fsten.len(0), fsten.len(1), 2, 14);
+		int jpn;
+		BMG_get_bc(params.per_mask(), &jpn);
 
 		BMG3_SymStd_SETUP_interp_OI(kf, kc,
 		                            fopd.data(), copd.data(),

@@ -21,6 +21,7 @@ extern "C" {
 	void BMG2_SymStd_UTILS_update_ghosts(int K, real_t *x, len_t Nx, len_t Ny, len_t *iWork,
 	                                     len_t NMSGi, int *pMSG,
 	                                     real_t *buffer, len_t NMSGr, int nog, int mpicomm);
+	void BMG_get_bc(int, int*);
 }
 
 namespace cedar { namespace cdr2 { namespace kernel {
@@ -113,7 +114,7 @@ namespace impls
 	}
 
 
-	void setup_msg(grid_topo & topo, void **msg_ctx)
+	void setup_msg(const kernel_params & params, grid_topo & topo, void **msg_ctx)
 	{
 		MsgCtx *ctx = new MsgCtx(topo);
 		int rank;
@@ -123,7 +124,7 @@ namespace impls
 		MPI_Comm_rank(topo.comm, &rank);
 		rank++; // Fortran likes to be difficult...
 
-		ibc = BMG_BCs_definite;
+		BMG_get_bc(params.per_mask(), &ibc);
 
 		BMG2_SymStd_SETUP_MSG(ctx->pMSG.data(), ctx->pMSGSO.data(),
 		                      ctx->msg_geom.data(), ctx->msg_geom.size(),
@@ -143,7 +144,7 @@ namespace impls
 	}
 
 
-	void msg_stencil_exchange(mpi::stencil_op & sop)
+	void msg_stencil_exchange(const kernel_params & params, mpi::stencil_op & sop)
 	{
 		MsgCtx *ctx = (MsgCtx*) sop.halo_ctx;
 		grid_topo &topo = sop.grid();
@@ -168,7 +169,7 @@ namespace impls
 	}
 
 
-	void msg_exchange(mpi::grid_func & f)
+	void msg_exchange(const kernel_params & params, mpi::grid_func & f)
 	{
 		MsgCtx *ctx = (MsgCtx*) f.halo_ctx;
 		grid_topo &topo = f.grid();

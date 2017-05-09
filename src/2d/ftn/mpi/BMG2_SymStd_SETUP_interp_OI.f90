@@ -1,7 +1,7 @@
 SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
      &                KF, KC, SO, CI, &
      &                IIF, JJF, IIC, JJC, NOG, IFD, NStncl,&
-     &                NOGm, IGRD, iWork, NMSGi, pMSG,&
+     &                NOGm, IBC, IGRD, iWork, NMSGi, pMSG,&
      &                BUFFER, NMSGr, MPICOMM&
      &                ) BIND(C, NAME='MPI_BMG2_SymStd_SETUP_interp_OI')
 
@@ -61,7 +61,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
 !    Argument Declarations:
 !
       INTEGER(C_INT), VALUE :: NOG, NOGm, NStncl, KC, KF,&
-           & IFD, MPICOMM
+           & IFD, MPICOMM, IBC
       INTEGER(len_t), VALUE :: IIC, IIF, JJC, JJF, NMSGi, NMSGr
       INTEGER(len_t) :: iWork(NMSGi), IGRD(NOGm,NBMG_pIGRD)
       INTEGER(C_INT) :: pMSG(NBMG_pMSG,NOG)
@@ -76,6 +76,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
      &          ptrn, ierror, ISTART, ISTARTO, ICSTART, ICSTARTO, ICEND,&
      &          ICENDO, JSTART, JSTARTO, JCSTART, JCSTARTO, JCEND,&
      &          JCENDO
+      integer :: IPN, PER_x, PER_y, PER_xy
       REAL*8    A, B, D1MACH, EP, EPSILON, SUM, S
       LOGICAL   LEFTEDGE, BOTTOMEDGE, RIGHTEDGE, TOPEDGE
 
@@ -96,6 +97,16 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
       !    RETURN
 
       ! ENDIF
+
+      IPN = IABS(IBC)
+
+! ----------------------------------
+!     Periodic boundary conditions
+! ----------------------------------
+
+      PER_x = IABS(BMG_BCs_def_per_x)
+      PER_y = IABS(BMG_BCs_def_per_y)
+      PER_xy = IABS(BMG_BCs_def_per_xy)
 
 ! ----------------------------------
 !     Useful Constants:
@@ -128,12 +139,16 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
 !
 
 
-      LEFTEDGE   = (IGRD(KF,idL_BMG_ICoord).eq.1)
-      BOTTOMEDGE = (IGRD(KF,idL_BMG_JCoord).eq.1)
-      RIGHTEDGE  = (IGRD(KF,idL_BMG_ICoord)+IGRD(KF,idL_BMG_NLx)-1)&
-     &     .eq.IGRD(KF,idL_BMG_NGx)
-      TOPEDGE    = (IGRD(KF,idL_BMG_JCoord)+IGRD(KF,idL_BMG_NLy)-1)&
-     &     .eq.IGRD(KF,idL_BMG_NGy)
+      LEFTEDGE   = (IGRD(KF,idL_BMG_ICoord).eq.1 .and. &
+     & (IPN .ne. PER_x .and. IPN .ne. PER_xy))
+      BOTTOMEDGE = (IGRD(KF,idL_BMG_JCoord).eq.1 .and. &
+     & (IPN .ne. PER_y .and. IPN .ne. PER_xy))
+      RIGHTEDGE  = (IGRD(KF,idL_BMG_ICoord)+IGRD(KF,idL_BMG_NLx)-1&
+     &      .eq. IGRD(KF,idL_BMG_NGx) .and. &
+     &      (IPN .ne. PER_x .and. IPN .ne. PER_xy))
+      TOPEDGE    = (IGRD(KF,idL_BMG_JCoord)+IGRD(KF,idL_BMG_NLy)-1&
+           &     .eq.IGRD(KF,idL_BMG_NGy) .and. &
+           (IPN .ne. PER_y .and. IPN .ne. PER_xy))
 
       IF (LEFTEDGE) THEN
          ISTARTO  = 2

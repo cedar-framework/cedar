@@ -4,6 +4,7 @@
 		using namespace cedar;
 		void BMG2_SymStd_residual(int*,real_t*,real_t*,real_t*,real_t*,len_t*,len_t*,
 								  int*,int*,int*,int*,int*,int*,int*);
+		void BMG_get_bc(int, int*);
 	}
 
 namespace cedar { namespace cdr2 { namespace kernel {
@@ -13,7 +14,8 @@ namespace impls
 {
 	using namespace cedar::cdr2;
 
-	void residual(const stencil_op & A, const grid_func & x,
+	void residual(const kernel_params & params,
+	              const stencil_op & A, const grid_func & x,
 				  const grid_func & b, grid_func &r)
 	{
 		using namespace cedar::cdr2;
@@ -36,14 +38,15 @@ namespace impls
 		}
 	}
 
-	void residual_fortran(const stencil_op &A, const grid_func &x,
+	void residual_fortran(const kernel_params & params,
+	                      const stencil_op &A, const grid_func &x,
 						  const grid_func &b, grid_func &r)
 	{
 		int k = 0;
 		int kf = 0;
 		int ifd = 0;
+		int ibc;
 		int nstncl = 5;
-		int ibc = 0;
 		int irelax = 0;
 		int irelax_sym = 0;
 		int updown = 0;
@@ -54,6 +57,16 @@ namespace impls
 		grid_func &xd = const_cast<grid_func&>(x);
 		grid_func &bd = const_cast<grid_func&>(b);
 		using namespace cedar::cdr2;
+
+		if (Ad.stencil().five_pt()) {
+			ifd = 1;
+			nstncl = 3;
+		} else {
+			ifd = 0;
+			nstncl = 5;
+		}
+
+		BMG_get_bc(params.per_mask(), &ibc);
 
 		BMG2_SymStd_residual(&k, Ad.data(), bd.data(), xd.data(), r.data(), &ii, &jj,
 							 &kf, &ifd, &nstncl, &ibc, &irelax, &irelax_sym, &updown);

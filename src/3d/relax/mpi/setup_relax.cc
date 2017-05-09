@@ -14,7 +14,8 @@ namespace cedar { namespace cdr3 { namespace kernel {
 namespace impls
 {
 	using namespace cedar::cdr3;
-	void mpi_setup_rbgs_point(const mpi::stencil_op & so,
+	void mpi_setup_rbgs_point(const kernel_params & params,
+	                          const mpi::stencil_op & so,
 	                          relax_stencil & sor)
 	{
 		int nstencil, nsorv;

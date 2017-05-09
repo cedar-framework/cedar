@@ -19,7 +19,8 @@ namespace impls
 	using namespace cedar;
 	using namespace cedar::cdr3;
 
-	void residual(const stencil_op & A, const grid_func & x,
+	void residual(const kernel_params & params,
+	              const stencil_op & A, const grid_func & x,
 	              const grid_func & b, grid_func & r)
 	{
 		int kg, nog, ifd, nstencil;

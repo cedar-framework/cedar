@@ -23,87 +23,87 @@ namespace mpi = cedar::cdr3::mpi;
 
 namespace factory
 {
-	std::shared_ptr<registry> from_config(config::reader &conf)
+	void init(std::shared_ptr<registry> kreg, config::reader &conf)
 	{
-		auto kreg = std::make_shared<registry>();
+		auto params = build_kernel_params(conf);
 
 		kreg->add(kernel_name::halo_setup, "fortran-msg",
-		         cedar::kernel<grid_topo&,void**>(impls::setup_msg));
+		          cedar::kernel<grid_topo&,void**>(impls::setup_msg, params));
 
 		kreg->add(kernel_name::halo_exchange, "fortran-msg",
-		          cedar::kernel<cdr3::mpi::grid_func&>(impls::msg_exchange));
+		          cedar::kernel<cdr3::mpi::grid_func&>(impls::msg_exchange, params));
 
 		kreg->add(kernel_name::halo_stencil_exchange, "fortran-msg",
-		          cedar::kernel<cdr3::mpi::stencil_op&>(impls::msg_stencil_exchange));
+		          cedar::kernel<cdr3::mpi::stencil_op&>(impls::msg_stencil_exchange, params));
 
 		kreg->add(kernel_name::residual, "fortran-msg",
 		         cedar::kernel<const mpi::stencil_op &,
 		          const mpi::grid_func &,
 		          const mpi::grid_func &,
-		          mpi::grid_func&>(impls::mpi_residual_fortran));
+		          mpi::grid_func&>(impls::mpi_residual_fortran, params));
 
 		kreg->add(kernel_name::setup_relax, "fortran-msg-rbgs-point",
 		          cedar::kernel<const mpi::stencil_op&,
-		          cdr3::relax_stencil&>(impls::mpi_setup_rbgs_point));
+		          cdr3::relax_stencil&>(impls::mpi_setup_rbgs_point, params));
 
 		kreg->add(kernel_name::setup_interp, "fortran-msg",
 		          cedar::kernel<int,int,int,
 		          const mpi::stencil_op&,
 		          const mpi::stencil_op&,
-		          inter::mpi::prolong_op&>(impls::mpi_setup_interp));
+		          inter::mpi::prolong_op&>(impls::mpi_setup_interp, params));
 
 		kreg->add(kernel_name::galerkin_prod, "fortran-msg",
 		          cedar::kernel<int,int,int,
 		          const inter::mpi::prolong_op&,
 		          const mpi::stencil_op&,
-		          mpi::stencil_op&>(impls::mpi_galerkin_prod));
+		          mpi::stencil_op&>(impls::mpi_galerkin_prod, params));
 
 		kreg->add(kernel_name::relax, "fortran-msg-rbgs",
 		          cedar::kernel<const mpi::stencil_op&,
 		          mpi::grid_func&,
 		          const mpi::grid_func&,
 		          const cdr3::relax_stencil&,
-		          cycle::Dir>(impls::mpi_relax_rbgs_point));
+		          cycle::Dir>(impls::mpi_relax_rbgs_point, params));
 
 		kreg->add(kernel_name::interp_add, "fortran-msg",
 		          cedar::kernel<const inter::mpi::prolong_op&,
 		         const mpi::grid_func&,
 		         const mpi::grid_func&,
-		         mpi::grid_func&>(impls::mpi_fortran_interp));
+		          mpi::grid_func&>(impls::mpi_fortran_interp, params));
 
 		kreg->add(kernel_name::restriction, "fortran-msg",
 		          cedar::kernel<const inter::mpi::restrict_op&,
 		          const mpi::grid_func&,
-		          mpi::grid_func&>(impls::mpi_fortran_restrict));
+		          mpi::grid_func&>(impls::mpi_fortran_restrict, params));
 
 		kreg->add(kernel_name::setup_nog, "fortran",
 		         cedar::kernel<grid_topo&,
-		         len_t, int*>(impls::fortran_setup_nog));
+		         len_t, int*>(impls::fortran_setup_nog, params));
 
 		kreg->add(kernel_name::setup_cg_lu, "fortran-msg",
 		         cedar::kernel<const mpi::stencil_op&,
-		         mpi::grid_func&>(impls::mpi_setup_cg_lu));
+		         mpi::grid_func&>(impls::mpi_setup_cg_lu, params));
 
 		kreg->add(kernel_name::solve_cg, "fortran-msg",
 		          cedar::kernel<mpi::grid_func&,
 		          const mpi::grid_func&,
 		          const mpi::grid_func&,
-		          real_t*>(impls::mpi_solve_cg_lu));
+		          real_t*>(impls::mpi_solve_cg_lu, params));
 
 		kreg->add(kernel_name::setup_cg_redist, "c++",
 		          cedar::kernel<const mpi::stencil_op &,
 		          std::shared_ptr<config::reader>,
 		          std::shared_ptr<mpi::redist_solver>*,
-		          std::vector<int>&>(impls::setup_cg_redist));
+		          std::vector<int>&>(impls::setup_cg_redist, params));
 
 		kreg->add(kernel_name::solve_cg_redist, "c++",
 		          cedar::kernel<const mpi::redist_solver &,
 		          mpi::grid_func &,
-		          const mpi::grid_func &>(impls::solve_cg_redist));
+		          const mpi::grid_func &>(impls::solve_cg_redist, params));
 
 		kreg->add(kernel_name::matvec, "fortran-msg",
 		          cedar::kernel<const mpi::stencil_op&,
-		          const mpi::grid_func&, mpi::grid_func&>(impls::matvec));
+		          const mpi::grid_func&, mpi::grid_func&>(impls::matvec, params));
 
 		std::vector<std::tuple<std::string, std::string, std::string>> defaults = {
 			std::make_tuple(kernel_name::residual, "kernels.residual", "fortran-msg"),
@@ -129,9 +129,18 @@ namespace factory
 			log::debug << "Using '" + kname + " ' for " <<  std::get<0>(v) << "." << std::endl;
 			kreg->set(std::get<0>(v), kname);
 		}
+	}
+
+
+	std::shared_ptr<registry> from_config(config::reader &conf)
+	{
+		auto kreg = std::make_shared<registry>();
+
+		init(kreg, conf);
 
 		return kreg;
 	}
+
 }
 
 }}}}

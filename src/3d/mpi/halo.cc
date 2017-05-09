@@ -10,7 +10,7 @@
 extern "C" {
 	using namespace cedar;
 	void BMG3_SymStd_SETUP_MSG(int *pMSG, int *pMSGSO, len_t *imsg_geom,
-	                           len_t nmsgi, int *pSI_MSG, len_t *IGRD,
+	                           len_t nmsgi, int *pSI_MSG, int IBC, len_t *IGRD,
 	                           int nog, int nogm, int nproc, int myproc,
 	                           len_t *dimx, len_t *dimy, len_t *dimz,
 	                           len_t *dimxfine, len_t *dimyfine, len_t *dimzfine,
@@ -27,6 +27,7 @@ extern "C" {
 	                                     len_t *iwork, len_t nmsgi, int *pMSG,
 	                                     real_t *buffer, len_t nmsgr, int nog,
 	                                     int mpicomm);
+	void BMG_get_bc(int, int*);
 }
 
 
@@ -133,19 +134,22 @@ namespace impls
 	}
 
 
-	void setup_msg(grid_topo & topo, void **msg_ctx)
+	void setup_msg(const kernel_params & params, grid_topo & topo, void **msg_ctx)
 	{
 		MsgCtx *ctx = new MsgCtx(topo);
 		int rank;
+		int ibc;
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
 		MPI_Comm_rank(topo.comm, &rank);
 		rank++; // Fortran likes to be difficult...
 
+		BMG_get_bc(params.per_mask(), &ibc);
+
 		BMG3_SymStd_SETUP_MSG(ctx->pMSG.data(), ctx->pMSGSO.data(),
 		                      ctx->msg_geom.data(), ctx->msg_geom.size(),
-		                      &ctx->pSI_MSG, topo.IGRD(), topo.nlevel(),
+		                      &ctx->pSI_MSG, ibc, topo.IGRD(), topo.nlevel(),
 		                      topo.nlevel(), topo.nproc(), rank,
 		                      ctx->dimx.data(), ctx->dimy.data(), ctx->dimz.data(),
 		                      ctx->dimxfine.data(), ctx->dimyfine.data(), ctx->dimzfine.data(),
@@ -156,7 +160,7 @@ namespace impls
 	}
 
 
-	void msg_stencil_exchange(mpi::stencil_op & sop)
+	void msg_stencil_exchange(const kernel_params & params, mpi::stencil_op & sop)
 	{
 		MsgCtx *ctx = (MsgCtx*) sop.halo_ctx;
 		grid_topo &topo = sop.grid();
@@ -180,7 +184,7 @@ namespace impls
 	}
 
 
-	void msg_exchange(mpi::grid_func & f)
+	void msg_exchange(const kernel_params & params, mpi::grid_func & f)
 	{
 		MsgCtx *ctx = (MsgCtx*) f.halo_ctx;
 		grid_topo &topo = f.grid();

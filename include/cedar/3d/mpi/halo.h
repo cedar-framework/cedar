@@ -3,6 +3,7 @@
 
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 
+#include <cedar/kernel_params.h>
 #include <cedar/array.h>
 #include <cedar/mpi/grid_topo.h>
 #include <cedar/3d/mpi/stencil_op.h>
@@ -50,9 +51,9 @@ namespace impls
 		}
 	};
 
-	void setup_msg(grid_topo &topo, void **msg_ctx);
-	void msg_exchange(mpi::grid_func & f);
-	void msg_stencil_exchange(mpi::stencil_op & so);
+	void setup_msg(const kernel_params & params, grid_topo &topo, void **msg_ctx);
+	void msg_exchange(const kernel_params & params, mpi::grid_func & f);
+	void msg_stencil_exchange(const kernel_params & params, mpi::stencil_op & so);
 }
 }}}
 

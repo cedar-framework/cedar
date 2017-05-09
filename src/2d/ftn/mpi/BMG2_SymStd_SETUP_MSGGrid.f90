@@ -95,13 +95,13 @@
       PERIODIC_X = ( IBC.EQ.BMG_BCs_def_per_x    .OR.&
      &               IBC.EQ.BMG_BCs_def_per_xy   .OR.&
      &               IBC.EQ.BMG_BCs_indef_per_x  .OR.&
-     &               IBC.EQ.BMG_BCs_indef_per_xy  &
+     &               IBC.EQ.BMG_BCs_indef_per_xy&
      &              )
 
       PERIODIC_Y = ( IBC.EQ.BMG_BCs_def_per_y    .OR.&
      &               IBC.EQ.BMG_BCs_def_per_xy   .OR.&
      &               IBC.EQ.BMG_BCs_indef_per_y  .OR.&
-     &               IBC.EQ.BMG_BCs_indef_per_xy  &
+     &               IBC.EQ.BMG_BCs_indef_per_xy&
      &              )
 
 
@@ -158,22 +158,22 @@
      &           + LocalArraySize(2,IJRank)-3
             GlobalCoordLocalData(2,3,IJRank) = 1
 
-            IF (iGs .eq. 1) THEN
-               GlobalCoordLocalData(1,1,IJRank) = &
+            IF (.not. PERIODIC_X .and. iGs .eq. 1) THEN
+               GlobalCoordLocalData(1,1,IJRank) =&
      &              GlobalCoordLocalData(1,1,IJRank) - 1
             ENDIF
 
-            IF (NGX .eq. iGs+DimX(I,KG)+1) THEN
-               GlobalCoordLocalData(2,1,IJRank) = &
+            IF (.not. PERIODIC_X .and. NGX .eq. iGs+DimX(I,KG)+1) THEN
+               GlobalCoordLocalData(2,1,IJRank) =&
      &              GlobalCoordLocalData(2,1,IJRank) + 1
             ENDIF
 
-            IF (jGs .eq. 1) THEN
-               GlobalCoordLocalData(1,2,IJRank) = &
+            IF (.not. PERIODIC_Y .and. jGs .eq. 1) THEN
+               GlobalCoordLocalData(1,2,IJRank) =&
      &              GlobalCoordLocalData(1,2,IJRank) - 1
             ENDIF
 
-            IF (NGY .eq. jGs+DimY(J,KG)+1) THEN
+            IF (.not. PERIODIC_Y .and. NGY .eq. jGs+DimY(J,KG)+1) THEN
                GlobalCoordLocalData(2,2,IJRank) =&
      &              GlobalCoordLocalData(2,2,IJRank) + 1
             ENDIF
@@ -184,13 +184,29 @@
             GlobalCoordActData(1,2,IJRank) = jGs
             GlobalCoordActData(1,3,IJRank) = 1
 
-            GlobalCoordActData(2,1,IJRank) = &
+            GlobalCoordActData(2,1,IJRank) =&
      &           GlobalCoordActData(1,1,IJRank)&
      &           + LocalArraySize(1,IJRank)-1
-            GlobalCoordActData(2,2,IJRank) = &
+            GlobalCoordActData(2,2,IJRank) =&
      &           GlobalCoordActData(1,2,IJRank)&
      &           + LocalArraySize(2,IJRank)-1
             GlobalCoordActData(2,3,IJRank) = 1
+
+            IF (PERIODIC_X .and. iGs .eq. 1) THEN
+               GlobalCoordActData(1,1,IJRank) = NGx - 1
+            ENDIF
+
+            IF (PERIODIC_Y .and. jGs .eq. 1) THEN
+               GlobalCoordActData(1,2,IJRank) = NGy - 1
+            ENDIF
+
+            IF (PERIODIC_X .and. NGx .eq. iGs+DimX(I,KG)+1) THEN
+               GlobalCoordActData(2,1,IJRank) = 2
+            ENDIF
+
+            IF (PERIODIC_Y .and. NGy .eq. jGs+DimY(J,KG)+1) THEN
+               GlobalCoordActData(2,2,IJRank) = 2
+            ENDIF
 
          END DO
       END DO

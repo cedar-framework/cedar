@@ -169,9 +169,15 @@ grid_func & grid_func::operator-=(const grid_func &rhs)
 namespace cedar { namespace cdr2 {
 std::ostream & operator<<(std::ostream &os, const grid_func & obj)
 {
+	unsigned int width = 4;
+
+	os << std::setprecision(7);
+
+
 	for (auto j: obj.range(1)) {
 		for (auto i: obj.range(0)) {
-			os << i << " " << j << " " << std::to_string(obj(i,j)) << '\n';
+			os << std::setw(width) << i+1 << ", " << std::setw(width) << j+1 << ", "
+			   << std::scientific << obj(i,j) << '\n';
 		}
 	}
 	return os;

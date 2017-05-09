@@ -10,6 +10,7 @@ namespace cedar { namespace cdr3 { namespace kernel { namespace mpi {
 namespace factory
 {
 	std::shared_ptr<registry> from_config(config::reader &conf);
+	void init(std::shared_ptr<registry> kreg, config::reader & conf);
 }
 
 }}}}

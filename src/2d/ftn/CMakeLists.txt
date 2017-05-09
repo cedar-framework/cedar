@@ -14,6 +14,7 @@ set(sources
   ftn/BMG2_SymStd_SETUP_lines_y.f90
   ftn/BMG2_SymStd_SETUP_cg_LU.f90
   ftn/BMG2_SymStd_SOLVE_cg.f90
+  ftn/BMG_get_bc.f90
   ftn/util.f90)
 
 if (ENABLE_MPI)

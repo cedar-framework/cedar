@@ -17,7 +17,8 @@ namespace cedar { namespace cdr2 { namespace kernel {
 namespace impls
 {
 	using namespace cedar::cdr2;
-	void mpi_setup_cg_lu(const mpi::stencil_op & so,
+	void mpi_setup_cg_lu(const kernel_params & params,
+	                     const mpi::stencil_op & so,
 	                     grid_func & ABD)
 	{
 		mpi::stencil_op & copd = const_cast<mpi::stencil_op&>(so);
@@ -40,6 +41,10 @@ namespace impls
 		len_t local_arr_ptr = ctx->pMSG(ipL_MSG_LocalArraySize,0) - 1;  // 1 vs 0 based indexing
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+
+		if (params.per_mask()) {
+			log::error << "MPI LU cg solver does not support periodic BCs" << std::endl;
+		}
 
 		MPI_BMG2_SymStd_SETUP_cg_LU(csten.data(), csten.len(0), csten.len(1),
 		                            nstencil, topo.is(0), topo.is(1),

@@ -19,7 +19,8 @@ namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
-	void mpi_fortran_interp(const inter::mpi::prolong_op & P,
+	void mpi_fortran_interp(const kernel_params & params,
+	                        const inter::mpi::prolong_op & P,
 	                        const mpi::grid_func & coarse,
 	                        const mpi::grid_func & residual,
 	                        mpi::grid_func & fine)

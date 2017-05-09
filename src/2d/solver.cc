@@ -10,6 +10,7 @@ using namespace cedar::cdr2;
 
 void solver::setup_space(int nlevels)
 {
+	auto params = build_kernel_params(*conf);
 	{
 		grid_stencil & fsten = levels.back().A.stencil();
 		levels.back().res = grid_func(fsten.shape(0), fsten.shape(1));
@@ -46,7 +47,11 @@ void solver::setup_space(int nlevels)
 	auto & cop_sten = cop.stencil();
 	auto nxc = cop_sten.shape(0);
 	auto nyc = cop_sten.shape(1);
-	ABD = grid_func(nxc+2, nxc*nyc, 0);
+
+	len_t abd_len_0 = nxc+2;
+	if (params->periodic[0] or params->periodic[1])
+		abd_len_0 = nxc*nyc;
+	ABD = grid_func(abd_len_0, nxc*nyc, 0);
 	bbd = new real_t[ABD.len(1)];
 }
 
@@ -54,6 +59,7 @@ void solver::setup_space(int nlevels)
 solver::solver(stencil_op&& fop)
 {
 	kreg = kernel::factory::from_config(*conf);
+	fop.set_registry(kreg);
 
 	setup(std::move(fop));
 }
@@ -63,6 +69,7 @@ solver::solver(stencil_op&& fop,
                std::shared_ptr<config::reader> cfg): multilevel(cfg)
 {
 	kreg = kernel::factory::from_config(*conf);
+	fop.set_registry(kreg);
 
 	setup(std::move(fop));
 }

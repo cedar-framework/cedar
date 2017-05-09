@@ -14,7 +14,7 @@ namespace cedar { namespace cdr2 { namespace kernel {
 namespace impls
 {
 	using namespace cedar::cdr2;
-	void fortran_setup_nog(grid_topo & topo, len_t min_coarse, int *nog)
+	void fortran_setup_nog(const kernel_params & params, grid_topo & topo, len_t min_coarse, int *nog)
 	{
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 

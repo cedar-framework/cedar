@@ -21,7 +21,8 @@ namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
-	void mpi_relax_rbgs_point(const mpi::stencil_op & so,
+	void mpi_relax_rbgs_point(const kernel_params & params,
+	                          const mpi::stencil_op & so,
 	                          mpi::grid_func & x,
 	                          const mpi::grid_func & b,
 	                          const relax_stencil & sor,

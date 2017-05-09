@@ -7,6 +7,7 @@ extern "C" {
 	void BMG2_SymStd_SETUP_ITLI_ex(int kf, int kc, real_t *so, real_t *soc, real_t *ci,
 	                               len_t iif, len_t jjf, len_t iic, len_t jjc, int nog,
 	                               int ifd, int nstncl, int ipn);
+	void BMG_get_bc(int, int*);
 }
 
 
@@ -16,7 +17,8 @@ namespace impls
 {
 	using namespace cedar::cdr2;
 
-	void galerkin_prod(int kf, int kc, int nog,
+	void galerkin_prod(const kernel_params & params,
+	                   int kf, int kc, int nog,
 	                   const inter::prolong_op & P,
 	                   const stencil_op & fop,
 	                   stencil_op & cop)
@@ -43,7 +45,7 @@ namespace impls
 			nstencil = 9;
 		}
 
-		ipn = BMG_BCs_definite;
+		BMG_get_bc(params.per_mask(), &ipn);
 
 		BMG2_SymStd_SETUP_ITLI_ex(kf, kc, fopd.data(), cop.data(), Pd.data(),
 		                          iif, jjf, iic, jjc, nog, ifd, nstencil, ipn);

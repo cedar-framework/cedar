@@ -11,13 +11,15 @@ extern "C" {
 	void BMG2_SymStd_relax_lines_y(int k, real_t *SO, real_t *QF, real_t *Q, real_t *SOR,
 	                               real_t *B, len_t II, len_t JJ, int kf, int ifd,
 	                               int nstencil, int irelax_sym, int updown, int jpn);
+	void BMG_get_bc(int, int*);
 }
 
 namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	void relax_rbgs_point(const stencil_op & so,
+	void relax_rbgs_point(const kernel_params & params,
+	                      const stencil_op & so,
 	                      grid_func & x,
 	                      const grid_func & b,
 	                      const relax_stencil & sor,
@@ -46,7 +48,7 @@ namespace impls
 		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
 		else updown = BMG_DOWN;
 
-		ibc = BMG_BCs_definite;
+		BMG_get_bc(params.per_mask(), &ibc);
 
 		BMG2_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
 		                     so_sten.len(0), so_sten.len(1), kf, ifd, nstencil, nsorv,
@@ -55,7 +57,8 @@ namespace impls
 
 
 
-	void relax_lines_x(const stencil_op & so,
+	void relax_lines_x(const kernel_params & params,
+	                   const stencil_op & so,
 	                   grid_func & x,
 	                   const grid_func & b,
 	                   const relax_stencil & sor,
@@ -85,7 +88,7 @@ namespace impls
 		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
 		else updown = BMG_DOWN;
 
-		ibc = BMG_BCs_definite;
+		BMG_get_bc(params.per_mask(), &ibc);
 
 		BMG2_SymStd_relax_lines_x(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
 		                          so_sten.len(0), so_sten.len(1), kf, ifd, nstencil,
@@ -93,7 +96,8 @@ namespace impls
 	}
 
 
-	void relax_lines_y(const stencil_op & so,
+	void relax_lines_y(const kernel_params & params,
+	                   const stencil_op & so,
 	                   grid_func & x,
 	                   const grid_func & b,
 	                   const relax_stencil & sor,
@@ -123,7 +127,7 @@ namespace impls
 		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
 		else updown = BMG_DOWN;
 
-		ibc = BMG_BCs_definite;
+		BMG_get_bc(params.per_mask(), &ibc);
 
 		BMG2_SymStd_relax_lines_y(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
 		                          so_sten.len(0), so_sten.len(1), kf, ifd, nstencil,
