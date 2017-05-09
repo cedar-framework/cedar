@@ -112,7 +112,7 @@ std::ostream & operator<< (std::ostream &os, const grid_func & obj)
 	for (auto k : obj.range(2)) {
 		for (auto j: obj.range(1)) {
 			for (auto i: obj.range(0)) {
-				os << std::setw(width) << (kGs+k-2)*NGx*NGy + (jGs+j-2)*NGx + iGs+i-2 << " "
+				os << std::setw(width) << (kGs+k-2)*NGx*NGy + (jGs+j-2)*NGx + iGs+i-2 << ", "
 				   << std::setw(width) << iGs + i << ", " << std::setw(width) << jGs + j << ", "
 				   << std::setw(width) << kGs + k << ", "
 				   << std::scientific << obj(i,j,k) << '\n';
