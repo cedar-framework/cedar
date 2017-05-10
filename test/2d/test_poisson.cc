@@ -74,6 +74,7 @@ TEST(SerialPoisson2, Isotropic) {
 	set_problem(b);
 
 	auto conf = std::make_shared<config::reader>("");
+	log::init(*conf);
 	solver bmg(std::move(so), conf);
 
 	auto sol = bmg.solve(b);
@@ -105,6 +106,7 @@ TEST(SerialPoisson2, StretchX) {
 	set_problem(b);
 
 	auto conf = std::make_shared<config::reader>("");
+	log::init(*conf);
 	conf->set("solver.relaxation", "line-x");
 	solver bmg(std::move(so), conf);
 
@@ -137,6 +139,7 @@ TEST(SerialPoisson2, StretchY) {
 	set_problem(b);
 
 	auto conf = std::make_shared<config::reader>("");
+	log::init(*conf);
 	conf->set("solver.relaxation", "line-y");
 	solver bmg(std::move(so), conf);
 

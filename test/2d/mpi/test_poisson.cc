@@ -96,6 +96,7 @@ TEST(MPIPoisson2, Isotropic) {
 	            });
 
 	auto conf = std::make_shared<config::reader>("");
+	log::init(*conf);
 	mpi::solver bmg(std::move(so), conf);
 
 	auto sol = bmg.solve(b);
@@ -135,6 +136,7 @@ TEST(MPIPoisson2, StrongX) {
 	            });
 
 	auto conf = std::make_shared<config::reader>("");
+	log::init(*conf);
 	conf->set("solver.relaxation", "line-x");
 	mpi::solver bmg(std::move(so), conf);
 
@@ -175,6 +177,7 @@ TEST(MPIPoisson2, StrongY) {
 	            });
 
 	auto conf = std::make_shared<config::reader>("");
+	log::init(*conf);
 	conf->set("solver.relaxation", "line-y");
 	mpi::solver bmg(std::move(so), conf);
 

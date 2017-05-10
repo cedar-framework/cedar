@@ -6,6 +6,9 @@ TEST(SerialResidual2, FiveAndNine) {
 	using namespace cedar;
 	using namespace cedar::cdr2;
 
+	config::reader conf("");
+	log::init(conf);
+
 	len_t nx = 8;
 	len_t ny = nx;
 	{ // five point stencil

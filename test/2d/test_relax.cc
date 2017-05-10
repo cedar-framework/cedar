@@ -18,6 +18,9 @@ TEST(SerialRelax2, Point5) {
 	len_t nx = 31;
 	len_t ny = nx;
 
+	config::reader conf("");
+	log::init(conf);
+
 	auto so = gallery::poisson(nx, ny);
 	auto b = grid_func::zeros(nx, ny);
 	auto x = grid_func::ones(nx, ny);
@@ -65,6 +68,8 @@ TEST(SerialRelax2, Point9) {
 	relax_stencil sor(nx, ny);
 
 	auto kreg = so.get_registry();
+	config::reader conf("");
+	log::init(conf);
 
 	kreg->setup_relax(so, sor);
 
@@ -99,6 +104,9 @@ TEST(SerialRelax2, LineX5) {
 	len_t nx = 132;
 	len_t ny = 132;
 
+	config::reader conf("");
+	log::init(conf);
+
 	auto so = gallery::diag_diffusion(nx, ny, 1, .0001);
 	auto b = grid_func::zeros(nx, ny);
 	auto x = grid_func::random(nx, ny);
@@ -132,6 +140,9 @@ TEST(SerialRelax2, LineY5) {
 	int nsweeps = 15;
 	len_t nx = 132;
 	len_t ny = 132;
+
+	config::reader conf("");
+	log::init(conf);
 
 	auto so = gallery::diag_diffusion(nx, ny, .0001, 1);
 	auto b = grid_func::zeros(nx, ny);

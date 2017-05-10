@@ -85,6 +85,7 @@ TEST(SerialPoisson3, Isotropic) {
 	set_problem(b);
 
 	auto conf = std::make_shared<config::reader>("");
+	log::init(*conf);
 	solver bmg(std::move(so), conf);
 
 	auto sol = bmg.solve(b);

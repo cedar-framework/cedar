@@ -10,6 +10,9 @@ TEST(MPIRelax3, Point7) {
 	using namespace cedar;
 	using namespace cedar::cdr3;
 
+	config::reader conf("");
+	log::init(conf);
+
 	int nsweeps = 5;
 
 	auto nx = 50;
