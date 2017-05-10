@@ -80,7 +80,10 @@ To view the solution, modify the `poisson.cc` file to include
     outfile.close();
 ```
 
-Then `make`.  Here there will be `np` different solution files `solution-*.txt`.  This can be viewed in Python:
+Then `make`.  Here there will be `np` different solution files `solution-*.txt`.  This can be viewed in Python for example in [example_output.ipynb](tools/example_output.ipynb), which gives the following for the processor layout (`mpirun -np 6`) and the solution:
+
+![](tools/example_output.png)
+
 
 # Citing
 
