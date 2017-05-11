@@ -1,4 +1,3 @@
-#include <mpi.h>
 #include <iostream>
 #include <memory>
 #include <array>
@@ -167,10 +166,6 @@ int main(int argc, char *argv[])
 	using namespace cedar;
 	using namespace cedar::cdr2;
 
-	int provided;
-
-	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
-
 	auto conf = std::make_shared<config::reader>();
 	auto params = build_kernel_params(*conf);
 	auto ndofs = conf->getvec<len_t>("grid.n");
@@ -208,6 +203,5 @@ int main(int argc, char *argv[])
 
 	log::status << "Finished Test" << std::endl;
 
-	MPI_Finalize();
 	return 0;
 }
