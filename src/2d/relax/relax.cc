@@ -18,8 +18,10 @@ namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
+
+	template<>
 	void relax_rbgs_point(const kernel_params & params,
-	                      const stencil_op & so,
+	                      const stencil_op<five_pt> & so,
 	                      grid_func & x,
 	                      const grid_func & b,
 	                      const relax_stencil & sor,
@@ -29,19 +31,13 @@ namespace impls
 		int k, kf, ifd;
 		int updown, nsorv, ibc, nstencil;
 
-		const grid_stencil &so_sten = so.stencil();
-		stencil_op & sod = const_cast<stencil_op&>(so);
+		auto & sod = const_cast<stencil_op<five_pt>&>(so);
 		relax_stencil & sord = const_cast<relax_stencil&>(sor);
 		grid_func & bd = const_cast<grid_func&>(b);
 
 		k = kf = 1;
-		if (so_sten.five_pt()) {
-			ifd = 1;
-			nstencil = 3;
-		} else {
-			ifd = 0;
-			nstencil = 5;
-		}
+		ifd = 1;
+		nstencil = 3;
 
 		nsorv = 2;
 
@@ -51,14 +47,46 @@ namespace impls
 		BMG_get_bc(params.per_mask(), &ibc);
 
 		BMG2_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
-		                     so_sten.len(0), so_sten.len(1), kf, ifd, nstencil, nsorv,
+		                     so.len(0), so.len(1), kf, ifd, nstencil, nsorv,
+		                     BMG_RELAX_SYM, updown, ibc);
+	}
+
+	template<>
+	void relax_rbgs_point(const kernel_params & params,
+	                      const stencil_op<nine_pt> & so,
+	                      grid_func & x,
+	                      const grid_func & b,
+	                      const relax_stencil & sor,
+	                      cycle::Dir cycle_dir)
+	{
+		using namespace cedar::cdr2;
+		int k, kf, ifd;
+		int updown, nsorv, ibc, nstencil;
+
+		auto & sod = const_cast<stencil_op<nine_pt>&>(so);
+		relax_stencil & sord = const_cast<relax_stencil&>(sor);
+		grid_func & bd = const_cast<grid_func&>(b);
+
+		k = kf = 1;
+		ifd = 0;
+		nstencil = 5;
+
+		nsorv = 2;
+
+		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
+		else updown = BMG_DOWN;
+
+		BMG_get_bc(params.per_mask(), &ibc);
+
+		BMG2_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
+		                     so.len(0), so.len(1), kf, ifd, nstencil, nsorv,
 		                     BMG_RELAX_SYM, updown, ibc);
 	}
 
 
-
+	template<>
 	void relax_lines_x(const kernel_params & params,
-	                   const stencil_op & so,
+	                   const stencil_op<five_pt> & so,
 	                   grid_func & x,
 	                   const grid_func & b,
 	                   const relax_stencil & sor,
@@ -67,23 +95,15 @@ namespace impls
 	{
 		using namespace cedar::cdr2;
 		int k, kf, ifd;
-		int updown, nsorv, ibc, nstencil;
+		int updown, ibc, nstencil;
 
-		const grid_stencil &so_sten = so.stencil();
-		stencil_op & sod = const_cast<stencil_op&>(so);
+		auto & sod = const_cast<stencil_op<five_pt>&>(so);
 		relax_stencil & sord = const_cast<relax_stencil&>(sor);
 		grid_func & bd = const_cast<grid_func&>(b);
 
 		k = kf = 1;
-		if (so_sten.five_pt()) {
-			ifd = 1;
-			nstencil = 3;
-		} else {
-			ifd = 0;
-			nstencil = 5;
-		}
-
-		nsorv = 2;
+		ifd = 1;
+		nstencil = 3;
 
 		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
 		else updown = BMG_DOWN;
@@ -91,13 +111,13 @@ namespace impls
 		BMG_get_bc(params.per_mask(), &ibc);
 
 		BMG2_SymStd_relax_lines_x(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
-		                          so_sten.len(0), so_sten.len(1), kf, ifd, nstencil,
+		                          so.len(0), so.len(1), kf, ifd, nstencil,
 		                          BMG_RELAX_SYM, updown, ibc);
 	}
 
-
-	void relax_lines_y(const kernel_params & params,
-	                   const stencil_op & so,
+	template<>
+	void relax_lines_x(const kernel_params & params,
+	                   const stencil_op<nine_pt> & so,
 	                   grid_func & x,
 	                   const grid_func & b,
 	                   const relax_stencil & sor,
@@ -106,23 +126,47 @@ namespace impls
 	{
 		using namespace cedar::cdr2;
 		int k, kf, ifd;
-		int updown, nsorv, ibc, nstencil;
+		int updown, ibc, nstencil;
 
-		const grid_stencil &so_sten = so.stencil();
-		stencil_op & sod = const_cast<stencil_op&>(so);
+		auto & sod = const_cast<stencil_op<nine_pt>&>(so);
 		relax_stencil & sord = const_cast<relax_stencil&>(sor);
 		grid_func & bd = const_cast<grid_func&>(b);
 
 		k = kf = 1;
-		if (so_sten.five_pt()) {
-			ifd = 1;
-			nstencil = 3;
-		} else {
-			ifd = 0;
-			nstencil = 5;
-		}
+		ifd = 0;
+		nstencil = 5;
 
-		nsorv = 2;
+		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
+		else updown = BMG_DOWN;
+
+		BMG_get_bc(params.per_mask(), &ibc);
+
+		BMG2_SymStd_relax_lines_x(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
+		                          so.len(0), so.len(1), kf, ifd, nstencil,
+		                          BMG_RELAX_SYM, updown, ibc);
+	}
+
+
+	template<>
+	void relax_lines_y(const kernel_params & params,
+	                   const stencil_op<five_pt> & so,
+	                   grid_func & x,
+	                   const grid_func & b,
+	                   const relax_stencil & sor,
+	                   grid_func & res,
+	                   cycle::Dir cycle_dir)
+	{
+		using namespace cedar::cdr2;
+		int k, kf, ifd;
+		int updown, ibc, nstencil;
+
+		auto & sod = const_cast<stencil_op<five_pt>&>(so);
+		relax_stencil & sord = const_cast<relax_stencil&>(sor);
+		grid_func & bd = const_cast<grid_func&>(b);
+
+		k = kf = 1;
+		ifd = 1;
+		nstencil = 3;
 
 		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
 		else updown = BMG_DOWN;
@@ -130,7 +174,39 @@ namespace impls
 		BMG_get_bc(params.per_mask(), &ibc);
 
 		BMG2_SymStd_relax_lines_y(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
-		                          so_sten.len(0), so_sten.len(1), kf, ifd, nstencil,
+		                          so.len(0), so.len(1), kf, ifd, nstencil,
+		                          BMG_RELAX_SYM, updown, ibc);
+	}
+
+
+	template<>
+	void relax_lines_y(const kernel_params & params,
+	                   const stencil_op<nine_pt> & so,
+	                   grid_func & x,
+	                   const grid_func & b,
+	                   const relax_stencil & sor,
+	                   grid_func & res,
+	                   cycle::Dir cycle_dir)
+	{
+		using namespace cedar::cdr2;
+		int k, kf, ifd;
+		int updown, ibc, nstencil;
+
+		auto & sod = const_cast<stencil_op<nine_pt>&>(so);
+		relax_stencil & sord = const_cast<relax_stencil&>(sor);
+		grid_func & bd = const_cast<grid_func&>(b);
+
+		k = kf = 1;
+		ifd = 0;
+		nstencil = 5;
+
+		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
+		else updown = BMG_DOWN;
+
+		BMG_get_bc(params.per_mask(), &ibc);
+
+		BMG2_SymStd_relax_lines_y(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
+		                          so.len(0), so.len(1), kf, ifd, nstencil,
 		                          BMG_RELAX_SYM, updown, ibc);
 	}
 }

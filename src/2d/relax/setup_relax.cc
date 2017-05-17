@@ -15,21 +15,41 @@ namespace cedar { namespace cdr2 { namespace kernel {
 namespace impls
 {
 	using namespace cedar::cdr2;
+
+	template<>
 	void setup_rbgs_point(const kernel_params & params,
-	                      const stencil_op & so,
+	                      const stencil_op<five_pt> & so,
 	                      relax_stencil & sor)
 	{
 		len_t nx, ny;
 		int nstencil, nsorv;
 
-		const grid_stencil & so_sten = so.stencil();
-		stencil_op & sod = const_cast<stencil_op&>(so);
+		auto & sod = const_cast<stencil_op<five_pt>&>(so);
 
-		nx = so_sten.len(0);
-		ny = so_sten.len(1);
+		nx = so.len(0);
+		ny = so.len(1);
 
-		if (so_sten.five_pt()) nstencil = 3;
-		else nstencil = 5;
+		nstencil = 3;
+
+		nsorv = 2;
+
+		BMG2_SymStd_SETUP_recip(sod.data(), sor.data(), nx, ny, nstencil, nsorv);
+	}
+
+	template<>
+	void setup_rbgs_point(const kernel_params & params,
+	                      const stencil_op<nine_pt> & so,
+	                      relax_stencil & sor)
+	{
+		len_t nx, ny;
+		int nstencil, nsorv;
+
+		auto & sod = const_cast<stencil_op<nine_pt>&>(so);
+
+		nx = so.len(0);
+		ny = so.len(1);
+
+		nstencil = 5;
 
 		nsorv = 2;
 
@@ -37,20 +57,38 @@ namespace impls
 	}
 
 
+	template<>
 	void setup_rbgs_x(const kernel_params & params,
-	                  const stencil_op & so,
+	                  const stencil_op<five_pt> & so,
 	                  relax_stencil & sor)
 	{
 		int nx, ny, nstencil, jpn;
 
-		const grid_stencil & so_sten = so.stencil();
-		stencil_op & sod = const_cast<stencil_op&>(so);
+		auto & sod = const_cast<stencil_op<five_pt>&>(so);
 
-		nx = so_sten.len(0);
-		ny = so_sten.len(1);
+		nx = so.len(0);
+		ny = so.len(1);
 
-		if (so_sten.five_pt()) nstencil = 3;
-		else nstencil = 5;
+		nstencil = 3;
+
+		BMG_get_bc(params.per_mask(), &jpn);
+
+		BMG2_SymStd_SETUP_lines_x(sod.data(), sor.data(), nx, ny, nstencil, jpn);
+	}
+
+	template<>
+	void setup_rbgs_x(const kernel_params & params,
+	                  const stencil_op<nine_pt> & so,
+	                  relax_stencil & sor)
+	{
+		int nx, ny, nstencil, jpn;
+
+		auto & sod = const_cast<stencil_op<nine_pt>&>(so);
+
+		nx = so.len(0);
+		ny = so.len(1);
+
+		nstencil = 5;
 
 		BMG_get_bc(params.per_mask(), &jpn);
 
@@ -58,20 +96,39 @@ namespace impls
 	}
 
 
+	template<>
 	void setup_rbgs_y(const kernel_params & params,
-	                  const stencil_op & so,
+	                  const stencil_op<five_pt> & so,
 	                  relax_stencil & sor)
 	{
 		int nx, ny, nstencil, jpn;
 
-		const grid_stencil & so_sten = so.stencil();
-		stencil_op & sod = const_cast<stencil_op&>(so);
+		auto & sod = const_cast<stencil_op<five_pt>&>(so);
 
-		nx = so_sten.len(0);
-		ny = so_sten.len(1);
+		nx = so.len(0);
+		ny = so.len(1);
 
-		if (so_sten.five_pt()) nstencil = 3;
-		else nstencil = 5;
+		nstencil = 3;
+
+		BMG_get_bc(params.per_mask(), &jpn);
+
+		BMG2_SymStd_SETUP_lines_y(sod.data(), sor.data(), nx, ny, nstencil, jpn);
+	}
+
+
+	template<>
+	void setup_rbgs_y(const kernel_params & params,
+	                  const stencil_op<nine_pt> & so,
+	                  relax_stencil & sor)
+	{
+		int nx, ny, nstencil, jpn;
+
+		auto & sod = const_cast<stencil_op<nine_pt>&>(so);
+
+		nx = so.len(0);
+		ny = so.len(1);
+
+		nstencil = 5;
 
 		BMG_get_bc(params.per_mask(), &jpn);
 

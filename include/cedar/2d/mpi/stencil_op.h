@@ -3,7 +3,6 @@
 
 #include <mpi.h>
 
-#include <cedar/2d/stencil_op_base.h>
 #include <cedar/mpi/par_object.h>
 #include <cedar/2d/mpi/grid_func.h>
 #include <cedar/2d/kernel/mpi/registry.h>

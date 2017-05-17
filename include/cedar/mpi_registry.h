@@ -8,12 +8,12 @@
 
 namespace cedar {
 
-template <class stencil_op, class relax_stencil, class prolong_op, class grid_func, class redist_solver, class serial_solver>
+template <class stencil_op, class relax_stencil, class prolong_op, class restrict_op, class grid_func, class redist_solver, class serial_solver>
 
-class mpi_registry : public kernel_registry<stencil_op, relax_stencil, prolong_op, grid_func>
+class mpi_registry : public kernel_registry<stencil_op, relax_stencil, prolong_op, restrict_op, grid_func>
 {
 public:
-	using kernel_registry<stencil_op, relax_stencil, prolong_op, grid_func>::active;
+	using kernel_registry<stencil_op, relax_stencil, prolong_op, restrict_op, grid_func>::active;
 	void setup_nog(grid_topo &topo,
 	               len_t min_coarse, int *nog)
 	{
@@ -92,14 +92,6 @@ public:
 	{
 		active.run(kernel_name::solve_cg_redist,
 		           bmg, x, b);
-	}
-
-
-	void matvec(const stencil_op & so,
-	            const grid_func &x,
-	            grid_func &b)
-	{
-		active.run(kernel_name::matvec, so, x, b);
 	}
 };
 

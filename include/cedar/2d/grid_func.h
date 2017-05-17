@@ -5,7 +5,6 @@
 #include <iostream>
 
 #include <cedar/types.h>
-#include <cedar/2d/types.h>
 #include <cedar/array.h>
 #include <cedar/grid_quantity.h>
 

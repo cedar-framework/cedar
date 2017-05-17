@@ -3,7 +3,6 @@
 
 #include <memory>
 
-#include "cedar/discrete_op.h"
 
 namespace cedar {
 template <class grid_func>

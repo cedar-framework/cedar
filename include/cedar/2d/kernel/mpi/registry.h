@@ -25,6 +25,7 @@ namespace cedar { namespace cdr2 { namespace mpi {
 		namespace inter {
 			namespace mpi {
 				class prolong_op;
+				class restrict_op;
 			}
 		}
 	}
@@ -33,7 +34,7 @@ namespace cedar { namespace cdr2 { namespace mpi {
 
 namespace cedar { namespace cdr2 { namespace kernel { namespace mpi {
 namespace mpi = cedar::cdr2::mpi;
-class registry : public mpi_registry<mpi::stencil_op, relax_stencil, inter::mpi::prolong_op, mpi::grid_func, mpi::redist_solver, solver>
+class registry : public mpi_registry<mpi::stencil_op, relax_stencil, inter::mpi::prolong_op, inter::mpi::restrict_op, mpi::grid_func, mpi::redist_solver, solver>
 {
 };
 

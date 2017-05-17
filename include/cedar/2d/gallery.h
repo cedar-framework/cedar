@@ -6,12 +6,12 @@
 
 namespace cedar { namespace cdr2 { namespace gallery {
 
-stencil_op poisson(cedar::len_t nx, cedar::len_t ny);
+stencil_op<five_pt> poisson(cedar::len_t nx, cedar::len_t ny);
 
-stencil_op diag_diffusion(cedar::len_t nx, cedar::len_t ny,
-                                 cedar::real_t dx, cedar::real_t dy);
+stencil_op<five_pt> diag_diffusion(cedar::len_t nx, cedar::len_t ny,
+                                   cedar::real_t dx, cedar::real_t dy);
 
-stencil_op fe(cedar::len_t nx, cedar::len_t ny);
+stencil_op<nine_pt> fe(cedar::len_t nx, cedar::len_t ny);
 
 }}}
 

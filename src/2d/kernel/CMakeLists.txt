@@ -1,5 +1,4 @@
 set(sources
-  kernel/factory.cc
   kernel/setup_nog.cc
 )
 

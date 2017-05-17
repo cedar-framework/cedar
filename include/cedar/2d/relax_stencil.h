@@ -1,7 +1,6 @@
 #ifndef CEDAR_2D_CORE_RELAX_STENCIL_H
 #define CEDAR_2D_CORE_RELAX_STENCIL_H
 
-#include <cedar/2d/types.h>
 #include <cedar/array.h>
 #include <cedar/grid_quantity.h>
 

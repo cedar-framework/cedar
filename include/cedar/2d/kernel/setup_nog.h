@@ -2,8 +2,7 @@
 #define CEDAR_2D_KERNEL_SETUP_NOG_H
 
 #include <cedar/kernel_params.h>
-#include "cedar/mpi/grid_topo.h"
-#include "cedar/2d/types.h"
+#include <cedar/mpi/grid_topo.h>
 
 namespace cedar { namespace cdr2 { namespace kernel {
 

@@ -1,35 +1,16 @@
-#ifndef CEDAR_2D_CORE_STENCIL_OP_H
-#define CEDAR_2D_CORE_STENCIL_OP_H
+#ifndef CEDAR_2D_STENCIL_OP_H
+#define CEDAR_2D_STENCIL_OP_H
 
-#include <cedar/types.h>
-#include <cedar/2d/stencil_op_base.h>
-#include <cedar/2d/grid_func.h>
-#include <cedar/2d/kernel/registry.h>
-
+#include <cedar/stencil_op_nd.h>
+#include <cedar/2d/base_types.h>
 
 namespace cedar { namespace cdr2 {
 
-class stencil_op : public stencil_op_base<grid_func, kernel::registry>
-{
+		enum class five_pt {c=BMG2_C, w=BMG2_W, s=BMG2_S, ndirs};
+		enum class nine_pt {c=BMG2_C, w=BMG2_W, s=BMG2_S, sw=BMG2_SW, nw=BMG2_NW, ndirs};
 
-public:
-	stencil_op() {};
-stencil_op(len_t nx, len_t ny, bool intergrid) : stencil_op_base(nx,ny,intergrid) {}
-stencil_op(len_t nx, len_t ny) : stencil_op_base(nx,ny) {}
-	friend std::ostream & operator<< (std::ostream &os, const stencil_op & op);
-	virtual void apply(const grid_func &x, grid_func &y) const
-	{
-		stencil_op_base::apply<stencil_op>(x, y);
-	}
-	virtual void residual(const grid_func &x, const grid_func & b, grid_func &r) const
-	{
-		stencil_op_base::residual<stencil_op>(x, b, r);
-	}
-	virtual grid_func residual(const grid_func &x, const grid_func &b) const
-	{
-		return stencil_op_base::residual<stencil_op>(x, b);
-	}
-};
+		template<class stype>
+			using stencil_op = stencil_op_nd<2, stype>;
 
 }}
 
