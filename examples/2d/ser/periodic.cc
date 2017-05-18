@@ -8,19 +8,17 @@
 #include <cedar/2d/grid_func.h>
 #include <cedar/2d/stencil_op.h>
 #include <cedar/2d/solver.h>
-#include <cedar/2d/gallery.h>
+#include <cedar/2d/stencil_op.h>
 
 
-static cedar::cdr2::stencil_op create_op(cedar::len_t nx, cedar::len_t ny, std::array<bool, 3> periodic)
+static cedar::cdr2::stencil_op<cedar::cdr2::five_pt> create_op(cedar::len_t nx, cedar::len_t ny, std::array<bool, 3> periodic)
 {
 	using namespace cedar;
 	using namespace cedar::cdr2;
 
-	auto so = stencil_op(nx, ny);
-	auto & sten = so.stencil();
-	sten.five_pt() = true;
+	stencil_op<five_pt> so = stencil_op<five_pt>(nx, ny);
 
-	sten.set(0);
+	so.set(0);
 
 	if (periodic[0]) nx--;
 	if (periodic[1]) ny--;
@@ -28,57 +26,55 @@ static cedar::cdr2::stencil_op create_op(cedar::len_t nx, cedar::len_t ny, std::
 	real_t hy = 1.0/(ny+1);
 	real_t xh = hy/hx;
 	real_t yh = hx/hy;
-	len_t l = sten.shape(0);
-	len_t m = sten.shape(1);
-	len_t i1 = sten.shape(0)+1;
-	len_t j1 = sten.shape(1)+1;
+	len_t l = so.shape(0);
+	len_t m = so.shape(1);
+	len_t i1 = so.shape(0)+1;
+	len_t j1 = so.shape(1)+1;
 	len_t ibeg = 2;
 	len_t jbeg = 2;
 
 	if (periodic[0]) ibeg--;
 	if (periodic[1]) jbeg--;
 
-	auto & o = sten;
-
 	for (auto j : range<len_t>(jbeg, j1)) {
 		for (auto i : range<len_t>(1, i1)) {
-			o(i,j,dir::S) = 1.0 * yh;
+			so(i,j,five_pt::s) = 1.0 * yh;
 		}
 	}
 
 	for (auto j : range<len_t>(1, j1)) {
 		for (auto i : range<len_t>(ibeg, i1)) {
-			o(i,j,dir::W) = 1.0 * xh;
+			so(i,j,five_pt::w) = 1.0 * xh;
 		}
 	}
 
-	for (auto j : sten.range(1)) {
-		for (auto i : sten.range(0)) {
-			o(i,j,dir::C) = 2*xh + 2*yh;
+	for (auto j : so.range(1)) {
+		for (auto i : so.range(0)) {
+			so(i,j,five_pt::c) = 2*xh + 2*yh;
 		}
 	}
 
 	if (periodic[0]) {
-		for (auto j : sten.range(1)) {
-			o(ibeg-1,j,dir::C) = o(l,j,dir::C);
-			o(ibeg-1,j,dir::W) = o(l,j,dir::W);
-			o(ibeg-1,j,dir::S) = o(l,j,dir::S);
+		for (auto j : so.range(1)) {
+			so(ibeg-1,j,five_pt::c) = so(l,j,five_pt::c);
+			so(ibeg-1,j,five_pt::w) = so(l,j,five_pt::w);
+			so(ibeg-1,j,five_pt::s) = so(l,j,five_pt::s);
 
-			o(l+1,j,dir::C) = o(ibeg,j,dir::C);
-			o(l+1,j,dir::W) = o(ibeg,j,dir::W);
-			o(l+1,j,dir::S) = o(ibeg,j,dir::S);
+			so(l+1,j,five_pt::c) = so(ibeg,j,five_pt::c);
+			so(l+1,j,five_pt::w) = so(ibeg,j,five_pt::w);
+			so(l+1,j,five_pt::s) = so(ibeg,j,five_pt::s);
 		}
 	}
 
 	if (periodic[1]) {
-		for (auto i : sten.range(0)) {
-			o(i,jbeg-1,dir::C) = o(i,m,dir::C);
-			o(i,jbeg-1,dir::W) = o(i,m,dir::W);
-			o(i,jbeg-1,dir::S) = o(i,m,dir::S);
+		for (auto i : so.range(0)) {
+			so(i,jbeg-1,five_pt::c) = so(i,m,five_pt::c);
+			so(i,jbeg-1,five_pt::w) = so(i,m,five_pt::w);
+			so(i,jbeg-1,five_pt::s) = so(i,m,five_pt::s);
 
-			o(i,m+1,dir::C) = o(i,jbeg,dir::C);
-			o(i,m+1,dir::W) = o(i,jbeg,dir::W);
-			o(i,m+1,dir::S) = o(i,jbeg,dir::S);
+			so(i,m+1,five_pt::c) = so(i,jbeg,five_pt::c);
+			so(i,m+1,five_pt::w) = so(i,jbeg,five_pt::w);
+			so(i,m+1,five_pt::s) = so(i,jbeg,five_pt::s);
 		}
 	}
 
@@ -172,12 +168,12 @@ int main(int argc, char *argv[])
 	auto nx = ndofs[0];
 	auto ny = ndofs[1];
 
-	auto so = create_op(nx, ny, params->periodic);
+	stencil_op<five_pt> so = create_op(nx, ny, params->periodic);
 	grid_func b(nx, ny);
 
 	set_problem(b, params->periodic);
 
-	solver bmg(std::move(so), conf);
+	solver<five_pt> bmg(so, conf);
 	// {
 	// 	std::ofstream ffile("fine.txt");
 	// 	std::ofstream cfile("coarse.txt");

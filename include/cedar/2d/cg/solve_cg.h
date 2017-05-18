@@ -1,9 +1,10 @@
 #ifndef CEDAR_2D_KERNEL_SOLVE_CG_H
 #define CEDAR_2D_KERNEL_SOLVE_CG_H
 
-#include "cedar/2d/grid_func.h"
-#include "cedar/2d/mpi/grid_func.h"
-#include "cedar/2d/solver.h"
+#include <cedar/kernel_params.h>
+#include <cedar/2d/grid_func.h>
+#include <cedar/2d/mpi/grid_func.h>
+//#include "cedar/2d/solver.h"
 /* #include "cedar/2d/mpi/redist_solver.h" */
 
 namespace cedar { namespace cdr2 { namespace kernel {

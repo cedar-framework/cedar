@@ -12,12 +12,15 @@
 
 #include <cedar/2d/inter/restrict_op.h>
 #include <cedar/2d/inter/prolong_op.h>
+#include <cedar/2d/inter/restrict.h>
+#include <cedar/2d/inter/interp.h>
 #include <cedar/2d/inter/setup_interp.h>
 #include <cedar/2d/inter/galerkin_prod.h>
 #include <cedar/2d/relax/setup_relax.h>
 #include <cedar/2d/relax/relax.h>
 #include <cedar/2d/cg/setup_cg_lu.h>
 #include <cedar/2d/cg/solve_cg.h>
+#include <cedar/2d/residual.h>
 
 
 namespace cedar { namespace cdr2 { namespace kernel {
@@ -26,6 +29,10 @@ namespace cedar { namespace cdr2 { namespace kernel {
 				inter::prolong_op, inter::restrict_op, grid_func>
 {
 public:
+	using parent = kernel_registry<registry, stencil_op, relax_stencil,
+		inter::prolong_op, inter::restrict_op, grid_func>;
+registry(std::shared_ptr<kernel_params> params) : parent::kernel_registry(params) {}
+registry(config::reader & conf) : parent::kernel_registry(conf) {}
 	template<class sten>
 		void setup_interp(int kf, int kc, int nog,
 		                  const stencil_op<sten> & fop,
@@ -153,7 +160,7 @@ public:
 	                const grid_func & residual,
 	                grid_func & fine)
 	{
-		impls::fortran_interp(P, coarse, residual, fine);
+		impls::fortran_interp(*params, P, coarse, residual, fine);
 	}
 
 };

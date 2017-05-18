@@ -8,7 +8,7 @@
 namespace cedar {
 
 
-	template <template<class> class level_container,
+	template <template<class> class level_t, class level_container,
 		      template<class> class stencil_op,
 		      class grid_func,class registry, class fsten, class child>
 class multilevel
@@ -24,9 +24,9 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 		return kreg;
 	}
 
-	virtual std::size_t nlevels() { return levels.size(); }
+	std::size_t nlevels() { return levels.size(); }
 
-	virtual void log_residual(int lvl, const grid_func & res)
+	void log_residual(std::size_t lvl, const grid_func & res)
 	{
 		if (log::info.active()) {
 			log::info << "Level " << (levels.size() - lvl - 1) << " residual norm: "
@@ -35,7 +35,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	}
 
 
-	virtual void setup_cg_solve()
+	void setup_cg_solve()
 	{
 		auto & cop = levels.get(levels.size() - 1).A;
 		kreg->setup_cg_lu(cop, ABD);
@@ -46,12 +46,12 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	}
 
 
-	virtual void setup_interp(int lvl)
+	void setup_interp(std::size_t lvl)
 	{
 		auto & P = levels.get(lvl+1).P;
 		auto & cop = levels.get(lvl+1).A;
 		if (lvl == 0) {
-			auto & fop = levels.get<fsten>(lvl).A;
+			auto & fop = levels.template get<fsten>(lvl).A;
 			// TODO: check this (lvl changed)
 			kreg->setup_interp(lvl+1, lvl, levels.size(), fop, cop, P);
 		} else {
@@ -62,13 +62,13 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	}
 
 
-	virtual void setup_operator(int lvl)
+	void setup_operator(std::size_t lvl)
 	{
 		auto & P = levels.get(lvl+1).P;
 		auto & cop = levels.get(lvl+1).A;
 
 		if (lvl == 0) {
-			auto & fop = levels.get<fsten>(lvl).A;
+			auto & fop = levels.template get<fsten>(lvl).A;
 			// TODO: check this (lvl changed)
 			kreg->galerkin_prod(lvl+1, lvl, levels.size(), P, fop, cop);
 		} else {
@@ -79,9 +79,8 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	}
 
 	template<class sten>
-		void setup_relax_helper(level_container<fsten>::value_type<sten> & level, int lvl)
+		void setup_relax_helper(level_t<sten> & level, std::size_t lvl)
 	{
-
 		auto & sop = level.A;
 
 		std::string relax_type = conf->get<std::string>("solver.relaxation", "point");
@@ -107,7 +106,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 		else
 			log::error << "Invalid relaxation: " << relax_type << std::endl;
 
-		level.presmoother = [&,lvl,nrelax_pre,kernels,relax_type](const decltype(sop) &A,
+		level.presmoother = [&,lvl,nrelax_pre,kernels,relax_type](const stencil_op<sten> &A,
 		                                                          grid_func &x, const grid_func&b) {
 			for (auto i : range(nrelax_pre)) {
 				(void) i;
@@ -129,7 +128,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 					log::error << "Invalid relaxation: " << relax_type << std::endl;
 			}
 		};
-		level.postsmoother = [&,lvl,nrelax_post,kernels,relax_type](const decltype(sop) &A,
+		level.postsmoother = [&,lvl,nrelax_post,kernels,relax_type](const stencil_op<sten> &A,
 		                                                            grid_func &x, const grid_func&b) {
 			for (auto i: range(nrelax_post)) {
 				(void) i;
@@ -153,10 +152,10 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 		};
 	}
 
-	virtual void setup_relax(int lvl)
+	void setup_relax(std::size_t lvl)
 	{
 		if (lvl == 0) {
-			auto & level = levels.get<fsten>(lvl);
+			auto & level = levels.template get<fsten>(lvl);
 			setup_relax_helper(level, lvl);
 		} else {
 			auto & level = levels.get(lvl);
@@ -165,18 +164,18 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	}
 
 
-	void setup_space(int nlevels)
+	void setup_space(std::size_t nlevels)
 	{
 		static_cast<child*>(this)->setup_space(nlevels);
 	}
 
 
-	virtual void setup()
+	void setup()
 	{
-		auto num_levels = compute_num_levels(levels.get<fsten>(0).A);
+		auto num_levels = compute_num_levels(levels.template get<fsten>(0).A);
 		auto nlevels_conf = conf->get<int>("solver.num-levels", -1);
 		if (nlevels_conf > 0) {
-			if (nlevels_conf > num_levels) {
+			if (static_cast<std::size_t>(nlevels_conf) > num_levels) {
 				log::error << "too many levels specified" << std::endl;
 			} else {
 				num_levels = nlevels_conf;
@@ -185,7 +184,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 		log::debug << "Using a " << num_levels << " level heirarchy" << std::endl;
 		setup_space(num_levels);
 		timer_begin("setup");
-		for (auto i : range(num_levels-1)) {
+		for (std::size_t i = 0; i < num_levels - 1; ++i) {
 			setup_interp(i);
 			setup_operator(i);
 			setup_relax(i);
@@ -195,9 +194,12 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	}
 
 
-	template<class sten>
-		void ncycle_helper(level_container<fsten>::value_type<sten> & level,
-		                   int lvl, grid_func & x, const grid_func & b, int n)
+	/* template<class sten> */
+	/* 	void ncycle_helper(level_container<fsten>::value_type<sten> & level, */
+	/* 	                   int lvl, grid_func & x, const grid_func & b, int n) */
+	template<class T>
+		void ncycle_helper(T & level,
+		                   std::size_t lvl, grid_func & x, const grid_func & b, int n)
 	{
 		auto & A = level.A;
 
@@ -221,7 +223,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 
 		timer_down();
 
-		int coarse_lvl = levels.size() - 1;
+		std::size_t coarse_lvl = levels.size() - 1;
 		if (lvl+1 == coarse_lvl) {
 			timer_begin("coarse-solve");
 			coarse_solver(coarse_x, coarse_b);
@@ -250,11 +252,11 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 		}
 	}
 
-	void ncycle(int lvl, grid_func & x, const grid_func & b,
+	void ncycle(std::size_t lvl, grid_func & x, const grid_func & b,
 		int n=1)
 	{
 		if (lvl == 0) {
-			auto & level = levels.get<fsten>(lvl);
+			auto & level = levels.template get<fsten>(lvl);
 			ncycle_helper(level, lvl, x, b, n);
 		} else {
 			auto & level = levels.get(lvl);
@@ -263,9 +265,9 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	}
 
 
-	virtual grid_func solve(const grid_func & b)
+	grid_func solve(const grid_func & b)
 	{
-		auto & level = levels.get<fsten>(0);
+		auto & level = levels.template get<fsten>(0);
 		grid_func x = grid_func::zeros_like(b);
 		int maxiter = conf->get<int>("solver.max-iter", 10);
 		real_t tol = conf->get<real_t>("solver.tol", 1e-8);
@@ -288,9 +290,9 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	}
 
 
-	virtual void solve(const grid_func & b, grid_func & x)
+	void solve(const grid_func & b, grid_func & x)
 	{
-		auto & level = levels.get<fsten>(0);
+		auto & level = levels.template get<fsten>(0);
 		int maxiter = conf->get<int>("solver.max-iter", 10);
 		real_t tol = conf->get<real_t>("solver.tol", 1e-8);
 		kreg->residual(level.A,x,b,level.res);
@@ -310,7 +312,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 		timer_end("solve");
 	}
 
-	virtual void vcycle(grid_func & x, const grid_func & b)
+	void vcycle(grid_func & x, const grid_func & b)
 	{
 		if (levels.size() == 1)
 			coarse_solver(x, b);
@@ -318,7 +320,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 			ncycle(0, x, b);
 	}
 
-	int compute_num_levels(stencil_op<fsten> & fop)
+	std::size_t compute_num_levels(stencil_op<fsten> & fop)
 	{
 		return static_cast<child*>(this)->compute_num_levels(fop);
 	}
@@ -337,7 +339,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	config::reader & get_config() { return *conf; }
 
 protected:
-	level_container<fsten> levels;
+	level_container levels;
 	std::function<void(grid_func &x, const grid_func &b)> coarse_solver;
 	std::shared_ptr<config::reader> conf;
 	std::shared_ptr<registry> kreg;

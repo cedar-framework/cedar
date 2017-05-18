@@ -44,6 +44,7 @@ template <std::size_t nd, typename stype, std::size_t... Is>
 	public grid_quantity<len_t, nd>
 {
 public:
+stencil_op_nd() {}
 stencil_op_nd(decltype(Is, len_t{})... args)
 	{
 		this->num_ghosts = 1;

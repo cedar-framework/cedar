@@ -3,6 +3,7 @@
 
 #include <array>
 #include <functional>
+#include <cstddef>
 #include <algorithm>
 
 #include <cedar/multilevel.h>
@@ -86,28 +87,41 @@ template<> template<> inline level<nine_pt>& level_container<nine_pt>::get<nine_
 	#endif
 }
 
+template<> level_container<nine_pt>::level_container(stencil_op<nine_pt> & fine_op)
+{
+	lvls_nine.emplace_back(fine_op);
+}
+
+template<> level_container<five_pt>::level_container(stencil_op<five_pt> & fine_op)
+{
+	lvls_five.emplace_back(fine_op);
+}
+
 template<class fsten>
-class solver: public multilevel<level_container, stencil_op, grid_func, kernel::registry, fsten, solver<fsten>>
+class solver: public multilevel<level, level_container<fsten>,
+	stencil_op, grid_func, kernel::registry, fsten, solver<fsten>>
 {
 public:
-solver(stencil_op<fsten> & fop) : multilevel<level_container, stencil_op, grid_func, kernel::registry, fsten, solver<fsten>>(fop)
+	using parent = multilevel<level, level_container<fsten>,
+		stencil_op, grid_func, kernel::registry, fsten, solver<fsten>>;
+solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 	{
-		kreg = std::make_shared<kernel::registry>(*conf);
-		multilevel<level_container, stencil_op, grid_func, kernel::registry, fsten, solver<fsten>>::setup();
+		this->kreg = std::make_shared<kernel::registry>(*(this->conf));
+		parent::setup();
 	}
 	solver(stencil_op<fsten> & fop,
 	       std::shared_ptr<config::reader> conf) :
-	multilevel<level_container, stencil_op, grid_func, kernel::registry, fsten, solver<fsten>>(fop, conf)
+	parent::multilevel(fop, conf)
 	{
-		kreg = std::make_shared<kernel::registry>(*conf);
-		multilevel<level_container, stencil_op, grid_func, kernel::registry, fsten, solver<fsten>>::setup();
+		this->kreg = std::make_shared<kernel::registry>(*(this->conf));
+		parent::setup();
 	}
 	~solver() { delete[] this->bbd; }
-	int compute_num_levels(stencil_op<sten> & fop)
+	std::size_t compute_num_levels(stencil_op<fsten> & fop)
 	{
 		float nxc, nyc;
 		int ng = 0;
-		int min_coarse = conf->get<int>("solver.min-coarse", 3);
+		auto min_coarse = this->conf->template get<std::size_t>("solver.min-coarse", 3);
 
 		auto nx = fop.shape(0);
 		auto ny = fop.shape(1);
@@ -120,32 +134,46 @@ solver(stencil_op<fsten> & fop) : multilevel<level_container, stencil_op, grid_f
 
 		return ng;
 	}
-	void setup_space(int nlevels)
+	void setup_space(std::size_t nlevels)
 	{
-		auto params = build_kernel_params(*conf);
+		auto params = build_kernel_params(*(this->conf));
 
 		for (auto i : range(nlevels-1)) {
-			auto & fop = levels.get<i>.A;
-			auto nx = fop.shape(0);
-			auto ny = fop.shape(1);
-			auto nxc = (nx-1)/2. + 1;
-			auto nyc = (ny-1)/2. + 1;
+			// TODO: remove copy-paste coding
+			if (i == 0) {
+				auto & fop = this->levels.template get<fsten>(i).A;
+				auto nx = fop.shape(0);
+				auto ny = fop.shape(1);
+				auto nxc = (nx-1)/2. + 1;
+				auto nyc = (ny-1)/2. + 1;
 
-			levels.add(nxc, nyc);
+				this->levels.add(nxc, nyc);
 
-			log::debug << "Created coarse grid with dimensions: " << nxc
-			           << ", " << nyc << std::endl;
+				log::debug << "Created coarse grid with dimensions: " << nxc
+				           << ", " << nyc << std::endl;
+			} else {
+				auto & fop = this->levels.get(i).A;
+				auto nx = fop.shape(0);
+				auto ny = fop.shape(1);
+				auto nxc = (nx-1)/2. + 1;
+				auto nyc = (ny-1)/2. + 1;
+
+				this->levels.add(nxc, nyc);
+
+				log::debug << "Created coarse grid with dimensions: " << nxc
+				           << ", " << nyc << std::endl;
+			}
 		}
 
-		auto & cop = levels.get<levels.size()-1>().A;
+		auto & cop = this->levels.get(this->levels.size()-1).A;
 		auto nxc = cop.shape(0);
 		auto nyc = cop.shape(1);
 
 		len_t abd_len_0 = nxc+2;
 		if (params->periodic[0] or params->periodic[1])
 			abd_len_0 = nxc*nyc;
-		ABD = grid_func(abd_len_0, nxc*nyc, 0);
-		bbd = new real_t[ABD.len(1)];
+		this->ABD = grid_func(abd_len_0, nxc*nyc, 0);
+		this->bbd = new real_t[this->ABD.len(1)];
 	}
 };
 

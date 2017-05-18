@@ -16,6 +16,7 @@ class prolong_op : public stencil_op<inter::dir>
 {
 
 public:
+	prolong_op() {};
 	prolong_op(len_t nx, len_t ny);
 	friend std::ostream & operator<< (std::ostream &os, const prolong_op & P);
 	stencil_op<five_pt> * fine_op_five;
