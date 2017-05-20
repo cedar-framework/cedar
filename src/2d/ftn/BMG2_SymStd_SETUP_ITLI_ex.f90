@@ -1,6 +1,6 @@
       SUBROUTINE BMG2_SymStd_SETUP_ITLI_ex(&
-     &                KF, KC, SO, SOC, CI,&
-     &                IIF, JJF, IIC, JJC, NOG, IFD, NStncl,IPN&
+     &                SO, SOC, CI,&
+     &                IIF, JJF, IIC, JJC, IFD, NStncl,IPN&
      &                ) BIND(C, NAME='BMG2_SymStd_SETUP_ITLI_ex')
 
 ! ======================================================================
@@ -53,7 +53,7 @@
 !    Argument Declarations:
 !
       integer(len_t), value :: IIC, IIF, JJC, JJF
-      integer(c_int), value :: IFD, KC, KF, NOG, NStncl, IPN
+      integer(c_int), value :: IFD, NStncl, IPN
       real(real_t) :: CI(IIC,JJC,8), SO(IIF,JJF,NStncl), SOC(IIC,JJC,5)
 
 ! --------------------------
@@ -90,7 +90,8 @@
       PER_y = IABS(BMG_BCs_def_per_y)
       PER_xy = IABS(BMG_BCs_def_per_xy)
 
-      IF ( IFD.NE.1 .OR. KF.LT.NOG ) THEN
+      !IF ( IFD.NE.1 .OR. KF.LT.NOG ) THEN
+      IF ( IFD.NE.1 ) THEN
 
 !******************************
 !     begin computation of grid kc difference operator when kf differenc

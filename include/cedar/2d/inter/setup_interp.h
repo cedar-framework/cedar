@@ -14,7 +14,6 @@ namespace impls
 {
 	template<class sten>
 	void setup_interp(const kernel_params & params,
-	                  int kf, int kc, int nog,
 	                  const stencil_op<sten> & fop,
 	                  const stencil_op<nine_pt> & cop,
 	                  inter::prolong_op & P);

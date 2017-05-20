@@ -34,21 +34,19 @@ public:
 registry(std::shared_ptr<kernel_params> params) : parent::kernel_registry(params) {}
 registry(config::reader & conf) : parent::kernel_registry(conf) {}
 	template<class sten>
-		void setup_interp(int kf, int kc, int nog,
-		                  const stencil_op<sten> & fop,
+		void setup_interp(const stencil_op<sten> & fop,
 		                  const stencil_op<nine_pt> & cop,
 		                  inter::prolong_op & P)
 	{
-		impls::setup_interp(*params, kf, kc, nog, fop, cop, P);
+		impls::setup_interp(*params, fop, cop, P);
 	}
 
 	template<class sten>
-		void galerkin_prod(int kf, int kc, int nog,
-		                   const inter::prolong_op & P,
+		void galerkin_prod(const inter::prolong_op & P,
 		                   const stencil_op<sten> & fop,
 		                   stencil_op<nine_pt> & cop)
 	{
-		impls::galerkin_prod(*params, kf, kc, nog, P, fop, cop);
+		impls::galerkin_prod(*params, P, fop, cop);
 	}
 
 	template<class sten>

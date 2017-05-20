@@ -14,7 +14,6 @@ namespace impls
 {
 	template<class sten>
 	void galerkin_prod(const kernel_params & params,
-	                   int kf, int kc, int nog,
 	                   const inter::prolong_op & P,
 	                   const stencil_op<sten> & fop,
 	                   stencil_op<nine_pt> & cop);

@@ -2,9 +2,9 @@
 
 extern "C" {
 	using namespace cedar;
-	void BMG2_SymStd_SETUP_interp_OI(int kf, int kc, real_t *so, real_t *soc, real_t *ci,
+	void BMG2_SymStd_SETUP_interp_OI(real_t *so, real_t *soc, real_t *ci,
 	                                 len_t iif, len_t jjf, len_t iic, len_t jjc,
-	                                 int nog, int ifd, int nstncl, int jpn, int irelax);
+	                                 int ifd, int nstncl, int jpn, int irelax);
 	void BMG_get_bc(int, int*);
 }
 
@@ -16,7 +16,6 @@ namespace impls
 
 	template<>
 	void setup_interp(const kernel_params & params,
-	                  int kf, int kc, int nog,
 	                  const stencil_op<five_pt> &fop,
 	                  const stencil_op<nine_pt> &cop,
 	                  inter::prolong_op &P)
@@ -43,14 +42,13 @@ namespace impls
 
 		BMG_get_bc(params.per_mask(), &jpn);
 
-		BMG2_SymStd_SETUP_interp_OI(kf, kc, fopd.data(), copd.data(), P.data(), iif, jjf, iic, jjc,
-		                            nog, ifd, nstencil, jpn, irelax);
+		BMG2_SymStd_SETUP_interp_OI(fopd.data(), copd.data(), P.data(), iif, jjf, iic, jjc,
+		                            ifd, nstencil, jpn, irelax);
 	}
 
 
 	template<>
 	void setup_interp(const kernel_params & params,
-	                  int kf, int kc, int nog,
 	                  const stencil_op<nine_pt> &fop,
 	                  const stencil_op<nine_pt> &cop,
 	                  inter::prolong_op &P)
@@ -77,8 +75,8 @@ namespace impls
 
 		BMG_get_bc(params.per_mask(), &jpn);
 
-		BMG2_SymStd_SETUP_interp_OI(kf, kc, fopd.data(), copd.data(), P.data(), iif, jjf, iic, jjc,
-		                            nog, ifd, nstencil, jpn, irelax);
+		BMG2_SymStd_SETUP_interp_OI(fopd.data(), copd.data(), P.data(), iif, jjf, iic, jjc,
+		                            ifd, nstencil, jpn, irelax);
 	}
 }
 

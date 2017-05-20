@@ -17,7 +17,7 @@ public:
 	using conf_ptr = std::shared_ptr<config::reader>;
 multilevel(stencil_op<fsten> & fop) : levels(fop), conf(std::make_shared<config::reader>("config.json")) {}
 multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
-	virtual ~multilevel() {}
+	~multilevel() {}
 
 	std::shared_ptr<registry> kernel_registry()
 	{
@@ -53,11 +53,11 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 		if (lvl == 0) {
 			auto & fop = levels.template get<fsten>(lvl).A;
 			// TODO: check this (lvl changed)
-			kreg->setup_interp(lvl+1, lvl, levels.size(), fop, cop, P);
+			kreg->setup_interp(fop, cop, P);
 		} else {
 			auto & fop = levels.get(lvl).A;
 			// TODO: check this (lvl changed)
-			kreg->setup_interp(lvl+1, lvl, levels.size(), fop, cop, P);
+			kreg->setup_interp(fop, cop, P);
 		}
 	}
 
@@ -70,11 +70,11 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 		if (lvl == 0) {
 			auto & fop = levels.template get<fsten>(lvl).A;
 			// TODO: check this (lvl changed)
-			kreg->galerkin_prod(lvl+1, lvl, levels.size(), P, fop, cop);
+			kreg->galerkin_prod(P, fop, cop);
 		} else {
 			auto & fop = levels.get(lvl).A;
 			// TODO: check this (lvl changed)
-			kreg->galerkin_prod(lvl+1, lvl, levels.size(), P, fop, cop);
+			kreg->galerkin_prod(P, fop, cop);
 		}
 	}
 
@@ -170,9 +170,9 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	}
 
 
-	void setup()
+	void setup(stencil_op<fsten> & fop)
 	{
-		auto num_levels = compute_num_levels(levels.template get<fsten>(0).A);
+		auto num_levels = compute_num_levels(fop);
 		auto nlevels_conf = conf->get<int>("solver.num-levels", -1);
 		if (nlevels_conf > 0) {
 			if (static_cast<std::size_t>(nlevels_conf) > num_levels) {

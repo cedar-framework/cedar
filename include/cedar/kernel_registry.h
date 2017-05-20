@@ -24,19 +24,18 @@ struct kernel_registry
 	kernel_registry(config::reader & conf) { params = build_kernel_params(conf); }
 
 	template<class stencil0, class stencil1>
-	void setup_interp(int kf, int kc, int nog, const stencil_op<stencil0> & fop,
+	void setup_interp(const stencil_op<stencil0> & fop,
 	                  const stencil_op<stencil1> &cop, prolong_op & P) {
 
-		static_cast<child*>(this)->setup_interp(kf, kc, nog, fop, cop, P);
+		static_cast<child*>(this)->setup_interp(fop, cop, P);
 	}
 
 
 	template<class stencil0, class stencil1>
-	void galerkin_prod(int kf, int kc, int nog,
-	                   const prolong_op & P,
+	void galerkin_prod(const prolong_op & P,
 	                   const stencil_op<stencil0> & fop,
 	                   stencil_op<stencil1> & cop) {
-		static_cast<child*>(this)->galerkin_prod(kf, kc, nog, P, fop, cop);
+		static_cast<child*>(this)->galerkin_prod(P, fop, cop);
 	}
 
 
