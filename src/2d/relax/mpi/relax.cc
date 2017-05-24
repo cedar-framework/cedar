@@ -29,8 +29,9 @@ namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
+	template<>
 	void mpi_relax_rbgs_point(const kernel_params & params,
-	                          const mpi::stencil_op & so,
+	                          const mpi::stencil_op<five_pt> & so,
 	                          mpi::grid_func & x,
 	                          const mpi::grid_func & b,
 	                          const relax_stencil & sor,
@@ -40,22 +41,16 @@ namespace impls
 		int k, kf, ifd;
 		int updown, nstencil;
 
-		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);
+		auto & sod = const_cast<mpi::stencil_op<five_pt>&>(so);
 		grid_topo & topo = sod.grid();
 		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
-		grid_stencil & sten = sod.stencil();
 		relax_stencil & sord = const_cast<relax_stencil&>(sor);
 		mpi::grid_func & bd = const_cast<mpi::grid_func&>(b);
 
 		k = topo.level()+1;
 		kf = topo.nlevel();
-		if (sten.five_pt()) {
-			ifd = 1;
-			nstencil = 3;
-		} else {
-			ifd = 0;
-			nstencil = 5;
-		}
+		ifd = 1;
+		nstencil = 3;
 
 		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
 		else updown = BMG_DOWN;
@@ -64,15 +59,54 @@ namespace impls
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
 		MPI_BMG2_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
-		                         sten.len(0), sten.len(1), kf, ifd, nstencil, BMG_RELAX_SYM,
+		                         so.len(0), so.len(1), kf, ifd, nstencil, BMG_RELAX_SYM,
 		                         updown, topo.is(0), topo.is(1), ctx->msg_geom.data(),
 		                         ctx->msg_geom.size(), ctx->pMSG.data(), ctx->msg_buffer.data(),
 		                         ctx->msg_buffer.size(), fcomm);
 	}
 
 
+	template<>
+	void mpi_relax_rbgs_point(const kernel_params & params,
+	                          const mpi::stencil_op<nine_pt> & so,
+	                          mpi::grid_func & x,
+	                          const mpi::grid_func & b,
+	                          const relax_stencil & sor,
+	                          cycle::Dir cycle_dir)
+	{
+		using namespace cedar::cdr2;
+		int k, kf, ifd;
+		int updown, nstencil;
+
+		auto & sod = const_cast<mpi::stencil_op<nine_pt>&>(so);
+		grid_topo & topo = sod.grid();
+		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
+		relax_stencil & sord = const_cast<relax_stencil&>(sor);
+		mpi::grid_func & bd = const_cast<mpi::grid_func&>(b);
+
+		k = topo.level()+1;
+		kf = topo.nlevel();
+
+		ifd = 0;
+		nstencil = 5;
+
+		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
+		else updown = BMG_DOWN;
+
+		// ibc = BMG_BCs_definite;
+		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+
+		MPI_BMG2_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
+		                         so.len(0), so.len(1), kf, ifd, nstencil, BMG_RELAX_SYM,
+		                         updown, topo.is(0), topo.is(1), ctx->msg_geom.data(),
+		                         ctx->msg_geom.size(), ctx->pMSG.data(), ctx->msg_buffer.data(),
+		                         ctx->msg_buffer.size(), fcomm);
+	}
+
+
+	template<>
 	void mpi_relax_lines_x(const kernel_params & params,
-	                       const mpi::stencil_op & so,
+	                       const mpi::stencil_op<five_pt> & so,
 	                       mpi::grid_func & x,
 	                       const mpi::grid_func & b,
 	                       const relax_stencil & sor,
@@ -83,22 +117,17 @@ namespace impls
 		int k, kf, ifd;
 		int updown, nstencil;
 
-		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);
+		auto & sod = const_cast<mpi::stencil_op<five_pt>&>(so);
 		grid_topo & topo = sod.grid();
 		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
-		grid_stencil & sten = sod.stencil();
 		relax_stencil & sord = const_cast<relax_stencil&>(sor);
 		mpi::grid_func & bd = const_cast<mpi::grid_func&>(b);
 
 		k = topo.level()+1;
 		kf = topo.nlevel();
-		if (sten.five_pt()) {
-			ifd = 1;
-			nstencil = 3;
-		} else {
-			ifd = 0;
-			nstencil = 5;
-		}
+
+		ifd = 1;
+		nstencil = 3;
 
 		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
 		else updown = BMG_DOWN;
@@ -111,7 +140,7 @@ namespace impls
 		cedar::len_t * xdatadist = &ctx->msg_geom.data()[ctx->pLS(ipL_LS_XDataDist,k-1)-1];
 
 		MPI_BMG2_SymStd_relax_lines_x(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
-		                              sten.len(0), sten.len(1), topo.is(0), topo.is(1),
+		                              so.len(0), so.len(1), topo.is(0), topo.is(1),
 		                              kf, nstencil, BMG_RELAX_SYM, updown,
 		                              xdatadist,
 		                              ctx->msg_geom.data(), ctx->msg_geom.size(),
@@ -121,8 +150,9 @@ namespace impls
 	}
 
 
-	void mpi_relax_lines_y(const kernel_params & params,
-	                       const mpi::stencil_op & so,
+	template<>
+	void mpi_relax_lines_x(const kernel_params & params,
+	                       const mpi::stencil_op<nine_pt> & so,
 	                       mpi::grid_func & x,
 	                       const mpi::grid_func & b,
 	                       const relax_stencil & sor,
@@ -133,22 +163,64 @@ namespace impls
 		int k, kf, ifd;
 		int updown, nstencil;
 
-		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);
+		auto & sod = const_cast<mpi::stencil_op<nine_pt>&>(so);
 		grid_topo & topo = sod.grid();
 		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
-		grid_stencil & sten = sod.stencil();
 		relax_stencil & sord = const_cast<relax_stencil&>(sor);
 		mpi::grid_func & bd = const_cast<mpi::grid_func&>(b);
 
 		k = topo.level()+1;
 		kf = topo.nlevel();
-		if (sten.five_pt()) {
-			ifd = 1;
-			nstencil = 3;
-		} else {
-			ifd = 0;
-			nstencil = 5;
-		}
+
+		ifd = 0;
+		nstencil = 5;
+
+
+		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
+		else updown = BMG_DOWN;
+
+		// ibc = BMG_BCs_definite;
+		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+		MPI_Fint xlinecomm = MPI_Comm_c2f(ctx->xlinecomm);
+		MPI_Fint ylinecomm = MPI_Comm_c2f(ctx->ylinecomm);
+
+		cedar::len_t * xdatadist = &ctx->msg_geom.data()[ctx->pLS(ipL_LS_XDataDist,k-1)-1];
+
+		MPI_BMG2_SymStd_relax_lines_x(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
+		                              so.len(0), so.len(1), topo.is(0), topo.is(1),
+		                              kf, nstencil, BMG_RELAX_SYM, updown,
+		                              xdatadist,
+		                              ctx->msg_geom.data(), ctx->msg_geom.size(),
+		                              ctx->pMSG.data(), ctx->msg_buffer.data(),
+		                              ctx->msg_buffer.size(), fcomm,
+		                              xlinecomm, ylinecomm);
+	}
+
+
+	template<>
+	void mpi_relax_lines_y(const kernel_params & params,
+	                       const mpi::stencil_op<five_pt> & so,
+	                       mpi::grid_func & x,
+	                       const mpi::grid_func & b,
+	                       const relax_stencil & sor,
+	                       mpi::grid_func & res,
+	                       cycle::Dir cycle_dir)
+	{
+		using namespace cedar::cdr2;
+		int k, kf, ifd;
+		int updown, nstencil;
+
+		auto & sod = const_cast<mpi::stencil_op<five_pt>&>(so);
+		grid_topo & topo = sod.grid();
+		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
+		relax_stencil & sord = const_cast<relax_stencil&>(sor);
+		mpi::grid_func & bd = const_cast<mpi::grid_func&>(b);
+
+		k = topo.level()+1;
+		kf = topo.nlevel();
+
+		ifd = 1;
+		nstencil = 3;
 
 		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
 		else updown = BMG_DOWN;
@@ -161,7 +233,53 @@ namespace impls
 		cedar::len_t * ydatadist = &ctx->msg_geom.data()[ctx->pLS(ipL_LS_YDataDist,k-1)-1];
 
 		MPI_BMG2_SymStd_relax_lines_y(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
-		                              sten.len(0), sten.len(1), topo.is(0), topo.is(1),
+		                              so.len(0), so.len(1), topo.is(0), topo.is(1),
+		                              kf, nstencil, BMG_RELAX_SYM, updown,
+		                              ydatadist,
+		                              ctx->msg_geom.data(), ctx->msg_geom.size(),
+		                              ctx->pMSG.data(), ctx->msg_buffer.data(),
+		                              ctx->msg_buffer.size(), fcomm,
+		                              xlinecomm, ylinecomm);
+	}
+
+
+	template<>
+	void mpi_relax_lines_y(const kernel_params & params,
+	                       const mpi::stencil_op<nine_pt> & so,
+	                       mpi::grid_func & x,
+	                       const mpi::grid_func & b,
+	                       const relax_stencil & sor,
+	                       mpi::grid_func & res,
+	                       cycle::Dir cycle_dir)
+	{
+		using namespace cedar::cdr2;
+		int k, kf, ifd;
+		int updown, nstencil;
+
+		auto & sod = const_cast<mpi::stencil_op<nine_pt>&>(so);
+		grid_topo & topo = sod.grid();
+		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
+		relax_stencil & sord = const_cast<relax_stencil&>(sor);
+		mpi::grid_func & bd = const_cast<mpi::grid_func&>(b);
+
+		k = topo.level()+1;
+		kf = topo.nlevel();
+
+		ifd = 0;
+		nstencil = 5;
+
+		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
+		else updown = BMG_DOWN;
+
+		// ibc = BMG_BCs_definite;
+		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+		MPI_Fint xlinecomm = MPI_Comm_c2f(ctx->xlinecomm);
+		MPI_Fint ylinecomm = MPI_Comm_c2f(ctx->ylinecomm);
+
+		cedar::len_t * ydatadist = &ctx->msg_geom.data()[ctx->pLS(ipL_LS_YDataDist,k-1)-1];
+
+		MPI_BMG2_SymStd_relax_lines_y(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
+		                              so.len(0), so.len(1), topo.is(0), topo.is(1),
 		                              kf, nstencil, BMG_RELAX_SYM, updown,
 		                              ydatadist,
 		                              ctx->msg_geom.data(), ctx->msg_geom.size(),

@@ -52,11 +52,9 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 		auto & cop = levels.get(lvl+1).A;
 		if (lvl == 0) {
 			auto & fop = levels.template get<fsten>(lvl).A;
-			// TODO: check this (lvl changed)
 			kreg->setup_interp(fop, cop, P);
 		} else {
 			auto & fop = levels.get(lvl).A;
-			// TODO: check this (lvl changed)
 			kreg->setup_interp(fop, cop, P);
 		}
 	}
@@ -69,11 +67,9 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 
 		if (lvl == 0) {
 			auto & fop = levels.template get<fsten>(lvl).A;
-			// TODO: check this (lvl changed)
 			kreg->galerkin_prod(P, fop, cop);
 		} else {
 			auto & fop = levels.get(lvl).A;
-			// TODO: check this (lvl changed)
 			kreg->galerkin_prod(P, fop, cop);
 		}
 	}
@@ -194,11 +190,8 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	}
 
 
-	/* template<class sten> */
-	/* 	void ncycle_helper(level_container<fsten>::value_type<sten> & level, */
-	/* 	                   int lvl, grid_func & x, const grid_func & b, int n) */
-	template<class T>
-		void ncycle_helper(T & level,
+	template<class sten>
+		void ncycle_helper(level_t<sten> & level,
 		                   std::size_t lvl, grid_func & x, const grid_func & b, int n)
 	{
 		auto & A = level.A;

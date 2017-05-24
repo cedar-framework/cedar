@@ -22,37 +22,64 @@ namespace impls
 {
 	using namespace cedar::cdr2;
 
+	template<>
 	void mpi_galerkin_prod(const kernel_params & params,
-	                       int kf, int kc, int nog,
 	                       const inter::mpi::prolong_op & P,
-	                       const mpi::stencil_op & fop,
-	                       mpi::stencil_op & copd)
+	                       const mpi::stencil_op<five_pt> & fop,
+	                       mpi::stencil_op<nine_pt> & cop)
 	{
 		int ifd, nstencil;
-		inter::mpi::prolong_op & Pd = const_cast<inter::mpi::prolong_op&>(P);
-		mpi::stencil_op & fopd = const_cast<mpi::stencil_op&>(fop);
+		int kf, kc, nog;
+		auto & Pd = const_cast<inter::mpi::prolong_op&>(P);
+		auto & fopd = const_cast<mpi::stencil_op<five_pt>&>(fop);
 		grid_topo & topo = fopd.grid();
-		grid_stencil & fsten = fopd.stencil();
-		grid_stencil & csten = copd.stencil();
 		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
 
-		if (fsten.five_pt()) {
-			ifd = 1;
-			nstencil = 3;
-		} else {
-			ifd = 0;
-			nstencil = 5;
-		}
+		ifd = 1;
+		nstencil = 3;
+
+		kc = topo.level() + 1;
+		nog = topo.nlevel();
+		kf = kc + 1;
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
-		MPI_BMG2_SymStd_SETUP_ITLI_ex(kf, kc, fopd.data(), copd.data(), Pd.data(),
-		                              fsten.len(0), fsten.len(1), csten.len(0), csten.len(1),
+		MPI_BMG2_SymStd_SETUP_ITLI_ex(kf, kc, fopd.data(), cop.data(), Pd.data(),
+		                              fop.len(0), fop.len(1), cop.len(0), cop.len(1),
 		                              topo.is(0), topo.is(1),
 		                              nog, ifd, nstencil,
 		                              ctx->msg_geom.data(), ctx->msg_geom.size(), ctx->pMSGSO.data(),
 		                              ctx->msg_buffer.data(), ctx->msg_buffer.size(), fcomm);
 	}
 
+
+	template<>
+	void mpi_galerkin_prod(const kernel_params & params,
+	                       const inter::mpi::prolong_op & P,
+	                       const mpi::stencil_op<nine_pt> & fop,
+	                       mpi::stencil_op<nine_pt> & cop)
+	{
+		int ifd, nstencil;
+		int kf, kc, nog;
+		auto & Pd = const_cast<inter::mpi::prolong_op&>(P);
+		auto & fopd = const_cast<mpi::stencil_op<nine_pt>&>(fop);
+		grid_topo & topo = fopd.grid();
+		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
+
+		ifd = 0;
+		nstencil = 5;
+
+		kc = topo.level() + 1;
+		nog = topo.nlevel();
+		kf = kc + 1;
+
+		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+		MPI_BMG2_SymStd_SETUP_ITLI_ex(kf, kc, fopd.data(), cop.data(), Pd.data(),
+		                              fop.len(0), fop.len(1), cop.len(0), cop.len(1),
+		                              topo.is(0), topo.is(1),
+		                              nog, ifd, nstencil,
+		                              ctx->msg_geom.data(), ctx->msg_geom.size(), ctx->pMSGSO.data(),
+		                              ctx->msg_buffer.data(), ctx->msg_buffer.size(), fcomm);
+	}
 
 }
 

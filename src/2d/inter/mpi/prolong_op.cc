@@ -2,13 +2,10 @@
 
 using namespace cedar::cdr2::inter::mpi;
 
-prolong_op::prolong_op(topo_ptr topo) : mpi::stencil_op(topo->nlocal(0)-2,
-                                                                    topo->nlocal(1)-2, true)
+prolong_op::prolong_op(topo_ptr topo) : mpi::stencil_op<inter::dir>(topo)
 {
 	grid_ = topo;
 }
-
-
 
 
 namespace cedar { namespace cdr2 { namespace inter { namespace mpi {

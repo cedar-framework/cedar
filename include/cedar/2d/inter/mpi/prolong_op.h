@@ -1,25 +1,26 @@
 #ifndef CEDAR_2D_INTER_MPI_PROLONG_OP_H
 #define CEDAR_2D_INTER_MPI_PROLONG_OP_H
 
-#include "cedar/2d/mpi/stencil_op.h"
-#include "cedar/2d/mpi/grid_func.h"
+#include <cedar/2d/mpi/stencil_op.h>
+#include <cedar/2d/mpi/grid_func.h>
+#include <cedar/2d/inter/types.h>
 
 
 namespace cedar { namespace cdr2 { namespace inter { namespace mpi {
 
 
 namespace mpi = cedar::cdr2::mpi;
-using iadd_pack = std::tuple<const prolong_op&, const mpi::grid_func &, const mpi::grid_func&>;
 
-class prolong_op : public mpi::stencil_op
+class prolong_op : public mpi::stencil_op<inter::dir>
 {
 public:
 	prolong_op() {};
 	prolong_op(topo_ptr grid);
 	friend std::ostream & operator<< (std::ostream &os, const prolong_op & P);
-	mpi::stencil_op * fine_op;
+	stencil_op<five_pt> * fine_op_five;
+	stencil_op<nine_pt> * fine_op_nine;
+	bool fine_is_five;
 	mpi::grid_func *residual;
-	friend iadd_pack operator*(const prolong_op&, const mpi::grid_func&);
 };
 
 }}}}

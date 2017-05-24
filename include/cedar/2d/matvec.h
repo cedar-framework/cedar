@@ -2,18 +2,19 @@
 #define CEDAR_2D_KERNEL_MATVEC_H
 
 #include <cedar/kernel_params.h>
-/* #include "cedar/2d/mpi/stencil_op.h" */
-/* #include "cedar/2d/mpi/grid_func.h" */
+#include "cedar/2d/mpi/stencil_op.h"
+#include "cedar/2d/mpi/grid_func.h"
 
 namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	/* namespace mpi = cedar::cdr2::mpi; */
-	/* void matvec(const kernel_params & params, */
-	/*             const mpi::stencil_op & so, */
-	/*             const mpi::grid_func & x, */
-	/*             mpi::grid_func & y); */
+	namespace mpi = cedar::cdr2::mpi;
+	template <class sten>
+	void matvec(const kernel_params & params,
+	            const mpi::stencil_op<sten> & so,
+	            const mpi::grid_func & x,
+	            mpi::grid_func & y);
 }
 
 }}}

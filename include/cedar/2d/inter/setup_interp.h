@@ -5,25 +5,25 @@
 #include "cedar/2d/grid_func.h"
 #include "cedar/2d/stencil_op.h"
 #include "cedar/2d/inter/prolong_op.h"
-/* #include "cedar/2d/mpi/stencil_op.h" */
-/* #include "cedar/2d/inter/mpi/prolong_op.h" */
+#include "cedar/2d/mpi/stencil_op.h"
+#include "cedar/2d/inter/mpi/prolong_op.h"
 
 namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	template<class sten>
+	template <class sten>
 	void setup_interp(const kernel_params & params,
 	                  const stencil_op<sten> & fop,
 	                  const stencil_op<nine_pt> & cop,
 	                  inter::prolong_op & P);
 
-	/* namespace mpi = cedar::cdr2::mpi; */
-	/* void mpi_setup_interp(const kernel_params & params, */
-	/*                       int kf, int kc, int nog, */
-	/*                       const mpi::stencil_op & fop, */
-	/*                       const mpi::stencil_op & cop, */
-	/*                       inter::mpi::prolong_op & P); */
+	namespace mpi = cedar::cdr2::mpi;
+	template <class sten>
+	void mpi_setup_interp(const kernel_params & params,
+	                      const mpi::stencil_op<sten> & fop,
+	                      const mpi::stencil_op<nine_pt> & cop,
+	                      inter::mpi::prolong_op & P);
 }
 
 }}}
