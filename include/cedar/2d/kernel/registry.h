@@ -4,14 +4,8 @@
 
 #include <cedar/kernel_registry.h>
 #include <cedar/types.h>
+#include <cedar/2d/types.h>
 #include <cedar/cycle/types.h>
-
-#include <cedar/2d/relax_stencil.h>
-#include <cedar/2d/grid_func.h>
-#include <cedar/2d/stencil_op.h>
-
-#include <cedar/2d/inter/restrict_op.h>
-#include <cedar/2d/inter/prolong_op.h>
 #include <cedar/2d/inter/restrict.h>
 #include <cedar/2d/inter/interp.h>
 #include <cedar/2d/inter/setup_interp.h>
@@ -25,12 +19,10 @@
 
 namespace cedar { namespace cdr2 { namespace kernel {
 
-			class registry : public kernel_registry<registry, stencil_op, relax_stencil,
-				inter::prolong_op, inter::restrict_op, grid_func>
+class registry : public kernel_registry<registry, stypes>
 {
 public:
-	using parent = kernel_registry<registry, stencil_op, relax_stencil,
-		inter::prolong_op, inter::restrict_op, grid_func>;
+	using parent = kernel_registry<registry, stypes>;
 registry(std::shared_ptr<kernel_params> params) : parent::kernel_registry(params) {}
 registry(config::reader & conf) : parent::kernel_registry(conf) {}
 	template<class sten>

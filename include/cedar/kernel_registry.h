@@ -12,14 +12,17 @@ namespace cedar {
 
 
 	template <class child,
-		template<class> class stencil_op,
-		class relax_stencil,
-		class prolong_op,
-		class restrict_op,
-		class grid_func>
-
+		class solver_types>
 struct kernel_registry
 {
+	// extract basic types from solver_types
+	template<class sten>
+	using stencil_op = typename solver_types::template stencil_op<sten>;
+	using grid_func = typename solver_types::grid_func;
+	using prolong_op = typename solver_types::prolong_op;
+	using restrict_op = typename solver_types::restrict_op;
+	using relax_stencil = typename solver_types::relax_stencil;
+
     kernel_registry(std::shared_ptr<kernel_params> params) : params(params) {}
 	kernel_registry(config::reader & conf) { params = build_kernel_params(conf); }
 
