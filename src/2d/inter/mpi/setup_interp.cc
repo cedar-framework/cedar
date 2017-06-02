@@ -19,15 +19,14 @@ namespace impls
 
 	template<>
 	void mpi_setup_interp(const kernel_params & params,
-	                      const mpi::stencil_op & fop<five_pt>,
-	                      const mpi::stencil_op & cop<nine_pt>,
+	                      const mpi::stencil_op<five_pt> & fop,
+	                      const mpi::stencil_op<nine_pt> & cop,
 	                      inter::mpi::prolong_op & P)
 	{
 		int ifd, nstencil, jpn;
 		int kf, kc, nog;
 
 		auto & fopd = const_cast<mpi::stencil_op<five_pt>&>(fop);
-		auto & copd = const_cast<mpi::stencil_op<nine_pt>&>(cop);
 		grid_topo & topo = fopd.grid();
 		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
 
@@ -42,7 +41,7 @@ namespace impls
 		BMG_get_bc(params.per_mask(), &jpn);
 
 		MPI_BMG2_SymStd_SETUP_interp_OI(kf, kc, fopd.data(), P.data(),
-		                                fsten.len(0), fsten.len(1), csten.len(0), csten.len(1),
+		                                fop.len(0), fop.len(1), cop.len(0), cop.len(1),
 		                                nog, ifd, nstencil, nog, jpn, topo.IGRD(),
 		                                ctx->msg_geom.data(), ctx->msg_geom.size(),
 		                                ctx->pMSG.data(), ctx->msg_buffer.data(),
@@ -52,15 +51,14 @@ namespace impls
 
 	template<>
 	void mpi_setup_interp(const kernel_params & params,
-	                      const mpi::stencil_op & fop<nine_pt>,
-	                      const mpi::stencil_op & cop<nine_pt>,
+	                      const mpi::stencil_op<nine_pt> & fop,
+	                      const mpi::stencil_op<nine_pt> & cop,
 	                      inter::mpi::prolong_op & P)
 	{
 		int ifd, nstencil, jpn;
 		int kf, kc, nog;
 
 		auto & fopd = const_cast<mpi::stencil_op<nine_pt>&>(fop);
-		auto & copd = const_cast<mpi::stencil_op<nine_pt>&>(cop);
 
 		grid_topo & topo = fopd.grid();
 		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
@@ -76,7 +74,7 @@ namespace impls
 		BMG_get_bc(params.per_mask(), &jpn);
 
 		MPI_BMG2_SymStd_SETUP_interp_OI(kf, kc, fopd.data(), P.data(),
-		                                fsten.len(0), fsten.len(1), csten.len(0), csten.len(1),
+		                                fop.len(0), fop.len(1), cop.len(0), cop.len(1),
 		                                nog, ifd, nstencil, nog, jpn, topo.IGRD(),
 		                                ctx->msg_geom.data(), ctx->msg_geom.size(),
 		                                ctx->pMSG.data(), ctx->msg_buffer.data(),

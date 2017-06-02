@@ -34,7 +34,6 @@ public:
 	real_t inf_norm() const;
 	grid_func & operator-=(const grid_func & rhs);
 	friend grid_func operator-(grid_func lhs, const grid_func &rhs) { return lhs -= rhs; }
-	grid_func & operator+=(iadd_t interp_add_package);
 	friend std::ostream& operator<< (std::ostream& os, const grid_func &obj);
 };
 

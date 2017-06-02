@@ -6,7 +6,6 @@
 #include <cedar/types.h>
 #include <cedar/2d/mpi/grid_func.h>
 #include <cedar/2d/util/topo.h>
-#include <cedar/2d/util/mpi_grid.h>
 #include <cedar/2d/mpi/solver.h>
 #include <cedar/2d/mpi/gallery.h>
 
@@ -109,7 +108,7 @@ int main(int argc, char *argv[])
 
 	set_problem(b);
 
-	mpi::solver bmg(std::move(so));
+	mpi::solver<five_pt> bmg(so);
 
 	MPI_Barrier(MPI_COMM_WORLD); // synchronize before timing solve
 	auto sol = bmg.solve(b);

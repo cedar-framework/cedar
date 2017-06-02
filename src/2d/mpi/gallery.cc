@@ -1,22 +1,15 @@
-#include <cedar/2d/kernel/mpi/factory.h>
 #include <cedar/2d/mpi/gallery.h>
 
 namespace cedar { namespace cdr2 { namespace mpi { namespace gallery {
 
 using namespace cedar;
 
-stencil_op poisson(topo_ptr grid)
+stencil_op<five_pt> poisson(topo_ptr grid)
 {
-	config::reader conf("");
-	auto kreg = kernel::mpi::factory::from_config(conf);
-
-	auto so = stencil_op(grid);
-	so.set_registry(kreg);
-	auto & sten = so.stencil();
-	sten.five_pt() = true;
+	auto so = stencil_op<five_pt>(grid);
 	auto & topo = so.grid();
 
-	sten.set(0);
+	so.set(0);
 
 	real_t nlx = topo.nlocal(0) - 2;
 	real_t nly = topo.nlocal(1) - 2;
@@ -61,19 +54,19 @@ stencil_op poisson(topo_ptr grid)
 
 	for (auto j : range<len_t>(jbeg, jend)) {
 		for (auto i : range<len_t>(1, iend)) {
-			sten(i,j,dir::S) = 1.0 * yh;
+			so(i,j,five_pt::s) = yh;
 		}
 	}
 
 	for (auto j : range<len_t>(1, jend)) {
 		for (auto i : range<len_t>(ibeg, iend)) {
-			sten(i,j,dir::W) = xh;
+			so(i,j,five_pt::w) = xh;
 		}
 	}
 
 	for (auto j : range<len_t>(1, j1)) {
 		for (auto i : range<len_t>(1, i1)) {
-			sten(i,j,dir::C) = 2*xh + 2*yh;
+			so(i,j,five_pt::c) = 2*xh + 2*yh;
 		}
 	}
 
@@ -82,18 +75,12 @@ stencil_op poisson(topo_ptr grid)
 
 
 
-stencil_op diag_diffusion(topo_ptr grid, real_t dx, real_t dy)
+stencil_op<five_pt> diag_diffusion(topo_ptr grid, real_t dx, real_t dy)
 {
-	config::reader conf("");
-	auto kreg = kernel::mpi::factory::from_config(conf);
-
-	auto so = stencil_op(grid);
-	so.set_registry(kreg);
-	auto & sten = so.stencil();
-	sten.five_pt() = true;
+	auto so = stencil_op<five_pt>(grid);
 	auto & topo = so.grid();
 
-	sten.set(0);
+	so.set(0);
 
 	real_t nlx = topo.nlocal(0) - 2;
 	real_t nly = topo.nlocal(1) - 2;
@@ -138,19 +125,19 @@ stencil_op diag_diffusion(topo_ptr grid, real_t dx, real_t dy)
 
 	for (auto j : range<len_t>(jbeg, jend)) {
 		for (auto i : range<len_t>(1, iend)) {
-			sten(i,j,dir::S) = dy * yh;
+			so(i,j,five_pt::s) = dy * yh;
 		}
 	}
 
 	for (auto j : range<len_t>(1, jend)) {
 		for (auto i : range<len_t>(ibeg, iend)) {
-			sten(i,j,dir::W) = dx * xh;
+			so(i,j,five_pt::w) = dx * xh;
 		}
 	}
 
 	for (auto j : range<len_t>(1, j1)) {
 		for (auto i : range<len_t>(1, i1)) {
-			sten(i,j,dir::C) = 2*dx*xh + 2*dy*yh;
+			so(i,j,five_pt::c) = 2*dx*xh + 2*dy*yh;
 		}
 	}
 

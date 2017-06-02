@@ -7,7 +7,7 @@
 
 namespace cedar { namespace cdr2 { namespace inter { namespace mpi {
 namespace mpi = cedar::cdr2::mpi;
-class restrict_op : public mpi::stencil_op
+class restrict_op
 {
 public:
 restrict_op() : P(nullptr) {}

@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include <cedar/types.h>
+#include <cedar/util/timer.h>
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 #include "cedar/2d/ftn/mpi/BMG_parameters_c.h"
 #include "cedar/2d/mpi/halo.h"
@@ -144,24 +145,41 @@ namespace impls
 	}
 
 
-	void msg_stencil_exchange(const kernel_params & params, mpi::stencil_op & sop)
+	template<>
+	void msg_stencil_exchange(const kernel_params & params, mpi::stencil_op<five_pt> & sop)
 	{
 		MsgCtx *ctx = (MsgCtx*) sop.halo_ctx;
 		grid_topo &topo = sop.grid();
-		grid_stencil & sten = sop.stencil();
 		int nstencil;
 
-		if (sten.five_pt()) {
-			nstencil = 3;
-		} else {
-			nstencil = 5;
-		}
+		nstencil = 3;
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
 		timer_begin("halo-stencil");
 		BMG2_SymStd_SETUP_fine_stencil(topo.level()+1, sop.data(),
-		                               sten.len(0), sten.len(1), nstencil,
+		                               sop.len(0), sop.len(1), nstencil,
+		                               ctx->msg_geom.data(), ctx->msg_geom.size(),
+		                               ctx->pMSGSO.data(), ctx->msg_buffer.data(),
+		                               ctx->msg_buffer.size(), fcomm);
+		timer_end("halo-stencil");
+	}
+
+
+	template<>
+	void msg_stencil_exchange(const kernel_params & params, mpi::stencil_op<nine_pt> & sop)
+	{
+		MsgCtx *ctx = (MsgCtx*) sop.halo_ctx;
+		grid_topo &topo = sop.grid();
+		int nstencil;
+
+		nstencil = 5;
+
+		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+
+		timer_begin("halo-stencil");
+		BMG2_SymStd_SETUP_fine_stencil(topo.level()+1, sop.data(),
+		                               sop.len(0), sop.len(1), nstencil,
 		                               ctx->msg_geom.data(), ctx->msg_geom.size(),
 		                               ctx->pMSGSO.data(), ctx->msg_buffer.data(),
 		                               ctx->msg_buffer.size(), fcomm);

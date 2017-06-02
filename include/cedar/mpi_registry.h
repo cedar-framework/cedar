@@ -23,7 +23,7 @@ class mpi_registry : public kernel_registry<child,
 {
 public:
 	using parent = kernel_registry<child, stencil_op, relax_stencil, prolong_op, restrict_op, grid_func>;
-mpi_registry(std::shared_ptr<kernel_params> params): parent::kernel_registry)(params) {}
+mpi_registry(std::shared_ptr<kernel_params> params): parent::kernel_registry(params) {}
 mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {}
 
 	void setup_nog(grid_topo &topo,

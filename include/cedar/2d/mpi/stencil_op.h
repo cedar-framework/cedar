@@ -9,12 +9,12 @@
 namespace cedar { namespace cdr2 { namespace mpi {
 
 template <class sten>
-class stencil_op : public stencil_op<sten>, public par_object
+class stencil_op : public cdr2::stencil_op<sten>, public par_object
 {
 public:
 	stencil_op() {}
 stencil_op(topo_ptr grd) :
-	stencil_op<sten>(grd->nlocal(0)-1, grd->nlocal(1)-1), // remove only one ghost since MPI needs an extra ghost
+	cdr2::stencil_op<sten>(grd->nlocal(0)-1, grd->nlocal(1)-1), // remove only one ghost since MPI needs an extra ghost
 		par_object(grd, grd->comm)
 		{
 			// TODO: verify this
@@ -22,6 +22,12 @@ stencil_op(topo_ptr grd) :
 			this->len(0)--;
 			this->len(1)--;
 		}
+	using cdr2::stencil_op<sten>::shape;
+	using cdr2::stencil_op<sten>::len;
+	using cdr2::stencil_op<sten>::set;
+	using cdr2::stencil_op<sten>::operator();
+	using cdr2::stencil_op<sten>::range;
+	using cdr2::stencil_op<sten>::grange;
 };
 
 template <class sten>

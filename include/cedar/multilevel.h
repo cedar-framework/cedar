@@ -330,9 +330,9 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 
 
 	config::reader & get_config() { return *conf; }
+	level_container levels;
 
 protected:
-	level_container levels;
 	std::function<void(grid_func &x, const grid_func &b)> coarse_solver;
 	std::shared_ptr<config::reader> conf;
 	std::shared_ptr<registry> kreg;

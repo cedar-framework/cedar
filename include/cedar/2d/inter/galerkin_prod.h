@@ -22,8 +22,8 @@ namespace impls
 	template <class sten>
 	void mpi_galerkin_prod(const kernel_params & params,
 	                       const inter::mpi::prolong_op & P,
-	                       const mpi::stencil_op & fop,
-	                       mpi::stencil_op & cop);
+	                       const mpi::stencil_op<sten> & fop,
+	                       mpi::stencil_op<nine_pt> & cop);
 }
 
 }}}

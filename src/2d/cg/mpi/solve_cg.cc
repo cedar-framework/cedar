@@ -3,6 +3,8 @@
 #include "cedar/2d/mpi/grid_func.h"
 #include "cedar/2d/ftn/BMG_parameters_c.h"
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
+#include "cedar/2d/solver.h"
+#include "cedar/2d/mpi/redist_solver.h"
 
 #include "cedar/2d/cg/solve_cg.h"
 
@@ -32,14 +34,14 @@ namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	void solve_cg_boxmg(const kernel_params & params, const solver &cg_solver,
+	void solve_cg_boxmg(const kernel_params & params, const solver<nine_pt> &cg_solver,
 	                    mpi::grid_func &x_par,
 	                    const mpi::grid_func &b)
 	{
 		int rank;
 
 		mpi::grid_func & b_par = const_cast<mpi::grid_func&>(b);
-		auto &coarse_solver = const_cast<solver&>(cg_solver);
+		auto &coarse_solver = const_cast<solver<nine_pt>&>(cg_solver);
 
 		grid_topo & topo = b_par.grid();
 		MsgCtx *ctx = (MsgCtx*) b_par.halo_ctx;
@@ -67,7 +69,7 @@ namespace impls
 		                          fcomm);
 
 		log::push_level("serial", coarse_solver.get_config());
-		auto & x_ser = coarse_solver.level(-1).x;
+		auto & x_ser = coarse_solver.levels.get(coarse_solver.levels.size()-1).x;
 		x_ser.set(0.0);
 		coarse_solver.vcycle(x_ser, bser);
 		log::pop_level();

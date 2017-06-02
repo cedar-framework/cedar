@@ -4,8 +4,14 @@
 #include <cedar/kernel_params.h>
 #include <cedar/2d/grid_func.h>
 #include <cedar/2d/mpi/grid_func.h>
-#include "cedar/2d/solver.h"
-#include "cedar/2d/mpi/redist_solver.h"
+
+namespace cedar { namespace cdr2 {
+		template<class> class solver;
+		enum class nine_pt;
+		namespace mpi {
+			class redist_solver;
+		}
+}}
 
 namespace cedar { namespace cdr2 { namespace kernel {
 
@@ -23,7 +29,7 @@ namespace impls
 	                     real_t *bbd);
 
 
-	void solve_cg_boxmg(const kernel_params & params, const solver & cg_solver,
+	void solve_cg_boxmg(const kernel_params & params, const solver<nine_pt> & cg_solver,
 	                    mpi::grid_func &x,
 	                    const mpi::grid_func &b);
 

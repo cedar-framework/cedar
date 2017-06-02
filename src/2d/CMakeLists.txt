@@ -22,12 +22,11 @@ if(ENABLE_MPI)
   add_subdirectory(util)
 
   list(APPEND sources
-	${interface_SOURCES}
+	# ${interface_SOURCES}
 	${util_SOURCES}
 	matvec.cc
 	mpi/grid_func.cc
 	mpi/halo.cc
-	mpi/solver.cc
 	mpi/stencil_op.cc
 	mpi/redist_solver.cc
 	mpi/residual.cc

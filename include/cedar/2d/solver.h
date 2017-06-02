@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include <cedar/multilevel.h>
+#include <cedar/config/reader.h>
 #include <cedar/2d/stencil_op.h>
 #include <cedar/2d/relax_stencil.h>
 #include <cedar/2d/inter/prolong_op.h>
@@ -89,13 +90,13 @@ template<> template<> inline level<nine_pt>& level_container<nine_pt>::get<nine_
 	#endif
 }
 
-template<> void level_container<nine_pt>::init(std::size_t nlevels)
+template<> inline void level_container<nine_pt>::init(std::size_t nlevels)
 {
 	lvls_nine.reserve(nlevels);
 	lvls_nine.emplace_back(fine_op);
 }
 
-template<> void level_container<five_pt>::init(std::size_t nlevels)
+template<> inline void level_container<five_pt>::init(std::size_t nlevels)
 {
 	lvls_five.emplace_back(fine_op);
 	lvls_nine.reserve(nlevels-1);
@@ -181,6 +182,11 @@ solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 		this->ABD = grid_func(abd_len_0, nxc*nyc, 0);
 		this->bbd = new real_t[this->ABD.len(1)];
 	}
+
+	void give_op(std::unique_ptr<stencil_op<fsten>> fop) {fop_ref = std::move(fop);}
+
+protected:
+	std::unique_ptr<stencil_op<fsten>> fop_ref;
 };
 
 }}
