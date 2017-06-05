@@ -34,6 +34,7 @@ level2mpi(topo_ptr topo) : parent::level(topo)
 
 level2mpi(stencil_op<sten> & A) : parent::level(A)
 	{
+		this->res = mpi::grid_func(A.grid_ptr());
 		this->SOR = {{relax_stencil(A.shape(0), A.shape(1)),
 		              relax_stencil(A.shape(0), A.shape(1))}};
 	}
@@ -42,11 +43,11 @@ level2mpi(stencil_op<sten> & A) : parent::level(A)
 
 template<class fsten>
 	class solver: public multilevel<level_container<level2mpi, fsten>,
-	kernel::mpi::registry, fsten, cdr2::mpi::solver<fsten>>
+	typename kernel::mpi::registry::parent, fsten, cdr2::mpi::solver<fsten>>
 {
 public:
 	using parent = multilevel<level_container<level2mpi, fsten>,
-		kernel::mpi::registry, fsten, cdr2::mpi::solver<fsten>>;
+		typename kernel::mpi::registry::parent, fsten, cdr2::mpi::solver<fsten>>;
 solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().comm)
 	{
 		this->kreg = std::make_shared<kernel::mpi::registry>(*(this->conf));
@@ -80,7 +81,7 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 	}
 
 
-	cdr2::mpi::grid_func solve(const cdr2::mpi::grid_func & b)
+	virtual cdr2::mpi::grid_func solve(const cdr2::mpi::grid_func & b) override
 	{
 		auto kernels = this->kernel_registry();
 		auto & bd = const_cast<cdr2::mpi::grid_func&>(b);
@@ -89,7 +90,7 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 	}
 
 
-	void solve(const cdr2::mpi::grid_func & b, cdr2::mpi::grid_func & x)
+	virtual void solve(const cdr2::mpi::grid_func & b, cdr2::mpi::grid_func & x) override
 	{
 		auto kernels = this->kernel_registry();
 		auto & bd = const_cast<cdr2::mpi::grid_func&>(b);
@@ -97,11 +98,11 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 		return parent::solve(b, x);
 	}
 
-	void setup_cg_solve()
+	virtual void setup_cg_solve() override
 	{
 		auto params = build_kernel_params(*(this->conf));
 		auto kernels = this->kernel_registry();
-		auto & cop = this->levels.get(this->levels().size() - 1).A;
+		auto & cop = this->levels.get(this->levels.size() - 1).A;
 		std::string cg_solver_str = this->conf->template get<std::string>("solver.cg-solver", "LU");
 
 		if (cg_solver_str == "LU")

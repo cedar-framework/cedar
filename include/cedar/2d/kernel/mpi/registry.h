@@ -19,6 +19,7 @@
 #include <cedar/2d/inter/mpi/restrict_op.h>
 #include <cedar/2d/cg/setup_cg_boxmg.h>
 #include <cedar/2d/cg/setup_cg_redist.h>
+#include <cedar/2d/kernel/setup_nog.h>
 
 namespace cedar { namespace cdr2 { namespace mpi {
 			class redist_solver;
@@ -36,6 +37,13 @@ registry(std::shared_ptr<kernel_params> params): parent::mpi_registry(params) {}
 registry(config::reader & conf) : parent::mpi_registry(conf) {}
 
 	using parent::halo_exchange;
+
+
+	void setup_nog(grid_topo & topo,
+	               len_t min_coarse, int *nog)
+	{
+		impls::fortran_setup_nog(*params, topo, min_coarse, nog);
+	}
 
 	template <class sten>
 		void setup_interp(const mpi::stencil_op<sten> & fop,

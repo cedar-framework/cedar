@@ -39,7 +39,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	}
 
 
-	void setup_cg_solve()
+	virtual void setup_cg_solve()
 	{
 		auto & cop = levels.get(levels.size() - 1).A;
 		kreg->setup_cg_lu(cop, ABD);
@@ -262,7 +262,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	}
 
 
-	grid_func solve(const grid_func & b)
+	virtual grid_func solve(const grid_func & b)
 	{
 		auto & level = levels.template get<fsten>(0);
 		grid_func x = grid_func::zeros_like(b);
@@ -287,7 +287,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	}
 
 
-	void solve(const grid_func & b, grid_func & x)
+	virtual void solve(const grid_func & b, grid_func & x)
 	{
 		auto & level = levels.template get<fsten>(0);
 		int maxiter = conf->get<int>("solver.max-iter", 10);
