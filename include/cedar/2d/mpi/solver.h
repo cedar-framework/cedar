@@ -8,6 +8,7 @@
 
 #include <cedar/multilevel.h>
 #include <cedar/level.h>
+#include <cedar/2d/level_container.h>
 #include <cedar/2d/mpi/stencil_op.h>
 #include <cedar/2d/relax_stencil.h>
 #include <cedar/2d/inter/mpi/prolong_op.h>
@@ -20,95 +21,32 @@
 namespace cedar { namespace cdr2 { namespace mpi {
 
 template<class sten>
-struct level1
+	struct level2mpi : public level<sten, stypes>
 {
-level1(topo_ptr topo): Adata(topo), A(Adata),
-		P(topo), x(topo), b(topo), res(topo),
-		SOR{{relax_stencil(topo->nlocal(0)-2, topo->nlocal(1)-2),
-				relax_stencil(topo->nlocal(0)-2, topo->nlocal(1)-2)}} {
-	R.associate(&P);
-}
-level1(stencil_op<sten> & A) : A(A), res(A.grid_ptr()),
-		SOR{{relax_stencil(A.shape(0), A.shape(1)),
-				relax_stencil(A.shape(0), A.shape(1))}} {}
-	mpi::stencil_op<sten>    Adata;
-	mpi::stencil_op<sten> &  A;
-	inter::mpi::prolong_op   P;
-	inter::mpi::restrict_op  R;
-	mpi::grid_func           x;
-	mpi::grid_func           b;
-	mpi::grid_func           res;
-	std::array<relax_stencil,2> SOR;
-
-	std::function<void(const stencil_op<sten> & A, grid_func & x, const grid_func & b)> presmoother;
-	std::function<void(const stencil_op<sten> & A, grid_func & x, const grid_func & b)> postsmoother;
-};
-
-template<class sten>
-class level_container1
-{
-public:
-	template<class rsten> using value_type = level1<rsten>;
-level_container1(stencil_op<sten> & fine_op) : fine_op(fine_op) {}
-	void init(std::size_t nlevels);
-	void add(topo_ptr topo) {
-		lvls_nine.emplace_back(topo);
+	using parent = level<sten, stypes>;
+level2mpi(topo_ptr topo) : parent::level(topo)
+	{
+		this->SOR = {{relax_stencil(topo->nlocal(0)-2, topo->nlocal(1)-2),
+		              relax_stencil(topo->nlocal(0)-2, topo->nlocal(1)-2)}};
+		this->R.associate(&this->P);
 	}
-	template<class rsten=nine_pt> level1<rsten>&  get(std::size_t i);
-	std::size_t size() { return lvls_nine.size() + lvls_five.size(); }
 
-protected:
-	stencil_op<sten> & fine_op;
-	std::vector<level1<nine_pt>> lvls_nine;
-	std::vector<level1<five_pt>> lvls_five;
+
+level2mpi(stencil_op<sten> & A) : parent::level(A)
+	{
+		this->SOR = {{relax_stencil(A.shape(0), A.shape(1)),
+		              relax_stencil(A.shape(0), A.shape(1))}};
+	}
 };
 
-template<> template<> inline level1<nine_pt>& level_container1<five_pt>::get<nine_pt>(std::size_t i)
-{
-	if (i==0) log::error << "fine grid operator is five point (not nine)!" << std::endl;
-	#ifdef BOUNDS_CHECK
-	return lvls_nine.at(i - lvls_five.size());
-	#else
-	return lvls_nine[i - lvls_five.size()];
-	#endif
-}
-
-template<> template<> inline level1<five_pt>& level_container1<five_pt>::get<five_pt>(std::size_t i)
-{
-	if (i != 0) log::error << "coarse operators are nine point (not five)!" << std::endl;
-	#ifdef BOUNDS_CHECK
-	return lvls_five.at(0);
-	#else
-	return lvls_five[0];
-	#endif
-}
-
-template<> template<> inline level1<nine_pt>& level_container1<nine_pt>::get<nine_pt>(std::size_t i)
-{
-	#ifdef BOUNDS_CHECK
-	return lvls_nine.at(i);
-	#else
-	return lvls_nine[i];
-	#endif
-}
-
-template<> inline void level_container1<nine_pt>::init(std::size_t nlevels)
-{
-	lvls_nine.reserve(nlevels);
-	lvls_nine.emplace_back(fine_op);
-}
-
-template<> inline void level_container1<five_pt>::init(std::size_t nlevels)
-{
-	lvls_five.emplace_back(fine_op);
-	lvls_nine.reserve(nlevels-1);
-}
 
 template<class fsten>
-	class solver: public multilevel<level1, level_container1<fsten>, cdr2::mpi::stencil_op, cdr2::mpi::grid_func, kernel::mpi::registry, fsten, cdr2::mpi::solver<fsten>>
+	class solver: public multilevel<level_container<level2mpi, fsten>,
+	kernel::mpi::registry, fsten, cdr2::mpi::solver<fsten>>
 {
 public:
-	using parent = multilevel<level1, level_container1<fsten>, cdr2::mpi::stencil_op, cdr2::mpi::grid_func, kernel::mpi::registry, fsten, cdr2::mpi::solver<fsten>>;
+	using parent = multilevel<level_container<level2mpi, fsten>,
+		kernel::mpi::registry, fsten, cdr2::mpi::solver<fsten>>;
 solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().comm)
 	{
 		this->kreg = std::make_shared<kernel::mpi::registry>(*(this->conf));

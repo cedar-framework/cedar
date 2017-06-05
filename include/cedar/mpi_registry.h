@@ -7,22 +7,22 @@
 namespace cedar {
 
 	template <class child,
-		template<class> class stencil_op,
-		class relax_stencil,
-		class prolong_op,
-		class restrict_op,
-		class grid_func,
+		class solver_types,
 		class redist_solver,
 		class serial_solver>
 class mpi_registry : public kernel_registry<child,
-		                                    stencil_op,
-		                                    relax_stencil,
-		                                    prolong_op,
-		                                    restrict_op,
-		                                    grid_func>
+                                    		solver_types>
 {
 public:
-	using parent = kernel_registry<child, stencil_op, relax_stencil, prolong_op, restrict_op, grid_func>;
+	using parent = kernel_registry<child, solver_types>;
+	// extract basic types from solver_types
+	template<class sten>
+	using stencil_op = typename solver_types::template stencil_op<sten>;
+	using grid_func = typename solver_types::grid_func;
+	using prolong_op = typename solver_types::prolong_op;
+	using restrict_op = typename solver_types::restrict_op;
+	using relax_stencil = typename solver_types::relax_stencil;
+
 mpi_registry(std::shared_ptr<kernel_params> params): parent::kernel_registry(params) {}
 mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {}
 

@@ -5,6 +5,7 @@
 #include <cedar/mpi_registry.h>
 #include <cedar/types.h>
 #include <cedar/cycle/types.h>
+#include <cedar/2d/mpi/types.h>
 
 #include <cedar/2d/matvec.h>
 #include <cedar/2d/mpi/halo.h>
@@ -27,12 +28,10 @@ namespace cedar { namespace cdr2 { namespace mpi {
 
 namespace cedar { namespace cdr2 { namespace kernel { namespace mpi {
 	namespace mpi = cedar::cdr2::mpi;
-	class registry : public mpi_registry<registry, mpi::stencil_op, relax_stencil,
-		inter::mpi::prolong_op, inter::mpi::restrict_op, mpi::grid_func, cdr2::mpi::redist_solver, solver<nine_pt>>
+	class registry : public mpi_registry<registry, cdr2::mpi::stypes, cdr2::mpi::redist_solver, solver<nine_pt>>
 {
 public:
-	using parent = mpi_registry<registry, mpi::stencil_op, relax_stencil,
-		inter::mpi::prolong_op, inter::mpi::restrict_op, mpi::grid_func, mpi::redist_solver, solver<nine_pt>>;
+	using parent = mpi_registry<registry, cdr2::mpi::stypes, cdr2::mpi::redist_solver, solver<nine_pt>>;
 registry(std::shared_ptr<kernel_params> params): parent::mpi_registry(params) {}
 registry(config::reader & conf) : parent::mpi_registry(conf) {}
 
