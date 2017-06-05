@@ -29,7 +29,7 @@ struct kernel_registry
 	template<class stencil0, class stencil1>
 	void setup_interp(const stencil_op<stencil0> & fop,
 	                  const stencil_op<stencil1> &cop, prolong_op & P) {
-
+		log::debug << "Running kernel <setup_interp>" << std::endl;
 		static_cast<child*>(this)->setup_interp(fop, cop, P);
 	}
 
@@ -38,6 +38,7 @@ struct kernel_registry
 	void galerkin_prod(const prolong_op & P,
 	                   const stencil_op<stencil0> & fop,
 	                   stencil_op<stencil1> & cop) {
+		log::debug << "Running kernel <galerkin_prod>" << std::endl;
 		static_cast<child*>(this)->galerkin_prod(P, fop, cop);
 	}
 
@@ -45,6 +46,7 @@ struct kernel_registry
 	template<class stencil>
 	void setup_relax(const stencil_op<stencil> & so,
 	                 relax_stencil & sor) {
+		log::debug << "Running kernel <setup_relax>" << std::endl;
 		static_cast<child*>(this)->setup_relax(so, sor);
 	}
 
@@ -52,6 +54,7 @@ struct kernel_registry
 	template<class stencil>
 	void setup_relax_x(const stencil_op<stencil> & so,
 	                   relax_stencil & sor) {
+		log::debug << "Running kernel <setup_relax_x>" << std::endl;
 		static_cast<child*>(this)->setup_relax_x(so, sor);
 	}
 
@@ -59,6 +62,7 @@ struct kernel_registry
 	template<class stencil>
 	void setup_relax_y(const stencil_op<stencil> & so,
 	                   relax_stencil & sor) {
+		log::debug << "Running kernel <setup_relax_y>" << std::endl;
 		static_cast<child*>(this)->setup_relax_y(so, sor);
 	}
 
@@ -66,6 +70,7 @@ struct kernel_registry
 	template<class stencil>
 	void setup_relax_xy(const stencil_op<stencil> & so,
 	                            relax_stencil & sor) {
+		log::debug << "Running kernel <setup_relax_xy" << std::endl;
 		static_cast<child*>(this)->setup_relax_xy(so, sor);
 	}
 
@@ -73,6 +78,7 @@ struct kernel_registry
 	template<class stencil>
 	void setup_cg_lu(const stencil_op<stencil> & so,
 	                 grid_func & ABD) {
+		log::debug << "Running kernel <setup_cg_lu>" << std::endl;
 		static_cast<child*>(this)->setup_cg_lu(so, ABD);
 	}
 
@@ -83,6 +89,7 @@ struct kernel_registry
 	           const grid_func & b,
 	           const relax_stencil & sor,
 	           cycle::Dir cdir) {
+		log::debug << "Running kernel <relax>" << std::endl;
 		static_cast<child*>(this)->relax(so, x, b, sor, cdir);
 	}
 
@@ -94,6 +101,7 @@ struct kernel_registry
 	                   const relax_stencil & sor,
 	                   grid_func &res,
 	                   cycle::Dir cdir) {
+		log::debug << "Running kernel <relax_lines_x>" << std::endl;
 		static_cast<child*>(this)->relax_lines_x(so, x, b, sor, res, cdir);
 	}
 
@@ -105,6 +113,7 @@ struct kernel_registry
 	                   const relax_stencil & sor,
 	                   grid_func &res,
 	                   cycle::Dir cdir) {
+		log::debug << "Running kernel <relax_lines_y>" << std::endl;
 		static_cast<child*>(this)->relax_lines_y(so, x, b, sor, res, cdir);
 	}
 
@@ -113,6 +122,7 @@ struct kernel_registry
 	              const grid_func &b,
 	              const grid_func &ABD,
 	              real_t *bbd) {
+		log::debug << "Running kernel <solve_cg>" << std::endl;
 		static_cast<child*>(this)->solve_cg(x, b, ABD, bbd);
 	}
 
@@ -121,6 +131,7 @@ struct kernel_registry
 	void matvec(const stencil_op<stencil> & so,
 	            const grid_func & x,
 	            grid_func & y) {
+		log::debug << "Running kernel <matvec>" << std::endl;
 		static_cast<child*>(this)->matvec(so, x, y);
 	}
 
@@ -128,6 +139,7 @@ struct kernel_registry
 	void matvec(const restrict_op & R,
 	            const grid_func & x,
 	            grid_func & y) {
+		log::debug << "Running kernel <restriction>" << std::endl;
 		static_cast<child*>(this)->matvec(R, x, y);
 	}
 
@@ -137,6 +149,7 @@ struct kernel_registry
 	              const grid_func & x,
 	              const grid_func & b,
 	              grid_func & r) {
+		log::debug << "Running kernel <residual>" << std::endl;
 		static_cast<child*>(this)->residual(so, x, b, r);
 	}
 
@@ -145,6 +158,7 @@ struct kernel_registry
 	                const grid_func & coarse,
 	                const grid_func & residual,
 	                grid_func & fine) {
+		log::debug << "Running kernel <interp_add>" << std::endl;
 		static_cast<child*>(this)->interp_add(P, coarse, residual, fine);
 	}
 
