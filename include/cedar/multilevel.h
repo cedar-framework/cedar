@@ -8,12 +8,16 @@
 namespace cedar {
 
 
-	template <template<class> class level_t, class level_container,
-		      template<class> class stencil_op,
-		      class grid_func,class registry, class fsten, class child>
+	template <class level_container,
+		      class registry, class fsten, class child>
 class multilevel
 {
 public:
+	template<class sten>
+		using level_t = typename level_container::template level_t<sten>;
+	template<class sten>
+		using stencil_op = typename level_t<fsten>::template stencil_op<sten>;
+	using grid_func = typename level_t<fsten>::grid_func;
 	using conf_ptr = std::shared_ptr<config::reader>;
 multilevel(stencil_op<fsten> & fop) : levels(fop), conf(std::make_shared<config::reader>("config.json")) {}
 multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}

@@ -36,12 +36,12 @@ level2(stencil_op<sten> & A) : parent::level(A)
 };
 
 template<class fsten>
-class solver: public multilevel<level2, level_container<level2,fsten>,
-	stencil_op, grid_func, kernel::registry, fsten, solver<fsten>>
+class solver: public multilevel<level_container<level2,fsten>,
+	kernel::registry, fsten, solver<fsten>>
 {
 public:
-	using parent = multilevel<level2, level_container<level2, fsten>,
-		stencil_op, grid_func, kernel::registry, fsten, solver<fsten>>;
+	using parent = multilevel<level_container<level2, fsten>,
+		kernel::registry, fsten, solver<fsten>>;
 solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 	{
 		this->kreg = std::make_shared<kernel::registry>(*(this->conf));
