@@ -6,8 +6,10 @@
 #include <cstddef>
 #include <algorithm>
 
+#include <cedar/level.h>
 #include <cedar/multilevel.h>
 #include <cedar/config/reader.h>
+#include <cedar/2d/level_container.h>
 #include <cedar/2d/stencil_op.h>
 #include <cedar/2d/relax_stencil.h>
 #include <cedar/2d/inter/prolong_op.h>
@@ -17,97 +19,28 @@
 namespace cedar { namespace cdr2 {
 
 template<class sten>
-struct level
+struct level2 : public level<sten, stypes>
 {
-level(len_t nx, len_t ny) : Adata(nx, ny), A(Adata),
-		P(nx, ny), x(nx, ny), res(nx, ny), b(nx, ny),
-		SOR{{relax_stencil(A.shape(0), A.shape(1)),
-		relax_stencil(A.shape(0), A.shape(1))}} {
-	R.associate(&P);
-}
-level(stencil_op<sten> & A) : A(A),
-		res(A.shape(0), A.shape(1)),
-		SOR{{relax_stencil(A.shape(0), A.shape(1)),
-				relax_stencil(A.shape(0), A.shape(1))}} {}
-	stencil_op<sten> Adata;
-	stencil_op<sten> & A;
-	inter::prolong_op  P;
-	inter::restrict_op R;
-	grid_func x;
-	grid_func res;
-	grid_func b;
-	std::array<relax_stencil, 2> SOR;
-
-	std::function<void(const stencil_op<sten> & A, grid_func & x, const grid_func & b)> presmoother;
-	std::function<void(const stencil_op<sten> & A, grid_func & x, const grid_func & b)> postsmoother;
-};
-
-template<class sten>
-class level_container
-{
-public:
-	template<class rsten> using value_type = level<rsten>;
-level_container(stencil_op<sten> & fine_op) : fine_op(fine_op) {}
-	void init(std::size_t nlevels);
-	void add(len_t nx, len_t ny) {
-		lvls_nine.emplace_back(nx, ny);
+	using parent = level<sten, stypes>;
+level2(len_t nx, len_t ny) : parent::level(nx, ny)
+	{
+		this->SOR = {{relax_stencil(nx, ny),
+		              relax_stencil(nx, ny)}};
+		this->R.associate(&this->P);
 	}
-	template<class rsten=nine_pt> level<rsten>&  get(std::size_t i);
-	std::size_t size() { return lvls_nine.size() + lvls_five.size(); }
-
-protected:
-	stencil_op<sten> & fine_op;
-	std::vector<level<nine_pt>> lvls_nine;
-	std::vector<level<five_pt>> lvls_five;
+level2(stencil_op<sten> & A) : parent::level(A)
+	{
+		this->SOR = {{relax_stencil(A.shape(0), A.shape(1)),
+		              relax_stencil(A.shape(0), A.shape(1))}};
+	}
 };
-
-template<> template<> inline level<nine_pt>& level_container<five_pt>::get<nine_pt>(std::size_t i)
-{
-	if (i==0) log::error << "fine grid operator is five point (not nine)!" << std::endl;
-	#ifdef BOUNDS_CHECK
-	return lvls_nine.at(i - lvls_five.size());
-	#else
-	return lvls_nine[i - lvls_five.size()];
-	#endif
-}
-
-template<> template<> inline level<five_pt>& level_container<five_pt>::get<five_pt>(std::size_t i)
-{
-	if (i != 0) log::error << "coarse operators are nine point (not five)!" << std::endl;
-	#ifdef BOUNDS_CHECK
-	return lvls_five.at(0);
-	#else
-	return lvls_five[0];
-	#endif
-}
-
-template<> template<> inline level<nine_pt>& level_container<nine_pt>::get<nine_pt>(std::size_t i)
-{
-	#ifdef BOUNDS_CHECK
-	return lvls_nine.at(i);
-	#else
-	return lvls_nine[i];
-	#endif
-}
-
-template<> inline void level_container<nine_pt>::init(std::size_t nlevels)
-{
-	lvls_nine.reserve(nlevels);
-	lvls_nine.emplace_back(fine_op);
-}
-
-template<> inline void level_container<five_pt>::init(std::size_t nlevels)
-{
-	lvls_five.emplace_back(fine_op);
-	lvls_nine.reserve(nlevels-1);
-}
 
 template<class fsten>
-class solver: public multilevel<level, level_container<fsten>,
+class solver: public multilevel<level2, level_container<level2,fsten>,
 	stencil_op, grid_func, kernel::registry, fsten, solver<fsten>>
 {
 public:
-	using parent = multilevel<level, level_container<fsten>,
+	using parent = multilevel<level2, level_container<level2, fsten>,
 		stencil_op, grid_func, kernel::registry, fsten, solver<fsten>>;
 solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 	{
