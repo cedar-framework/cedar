@@ -12,8 +12,7 @@ if(ENABLE_MPI)
 	inter/mpi/restrict_op.cc
 	inter/mpi/restrict.cc
 	inter/mpi/galerkin_prod.cc
-	inter/mpi/interp.cc
-	inter/mpi/setup_interp.cc)
+	inter/mpi/interp.cc)
 endif()
 
 set(inter_SOURCES ${sources} PARENT_SCOPE)
