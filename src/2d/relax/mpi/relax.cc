@@ -114,7 +114,7 @@ namespace impls
 	                       cycle::Dir cycle_dir)
 	{
 		using namespace cedar::cdr2;
-		int k, kf, ifd;
+		int k, kf;
 		int updown, nstencil;
 
 		auto & sod = const_cast<mpi::stencil_op<five_pt>&>(so);
@@ -126,7 +126,6 @@ namespace impls
 		k = topo.level()+1;
 		kf = topo.nlevel();
 
-		ifd = 1;
 		nstencil = 3;
 
 		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
@@ -160,7 +159,7 @@ namespace impls
 	                       cycle::Dir cycle_dir)
 	{
 		using namespace cedar::cdr2;
-		int k, kf, ifd;
+		int k, kf;
 		int updown, nstencil;
 
 		auto & sod = const_cast<mpi::stencil_op<nine_pt>&>(so);
@@ -172,9 +171,7 @@ namespace impls
 		k = topo.level()+1;
 		kf = topo.nlevel();
 
-		ifd = 0;
 		nstencil = 5;
-
 
 		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
 		else updown = BMG_DOWN;
@@ -207,7 +204,7 @@ namespace impls
 	                       cycle::Dir cycle_dir)
 	{
 		using namespace cedar::cdr2;
-		int k, kf, ifd;
+		int k, kf;
 		int updown, nstencil;
 
 		auto & sod = const_cast<mpi::stencil_op<five_pt>&>(so);
@@ -219,7 +216,6 @@ namespace impls
 		k = topo.level()+1;
 		kf = topo.nlevel();
 
-		ifd = 1;
 		nstencil = 3;
 
 		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
@@ -253,7 +249,7 @@ namespace impls
 	                       cycle::Dir cycle_dir)
 	{
 		using namespace cedar::cdr2;
-		int k, kf, ifd;
+		int k, kf;
 		int updown, nstencil;
 
 		auto & sod = const_cast<mpi::stencil_op<nine_pt>&>(so);
@@ -265,7 +261,6 @@ namespace impls
 		k = topo.level()+1;
 		kf = topo.nlevel();
 
-		ifd = 0;
 		nstencil = 5;
 
 		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;

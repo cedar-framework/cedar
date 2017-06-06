@@ -156,103 +156,69 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 		}
 	}
 
+
+	grid_topo & get_grid(std::size_t i)
+	{
+		if (i == 0) {
+			auto & fop = this->levels.template get<fsten>(i).A;
+			return fop.grid();
+		} else {
+			auto & sop = this->levels.get(i).A;
+			return sop.grid();
+		}
+	}
+
+
 	void setup_space(std::size_t nlevels)
 	{
 		this->levels.init(nlevels);
 		for (auto i : range<std::size_t>(nlevels-1)) {
-			// TODO: remove copy-paste coding
-			if (i == 0) {
-				auto & fop = this->levels.template get<fsten>(i).A;
-				fop.grid().grow(nlevels);
 
-				int kc = nlevels - i - 1;
+			auto & fgrid = this->get_grid(i);
+			if (i == 0)
+				fgrid.grow(nlevels);
 
-				grid_topo & fgrid = fop.grid();
-				auto cgrid = std::make_shared<grid_topo>(fgrid.get_igrd(), kc, nlevels);
-				cgrid->comm = fgrid.comm;
+			int kc = nlevels - i - 2;
 
-				len_t NLxg = fgrid.nlocal(0) - 2;
-				len_t NLyg = fgrid.nlocal(1) - 2;
-				len_t NGxg = (fgrid.nglobal(0) - 1) / 2 + 2;
-				len_t NGyg = (fgrid.nglobal(1) - 1) / 2 + 2;
+			auto cgrid = std::make_shared<grid_topo>(fgrid.get_igrd(), kc, nlevels);
+			cgrid->comm = fgrid.comm;
 
-				cgrid->nglobal(0) = NGxg;
-				cgrid->nglobal(1) = NGyg;
+			len_t NLxg = fgrid.nlocal(0) - 2;
+			len_t NLyg = fgrid.nlocal(1) - 2;
+			len_t NGxg = (fgrid.nglobal(0) - 1) / 2 + 2;
+			len_t NGyg = (fgrid.nglobal(1) - 1) / 2 + 2;
 
-				if ((fgrid.is(0) % 2) == 1) {
-					cgrid->is(0) = (fgrid.is(0) + 1) / 2;
-					NLxg = (NLxg + 1) / 2;
-				} else {
-					cgrid->is(0) = fgrid.is(0)/2 + 1;
-					if (NLxg % 2 == 1) NLxg = (NLxg-1)/2;
-					else NLxg = (NLxg+1)/2;
-				}
+			cgrid->nglobal(0) = NGxg;
+			cgrid->nglobal(1) = NGyg;
 
-
-				if (fgrid.is(1) % 2 == 1) {
-					cgrid->is(1) = (fgrid.is(1)+1) / 2;
-					NLyg = (NLyg+1) / 2;
-				} else {
-					cgrid->is(1) = fgrid.is(1) / 2 + 1;
-					if (NLyg % 2 == 1) NLyg = (NLyg - 1) / 2;
-					else NLyg = (NLyg+1)/2;
-				}
-
-				cgrid->nlocal(0) = NLxg + 2;
-				cgrid->nlocal(1) = NLyg + 2;
-
-				cgrid->nproc(0) = fgrid.nproc(0);
-				cgrid->nproc(1) = fgrid.nproc(1);
-				cgrid->coord(0) = fgrid.coord(0);
-				cgrid->coord(1) = fgrid.coord(1);
-
-				this->levels.add(cgrid);
+			if ((fgrid.is(0) % 2) == 1) {
+				cgrid->is(0) = (fgrid.is(0) + 1) / 2;
+				NLxg = (NLxg + 1) / 2;
 			} else {
-				auto & fop = this->levels.get(i).A;
-
-				int kc = nlevels - i - 1;
-
-				grid_topo & fgrid = fop.grid();
-				auto cgrid = std::make_shared<grid_topo>(fgrid.get_igrd(), kc, nlevels);
-				cgrid->comm = fgrid.comm;
-
-				len_t NLxg = fgrid.nlocal(0) - 2;
-				len_t NLyg = fgrid.nlocal(1) - 2;
-				len_t NGxg = (fgrid.nglobal(0) - 1) / 2 + 2;
-				len_t NGyg = (fgrid.nglobal(1) - 1) / 2 + 2;
-
-				cgrid->nglobal(0) = NGxg;
-				cgrid->nglobal(1) = NGyg;
-
-				if ((fgrid.is(0) % 2) == 1) {
-					cgrid->is(0) = (fgrid.is(0) + 1) / 2;
-					NLxg = (NLxg + 1) / 2;
-				} else {
-					cgrid->is(0) = fgrid.is(0)/2 + 1;
-					if (NLxg % 2 == 1) NLxg = (NLxg-1)/2;
-					else NLxg = (NLxg+1)/2;
-				}
-
-
-				if (fgrid.is(1) % 2 == 1) {
-					cgrid->is(1) = (fgrid.is(1)+1) / 2;
-					NLyg = (NLyg+1) / 2;
-				} else {
-					cgrid->is(1) = fgrid.is(1) / 2 + 1;
-					if (NLyg % 2 == 1) NLyg = (NLyg - 1) / 2;
-					else NLyg = (NLyg+1)/2;
-				}
-
-				cgrid->nlocal(0) = NLxg + 2;
-				cgrid->nlocal(1) = NLyg + 2;
-
-				cgrid->nproc(0) = fgrid.nproc(0);
-				cgrid->nproc(1) = fgrid.nproc(1);
-				cgrid->coord(0) = fgrid.coord(0);
-				cgrid->coord(1) = fgrid.coord(1);
-
-				this->levels.add(cgrid);
+				cgrid->is(0) = fgrid.is(0)/2 + 1;
+				if (NLxg % 2 == 1) NLxg = (NLxg-1)/2;
+				else NLxg = (NLxg+1)/2;
 			}
+
+
+			if (fgrid.is(1) % 2 == 1) {
+				cgrid->is(1) = (fgrid.is(1)+1) / 2;
+				NLyg = (NLyg+1) / 2;
+			} else {
+				cgrid->is(1) = fgrid.is(1) / 2 + 1;
+				if (NLyg % 2 == 1) NLyg = (NLyg - 1) / 2;
+				else NLyg = (NLyg+1)/2;
+			}
+
+			cgrid->nlocal(0) = NLxg + 2;
+			cgrid->nlocal(1) = NLyg + 2;
+
+			cgrid->nproc(0) = fgrid.nproc(0);
+			cgrid->nproc(1) = fgrid.nproc(1);
+			cgrid->coord(0) = fgrid.coord(0);
+			cgrid->coord(1) = fgrid.coord(1);
+
+			this->levels.add(cgrid);
 		}
 		setup_halo();
 	}

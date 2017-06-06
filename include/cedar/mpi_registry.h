@@ -29,6 +29,7 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {}
 	void setup_nog(grid_topo &topo,
 	               len_t min_coarse, int *nog)
 	{
+		log::debug << "Running kernel <setup_nog>" << std::endl;
 		static_cast<child*>(this)->setup_nog(topo, min_coarse, nog);
 	}
 
@@ -36,18 +37,21 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {}
 	void halo_setup(grid_topo &topo,
 	                void **halo_ctx)
 	{
+		log::debug << "Running kernel <halo_setup>" << std::endl;
 		static_cast<child*>(this)->halo_setup(topo, halo_ctx);
 	}
 
 
 	void halo_exchange(grid_func &f)
 	{
+		log::debug << "Running kernel <halo_exchange" << std::endl;
 		static_cast<child*>(this)->halo_exchange(f);
 	}
 
 
 	void halo_exchange(grid_func &f, void *halo_ctx)
 	{
+		log::debug << "Running kernel <halo_exchange>" << std::endl;
 		f.halo_ctx = halo_ctx;
 		static_cast<child*>(this)->halo_exchange(f);
 	}
@@ -56,6 +60,7 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {}
 	template <class sten>
 	void halo_stencil_exchange(stencil_op<sten> & so)
 	{
+		log::debug << "Running kernel <halo_stencil_exchange>" << std::endl;
 		static_cast<child*>(this)->halo_stencil_exchange(so);
 	}
 
@@ -65,6 +70,7 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {}
 	                    std::shared_ptr<config::reader> conf,
 	                    std::shared_ptr<serial_solver> *bmg)
 	{
+		log::debug << "Running kernel <setup_cg_boxmg>" << std::endl;
 		static_cast<child*>(this)->setup_cg_boxmg(so, conf, bmg);
 	}
 
@@ -73,6 +79,7 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {}
 	                    grid_func &x,
 	                    const grid_func &b)
 	{
+		log::debug << "Running kernel <solve_cg_boxmg" << std::endl;
 		static_cast<child*>(this)->solve_cg_boxmg(bmg, x, b);
 	}
 
@@ -83,6 +90,7 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {}
 	                     std::shared_ptr<redist_solver> * bmg,
 	                     std::vector<int> & nblocks)
 	{
+		log::debug << "Running kernel <setup_cg_redist>" << std::endl;
 		static_cast<child*>(this)->setup_cg_redist(so, conf, bmg, nblocks);
 	}
 
@@ -91,6 +99,7 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {}
 	                     grid_func & x,
 	                     const grid_func & b)
 	{
+		log::debug << "Running kernel <solve_cg_redist>" << std::endl;
 		static_cast<child*>(this)->solve_cg_redist(bmg, x, b);
 	}
 };

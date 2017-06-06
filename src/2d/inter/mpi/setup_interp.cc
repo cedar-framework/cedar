@@ -30,10 +30,13 @@ namespace impls
 		grid_topo & topo = fopd.grid();
 		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
 
+		P.fine_op_five = &fopd;
+		P.fine_is_five = true;
+
 		ifd = 1;
 		nstencil = 3;
 
-		kc = topo.level() + 1;
+		kc = topo.level();
 		nog = topo.nlevel();
 		kf = kc + 1;
 
@@ -63,10 +66,13 @@ namespace impls
 		grid_topo & topo = fopd.grid();
 		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
 
+		P.fine_op_nine = &fopd;
+		P.fine_is_five = false;
+
 		ifd = 0;
 		nstencil = 5;
 
-		kc = topo.level() + 1;
+		kc = topo.level();
 		nog = topo.nlevel();
 		kf = kc + 1;
 
