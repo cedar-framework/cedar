@@ -69,7 +69,7 @@ namespace impls
 		                          fcomm);
 
 		log::push_level("serial", coarse_solver.get_config());
-		auto & x_ser = coarse_solver.levels.get(coarse_solver.levels.size()-1).x;
+		auto & x_ser = coarse_solver.levels.get(0).x;
 		x_ser.set(0.0);
 		coarse_solver.vcycle(x_ser, bser);
 		log::pop_level();

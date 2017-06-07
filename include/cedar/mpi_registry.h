@@ -79,7 +79,7 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {}
 	                    grid_func &x,
 	                    const grid_func &b)
 	{
-		log::debug << "Running kernel <solve_cg_boxmg" << std::endl;
+		log::debug << "Running kernel <solve_cg_boxmg>" << std::endl;
 		static_cast<child*>(this)->solve_cg_boxmg(bmg, x, b);
 	}
 

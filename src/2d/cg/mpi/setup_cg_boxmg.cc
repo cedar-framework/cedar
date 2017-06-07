@@ -89,7 +89,7 @@ namespace impls
 
 		auto so_ser = std::make_unique<cdr2::stencil_op<nine_pt>>(topo.nglobal(0)-2, topo.nglobal(1)-2);
 
-		nstencil = 3;
+		nstencil = 5;
 
 		nog = topo.nlevel();
 
@@ -117,7 +117,7 @@ namespace impls
 
 		*bmg = std::make_shared<solver<nine_pt>>(*so_ser, conf);
 		(*bmg)->give_op(std::move(so_ser)); // transfer ownership of this pointer
-		auto & clevel = (*bmg)->levels.get((*bmg)->levels.size()-1);
+		auto & clevel = (*bmg)->levels.get(0);
 		clevel.x = grid_func::like(clevel.res);
 	}
 }

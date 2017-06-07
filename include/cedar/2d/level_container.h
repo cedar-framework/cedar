@@ -6,17 +6,17 @@
 
 namespace cedar { namespace cdr2 {
 
-template<template<class> class level, class sten>
+	template<template<class> class level, class fsten, class rsten>
 	struct get_helper
 {
-	static level<sten> & get(std::vector<level<nine_pt>> & lvls_nine,
-	                         std::vector<level<five_pt>> & lvls_five,
-	                         std::size_t i);
+	static level<rsten> & get(std::vector<level<nine_pt>> & lvls_nine,
+	                          std::vector<level<five_pt>> & lvls_five,
+	                          std::size_t i);
 };
 
 
-template<template<class> class level>
-	struct get_helper<level, five_pt>
+template<template<class> class level, class fsten>
+	struct get_helper<level, fsten, five_pt>
 {
 	static level<five_pt> & get(std::vector<level<nine_pt>> & lvls_nine,
 	                            std::vector<level<five_pt>> & lvls_five,
@@ -33,7 +33,7 @@ template<template<class> class level>
 
 
 template<template<class> class level>
-	struct get_helper<level, nine_pt>
+	struct get_helper<level, five_pt, nine_pt>
 {
 	static level<nine_pt> & get(std::vector<level<nine_pt>> & lvls_nine,
 	                            std::vector<level<five_pt>> & lvls_five,
@@ -44,6 +44,22 @@ template<template<class> class level>
 		return lvls_nine.at(i - lvls_five.size());
 		#else
 		return lvls_nine[i - lvls_five.size()];
+		#endif
+	}
+};
+
+
+template<template<class> class level>
+	struct get_helper<level, nine_pt, nine_pt>
+{
+	static level<nine_pt> & get(std::vector<level<nine_pt>> & lvls_nine,
+	                            std::vector<level<five_pt>> & lvls_five,
+	                            std::size_t i)
+	{
+		#ifdef BOUNDS_CHECK
+		return lvls_nine.at(i);
+		#else
+		return lvls_nine[i];
 		#endif
 	}
 };
@@ -113,7 +129,7 @@ level_container(stencil_op<fsten> & fine_op) : fine_op(fine_op) {}
 
 	template<class rsten=nine_pt> level<rsten>&  get(std::size_t i)
 	{
-		return get_helper<level,rsten>::get(lvls_nine, lvls_five, i);
+		return get_helper<level,fsten, rsten>::get(lvls_nine, lvls_five, i);
 	}
 
 	std::size_t size() { return lvls_nine.size() + lvls_five.size(); }
