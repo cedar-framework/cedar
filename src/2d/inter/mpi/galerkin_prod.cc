@@ -38,7 +38,7 @@ namespace impls
 		ifd = 1;
 		nstencil = 3;
 
-		kc = topo.level() + 1;
+		kc = topo.level();
 		nog = topo.nlevel();
 		kf = kc + 1;
 
@@ -68,7 +68,7 @@ namespace impls
 		ifd = 0;
 		nstencil = 5;
 
-		kc = topo.level() + 1;
+		kc = topo.level();
 		nog = topo.nlevel();
 		kf = kc + 1;
 
