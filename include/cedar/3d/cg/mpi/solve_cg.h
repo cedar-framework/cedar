@@ -1,8 +1,12 @@
-#ifndef CEDAR_3D_SOLVE_CG_H
-#define CEDAR_3D_SOLVE_CG_H
+#ifndef CEDAR_3D_SOLVE_CG_MPI_H
+#define CEDAR_3D_SOLVE_CG_MPI_H
 
 #include <cedar/3d/mpi/grid_func.h>
-#include <cedar/3d/mpi/redist_solver.h>
+
+namespace cedar { namespace cdr3 { namespace mpi {
+			class redist_solver;
+}}}
+
 
 namespace cedar { namespace cdr3 { namespace kernel {
 

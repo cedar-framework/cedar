@@ -1,22 +1,16 @@
-#include <cedar/3d/kernel/mpi/factory.h>
 #include <cedar/3d/mpi/gallery.h>
 
 namespace cedar { namespace cdr3 { namespace mpi { namespace gallery {
 
 using namespace cedar;
 
-stencil_op poisson(topo_ptr grid)
+stencil_op<seven_pt> poisson(topo_ptr grid)
 {
-	config::reader conf("");
-	auto kreg = kernel::mpi::factory::from_config(conf);
+	stencil_op<seven_pt> so(grid);
 
-	auto so = stencil_op(grid);
-	so.set_registry(kreg);
-	auto & sten = so.stencil();
-	sten.five_pt() = true;
 	auto & topo = so.grid();
 
-	sten.set(0);
+	so.set(0);
 
 	real_t nlx = topo.nlocal(0) - 2;
 	real_t nly = topo.nlocal(1) - 2;
@@ -77,7 +71,7 @@ stencil_op poisson(topo_ptr grid)
 	for (auto k : range<len_t>(1, kend)) {
 		for (auto j : range<len_t>(jbeg, jend)) {
 			for (auto i : range<len_t>(1, iend)) {
-				sten(i,j,k,dir::PS) = yh;
+				so(i,j,k,seven_pt::ps) = yh;
 			}
 		}
 	}
@@ -86,7 +80,7 @@ stencil_op poisson(topo_ptr grid)
 	for (auto k : range<len_t>(1, kend)) {
 		for (auto j : range<len_t>(1, jend)) {
 			for (auto i : range<len_t>(ibeg, iend)) {
-				sten(i,j,k,dir::PW) = xh;
+				so(i,j,k,seven_pt::pw) = xh;
 			}
 		}
 	}
@@ -95,7 +89,7 @@ stencil_op poisson(topo_ptr grid)
 	for (auto k : range<len_t>(kbeg, kend)) {
 		for (auto j : range<len_t>(1, jend)) {
 			for (auto i : range<len_t>(1, iend)) {
-				sten(i,j,k,dir::B) = zh;
+				so(i,j,k,seven_pt::b) = zh;
 			}
 		}
 	}
@@ -104,7 +98,7 @@ stencil_op poisson(topo_ptr grid)
 	for (auto k : range<len_t>(1, kend)) {
 		for (auto j : range<len_t>(1, jend)) {
 			for (auto i : range<len_t>(1, iend)) {
-				sten(i,j,k,dir::P) = 2*xh + 2*yh + 2*zh;
+				so(i,j,k,seven_pt::p) = 2*xh + 2*yh + 2*zh;
 			}
 		}
 	}

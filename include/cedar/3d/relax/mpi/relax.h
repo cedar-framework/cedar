@@ -33,14 +33,14 @@ namespace impls
 
 	template<class sten>
 	void mpi_relax_rbgs_point(const kernel_params & params,
-	                          const mpi::stencil_op & so,
+	                          const mpi::stencil_op<sten> & so,
 	                          mpi::grid_func & x,
 	                          const mpi::grid_func & b,
 	                          const relax_stencil & sor,
 	                          cycle::Dir cycle_dir)
 	{
 		using namespace cedar::cdr3;
-		int k, kf, ifd;
+		int k, ifd;
 		int updown, nstencil;
 		int rank;
 
@@ -51,7 +51,6 @@ namespace impls
 		mpi::grid_func & bd = const_cast<mpi::grid_func&>(b);
 
 		k = topo.level()+1;
-		kf = topo.nlevel();
 		nstencil = stencil_ndirs<sten>::value;
 
 		if (std::is_same<sten, seven_pt>::value)
@@ -68,7 +67,7 @@ namespace impls
 		MPI_Comm_rank(topo.comm, &rank); rank++;
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 		MPI_BMG3_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
-		                         sten.len(0), sten.len(1), sten.len(2),
+		                         so.len(0), so.len(1), so.len(2),
 		                         topo.nglobal(0), topo.nglobal(1), topo.nglobal(2),
 		                         topo.nlevel(), topo.nlevel(), ifd, nstencil, nsorv,
 		                         BMG_RELAX_SYM, updown,

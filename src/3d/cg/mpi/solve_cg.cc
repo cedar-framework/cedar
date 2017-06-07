@@ -2,8 +2,8 @@
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 #include <cedar/3d/mpi/halo.h>
 
-
 #include <cedar/3d/cg/solve_cg.h>
+#include <cedar/3d/mpi/redist_solver.h>
 
 
 extern "C" {

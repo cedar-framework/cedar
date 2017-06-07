@@ -23,7 +23,7 @@ template<class sten>
 level3mpi(topo_ptr topo ): parent::level(topo)
 	{
 		this->SOR = {{relax_stencil(topo->nlocal(0) - 2, topo->nlocal(1) - 2, topo->nlocal(2) - 2),
-		              relax_stnecil(topo->nlocal(0) - 2, topo->nlocal(1) - 2, topo->nlocal(2) - 2)}};
+		              relax_stencil(topo->nlocal(0) - 2, topo->nlocal(1) - 2, topo->nlocal(2) - 2)}};
 		this->R.associate(&this->P);
 	}
 
@@ -56,7 +56,7 @@ public:
 		this->kreg = std::make_shared<kernel::mpi::registry>(*(this->conf));
 		parent::setup(fop);
 	}
-	~solver() {if (cg_solver_lu) bbd = new real_t[1];}
+	~solver() {if (cg_solver_lu) this->bbd = new real_t[1];}
 
 	std::size_t compute_num_levels(cdr3::mpi::stencil_op<fsten> & fop)
 	{
@@ -74,7 +74,8 @@ public:
 	virtual cdr3::mpi::grid_func solve(const cdr3::mpi::grid_func &b) override
 	{
 		auto kernels = this->kernel_registry();
-		kernels->halo_exchange(b, halo_ctx);
+		auto & bd = const_cast<grid_func&>(b);
+		kernels->halo_exchange(bd, halo_ctx);
 		return parent::solve(b);
 	}
 
@@ -82,7 +83,8 @@ public:
 	virtual void solve(const cdr3::mpi::grid_func &b, cdr3::mpi::grid_func &x) override
 	{
 		auto kernels = this->kernel_registry();
-		kernels->halo_exchange(b, halo_ctx);
+		auto & bd = const_cast<grid_func&>(b);
+		kernels->halo_exchange(bd, halo_ctx);
 		return parent::solve(b, x);
 	}
 
@@ -99,7 +101,7 @@ public:
 	}
 
 
-	void setup_space(std::size_t nlevels) override
+	void setup_space(std::size_t nlevels)
 	{
 		this->levels.init(nlevels);
 		for (auto i : range<std::size_t>(nlevels - 1)) {
@@ -185,13 +187,13 @@ public:
 			auto nyc = coarse_topo.nglobal(1);
 			auto nzc = coarse_topo.nglobal(2);
 			this->ABD = mpi::grid_func(nxc*(nyc+1)+2, nxc*nyc*nzc, 0);
-			bbd = new real_t[this->ABD.len(1)];
+			this->bbd = new real_t[this->ABD.len(1)];
 			parent::setup_cg_solve();
 		} else {
 			auto kernels = this->kernel_registry();
-			auto & fgrid = levels[0].A.grid();
+			auto & fgrid = cop.grid();
 
-			auto choice = choose_redist<3>(*conf,
+			auto choice = choose_redist<3>(*this->conf,
 			                               std::array<int, 3>({fgrid.nproc(0), fgrid.nproc(1), fgrid.nproc(2)}),
 			                               std::array<len_t, 3>({fgrid.nglobal(0), fgrid.nglobal(1), fgrid.nglobal(2)}));
 
@@ -200,15 +202,13 @@ public:
 			            << " cores" << std::endl;
 
 			std::shared_ptr<mpi::redist_solver> cg_bmg;
-			auto cg_conf = conf->getconf("cg-config");
+			auto cg_conf = this->conf->getconf("cg-config");
 			if (!cg_conf)
-				cg_conf = conf;
+				cg_conf = this->conf;
 			std::vector<int> nblocks(choice.begin(), choice.end());
 			kernels->setup_cg_redist(cop, cg_conf, &cg_bmg, nblocks);
 			this->coarse_solver = [&,cg_bmg,kernels](mpi::grid_func &x, const mpi::grid_func &b) {
 				kernels->solve_cg_redist(*cg_bmg, x, b);
-				if (params->per_mask())
-					kernels->halo_exchange(x);
 			};
 		}
 	}
@@ -224,10 +224,10 @@ public:
 
 		for (auto i :range<std::size_t>(this->levels.size()-1)) {
 			this->levels.get(i+1).x.halo_ctx = halo_ctx;
-			this->levels(i+1).b.halo_ctx = halo_ctx;
-			this->levels(i+1).res.halo_ctx = halo_ctx;
-			this->levels(i+1).A.halo_ctx = halo_ctx;
-			this->levels(i+1).P.halo_ctx = halo_ctx;
+			this->levels.get(i+1).b.halo_ctx = halo_ctx;
+			this->levels.get(i+1).res.halo_ctx = halo_ctx;
+			this->levels.get(i+1).A.halo_ctx = halo_ctx;
+			this->levels.get(i+1).P.halo_ctx = halo_ctx;
 		}
 	}
 	MPI_Comm comm;

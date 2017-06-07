@@ -26,7 +26,7 @@ namespace impls
 	void matvec(const kernel_params & params,
 	            const mpi::stencil_op<sten> & so,
 	            const mpi::grid_func & x,
-	            mpi::grid_func & y)
+	            mpi::grid_func & b)
 	{
 		using namespace cedar::cdr3;
 		int kg, ifd, nstencil, nog;

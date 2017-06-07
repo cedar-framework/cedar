@@ -260,9 +260,9 @@ int main(int argc, char *argv[])
 		std::ofstream ffile("output/fine-" + suffix);
 		std::ofstream rfile("output/restrict-" + suffix);
 		std::ofstream cfile("output/coarse-" + suffix);
-		ffile << bmg.level(-1).A;
-		rfile << bmg.level(-1).P;
-		cfile << bmg.level(-2).A;
+		ffile << bmg.levels.get<seven_pt>(0).A;
+		rfile << bmg.levels.get<seven_pt>(0).P;
+		cfile << bmg.levels.get(1).A;
 		rfile.close();
 		ffile.close();
 		cfile.close();

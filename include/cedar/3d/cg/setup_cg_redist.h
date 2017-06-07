@@ -4,9 +4,13 @@
 #include <memory>
 
 #include <cedar/kernel_params.h>
-#include <cedar/3d/mpi/solver.h>
-#include <cedar/3d/mpi/redist_solver.h>
 #include <cedar/3d/mpi/stencil_op.h>
+
+namespace cedar { namespace cdr3 { namespace mpi {
+			class redist_solver;
+		}
+	}
+}
 
 namespace cedar { namespace cdr3 { namespace kernel {
 

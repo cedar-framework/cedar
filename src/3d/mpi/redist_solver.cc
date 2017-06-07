@@ -15,26 +15,26 @@ using namespace cedar::cdr3::mpi;
 
 namespace cedar { namespace cdr3 { namespace mpi {
 template<>
-stencil_op redist_solver::redist_operator<stencil_op<xxvii_pt>>(const stencil_op<xxvii_pt> & so, topo_ptr topo)
+stencil_op<xxvii_pt> redist_solver::redist_operator<stencil_op,xxvii_pt>(const stencil_op<xxvii_pt> & so, topo_ptr topo)
 {
-	auto rop = stencil_op<xxvii_pt>(topo);
+	stencil_op<xxvii_pt> rop(topo);
 
-	gather_operator<stencil_op<xxvii_pt>>(so, rop);
+	gather_operator<stencil_op>(so, rop);
 
 	return rop;
 }
 
 template<>
-cdr3::stencil_op redist_solver::redist_operator<cdr3::stencil_op<nine_pt>>(const stencil_op<nine_pt> & so,
+cdr3::stencil_op<xxvii_pt> redist_solver::redist_operator<cdr3::stencil_op, xxvii_pt>(const stencil_op<xxvii_pt> & so,
 	     topo_ptr topo)
 {
 	assert(topo->nproc() == 1);
 
-	auto rop = cdr3::stencil_op<nine_pt>(topo->nlocal(0) - 2,
-	                                     topo->nlocal(1) - 2,
-	                                     topo->nlocal(2) - 2);
+	cdr3::stencil_op<xxvii_pt> rop(topo->nlocal(0) - 2,
+	                               topo->nlocal(1) - 2,
+	                               topo->nlocal(2) - 2);
 
-	gather_operator<cdr3::stencil_op<nine_pt>>(so, rop);
+	gather_operator<cdr3::stencil_op>(so, rop);
 
 	return rop;
 }
@@ -60,19 +60,19 @@ redist_solver::redist_solver(const stencil_op<xxvii_pt> & so,
 
 	if (active) {
 		if (ser_cg) {
-			auto rop = redist_operator<cdr3::stencil_op<nine_pt>>(so, ctopo);
+			auto rop = redist_operator<cdr3::stencil_op, xxvii_pt>(so, ctopo);
 			log::push_level("serial", *conf);
-			slv_ser = std::make_unique<cdr3::solver<nine_pt>>(std::move(rop), conf);
+			slv_ser = std::make_unique<cdr3::solver<xxvii_pt>>(rop, conf);
 			log::pop_level();
 		} else {
-			auto rop = redist_operator<mpi::stencil_op<xxvii_pt>>(so, ctopo);
+			auto rop = redist_operator<mpi::stencil_op, xxvii_pt>(so, ctopo);
 			MPI_Fint parent_comm;
 			MSG_pause(&parent_comm);
 			log::push_level("redist", *conf);
 			timer_down();
-			slv = std::make_unique<solver<xxvii_pt>>(std::move(rop), conf);
+			slv = std::make_unique<solver<xxvii_pt>>(rop, conf);
 			timer_up();
-			b_redist.halo_ctx = slv->level(-1).A.halo_ctx;
+			b_redist.halo_ctx = slv->levels.get(0).A.halo_ctx;
 			log::pop_level();
 			MSG_pause(&msg_comm);
 			MSG_play(parent_comm);

@@ -9,6 +9,18 @@
 #include <cedar/3d/mpi/stencil_op.h>
 #include <cedar/3d/mpi/grid_func.h>
 
+
+extern "C" {
+	using namespace cedar;
+	void BMG3_SymStd_SETUP_fine_stencil(int kf, real_t *so,
+	                                    len_t nlx, len_t nly, len_t nlz,
+	                                    int nstencil,
+	                                    len_t *iwork, len_t nmsgi, int *pMSGSO,
+	                                    real_t *buffer, len_t nmsgr,
+	                                    int mpicomm);
+	void BMG_get_bc(int, int*);
+}
+
 namespace cedar { namespace cdr3 { namespace kernel {
 namespace impls
 {
@@ -54,7 +66,7 @@ namespace impls
 	void setup_msg(const kernel_params & params, grid_topo &topo, void **msg_ctx);
 	void msg_exchange(const kernel_params & params, mpi::grid_func & f);
 	template<class sten>
-	void msg_stencil_exchange(const kernel_params & params, mpi::stencil_op<sten> & so)
+	void msg_stencil_exchange(const kernel_params & params, mpi::stencil_op<sten> & sop)
 	{
 		MsgCtx *ctx = (MsgCtx*) sop.halo_ctx;
 		grid_topo &topo = sop.grid();
@@ -62,7 +74,7 @@ namespace impls
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
-		BMG3_SymStd_SETUP_fine_sopcil(topo.level()+1, sop.data(),
+		BMG3_SymStd_SETUP_fine_stencil(topo.level()+1, sop.data(),
 		                               sop.len(0), sop.len(1), sop.len(2),
 		                               nstencil,
 		                               ctx->msg_geom.data(), ctx->msg_geom.size(),

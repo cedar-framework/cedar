@@ -1,5 +1,5 @@
-#ifndef CEDAR_3D_KERNEL_RESIDUAL_H
-#define CEDAR_3D_KERNEL_RESIDUAL_H
+#ifndef CEDAR_3D_KERNEL_MPI_RESIDUAL_H
+#define CEDAR_3D_KERNEL_MPI_RESIDUAL_H
 
 #include <type_traits>
 #include <cedar/kernel_params.h>
@@ -24,7 +24,7 @@ namespace impls
 	namespace mpi = cedar::cdr3::mpi;
 	template<class sten>
 	void mpi_residual_fortran(const kernel_params & params, const mpi::stencil_op<sten> & A, const mpi::grid_func & x,
-	                          const mpi::grid_func & b, mpi::grid_func &y)
+	                          const mpi::grid_func & b, mpi::grid_func &r)
 	{
 		int k, kf, nog, ifd, nstencil;
 		auto & Ad = const_cast<mpi::stencil_op<sten> &>(A);

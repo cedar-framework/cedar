@@ -51,13 +51,14 @@ namespace impls
 	template<class sten>
 	void mpi_setup_interp(const kernel_params & params,
 	                      const mpi::stencil_op<sten> & fop,
-	                      const mpi::stencil_op<xxvii> & cop,
+	                      const mpi::stencil_op<xxvii_pt> & cop,
 	                      inter::mpi::prolong_op & P)
 	{
 		int ifd, nstencil;
+		int kc, nog, kf;
 
 		auto & fopd = const_cast<mpi::stencil_op<sten>&>(fop);
-		auto & copd = const_cast<mpi::stencil_op<xxvii>&>(cop);
+		auto & copd = const_cast<mpi::stencil_op<xxvii_pt>&>(cop);
 		grid_topo & topo = fopd.grid();
 		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
 
@@ -80,7 +81,7 @@ namespace impls
 		kf = kc + 1;
 
 		// TODO: preallocate this
-		array<len_t, real_t, 4> yo(fsten.len(0), fsten.len(1), 2, 14);
+		array<len_t, real_t, 4> yo(fop.len(0), fop.len(1), 2, 14);
 		int jpn;
 		BMG_get_bc(params.per_mask(), &jpn);
 

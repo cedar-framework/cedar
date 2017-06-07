@@ -33,16 +33,18 @@ namespace impls
 		mpi::grid_func & coarsed = const_cast<mpi::grid_func&>(coarse);
 		mpi::grid_func & res = const_cast<mpi::grid_func&>(residual);
 		grid_topo & topo = Pd.grid();
-		grid_topo & topof = Pd.fine_op->grid();
 		MsgCtx *ctx = (MsgCtx*) Pd.halo_ctx;
 
 		real_t * fop_data;
+		topo_ptr topof;
 		if (Pd.fine_is_seven) {
 			nstencil = 4;
 			fop_data = Pd.fine_op_seven->data();
+			topof = Pd.fine_op_seven->grid_ptr();
 		} else {
 			nstencil = 14;
 			fop_data = Pd.fine_op_xxvii->data();
+			topof = Pd.fine_op_xxvii->grid_ptr();
 		}
 
 		kc = topo.level() + 1;
@@ -55,7 +57,7 @@ namespace impls
 		                           fop_data, nstencil, Pd.data(),
 		                           coarsed.len(0), coarsed.len(1), coarsed.len(2),
 		                           fine.len(0), fine.len(1), fine.len(2),
-		                           topof.is(0), topof.is(1), topof.is(2),
+		                           topof->is(0), topof->is(1), topof->is(2),
 		                           ctx->msg_geom.data(), ctx->msg_geom.size(),
 		                           ctx->pMSG.data(), ctx->msg_buffer.data(),
 		                           ctx->msg_buffer.size(), fcomm);

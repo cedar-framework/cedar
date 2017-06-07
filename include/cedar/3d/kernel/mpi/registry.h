@@ -39,7 +39,7 @@ namespace mpi = cedar::cdr3::mpi;
 class registry : public mpi_registry<registry, cdr3::mpi::stypes, cdr3::mpi::redist_solver, solver<xxvii_pt>>
 {
 public:
-	using parent = public mpi_registry<registry, cdr3::mpi::stypes, cdr3::mpi::redist_solver, solver<xxvii_pt>>;
+	using parent = mpi_registry<registry, cdr3::mpi::stypes, cdr3::mpi::redist_solver, solver<xxvii_pt>>;
 registry(std::shared_ptr<kernel_params> params): parent::mpi_registry(params) {}
 registry(config::reader & conf) : parent::mpi_registry(conf) {}
 

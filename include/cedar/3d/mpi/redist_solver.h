@@ -45,7 +45,7 @@ public:
 
 protected:
 	bool ser_cg;
-	std::unique_ptr<solver> slv;
+	std::unique_ptr<solver<xxvii_pt>> slv;
 	std::unique_ptr<cdr3::solver<xxvii_pt>> slv_ser;
 	redist_comms rcomms;
 	int block_id; /** id within a block */
@@ -78,17 +78,17 @@ protected:
 	    @param[in] topo Redistributed processor grid topology
 	    @returns The redistributed operator
 	*/
-	template <stencil_operator>
-	stencil_operator redist_operator(const stencil_op<sten> & so, topo_ptr topo)
+	template<template<class> class stencil_operator, class sten>
+	stencil_operator<sten> redist_operator(const stencil_op<xxvii_pt> & so, topo_ptr topo)
 	{
-		stencil_operator v;
+		stencil_operator<sten> v;
 		log::error << "Unspoorted type" << std::endl;
 		return v;
 	}
 	void gather_rhs(const grid_func & b);
 	void scatter_sol(grid_func & x);
-	template <typename target_operator> void gather_operator(const stencil_op<xxvii_pt> & src,
-	                                                         target_operator & dest)
+	template <template<class> class target_operator> void gather_operator(const stencil_op<xxvii_pt> & src,
+		target_operator<xxvii_pt> & dest)
 	{
 		using buf_arr = array<len_t,real_t,1>;
 

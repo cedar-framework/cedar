@@ -18,8 +18,8 @@ std::ostream & operator<< (std::ostream & os, const stencil_op<seven_pt> &op)
 
 	os << std::setprecision(7);
 
-	for (auto k: sten.range(2)) {
-		for (auto j: sten.range(1)) {
+	for (auto k: op.range(2)) {
+		for (auto j: op.range(1)) {
 			for (auto i: op.range(0)) {
 				os << std::setw(width) << (kGs+k-2)*NGx*NGy + (jGs+j-2)*NGx + iGs+i-1 << ", "
 				   << std::setw(width) << iGs + i << ", " << std::setw(width) << jGs + j << ", "
@@ -37,7 +37,7 @@ std::ostream & operator<< (std::ostream & os, const stencil_op<seven_pt> &op)
 	return os;
 }
 
-
+template<>
 std::ostream & operator<< (std::ostream & os, const stencil_op<xxvii_pt> &op)
 {
 	auto & topo = op.grid();
@@ -50,9 +50,9 @@ std::ostream & operator<< (std::ostream & os, const stencil_op<xxvii_pt> &op)
 
 	os << std::setprecision(7);
 
-	for (auto k: sten.range(2)) {
-		for (auto j: sten.range(1)) {
-			for (auto i: sten.range(0)) {
+	for (auto k: op.range(2)) {
+		for (auto j: op.range(1)) {
+			for (auto i: op.range(0)) {
 				os << std::setw(width) << (kGs+k-2)*NGx*NGy + (jGs+j-2)*NGx + iGs+i-2 << " "
 				   << std::setw(width) << iGs + i << ", " << std::setw(width) << jGs + j << ", "
 				   << std::setw(width) << kGs + k << ", N, "

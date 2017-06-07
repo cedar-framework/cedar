@@ -1,7 +1,9 @@
 #ifndef CEDAR_3D_INTER_MPI_PROLONG_OP_H
 #define CEDAR_3D_INTER_MPI_PROLONG_OP_H
 
+#include <cedar/3d/inter/types.h>
 #include <cedar/3d/stencil_op.h>
+#include <cedar/3d/mpi/stencil_op.h>
 #include <cedar/3d/mpi/grid_func.h>
 
 namespace cedar { namespace cdr3 { namespace inter { namespace mpi {

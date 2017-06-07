@@ -28,7 +28,7 @@ namespace impls
 		void store_fine_op(stencil_op<sten> & fop,
 		                   inter::prolong_op & P);
 	template<>
-		void store_fine_op(stencil_op<seven_pt> & fop,
+		inline void store_fine_op(stencil_op<seven_pt> & fop,
 		                   inter::prolong_op & P)
 	{
 		P.fine_op_seven = &fop;
@@ -36,8 +36,8 @@ namespace impls
 	}
 
 	template<>
-		void store_fine_op(stencil_op<xxvii_pt> & fop,
-		                   inter::prolong_op & P)
+		inline void store_fine_op(stencil_op<xxvii_pt> & fop,
+		                          inter::prolong_op & P)
 	{
 		P.fine_op_xxvii = &fop;
 		P.fine_is_seven = false;

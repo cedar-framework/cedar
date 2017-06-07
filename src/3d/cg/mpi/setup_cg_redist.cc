@@ -1,3 +1,4 @@
+#include <cedar/3d/mpi/redist_solver.h>
 #include <cedar/3d/cg/setup_cg_redist.h>
 
 

@@ -48,7 +48,7 @@ namespace impls
 	{
 		int kf, kc, nog;
 		inter::mpi::prolong_op & Pd = const_cast<inter::mpi::prolong_op&>(P);
-		mpi::stencil_op & fopd = const_cast<mpi::stencil_op&>(fop);
+		auto & fopd = const_cast<mpi::stencil_op<sten>&>(fop);
 		grid_topo & topo = fopd.grid();
 		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
 
@@ -59,7 +59,7 @@ namespace impls
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
 		if (std::is_same<sten, seven_pt>::value) {
-			MPI_BMG3_SymStd_SETUP_ITLI07_ex(kf, kc, fopd.data(), copd.data(), Pd.data(),
+			MPI_BMG3_SymStd_SETUP_ITLI07_ex(kf, kc, fopd.data(), cop.data(), Pd.data(),
 			                                fop.len(0), fop.len(1), fop.len(2),
 			                                cop.len(0), cop.len(1), cop.len(2),
 			                                topo.is(0), topo.is(1), topo.is(2),
@@ -73,7 +73,7 @@ namespace impls
 			                                ctx->dimx.data(), ctx->dimy.data(), ctx->dimz.data(),
 			                                fcomm);
 		} else {
-			MPI_BMG3_SymStd_SETUP_ITLI27_ex(kf, kc, fopd.data(), copd.data(), Pd.data(),
+			MPI_BMG3_SymStd_SETUP_ITLI27_ex(kf, kc, fopd.data(), cop.data(), Pd.data(),
 			                                fop.len(0), fop.len(1), fop.len(2),
 			                                cop.len(0), cop.len(1), cop.len(2),
 			                                topo.is(0), topo.is(1), topo.is(2),
