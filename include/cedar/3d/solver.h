@@ -103,7 +103,7 @@ solver(stencil_op<fsten> & fop,
 				log::debug << "Created coarse grid with dimensions: " << nxc << ", " <<
 					nyc << ", " << nzc << std::endl;
 			} else {
-				auto & fop = this->levels.template get<fsten>(i).A;
+				auto & fop = this->levels.get(i).A;
 
 				auto nx = fop.shape(0);
 				auto ny = fop.shape(1);

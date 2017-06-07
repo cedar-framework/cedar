@@ -6,23 +6,23 @@
 
 namespace cedar { namespace cdr3 {
 
-template<template<class> class level, class sten>
+	template<template<class> class level, class fsten, class rsten>
 	struct get_helper
 {
-	static level<sten> & get(std::vector<level<xxvii_pt>> & lvls_xxvii,
-	                         std::vector<level<seven_pt>> & lvls_seven,
-	                         std::size_t i);
+	static level<rsten> & get(std::vector<level<xxvii_pt>> & lvls_xxvii,
+	                          std::vector<level<seven_pt>> & lvls_seven,
+	                          std::size_t i);
 };
 
 
-template<template<class> class level>
-	struct get_helper<level, seven_pt>
+template<template<class> class level, class fsten>
+	struct get_helper<level, fsten, seven_pt>
 {
 	static level<seven_pt> & get(std::vector<level<xxvii_pt>> & lvls_xxvii,
 	                            std::vector<level<seven_pt>> & lvls_seven,
 	                            std::size_t i)
 	{
-		if (i != 0) log::error << "coarse operators are xxvii point (not seven)!" << std::endl;
+		if (i != 0) log::error << "coarse operators are nine point (not five)!" << std::endl;
 		#ifdef BOUNDS_CHECK
 		return lvls_seven.at(0);
 		#else
@@ -33,17 +33,33 @@ template<template<class> class level>
 
 
 template<template<class> class level>
-	struct get_helper<level, xxvii_pt>
+	struct get_helper<level, seven_pt, xxvii_pt>
 {
 	static level<xxvii_pt> & get(std::vector<level<xxvii_pt>> & lvls_xxvii,
 	                            std::vector<level<seven_pt>> & lvls_seven,
 	                            std::size_t i)
 	{
-		if (i==0) log::error << "fine grid operator is seven point (not xxvii)!" << std::endl;
+		if (i==0) log::error << "fine grid operator is five point (not nine)!" << std::endl;
 		#ifdef BOUNDS_CHECK
 		return lvls_xxvii.at(i - lvls_seven.size());
 		#else
 		return lvls_xxvii[i - lvls_seven.size()];
+		#endif
+	}
+};
+
+
+template<template<class> class level>
+	struct get_helper<level, xxvii_pt, xxvii_pt>
+{
+	static level<xxvii_pt> & get(std::vector<level<xxvii_pt>> & lvls_xxvii,
+	                            std::vector<level<seven_pt>> & lvls_seven,
+	                            std::size_t i)
+	{
+		#ifdef BOUNDS_CHECK
+		return lvls_xxvii.at(i);
+		#else
+		return lvls_xxvii[i];
 		#endif
 	}
 };
@@ -113,7 +129,7 @@ level_container(stencil_op<fsten> & fine_op) : fine_op(fine_op) {}
 
 	template<class rsten=xxvii_pt> level<rsten>&  get(std::size_t i)
 	{
-		return get_helper<level,rsten>::get(lvls_xxvii, lvls_seven, i);
+		return get_helper<level,fsten, rsten>::get(lvls_xxvii, lvls_seven, i);
 	}
 
 	std::size_t size() { return lvls_xxvii.size() + lvls_seven.size(); }
