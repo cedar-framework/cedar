@@ -8,7 +8,7 @@ enum class dir {XYL=0, XYR=1, XYA=2, XYB=3, XZA=4, XZB=5,
 		XZNW=11,
 		XZNE=12, XZSE=13, YZSW=14, YZNW=15, YZNE=16,
 		YZSE=17, BSW=18, BNW=19, BNE=20, BSE=21,
-		TSW=22, TNW=23, TNE=24, TSE=25};
+		TSW=22, TNW=23, TNE=24, TSE=25, ndirs};
 
 }}}
 #endif

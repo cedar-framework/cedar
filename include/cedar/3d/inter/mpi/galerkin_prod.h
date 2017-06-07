@@ -1,7 +1,13 @@
-#include <cedar/2d/ftn/BMG_parameters_c.h>
-#include <cedar/3d/mpi/halo.h>
+#ifndef CEDAR_3D_INTER_MPI_GALERKIN_PROD_H
+#define CEDAR_3D_INTER_MPI_GALERKIN_PROD_H
 
-#include <cedar/3d/inter/galerkin_prod.h>
+#include <type_traits>
+
+#include <cedar/kernel_params.h>
+#include <cedar/3d/mpi/stencil_op.h>
+#include <cedar/3d/mpi/halo.h>
+#include <cedar/3d/inter/mpi/prolong_op.h>
+#include <cedar/2d/ftn/BMG_parameters_c.h>
 
 extern "C" {
 	using namespace cedar;
@@ -27,31 +33,35 @@ extern "C" {
 	                                     int nprock, len_t *dimx, len_t *dimy, len_t *dimz, int mpicomm);
 }
 
+
 namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
-	using namespace cedar::cdr3;
+	namespace mpi = cedar::cdr3::mpi;
 
+	template<class sten>
 	void mpi_galerkin_prod(const kernel_params & params,
-	                       int kf, int kc, int nog,
 	                       const inter::mpi::prolong_op & P,
-	                       const mpi::stencil_op & fop,
-	                       mpi::stencil_op & copd)
+	                       const mpi::stencil_op<sten> & fop,
+	                       mpi::stencil_op<xxvii_pt> & cop)
 	{
+		int kf, kc, nog;
 		inter::mpi::prolong_op & Pd = const_cast<inter::mpi::prolong_op&>(P);
 		mpi::stencil_op & fopd = const_cast<mpi::stencil_op&>(fop);
 		grid_topo & topo = fopd.grid();
-		grid_stencil & fsten = fopd.stencil();
-		grid_stencil & csten = copd.stencil();
 		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
+
+		kc = topo.level() + 1;
+		nog = topo.nlevel();
+		kf = kc + 1;
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
-		if (fsten.five_pt()) {
+		if (std::is_same<sten, seven_pt>::value) {
 			MPI_BMG3_SymStd_SETUP_ITLI07_ex(kf, kc, fopd.data(), copd.data(), Pd.data(),
-			                                fsten.len(0), fsten.len(1), fsten.len(2),
-			                                csten.len(0), csten.len(1), csten.len(2),
+			                                fop.len(0), fop.len(1), fop.len(2),
+			                                cop.len(0), cop.len(1), cop.len(2),
 			                                topo.is(0), topo.is(1), topo.is(2),
 			                                nog, nog, topo.IGRD(),
 			                                ctx->msg_geom.data(), ctx->msg_geom.size(),
@@ -64,8 +74,8 @@ namespace impls
 			                                fcomm);
 		} else {
 			MPI_BMG3_SymStd_SETUP_ITLI27_ex(kf, kc, fopd.data(), copd.data(), Pd.data(),
-			                                fsten.len(0), fsten.len(1), fsten.len(2),
-			                                csten.len(0), csten.len(1), csten.len(2),
+			                                fop.len(0), fop.len(1), fop.len(2),
+			                                cop.len(0), cop.len(1), cop.len(2),
 			                                topo.is(0), topo.is(1), topo.is(2),
 			                                nog, nog, topo.IGRD(),
 			                                ctx->msg_geom.data(), ctx->msg_geom.size(),
@@ -77,9 +87,10 @@ namespace impls
 			                                ctx->dimx.data(), ctx->dimy.data(), ctx->dimz.data(),
 			                                fcomm);
 		}
-
-
 	}
+
 }
 
 }}}
+
+#endif

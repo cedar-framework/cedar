@@ -53,7 +53,22 @@ namespace impls
 
 	void setup_msg(const kernel_params & params, grid_topo &topo, void **msg_ctx);
 	void msg_exchange(const kernel_params & params, mpi::grid_func & f);
-	void msg_stencil_exchange(const kernel_params & params, mpi::stencil_op & so);
+	template<class sten>
+	void msg_stencil_exchange(const kernel_params & params, mpi::stencil_op<sten> & so)
+	{
+		MsgCtx *ctx = (MsgCtx*) sop.halo_ctx;
+		grid_topo &topo = sop.grid();
+		int nstencil = stencil_ndirs<sten>::value;
+
+		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+
+		BMG3_SymStd_SETUP_fine_sopcil(topo.level()+1, sop.data(),
+		                               sop.len(0), sop.len(1), sop.len(2),
+		                               nstencil,
+		                               ctx->msg_geom.data(), ctx->msg_geom.size(),
+		                               ctx->pMSGSO.data(), ctx->msg_buffer.data(),
+		                               ctx->msg_buffer.size(), fcomm);
+	}
 }
 }}}
 

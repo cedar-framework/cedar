@@ -84,18 +84,6 @@ cedar::real_t grid_func::inf_norm() const
 }
 
 
-grid_func & grid_func::operator+=(iadd_t package)
-{
-	auto kernels = std::get<0>(package).get_registry();
-	kernels->run(kernel_name::interp_add,
-	             std::get<0>(package),
-	             std::get<1>(package),
-	             std::get<2>(package),
-	             static_cast<grid_func&>(*this));
-
-	return *this;
-}
-
 namespace cedar { namespace cdr3 { namespace mpi {
 std::ostream & operator<< (std::ostream &os, const grid_func & obj)
 {

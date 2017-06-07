@@ -12,8 +12,9 @@ namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls {
 	namespace mpi = cedar::cdr3::mpi;
+	template<class sten>
 	void setup_cg_redist(const kernel_params & params,
-	                     const mpi::stencil_op & so,
+	                     const mpi::stencil_op<sten> & so,
 	                     std::shared_ptr<config::reader> conf,
 	                     std::shared_ptr<mpi::redist_solver> * slv,
 	                     std::vector<int> & nblocks);

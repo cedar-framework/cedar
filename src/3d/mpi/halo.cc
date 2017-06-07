@@ -159,31 +159,6 @@ namespace impls
 		*msg_ctx = (void*) ctx;
 	}
 
-
-	void msg_stencil_exchange(const kernel_params & params, mpi::stencil_op & sop)
-	{
-		MsgCtx *ctx = (MsgCtx*) sop.halo_ctx;
-		grid_topo &topo = sop.grid();
-		grid_stencil & sten = sop.stencil();
-		int nstencil;
-
-		if (sten.five_pt()) {
-			nstencil = 4;
-		} else {
-			nstencil = 14;
-		}
-
-		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
-
-		BMG3_SymStd_SETUP_fine_stencil(topo.level()+1, sop.data(),
-		                               sten.len(0), sten.len(1), sten.len(2),
-		                               nstencil,
-		                               ctx->msg_geom.data(), ctx->msg_geom.size(),
-		                               ctx->pMSGSO.data(), ctx->msg_buffer.data(),
-		                               ctx->msg_buffer.size(), fcomm);
-	}
-
-
 	void msg_exchange(const kernel_params & params, mpi::grid_func & f)
 	{
 		MsgCtx *ctx = (MsgCtx*) f.halo_ctx;

@@ -15,32 +15,33 @@ using namespace cedar::cdr3::mpi;
 
 namespace cedar { namespace cdr3 { namespace mpi {
 template<>
-stencil_op redist_solver::redist_operator<stencil_op>(const stencil_op & so, topo_ptr topo)
+stencil_op redist_solver::redist_operator<stencil_op<xxvii_pt>>(const stencil_op<xxvii_pt> & so, topo_ptr topo)
 {
-	auto rop = stencil_op(topo);
+	auto rop = stencil_op<xxvii_pt>(topo);
 
-	gather_operator<stencil_op>(so, rop);
+	gather_operator<stencil_op<xxvii_pt>>(so, rop);
 
 	return rop;
 }
 
 template<>
-cdr3::stencil_op redist_solver::redist_operator<cdr3::stencil_op>(const stencil_op & so, topo_ptr topo)
+cdr3::stencil_op redist_solver::redist_operator<cdr3::stencil_op<nine_pt>>(const stencil_op<nine_pt> & so,
+	     topo_ptr topo)
 {
 	assert(topo->nproc() == 1);
 
-	auto rop = cdr3::stencil_op(topo->nlocal(0) - 2,
-	                            topo->nlocal(1) - 2,
-	                            topo->nlocal(2) - 2);
+	auto rop = cdr3::stencil_op<nine_pt>(topo->nlocal(0) - 2,
+	                                     topo->nlocal(1) - 2,
+	                                     topo->nlocal(2) - 2);
 
-	gather_operator<cdr3::stencil_op>(so, rop);
+	gather_operator<cdr3::stencil_op<nine_pt>>(so, rop);
 
 	return rop;
 }
 }}}
 
 
-redist_solver::redist_solver(const stencil_op & so,
+redist_solver::redist_solver(const stencil_op<xxvii_pt> & so,
                              std::shared_ptr<config::reader> conf,
                              std::array<int, 3> nblock) :
 	ser_cg(nblock[0]*nblock[1]*nblock[2] == 1), nblock(nblock), active(true), recv_id(-1)
@@ -59,17 +60,17 @@ redist_solver::redist_solver(const stencil_op & so,
 
 	if (active) {
 		if (ser_cg) {
-			auto rop = redist_operator<cdr3::stencil_op>(so, ctopo);
+			auto rop = redist_operator<cdr3::stencil_op<nine_pt>>(so, ctopo);
 			log::push_level("serial", *conf);
-			slv_ser = std::make_unique<cdr3::solver>(std::move(rop), conf);
+			slv_ser = std::make_unique<cdr3::solver<nine_pt>>(std::move(rop), conf);
 			log::pop_level();
 		} else {
-			auto rop = redist_operator<mpi::stencil_op>(so, ctopo);
+			auto rop = redist_operator<mpi::stencil_op<xxvii_pt>>(so, ctopo);
 			MPI_Fint parent_comm;
 			MSG_pause(&parent_comm);
 			log::push_level("redist", *conf);
 			timer_down();
-			slv = std::make_unique<solver>(std::move(rop), conf);
+			slv = std::make_unique<solver<xxvii_pt>>(std::move(rop), conf);
 			timer_up();
 			b_redist.halo_ctx = slv->level(-1).A.halo_ctx;
 			log::pop_level();

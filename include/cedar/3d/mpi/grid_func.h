@@ -5,20 +5,11 @@
 #include <cedar/mpi/par_object.h>
 #include <iostream>
 
-namespace cedar { namespace cdr3 { namespace inter { namespace mpi {
-				class prolong_op;
-			}
-		}
-	}
-}
-
-
 namespace cedar { namespace cdr3 { namespace mpi {
 
 class grid_func: public ::cedar::cdr3::grid_func, public par_object
 {
 public:
-	using iadd_t = std::tuple<const cedar::cdr3::inter::mpi::prolong_op&, const grid_func&, const grid_func&>;
 	grid_func(){};
 	grid_func(topo_ptr grid);
 	grid_func(len_t nx, len_t ny, len_t nz);
@@ -32,7 +23,6 @@ public:
 	real_t inf_norm() const;
 	grid_func & operator-=(const grid_func & rhs);
 	friend grid_func operator-(grid_func lhs, const grid_func &rhs) { return lhs -= rhs; }
-	grid_func & operator+=(iadd_t interp_add_package);
 	friend std::ostream& operator<< (std::ostream& os, const grid_func &obj);
 };
 

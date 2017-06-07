@@ -1,7 +1,7 @@
 #include <cedar/2d/ftn/BMG_parameters_c.h>
 #include <cedar/3d/mpi/halo.h>
 
-#include <cedar/3d/inter/interp.h>
+#include <cedar/3d/inter/mpi/interp.h>
 
 extern "C" {
 	using namespace cedar;
@@ -36,10 +36,13 @@ namespace impls
 		grid_topo & topof = Pd.fine_op->grid();
 		MsgCtx *ctx = (MsgCtx*) Pd.halo_ctx;
 
-		if (Pd.stencil().five_pt()) {
+		real_t * fop_data;
+		if (Pd.fine_is_seven) {
 			nstencil = 4;
+			fop_data = Pd.fine_op_seven->data();
 		} else {
 			nstencil = 14;
+			fop_data = Pd.fine_op_xxvii->data();
 		}
 
 		kc = topo.level() + 1;
@@ -49,7 +52,7 @@ namespace impls
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 		MPI_BMG3_SymStd_interp_add(kc, kf, nog,
 		                           fine.data(), coarsed.data(), res.data(),
-		                           Pd.fine_op->data(), nstencil, Pd.data(),
+		                           fop_data, nstencil, Pd.data(),
 		                           coarsed.len(0), coarsed.len(1), coarsed.len(2),
 		                           fine.len(0), fine.len(1), fine.len(2),
 		                           topof.is(0), topof.is(1), topof.is(2),

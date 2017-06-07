@@ -1,7 +1,5 @@
 set(sources
-  kernel/setup_nog.cc
-  kernel/factory.cc)
-
+  kernel/setup_nog.cc)
 
 if (ENABLE_MPI)
   list(APPEND sources

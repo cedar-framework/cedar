@@ -1,8 +1,11 @@
+#ifndef CEDAR_3D_SETUP_CG_LU_MPI_H
+#define CEDAR_3D_SETUP_CG_LU_MPI_H
+
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 #include "cedar/2d/ftn/BMG_parameters_c.h"
-#include <cedar/3d/mpi/halo.h>
+#include <cedar/kernel_params.h>
+#include <cedar/3d/mpi/stencil_op.h>
 
-#include <cedar/3d/cg/setup_cg_lu.h>
 
 extern "C" {
 	using namespace cedar;
@@ -13,27 +16,22 @@ extern "C" {
 	                                 int *proc_grid, int *proc_coord, len_t *loc_arr_size, int mpicomm);
 }
 
-
 namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
+	namespace mpi = cedar::cdr3::mpi;
+
+	template<class sten>
 	void mpi_setup_cg_lu(const kernel_params & params,
-	                     const mpi::stencil_op & so,
+	                     const mpi::stencil_op<sten> & so,
 	                     grid_func & ABD)
 	{
-		mpi::stencil_op & copd = const_cast<mpi::stencil_op&>(so);
+		auto & copd = const_cast<mpi::stencil_op<sten>&>(so);
 
-		grid_stencil & csten = copd.stencil();
 		grid_topo & topo = copd.grid();
 		MsgCtx *ctx = (MsgCtx*) copd.halo_ctx;
-		int nstencil;
-
-		if (csten.five_pt()) {
-			nstencil = 4;
-		} else {
-			nstencil = 14;
-		}
+		int nstencil = stencil_ndirs<sten>::value;
 
 		int rank;
 		MPI_Comm_rank(topo.comm, &rank);
@@ -46,7 +44,7 @@ namespace impls
 		}
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
-		MPI_BMG3_SymStd_SETUP_cg_LU(csten.data(), csten.len(0), csten.len(1), csten.len(2),
+		MPI_BMG3_SymStd_SETUP_cg_LU(copd.data(), copd.len(0), copd.len(1), copd.len(2),
 		                            nstencil, ABD.data(), ABD.len(0), ABD.len(1),
 		                            ctx->msg_buffer.data(), ctx->msg_buffer.size(),
 		                            topo.nproc(0), topo.nproc(1), topo.nproc(2), topo.nproc(),
@@ -58,3 +56,5 @@ namespace impls
 }
 
 }}}
+
+#endif

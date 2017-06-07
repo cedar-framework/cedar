@@ -1,9 +1,11 @@
-#include <cedar/types.h>
-#include <cedar/3d/stencil_op.h>
-#include <cedar/3d/grid_func.h>
-#include <cedar/3d/mpi/halo.h>
+#ifndef CEDAR_3D_KERNEL_RESIDUAL_H
+#define CEDAR_3D_KERNEL_RESIDUAL_H
 
-#include <cedar/3d/residual.h>
+#include <type_traits>
+#include <cedar/kernel_params.h>
+#include <cedar/3d/mpi/stencil_op.h>
+#include <cedar/3d/mpi/grid_func.h>
+#include <cedar/3d/mpi/halo.h>
 
 extern "C" {
 	using namespace cedar;
@@ -19,27 +21,23 @@ namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
-	using namespace cedar;
-	using namespace cedar::cdr3;
-
-	void mpi_residual_fortran(const kernel_params & params,
-	                          const mpi::stencil_op & A, const mpi::grid_func & x,
-	                          const mpi::grid_func & b, mpi::grid_func &r)
+	namespace mpi = cedar::cdr3::mpi;
+	template<class sten>
+	void mpi_residual_fortran(const kernel_params & params, const mpi::stencil_op<sten> & A, const mpi::grid_func & x,
+	                          const mpi::grid_func & b, mpi::grid_func &y)
 	{
 		int k, kf, nog, ifd, nstencil;
-		auto & Ad = const_cast<mpi::stencil_op &>(A);
+		auto & Ad = const_cast<mpi::stencil_op<sten> &>(A);
 		auto & xd = const_cast<mpi::grid_func&>(x);
 		auto & bd = const_cast<mpi::grid_func&>(b);
 		grid_topo & topo = Ad.grid();
 		MsgCtx *ctx = (MsgCtx*) Ad.halo_ctx;
 
-		if (Ad.stencil().five_pt()) {
+		nstencil = stencil_ndirs<sten>::value;
+		if (std::is_same<sten, seven_pt>::value)
 			ifd = 1;
-			nstencil = 4;
-		} else {
+		else
 			ifd = 0;
-			nstencil = 14;
-		}
 
 		nog = kf = topo.nlevel();
 		k = topo.level()+1;
@@ -56,3 +54,4 @@ namespace impls
 }
 
 }}}
+#endif

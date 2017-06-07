@@ -79,6 +79,11 @@ stencil_op_nd(decltype(Is, len_t{})... args)
 template <std::size_t nd, typename stype, std::size_t... Is>
 	std::ostream & operator<<(std::ostream & os, const stencil_op_nd<nd,stype,index_sequence<Is...>> & obj);
 
+template<class stype>
+	struct stencil_ndirs
+	{
+		static const int value = static_cast<int>(stype::ndirs);
+	};
 }
 
 #endif

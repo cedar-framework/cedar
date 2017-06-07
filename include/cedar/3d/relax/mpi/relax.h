@@ -1,7 +1,15 @@
+#ifndef CEDAR_3D_RELAX_MPI_H
+#define CEDAR_3D_RELAX_MPI_H
+
+#include <type_traits>
+
 #include "cedar/2d/ftn/BMG_parameters_c.h"
+#include <cedar/kernel_params.h>
+#include <cedar/cycle/types.h>
+#include <cedar/3d/mpi/grid_func.h>
+#include <cedar/3d/mpi/stencil_op.h>
 #include <cedar/3d/mpi/halo.h>
 
-#include <cedar/3d/relax/relax.h>
 
 extern "C" {
 	using namespace cedar;
@@ -21,6 +29,9 @@ namespace cedar { namespace cdr3 { namespace kernel {
 
 namespace impls
 {
+	namespace mpi = cedar::cdr3::mpi;
+
+	template<class sten>
 	void mpi_relax_rbgs_point(const kernel_params & params,
 	                          const mpi::stencil_op & so,
 	                          mpi::grid_func & x,
@@ -33,22 +44,20 @@ namespace impls
 		int updown, nstencil;
 		int rank;
 
-		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);
+		auto & sod = const_cast<mpi::stencil_op<sten>&>(so);
 		grid_topo & topo = sod.grid();
 		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
-		grid_stencil & sten = sod.stencil();
 		relax_stencil & sord = const_cast<relax_stencil&>(sor);
 		mpi::grid_func & bd = const_cast<mpi::grid_func&>(b);
 
 		k = topo.level()+1;
 		kf = topo.nlevel();
-		if (sten.five_pt()) {
+		nstencil = stencil_ndirs<sten>::value;
+
+		if (std::is_same<sten, seven_pt>::value)
 			ifd = 1;
-			nstencil = 4;
-		} else {
+		else
 			ifd = 0;
-			nstencil = 14;
-		}
 
 		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
 		else updown = BMG_DOWN;
@@ -73,4 +82,4 @@ namespace impls
 
 }}}
 
-
+#endif

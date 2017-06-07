@@ -10,12 +10,6 @@ namespace cedar { namespace cdr2 {
 		enum class nine_pt {c=BMG2_C, w=BMG2_W, s=BMG2_S, sw=BMG2_SW, nw=BMG2_NW, ndirs};
 
 		template<class stype>
-			struct stencil_ndirs
-		{
-			static const int value = static_cast<int>(stype::ndirs);
-		};
-
-		template<class stype>
 			using stencil_op = stencil_op_nd<2, stype>;
 
 }}

@@ -65,7 +65,7 @@ protected:
 	    @returns The redistrubted processor grid topology
 	*/
 	std::shared_ptr<grid_topo> redist_topo(const grid_topo & fine_topo, msg_ctx & ctx);
-	/** Redistributes the operator
+	/** Redistributes the operator.
 
 	    @param[in] so Source operator to redistribute
 	    @param[in] topo Redistributed processor grid topology

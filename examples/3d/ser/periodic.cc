@@ -8,17 +8,15 @@
 #include <cedar/3d/solver.h>
 
 
-static cedar::cdr3::stencil_op create_op(cedar::len_t nx, cedar::len_t ny, cedar::len_t nz,
-                                         std::array<bool, 3> periodic)
+static cedar::cdr3::stencil_op<cedar::cdr3::seven_pt> create_op(cedar::len_t nx, cedar::len_t ny, cedar::len_t nz,
+                                                                std::array<bool, 3> periodic)
 {
 	using namespace cedar;
 	using namespace cedar::cdr3;
 
-	auto so = stencil_op(nx, ny, nz);
-	auto & sten = so.stencil();
-	sten.five_pt() = true;
+	stencil_op<seven_pt> so(nx, ny, nz);
 
-	sten.set(0);
+	so.set(0);
 
 	if (periodic[0]) nx--;
 	if (periodic[1]) ny--;
@@ -29,12 +27,12 @@ static cedar::cdr3::stencil_op create_op(cedar::len_t nx, cedar::len_t ny, cedar
 	real_t xh=hy*hz/hx;
 	real_t yh=hx*hz/hy;
 	real_t zh=hx*hy/hz;
-	len_t l = sten.shape(0);
-	len_t m = sten.shape(1);
-	len_t n = sten.shape(2);
-	len_t i1 = sten.shape(0) + 1;
-	len_t j1 = sten.shape(1) + 1;
-	len_t k1 = sten.shape(2) + 1;
+	len_t l = so.shape(0);
+	len_t m = so.shape(1);
+	len_t n = so.shape(2);
+	len_t i1 = so.shape(0) + 1;
+	len_t j1 = so.shape(1) + 1;
+	len_t k1 = so.shape(2) + 1;
 	len_t ibeg = 2;
 	len_t jbeg = 2;
 	len_t kbeg = 2;
@@ -43,12 +41,10 @@ static cedar::cdr3::stencil_op create_op(cedar::len_t nx, cedar::len_t ny, cedar
 	if (periodic[1]) jbeg--;
 	if (periodic[2]) kbeg--;
 
-	auto & o = sten;
-
 	for (auto k : range<len_t>(1, k1)) {
 		for (auto j : range<len_t>(jbeg, j1)) {
 			for (auto i : range<len_t>(1, i1)) {
-				o(i,j,k,dir::PS) = 1.0*yh;
+				so(i,j,k,seven_pt::ps) = 1.0*yh;
 			}
 		}
 	}
@@ -56,7 +52,7 @@ static cedar::cdr3::stencil_op create_op(cedar::len_t nx, cedar::len_t ny, cedar
 	for (auto k : range<len_t>(1, k1)) {
 		for (auto j : range<len_t>(1, j1)) {
 			for (auto i : range<len_t>(ibeg, i1)) {
-				o(i,j,k,dir::PW) = 1.0*xh;
+				so(i,j,k,seven_pt::pw) = 1.0*xh;
 			}
 		}
 	}
@@ -64,63 +60,63 @@ static cedar::cdr3::stencil_op create_op(cedar::len_t nx, cedar::len_t ny, cedar
 	for (auto k : range<len_t>(kbeg, k1)) {
 		for (auto j : range<len_t>(1, j1)) {
 			for (auto i : range<len_t>(1, i1)) {
-				o(i,j,k,dir::B) = 1.0*zh;
+				so(i,j,k,seven_pt::b) = 1.0*zh;
 			}
 		}
 	}
 
-	for (auto k : sten.range(2)) {
-		for (auto j : sten.range(1)) {
-			for (auto i : sten.range(0)) {
-				o(i,j,k,dir::P) = 2.0*xh + 2.0*yh + 2.0*zh;
+	for (auto k : so.range(2)) {
+		for (auto j : so.range(1)) {
+			for (auto i : so.range(0)) {
+				so(i,j,k,seven_pt::p) = 2.0*xh + 2.0*yh + 2.0*zh;
 			}
 		}
 	}
 
 	if (periodic[0]) {
-		for (auto k : sten.grange(2)) {
-			for (auto j : sten.grange(1)) {
-				o(ibeg-1,j,k,dir::P ) = o(l,j,k,dir::P );
-				o(ibeg-1,j,k,dir::PW) = o(l,j,k,dir::PW);
-				o(ibeg-1,j,k,dir::PS) = o(l,j,k,dir::PS);
-				o(ibeg-1,j,k,dir::B ) = o(l,j,k,dir::B );
+		for (auto k : so.grange(2)) {
+			for (auto j : so.grange(1)) {
+				so(ibeg-1,j,k,seven_pt::p ) = so(l,j,k,seven_pt::p );
+				so(ibeg-1,j,k,seven_pt::pw) = so(l,j,k,seven_pt::pw);
+				so(ibeg-1,j,k,seven_pt::ps) = so(l,j,k,seven_pt::ps);
+				so(ibeg-1,j,k,seven_pt::b ) = so(l,j,k,seven_pt::b );
 
-				o(l+1,j,k,dir::P ) = o(ibeg,j,k,dir::P );
-				o(l+1,j,k,dir::PW) = o(ibeg,j,k,dir::PW);
-				o(l+1,j,k,dir::PS) = o(ibeg,j,k,dir::PS);
-				o(l+1,j,k,dir::B ) = o(ibeg,j,k,dir::B );
+				so(l+1,j,k,seven_pt::p ) = so(ibeg,j,k,seven_pt::p );
+				so(l+1,j,k,seven_pt::pw) = so(ibeg,j,k,seven_pt::pw);
+				so(l+1,j,k,seven_pt::ps) = so(ibeg,j,k,seven_pt::ps);
+				so(l+1,j,k,seven_pt::b ) = so(ibeg,j,k,seven_pt::b );
 			}
 		}
 	}
 
 	if (periodic[1]) {
-		for (auto k : sten.grange(2)) {
-			for (auto i : sten.grange(0)) {
-				o(i,jbeg-1,k,dir::P ) = o(i,m,k,dir::P );
-				o(i,jbeg-1,k,dir::PW) = o(i,m,k,dir::PW);
-				o(i,jbeg-1,k,dir::PS) = o(i,m,k,dir::PS);
-				o(i,jbeg-1,k,dir::B ) = o(i,m,k,dir::B );
+		for (auto k : so.grange(2)) {
+			for (auto i : so.grange(0)) {
+				so(i,jbeg-1,k,seven_pt::p ) = so(i,m,k,seven_pt::p );
+				so(i,jbeg-1,k,seven_pt::pw) = so(i,m,k,seven_pt::pw);
+				so(i,jbeg-1,k,seven_pt::ps) = so(i,m,k,seven_pt::ps);
+				so(i,jbeg-1,k,seven_pt::b ) = so(i,m,k,seven_pt::b );
 
-				o(i,m+1,k,dir::P ) = o(i,jbeg,k,dir::P );
-				o(i,m+1,k,dir::PW) = o(i,jbeg,k,dir::PW);
-				o(i,m+1,k,dir::PS) = o(i,jbeg,k,dir::PS);
-				o(i,m+1,k,dir::B ) = o(i,jbeg,k,dir::B );
+				so(i,m+1,k,seven_pt::p ) = so(i,jbeg,k,seven_pt::p );
+				so(i,m+1,k,seven_pt::pw) = so(i,jbeg,k,seven_pt::pw);
+				so(i,m+1,k,seven_pt::ps) = so(i,jbeg,k,seven_pt::ps);
+				so(i,m+1,k,seven_pt::b ) = so(i,jbeg,k,seven_pt::b );
 			}
 		}
 	}
 
 	if (periodic[2]) {
-		for (auto j: sten.grange(1)) {
-			for (auto i :sten.grange(0)) {
-				o(i,j,kbeg-1,dir::P ) = o(i,j,n,dir::P );
-				o(i,j,kbeg-1,dir::PW) = o(i,j,n,dir::PW);
-				o(i,j,kbeg-1,dir::PS) = o(i,j,n,dir::PS);
-				o(i,j,kbeg-1,dir::B ) = o(i,j,n,dir::B );
+		for (auto j: so.grange(1)) {
+			for (auto i :so.grange(0)) {
+				so(i,j,kbeg-1,seven_pt::p ) = so(i,j,n,seven_pt::p );
+				so(i,j,kbeg-1,seven_pt::pw) = so(i,j,n,seven_pt::pw);
+				so(i,j,kbeg-1,seven_pt::ps) = so(i,j,n,seven_pt::ps);
+				so(i,j,kbeg-1,seven_pt::b ) = so(i,j,n,seven_pt::b );
 
-				o(i,j,n+1,dir::P ) = o(i,j,kbeg,dir::P );
-				o(i,j,n+1,dir::PW) = o(i,j,kbeg,dir::PW);
-				o(i,j,n+1,dir::PS) = o(i,j,kbeg,dir::PS);
-				o(i,j,n+1,dir::B ) = o(i,j,kbeg,dir::B );
+				so(i,j,n+1,seven_pt::p ) = so(i,j,kbeg,seven_pt::p );
+				so(i,j,n+1,seven_pt::pw) = so(i,j,kbeg,seven_pt::pw);
+				so(i,j,n+1,seven_pt::ps) = so(i,j,kbeg,seven_pt::ps);
+				so(i,j,n+1,seven_pt::b ) = so(i,j,kbeg,seven_pt::b );
 			}
 		}
 	}
@@ -249,16 +245,16 @@ int main(int argc, char *argv[])
 	grid_func b(nx, ny, nz);
 	set_problem(b, params->periodic);
 
-	solver bmg(std::move(so), conf);
+	solver<seven_pt> bmg(so, conf);
 
 	{
 		std::ofstream ffile("output/ser-fine");
 		std::ofstream rfile("output/ser-restrict");
 		std::ofstream cfile("output/ser-coarse");
 
-		ffile << bmg.level(-1).A;
-		rfile << bmg.level(-1).P;
-		cfile << bmg.level(-2).A;
+		ffile << bmg.levels.get<seven_pt>(0).A;
+		rfile << bmg.levels.get(1).P;
+		cfile << bmg.levels.get(1).A;
 
 		ffile.close();
 		rfile.close();

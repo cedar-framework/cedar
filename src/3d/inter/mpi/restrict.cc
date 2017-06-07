@@ -1,7 +1,7 @@
 #include <cedar/2d/ftn/BMG_parameters_c.h>
 #include <cedar/3d/mpi/halo.h>
 
-#include <cedar/3d/inter/restrict.h>
+#include <cedar/3d/inter/mpi/restrict.h>
 
 extern "C" {
 	using namespace cedar;

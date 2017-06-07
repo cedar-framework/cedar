@@ -30,15 +30,19 @@ namespace impls
 		grid_func & coarsed = const_cast<grid_func&>(coarse);
 		grid_func & res = const_cast<grid_func&>(residual);
 
-		if (Pd.stencil().five_pt()) {
+		real_t * fop_data;
+
+		if (Pd.fine_is_seven) {
 			nstencil = 4;
+			fop_data = Pd.fine_op_seven->data();
 		} else {
 			nstencil = 14;
+			fop_data = Pd.fine_op_xxvii->data();
 		}
 
 		BMG_get_bc(params.per_mask(), &ibc);
 
-		BMG3_SymStd_interp_add(fine.data(), coarsed.data(), Pd.fine_op->data(), res.data(), Pd.data(),
+		BMG3_SymStd_interp_add(fine.data(), coarsed.data(), fop_data, res.data(), Pd.data(),
 		                       coarsed.len(0), coarsed.len(1), coarsed.len(2),
 		                       fine.len(0), fine.len(1), fine.len(2),
 		                       nstencil, ibc);

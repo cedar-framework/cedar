@@ -114,7 +114,7 @@ int main(int argc, char *argv[])
 	mpi::grid_func b(grid);
 
 	set_problem(b);
-	mpi::solver bmg(std::move(so));
+	mpi::solver<seven_pt> bmg(std::move(so));
 
 	MPI_Barrier(MPI_COMM_WORLD); // synchronize before timing solve
 	auto x = bmg.solve(b);
