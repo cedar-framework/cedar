@@ -23,7 +23,7 @@ redist_solver::redist_solver(const stencil_op<nine_pt> & so,
 	auto & topo = so.grid();
 	msg_ctx * ctx = (msg_ctx*) so.halo_ctx;
 	auto ctopo = redist_topo(topo, *ctx);
-	auto rop = redist_operator(so, ctopo);
+	so_redist = redist_operator(so, ctopo);
 	b_redist = grid_func(ctopo);
 	x_redist = grid_func(ctopo);
 
@@ -31,7 +31,7 @@ redist_solver::redist_solver(const stencil_op<nine_pt> & so,
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
 		log::push_level("redist", *conf);
-		slv = std::make_unique<solver<nine_pt>>(rop, conf);
+		slv = std::make_unique<solver<nine_pt>>(so_redist, conf);
 		log::pop_level();
 		MSG_pause(&msg_comm);
 		MSG_play(parent_comm);
@@ -67,7 +67,7 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 stencil_op<cdr2::nine_pt> redist_solver::redist_operator(const stencil_op<nine_pt> & so, topo_ptr topo)
 {
 	// save general case for later
-	auto rop = stencil_op<nine_pt>(topo);
+	stencil_op<nine_pt> rop(topo);
 
 	array<len_t,real_t,1> sbuf(5*so.len(0)*so.len(1));
 	int idx = 0;

@@ -57,6 +57,7 @@ protected:
 	MPI_Fint msg_comm;
 	grid_func b_redist; /** The redistributed rhs */
 	grid_func x_redist; /** The redistributed solution */
+	stencil_op<cdr2::nine_pt> so_redist; /** The redistributed operator */
 
 	/** Redistributes the processor grid.
 
