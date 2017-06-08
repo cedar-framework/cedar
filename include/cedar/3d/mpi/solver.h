@@ -109,7 +109,7 @@ public:
 			if (i == 0)
 				fgrid.grow(nlevels);
 
-			int kc = nlevels - this->levels.size() - 2;
+			int kc = nlevels - i - 2;
 
 			auto cgrid = std::make_shared<grid_topo>(fgrid.get_igrd(), kc, nlevels);
 			cgrid->comm = fgrid.comm;
