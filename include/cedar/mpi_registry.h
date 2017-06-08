@@ -6,6 +6,21 @@
 
 namespace cedar {
 
+
+	/**
+	   Base class used to define kernels used in a distributed
+	   multilevel solve.
+
+	   By subclassing this, you must implement each method to provide
+	   a registry of implementations to the common distributed
+	   multilevel operations.  This class given to multilevel solver
+	   objects so these operations can be performed generically.
+
+	   @tparam child The class that is inheriting this base.
+	   @tparam solver_types A structured listing of types used in a multilevel solve.
+	   @tparam redist_solver Class for a redistributed coarse-grid solver.
+	   @tparam serial_solver Class for a serial coarse-grid solve.
+	*/
 	template <class child,
 		class solver_types,
 		class redist_solver,

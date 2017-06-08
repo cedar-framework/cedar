@@ -4,6 +4,10 @@
 namespace cedar
 {
 
+/**
+   Base class for a structured list of types used in a multilevel
+   solver.
+*/
 template<template<class> class stencil_operator,
 	class grid_function,
 	class prolong_operator,

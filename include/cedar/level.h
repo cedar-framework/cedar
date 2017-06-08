@@ -4,6 +4,13 @@
 namespace cedar
 {
 
+/**
+   Base class for data that is stored on each level of a multilevel
+   solve.
+
+   @tparam sten The type of stencil used in the stencil_operator (e.g., five point or nine point in 2D)
+   @tparam solver_types A structured listing of types used in a multilevel solve.
+*/
 template<class sten, class solver_types>
 struct level
 {

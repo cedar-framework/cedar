@@ -9,13 +9,24 @@
 
 namespace cedar {
 
+/**
+   Multidimensional array.
+
+   Provides fortran-like ND array.  This is the core data structure
+   used to store grid functions and stencil operators.  The inner
+   index is the fastest moving (Fortran ordering).
+
+   @tparam len_type Type for the lengths of the array's dimensions.
+   @tparam data_type Type for what is stored in the array.
+   @tparam ND Number of dimensions.
+ */
 template <typename len_type, typename data_type, unsigned short ND>
 class array : public virtual array_base<len_type>
 {
 protected:
-	AlignedVector<data_type> vec;
-	std::array<len_type, ND> strides;
-	std::array<len_type, ND> extents;
+	AlignedVector<data_type> vec;     /** Vector where the data is stored. */
+	std::array<len_type, ND> strides; /** Strides of each dimension, e.g., first index is stride 1. */
+	std::array<len_type, ND> extents; /** Lengths of each dimension. */
 
 public:
 

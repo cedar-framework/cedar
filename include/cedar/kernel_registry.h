@@ -11,6 +11,17 @@
 namespace cedar {
 
 
+	/**
+	   Base class used to define kernels used in a multilevel solve.
+
+	   By subclassing this, you must implement each method to provide
+	   a registry of implementations to the common multilevel
+	   operations.  This class given to multilevel solver objects so
+	   these operations can be performed generically.
+
+	   @tparam child The class that is inheriting this base.
+	   @tparam solver_types A structured listing of types used in a multilevel solve.
+	*/
 	template <class child,
 		class solver_types>
 struct kernel_registry

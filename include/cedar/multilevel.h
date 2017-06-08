@@ -8,6 +8,18 @@
 namespace cedar {
 
 
+	/**
+	   Base class for multilevel solvers.
+
+	   Base class for every mutilevel solve class.  This class
+	   performs operations generically by taking a structured listing
+	   of types and kernel implementations (registry) as input.
+
+	   @tparam level_container Generic container for data that is stored on every level.
+	   @tparam registry Listing of implementations for multilevel operations, e.g., kernel_registry.
+	   @tparam fsten Stencil used for the fine-grid operator.
+	   @tparam child Class that inherits this.
+	*/
 	template <class level_container,
 		      class registry, class fsten, class child>
 class multilevel
