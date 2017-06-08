@@ -21,6 +21,7 @@ stencil_op(topo_ptr grid) :
 			// Fortran kernels expect the extra ghost to be excluded from extents
 			for (auto i : cedar::range<unsigned short>(3)) {
 				this->range_[i] = cedar::range(static_cast<len_t>(1), grid->nlocal(i)-1);
+				this->grange_[i] = cedar::range(static_cast<len_t>(0), grid->nlocal(i));
 				this->len(i)--;
 			}
 		}

@@ -52,7 +52,7 @@ namespace impls
 		grid_topo & topo = fopd.grid();
 		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
 
-		kc = topo.level() + 1;
+		kc = topo.level();
 		nog = topo.nlevel();
 		kf = kc + 1;
 
