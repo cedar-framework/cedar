@@ -45,3 +45,6 @@ if(ENABLE_UNIT_TESTS)
 
   add_subdirectory(test)
 endif()
+
+add_subdirectory(pybind11)
+add_subdirectory(interface)
