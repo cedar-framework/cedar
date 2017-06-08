@@ -60,8 +60,10 @@ protected:
 	MPI_Fint msg_comm;
 	grid_func b_redist;
 	grid_func x_redist;
+	stencil_op<cdr3::xxvii_pt> so_redist;
 	cdr3::grid_func b_redist_ser;
 	cdr3::grid_func x_redist_ser;
+	cdr3::stencil_op<cdr3::xxvii_pt> so_redist_ser;
 
 	/** Redistributes the processor grid.
 

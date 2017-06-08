@@ -53,24 +53,24 @@ redist_solver::redist_solver(const stencil_op<xxvii_pt> & so,
 	if (ser_cg) {
 		b_redist_ser = grid_func(ctopo->nlocal(0)-2, ctopo->nlocal(1)-2, ctopo->nlocal(2)-2);
 		x_redist_ser = grid_func(ctopo->nlocal(0)-2, ctopo->nlocal(1)-2, ctopo->nlocal(2)-2);
+		so_redist_ser = redist_operator<cdr3::stencil_op, xxvii_pt>(so, ctopo);
 	} else {
 		b_redist = grid_func(ctopo);
 		x_redist = grid_func(ctopo);
+		so_redist = redist_operator<mpi::stencil_op, xxvii_pt>(so, ctopo);
 	}
 
 	if (active) {
 		if (ser_cg) {
-			auto rop = redist_operator<cdr3::stencil_op, xxvii_pt>(so, ctopo);
 			log::push_level("serial", *conf);
-			slv_ser = std::make_unique<cdr3::solver<xxvii_pt>>(rop, conf);
+			slv_ser = std::make_unique<cdr3::solver<xxvii_pt>>(so_redist_ser, conf);
 			log::pop_level();
 		} else {
-			auto rop = redist_operator<mpi::stencil_op, xxvii_pt>(so, ctopo);
 			MPI_Fint parent_comm;
 			MSG_pause(&parent_comm);
 			log::push_level("redist", *conf);
 			timer_down();
-			slv = std::make_unique<solver<xxvii_pt>>(rop, conf);
+			slv = std::make_unique<solver<xxvii_pt>>(so_redist, conf);
 			timer_up();
 			b_redist.halo_ctx = slv->levels.get(0).A.halo_ctx;
 			log::pop_level();
