@@ -86,11 +86,11 @@ TEST(SerialPoisson3, Isotropic) {
 
 	auto conf = std::make_shared<config::reader>("");
 	log::init(*conf);
-	solver bmg(std::move(so), conf);
+	solver<seven_pt> bmg(so, conf);
 
 	auto sol = bmg.solve(b);
 
-	ASSERT_LT(std::abs(bmg.level(-1).res.lp_norm<2>()),
+	ASSERT_LT(std::abs(bmg.levels.template get<seven_pt>(0).res.lp_norm<2>()),
 	          1e-8);
 
 	grid_func exact_sol(sol.shape(0), sol.shape(1), sol.shape(2));

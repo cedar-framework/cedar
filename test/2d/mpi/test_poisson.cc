@@ -3,7 +3,6 @@
 
 #include <cedar/2d/mpi/gallery.h>
 #include <cedar/2d/util/topo.h>
-#include <cedar/2d/util/mpi_grid.h>
 #include <cedar/2d/mpi/solver.h>
 
 
@@ -97,11 +96,11 @@ TEST(MPIPoisson2, Isotropic) {
 
 	auto conf = std::make_shared<config::reader>("");
 	log::init(*conf);
-	mpi::solver bmg(std::move(so), conf);
+	mpi::solver<five_pt> bmg(so, conf);
 
 	auto sol = bmg.solve(b);
 
-	ASSERT_LT(std::abs(bmg.level(-1).res.lp_norm<2>()),
+	ASSERT_LT(std::abs(bmg.levels.template get<five_pt>(0).res.lp_norm<2>()),
 	          1e-8);
 
 	mpi::grid_func exact_sol(grid);
@@ -138,11 +137,11 @@ TEST(MPIPoisson2, StrongX) {
 	auto conf = std::make_shared<config::reader>("");
 	log::init(*conf);
 	conf->set("solver.relaxation", "line-x");
-	mpi::solver bmg(std::move(so), conf);
+	mpi::solver<five_pt> bmg(so, conf);
 
 	auto sol = bmg.solve(b);
 
-	ASSERT_LT(std::abs(bmg.level(-1).res.lp_norm<2>()),
+	ASSERT_LT(std::abs(bmg.levels.template get<five_pt>(0).res.lp_norm<2>()),
 	          1e-8);
 
 	mpi::grid_func exact_sol(grid);
@@ -179,11 +178,11 @@ TEST(MPIPoisson2, StrongY) {
 	auto conf = std::make_shared<config::reader>("");
 	log::init(*conf);
 	conf->set("solver.relaxation", "line-y");
-	mpi::solver bmg(std::move(so), conf);
+	mpi::solver<five_pt> bmg(so, conf);
 
 	auto sol = bmg.solve(b);
 
-	ASSERT_LT(std::abs(bmg.level(-1).res.lp_norm<2>()),
+	ASSERT_LT(std::abs(bmg.levels.template get<five_pt>(0).res.lp_norm<2>()),
 	          1e-8);
 
 	mpi::grid_func exact_sol(grid);
