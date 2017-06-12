@@ -64,8 +64,9 @@ setup(
     author_email='areisne2@illinois.edu',
     description='Prototype of Cedar Framework Interface',
     long_description='',
-    packages=['cedar'],
-    ext_modules=[CMakeExtension('cedar.pycedar')],
+    packages=['cedar','cedar.cdr2'],
+    ext_modules=[CMakeExtension('cedar.cdr2._cdr2'),
+                 CMakeExtension('cedar.cdr2.gallery')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
 )

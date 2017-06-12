@@ -123,6 +123,13 @@ protected:
 	std::unique_ptr<stencil_op<fsten>> fop_ref;
 };
 
+template<class fsten>
+	void solve(stencil_op<fsten> & A, grid_func & x, const grid_func & b)
+{
+	solver<fsten> bmg(A);
+	bmg.solve(b, x);
+}
+
 }}
 
 #endif

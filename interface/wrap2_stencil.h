@@ -1,3 +1,6 @@
+#ifndef WRAP2_STENCIL_H
+#define WRAP2_STENCIL_H
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
@@ -8,7 +11,7 @@ using namespace cedar;
 using namespace cedar::cdr2;
 
 template<class sten>
-void export_stencil_op(py::module & m, std::string sten_name) {
+void export_stencil_op2(py::module & m, std::string sten_name) {
 	std::string name("stencil_op_" + sten_name);
 	py::class_<stencil_op<sten>>(m, name.c_str(), py::buffer_protocol())
 		.def(py::init<len_t,len_t>())
@@ -29,12 +32,20 @@ void export_stencil_op(py::module & m, std::string sten_name) {
 							sizeof(real_t)*so.len(0)*so.len(1)}
 					);
 			});
+	if (std::is_same<sten,five_pt>::value) {
+		py::enum_<five_pt>(m, "five_pt")
+			.value("c", five_pt::c)
+			.value("w", five_pt::w)
+			.value("s", five_pt::s);
+	} else {
+		py::enum_<nine_pt>(m, "nine_pt")
+			.value("c", nine_pt::c)
+			.value("w", nine_pt::w)
+			.value("s", nine_pt::s)
+			.value("sw",nine_pt::sw)
+			.value("nw",nine_pt::nw);
+	}
 }
 
-PYBIND11_PLUGIN(_cdr2) {
-	py::module m("_cdr2", "");
-	export_stencil_op<five_pt>(m,"five");
-	export_stencil_op<nine_pt>(m,"nine");
 
-	return m.ptr();
-}
+#endif
