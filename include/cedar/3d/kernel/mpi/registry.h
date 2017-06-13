@@ -121,7 +121,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	            const mpi::grid_func & x,
 	            mpi::grid_func & y)
 	{
-		impls::matvec(so, x, y);
+		impls::matvec(*params, so, x, y);
 	}
 
 

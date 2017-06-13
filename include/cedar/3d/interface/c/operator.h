@@ -9,8 +9,8 @@ extern "C" {
 
 #include <cedar/3d/base_types.h>
 
-struct cdr3_op;
-typedef struct cdr3_op* cdr3_operator;
+struct bmg3_op;
+typedef struct bmg3_op* bmg3_operator;
 
 typedef struct {
 	unsigned int i;
@@ -19,17 +19,15 @@ typedef struct {
 	cdr3_dir dir;
 } grid_coord_3d;
 
-cdr3_operator cdr3_operator_create(cdr3_topo topo);
+bmg3_operator bmg3_operator_create(bmg3_topo topo);
 
-cdr3_operator cdr3_operator_create_sevenpt(cdr3_topo topo);
+void bmg3_operator_set(bmg3_operator, unsigned int nvals, grid_coord_3d coords[], double vals[]);
 
-void cdr3_operator_set(cdr3_operator, unsigned int nvals, grid_coord_3d coords[], double vals[]);
+void bmg3_operator_apply(bmg3_operator, const double *x, double *b);
 
-void cdr3_operator_apply(cdr3_operator, const double *x, double *b);
+void bmg3_operator_dump(bmg3_operator);
 
-void cdr3_operator_dump(cdr3_operator);
-
-void cdr3_operator_destroy(cdr3_operator);
+void bmg3_operator_destroy(bmg3_operator);
 
 #ifdef __cplusplus
 }

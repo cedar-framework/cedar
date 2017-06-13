@@ -8,7 +8,7 @@
 extern "C"
 {
 
-	cdr3_topo cdr3_topo_create(MPI_Comm comm,
+	bmg3_topo bmg3_topo_create(MPI_Comm comm,
 	                           unsigned int ngx,
 	                           unsigned int ngy,
 	                           unsigned int ngz,
@@ -77,7 +77,7 @@ extern "C"
 		}
 
 		grid_ptr = new std::shared_ptr<grid_topo>(std::move(grid));
-		return reinterpret_cast<cdr3_topo>(grid_ptr);
+		return reinterpret_cast<bmg3_topo>(grid_ptr);
 	}
 
 }

@@ -3,6 +3,7 @@
 #include <cedar/2d/mpi/stencil_op.h>
 
 #include <cedar/2d/interface/c/solver.h>
+#include <cedar/2d/interface/c/types.h>
 
 extern "C"
 {
@@ -10,12 +11,12 @@ extern "C"
 	{
 		using namespace cedar::cdr2;
 
-		mpi::stencil_op *sop = reinterpret_cast<mpi::stencil_op*>(*op);
+		auto & sop = reinterpret_cast<op_container*>(*op)->op;
 
-		mpi::solver *bmg = new mpi::solver(std::move(*sop));
-		bmg->level(-1).x = mpi::grid_func::zeros_like(bmg->level(-1).res);
-		bmg->level(-1).b = mpi::grid_func::zeros_like(bmg->level(-1).res);
-		*op = reinterpret_cast<bmg2_operator>(&bmg->level(-1).A);
+		auto *bmg = new mpi::solver<nine_pt>(sop);
+		auto & flevel = bmg->levels.get(0);
+		flevel.x = mpi::grid_func::zeros_like(flevel.res);
+		flevel.b = mpi::grid_func::zeros_like(flevel.res);
 
 		return reinterpret_cast<bmg2_solver>(bmg);
 	}
@@ -25,10 +26,9 @@ extern "C"
 	{
 		using namespace cedar::cdr2;
 
-		auto *bmg = reinterpret_cast<mpi::solver*>(op);
-		auto grid = bmg->level(-1).A.grid_ptr();
+		auto *bmg = reinterpret_cast<mpi::solver<nine_pt>*>(op);
 
-		auto & rhs = bmg->level(-1).b;
+		auto & rhs = bmg->levels.get(0).b;
 
 		int idx = 0;
 		for (auto j : rhs.range(1)) {
@@ -38,7 +38,7 @@ extern "C"
 			}
 		}
 
-		auto & sol = bmg->level(-1).x;
+		auto & sol = bmg->levels.get(0).x;
 		sol.set(0.0);
 		bmg->solve(rhs, sol);
 
@@ -55,7 +55,7 @@ extern "C"
 	{
 		using namespace cedar::cdr2;
 
-		delete reinterpret_cast<mpi::solver*>(bmg);
+		delete reinterpret_cast<mpi::solver<nine_pt>*>(bmg);
 	}
 
 }
