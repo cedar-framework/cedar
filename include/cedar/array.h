@@ -71,56 +71,59 @@ public:
 	}
 
 
-	std::tuple<short, len_type> get_offset(len_type i) const
+	std::pair<short, len_type> get_offset(len_type i) const
 	{
 		#ifdef BOUNDS_CHECK
 		assert(i < extents[ND-1]);
 		#endif
-		return std::make_tuple(ND-2, i*strides[ND-1]);
+		return std::make_pair(ND-2, i*strides[ND-1]);
 	}
 
 
-	template<typename... T> std::tuple<short, len_type> get_offset(len_type i, T... args) const
+	template<typename... T> std::pair<short, len_type> get_offset(len_type i, T... args) const
 	{
-		auto offset = get_offset(std::forward<decltype(args)>(args)...);
-		auto pos = std::get<0>(offset);
+		len_type offset; short pos;
+		std::tie(pos, offset) = get_offset(std::forward<decltype(args)>(args)...);
 		#ifdef BOUNDS_CHECK
 		assert(pos >= 0);
 		assert(i < extents[pos]);
 		#endif
-		return std::make_tuple(pos-1,
-		                       std::get<1>(offset) + i*strides[pos]);
+		return std::make_pair(pos-1,
+		                      offset + i*strides[pos]);
 	}
 
 
 	template<typename... T> data_type & operator()(T... args)
 	{
-		auto offset = get_offset(std::forward<decltype(args)>(args)...);
+		len_type offset; short pos;
+		std::tie(pos, offset) = get_offset(std::forward<decltype(args)>(args)...);
 		#ifdef BOUNDS_CHECK
-		assert(std::get<0>(offset) == -1);
-		return vec.at(std::get<1>(offset));
+		assert(pos == -1);
+		return vec.at(offset);
 		#else
-		return vec[std::get<1>(offset)];
+		return vec[offset];
 		#endif
 	}
 
 
 	template<typename... T> const data_type & operator()(T... args) const
 	{
-		auto offset = get_offset(std::forward<decltype(args)>(args)...);
+		len_type offset; short pos;
+		std::tie(pos, offset) = get_offset(std::forward<decltype(args)>(args)...);
 		#ifdef BOUNDS_CHECK
-		assert(std::get<0>(offset) == -1);
-		return vec.at(std::get<1>(offset));
+		assert(pos == -1);
+		return vec.at(offset);
 		#else
-		return vec[std::get<1>(offset)];
+		return vec[offset];
 		#endif
 	}
 
 
 	template<typename... T>	len_t index(T... args) const
 	{
-		auto offset = get_offset(std::forward<decltype(args)>(args)...);
-		return std::get<1>(offset);
+		len_t offset;
+		std::tie(std::ignore, offset) = get_offset(std::forward<decltype(args)>(args)...);
+		return offset;
 	}
 
 
