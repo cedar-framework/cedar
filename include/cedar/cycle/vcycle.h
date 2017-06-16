@@ -75,6 +75,12 @@ parent::cycle(levels, coarse_solver) {}
 			timer_begin("coarse-solve");
 			coarse_solver(coarse_x, coarse_b);
 			timer_end("coarse-solve");
+			if (log::info.active()) {
+				auto & coarse_A = levels.get(levels.size() - 1).A;
+				auto & coarse_residual = levels.get(levels.size()-1).res;
+				kreg->residual(coarse_A, coarse_x, coarse_b, coarse_residual);
+				log_residual(lvl+1, coarse_residual);
+			}
 		} else {
 			for (auto i : range(n)) {
 				(void)i;

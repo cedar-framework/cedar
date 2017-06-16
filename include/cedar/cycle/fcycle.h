@@ -38,6 +38,7 @@ parent::cycle(levels, coarse_solver), vcycler(levels, coarse_solver) {
 	void fmg_cycle(std::size_t lvl, grid_func & x, const grid_func & b)
 	{
 		if (lvl == levels.size() - 1) {
+			/* x.set(0.0); */
 			coarse_solver(x, b);
 			if (log::info.active()) {
 				auto & A = levels.get(levels.size() - 1).A;
@@ -64,6 +65,8 @@ parent::cycle(levels, coarse_solver), vcycler(levels, coarse_solver) {
 			auto & coarse_x = levels.get(lvl+1).x;
 			kreg->matvec(levels.get(lvl+1).R, b, coarse_b);
 			fmg_cycle(lvl+1, coarse_x, coarse_b);
+			x.set(0.0);
+			level.res.set(0.0);
 			kreg->interp_add(levels.get(lvl+1).P, coarse_x, level.res, x);
 			vcycler.ncycle(lvl, x, b);
 	}
