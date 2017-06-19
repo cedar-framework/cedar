@@ -1,6 +1,6 @@
 module ModInterface
 
-       use iso_c_binding, only: C_CHAR, C_NULL_CHAR, C_INT, C_DOUBLE
+       use iso_c_binding, only: C_CHAR, C_NULL_CHAR, C_INT, C_DOUBLE, C_PTR
        interface
          subroutine print_error(string) bind(C, name="print_error")
            use iso_c_binding, only: c_char
@@ -25,5 +25,15 @@ module ModInterface
 
        integer, parameter :: real_t = C_DOUBLE
        integer, parameter :: len_t = C_INT
+
+       interface
+          subroutine halo_exchange(k, nog, Q, II, JJ, ctx, halof) bind(C,name="halo_exchange")
+            use iso_c_binding, only : C_PTR, C_INT, C_DOUBLE
+            integer(C_INT),value :: k, nog
+            real(C_DOUBLE) :: Q(II,JJ)
+            integer(C_INT),value :: II, JJ
+            type(C_PTR) :: ctx, halof
+          end subroutine halo_exchange
+       end interface
 
 end module ModInterface

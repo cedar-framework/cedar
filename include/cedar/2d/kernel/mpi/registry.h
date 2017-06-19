@@ -9,6 +9,7 @@
 
 #include <cedar/2d/matvec.h>
 #include <cedar/2d/mpi/halo.h>
+#include <cedar/2d/relax/mpi/relax.h>
 #include <cedar/2d/relax_stencil.h>
 #include <cedar/2d/mpi/grid_func.h>
 #include <cedar/mpi/grid_topo.h>
@@ -100,7 +101,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		           const relax_stencil & sor,
 		           cycle::Dir cdir)
 	{
-		impls::mpi_relax_rbgs_point(*params, so, x, b, sor, cdir);
+		impls::mpi_relax_rbgs_point(*params, halof, so, x, b, sor, cdir);
 	}
 
 	template<class sten>
