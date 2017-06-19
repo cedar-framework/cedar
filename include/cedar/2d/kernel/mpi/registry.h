@@ -51,7 +51,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		                  const mpi::stencil_op<nine_pt> & cop,
 		                  inter::mpi::prolong_op & P)
 	{
-		impls::mpi_setup_interp(*params, fop, cop, P);
+		impls::mpi_setup_interp(*params, halof, fop, cop, P);
 	}
 
 	template <class sten>

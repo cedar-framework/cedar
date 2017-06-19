@@ -60,7 +60,6 @@ namespace impls
 		else updown = BMG_DOWN;
 
 		// ibc = BMG_BCs_definite;
-		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
 		MPI_BMG2_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
 		                         so.len(0), so.len(1), kf, ifd, nstencil, BMG_RELAX_SYM,
