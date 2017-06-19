@@ -29,10 +29,10 @@ namespace cedar { namespace cdr2 { namespace mpi {
 
 namespace cedar { namespace cdr2 { namespace kernel { namespace mpi {
 	namespace mpi = cedar::cdr2::mpi;
-	class registry : public mpi_registry<registry, cdr2::mpi::stypes, cdr2::mpi::redist_solver, solver<nine_pt>>
+	class registry : public mpi_registry<registry, cdr2::mpi::stypes, cdr2::mpi::redist_solver, solver<nine_pt>, 2>
 {
 public:
-	using parent = mpi_registry<registry, cdr2::mpi::stypes, cdr2::mpi::redist_solver, solver<nine_pt>>;
+	using parent = mpi_registry<registry, cdr2::mpi::stypes, cdr2::mpi::redist_solver, solver<nine_pt>, 2>;
 registry(std::shared_ptr<kernel_params> params): parent::mpi_registry(params) {}
 registry(config::reader & conf) : parent::mpi_registry(conf) {}
 
@@ -167,7 +167,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	              const mpi::grid_func & b,
 	              mpi::grid_func & r)
 	{
-		impls::mpi_residual_fortran(*params, so, x, b, r);
+		impls::mpi_residual_fortran(*params, halof, so, x, b, r);
 	}
 
 
@@ -190,6 +190,12 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	void halo_exchange(mpi::grid_func & f)
 	{
 		impls::msg_exchange(*params, f);
+	}
+
+
+	void halo_exchange(int k, int nog, real_t *so_data, std::array<len_t, 2> len, void *halo_ctx)
+	{
+		impls::msg_exchange(*params, k, nog, so_data, len[0], len[1], halo_ctx);
 	}
 
 

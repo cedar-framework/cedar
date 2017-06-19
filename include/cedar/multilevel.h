@@ -60,6 +60,15 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 		}
 	}
 
+
+	void vcycle(grid_func & x, const grid_func & b)
+	{
+		auto cycle_type = conf->get<std::string>("solver.cycle.type", "v");
+		assert(cycle_type == "v");
+		this->cycle->run(x, b);
+	}
+
+
 	std::shared_ptr<registry> kernel_registry()
 	{
 		return kreg;

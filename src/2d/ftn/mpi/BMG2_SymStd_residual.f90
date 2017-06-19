@@ -132,33 +132,6 @@
       ENDIF
 
 
-      ! Note: we need to update the ghost bdry of RES here,
-      ! since in the next step we restrict RES to the next
-      ! coarser mesh
-
-      ptrn = 1
-
-      call MSG_tbdx_send(RES, MSG_Buffer, &
-     &     iWorkMSG(pMSG(ipL_MSG_NumAdjProc,k)),&
-     &     iWorkMSG(pMSG(ipL_MSG_Proc,k)),&
-     &     iWorkMSG(pMSG(ipL_MSG_Ipr,k)),&
-     &     iWorkMSG(pMSG(ipL_MSG_Index,k)),&
-     &     ptrn, ierror)
-
-      call MSG_tbdx_receive(RES, MSG_Buffer,&
-     &     iWorkMSG(pMSG(ipL_MSG_NumAdjProc,k)),&
-     &     iWorkMSG(pMSG(ipL_MSG_Proc,k)),&
-     &     iWorkMSG(pMSG(ipL_MSG_Ipr,k)),&
-     &     iWorkMSG(pMSG(ipL_MSG_Index,k)),&
-     &     ptrn, ierror)
-
-      call MSG_tbdx_close(RES, MSG_Buffer,&
-     &     iWorkMSG(pMSG(ipL_MSG_NumAdjProc,k)),&
-     &     iWorkMSG(pMSG(ipL_MSG_Proc,k)),&
-     &     iWorkMSG(pMSG(ipL_MSG_Ipr,k)),&
-     &     iWorkMSG(pMSG(ipL_MSG_Index,k)),&
-     &     ptrn, ierror)
-
 ! ======================================================================
 
       RETURN

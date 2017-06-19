@@ -37,7 +37,8 @@ namespace impls
 		dimxfine(topo.nproc(0)),
 		dimyfine(topo.nproc(1)),
 		dimx(topo.nproc(0), topo.nlevel()),
-		dimy(topo.nproc(1), topo.nlevel())
+		dimy(topo.nproc(1), topo.nlevel()),
+		comm(topo.comm)
 	{
 		MPI_Comm_split(topo.comm, topo.coord(1), topo.coord(0),
 		               &xlinecomm);
@@ -198,6 +199,21 @@ namespace impls
 		BMG2_SymStd_UTILS_update_ghosts(topo.level()+1, f.data(), f.len(0), f.len(1), ctx->msg_geom.data(),
 		                                ctx->msg_geom.size(), ctx->pMSG.data(), ctx->msg_buffer.data(),
 		                                ctx->msg_buffer.size(), topo.nlevel(), fcomm);
+		timer_end("halo");
+	}
+
+
+	void msg_exchange(const kernel_params & params, int k, int nog, real_t *so_data, len_t nx, len_t ny, void *msg_ctx)
+	{
+		int rank;
+		MsgCtx *ctx = (MsgCtx*) msg_ctx;
+		MPI_Fint fcomm = MPI_Comm_c2f(ctx->comm);
+
+		timer_begin("halo");
+		BMG2_SymStd_UTILS_update_ghosts(k, so_data, nx, ny,
+		                                ctx->msg_geom.data(),
+		                                ctx->msg_geom.size(), ctx->pMSG.data(), ctx->msg_buffer.data(),
+		                                ctx->msg_buffer.size(), nog, fcomm);
 		timer_end("halo");
 	}
 }
