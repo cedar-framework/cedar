@@ -98,7 +98,7 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {
 
 	void halo_stencil_exchange(int k, int nog, real_t* so_data, std::array<len_t, ND> len, void *halo_ctx)
 	{
-		log::debug << "Running kernel <halo_exchange>" << std::endl;
+		log::debug << "Running kernel <halo_stencil_exchange>" << std::endl;
 		static_cast<child*>(this)->halo_stencil_exchange(k, nog, so_data, len, halo_ctx);
 	}
 
