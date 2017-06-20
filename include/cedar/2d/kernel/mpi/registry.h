@@ -18,6 +18,7 @@
 #include <cedar/2d/mpi/stencil_op.h>
 #include <cedar/2d/inter/mpi/prolong_op.h>
 #include <cedar/2d/inter/mpi/restrict_op.h>
+#include <cedar/2d/inter/mpi/galerkin_prod.h>
 #include <cedar/2d/cg/setup_cg_boxmg.h>
 #include <cedar/2d/cg/setup_cg_redist.h>
 #include <cedar/2d/kernel/setup_nog.h>
@@ -59,7 +60,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		                   const mpi::stencil_op<sten> & fop,
 		                   mpi::stencil_op<nine_pt> & cop)
 	{
-		impls::mpi_galerkin_prod(*params, P, fop, cop);
+		impls::mpi_galerkin_prod(*params, halof, P, fop, cop);
 	}
 
 	template <class sten>
@@ -197,6 +198,12 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	void halo_exchange(int k, int nog, real_t *so_data, std::array<len_t, 2> len, void *halo_ctx)
 	{
 		impls::msg_exchange(*params, k, nog, so_data, len[0], len[1], halo_ctx);
+	}
+
+
+	void halo_stencil_exchange(int k, int nog, real_t *so_data, std::array<len_t, 2> len, void *halo_ctx)
+	{
+		impls::msg_stencil_exchange(*params, k, nog, so_data, len[0], len[1], halo_ctx);
 	}
 
 

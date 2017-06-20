@@ -25,4 +25,11 @@ extern "C" {
 	{
 		halof->exchange(k, nog, q, {II, JJ}, ctx);
 	}
+
+
+	void halo_stencil_exchange(int k, int nog, cedar::real_t *q, cedar::len_t II,
+	                           cedar::len_t JJ, cedar::halo_exchanger<2> *halof, void *ctx)
+	{
+		halof->stencil_exchange(k, nog, q, {II, JJ}, ctx);
+	}
 }

@@ -17,13 +17,6 @@ namespace impls
 	                   const inter::prolong_op & P,
 	                   const stencil_op<sten> & fop,
 	                   stencil_op<nine_pt> & cop);
-
-	namespace mpi = cedar::cdr2::mpi;
-	template <class sten>
-	void mpi_galerkin_prod(const kernel_params & params,
-	                       const inter::mpi::prolong_op & P,
-	                       const mpi::stencil_op<sten> & fop,
-	                       mpi::stencil_op<nine_pt> & cop);
 }
 
 }}}

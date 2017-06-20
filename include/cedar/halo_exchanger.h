@@ -8,7 +8,7 @@ namespace cedar {
 	struct halo_exchanger
 	{
 		std::function<void(int k, int nog, real_t*, std::array<len_t, ND> len, void*)> exchange;
-		std::function<void(int,int,real_t*,void*)> stencil_exchange;
+		std::function<void(int k, int nog, real_t*, std::array<len_t, ND> len, void*)> stencil_exchange;
 	};
 }
 

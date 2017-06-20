@@ -43,10 +43,18 @@ mpi_registry(std::shared_ptr<kernel_params> params): parent::kernel_registry(par
 		halof.exchange = [this](int k, int nog, real_t *so_data, std::array<len_t, ND> len, void *halo_ctx) {
 			this->halo_exchange(k, nog, so_data, len, halo_ctx);
 		};
+
+		halof.stencil_exchange = [this](int k, int nog, real_t *so_data, std::array<len_t, ND> len, void *halo_ctx) {
+			this->halo_stencil_exchange(k, nog, so_data, len, halo_ctx);
+		};
 	}
 mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {
 		halof.exchange = [this](int k, int nog, real_t *so_data, std::array<len_t, ND> len, void *halo_ctx) {
 			this->halo_exchange(k, nog, so_data, len, halo_ctx);
+		};
+
+		halof.stencil_exchange = [this](int k, int nog, real_t *so_data, std::array<len_t, ND> len, void *halo_ctx) {
+			this->halo_stencil_exchange(k, nog, so_data, len, halo_ctx);
 		};
 	}
 
@@ -85,6 +93,13 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {
 	{
 		log::debug << "Running kernel <halo_exchange>" << std::endl;
 		static_cast<child*>(this)->halo_exchange(k, nog, so_data, len, halo_ctx);
+	}
+
+
+	void halo_stencil_exchange(int k, int nog, real_t* so_data, std::array<len_t, ND> len, void *halo_ctx)
+	{
+		log::debug << "Running kernel <halo_exchange>" << std::endl;
+		static_cast<child*>(this)->halo_stencil_exchange(k, nog, so_data, len, halo_ctx);
 	}
 
 

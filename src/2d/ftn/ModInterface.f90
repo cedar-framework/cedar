@@ -36,4 +36,16 @@ module ModInterface
           end subroutine halo_exchange
        end interface
 
+
+       interface
+          subroutine halo_stencil_exchange(k, nog, SO, II, JJ, ctx, halof) bind(C,name="halo_stencil_exchange")
+            use iso_c_binding, only : C_PTR, C_INT, C_DOUBLE
+            integer(C_INT),value :: k, nog
+            real(C_DOUBLE) :: SO(II,JJ)
+            integer(C_INT),value :: II, JJ
+            type(C_PTR) :: ctx, halof
+          end subroutine halo_stencil_exchange
+       end interface
+
+
 end module ModInterface

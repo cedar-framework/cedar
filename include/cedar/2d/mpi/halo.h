@@ -55,6 +55,8 @@ namespace impls
 	void setup_msg(const kernel_params & params, grid_topo &topo, void **msg_ctx);
 	void msg_exchange(const kernel_params & params, mpi::grid_func & f);
 	void msg_exchange(const kernel_params & params, int k, int nog, real_t *so_data, len_t nx, len_t ny, void *msg_ctx);
+
+	void msg_stencil_exchange(const kernel_params & params, int k, int nog, real_t *so_data, len_t nx, len_t ny, void *msg_ctx);
 	template<class sten>
 	void msg_stencil_exchange(const kernel_params & params, mpi::stencil_op<sten> & so);
 }

@@ -22,6 +22,9 @@ extern "C" {
 	void BMG2_SymStd_UTILS_update_ghosts(int K, real_t *x, len_t Nx, len_t Ny, len_t *iWork,
 	                                     len_t NMSGi, int *pMSG,
 	                                     real_t *buffer, len_t NMSGr, int nog, int mpicomm);
+	void BMG2_SymStd_UTILS_update_stencil_ghosts(int K, real_t *x, len_t Nx, len_t Ny, len_t *iWork,
+	                                             len_t NMSGi, int *pMSGSO,
+	                                             real_t *buffer, len_t NMSGr, int nog, int mpicomm);
 	void BMG_get_bc(int, int*);
 }
 
@@ -188,6 +191,23 @@ namespace impls
 	}
 
 
+	void msg_stencil_exchange(const kernel_params & params,
+	                          int k, int nog, real_t *so_data,
+	                          len_t nx, len_t ny, void *msg_ctx)
+	{
+		MsgCtx *ctx = (MsgCtx*) msg_ctx;
+
+		MPI_Fint fcomm = MPI_Comm_c2f(ctx->comm);
+
+		timer_begin("halo-stencil");
+		BMG2_SymStd_UTILS_update_stencil_ghosts(k, so_data, nx, ny,
+		                                        ctx->msg_geom.data(), ctx->msg_geom.size(),
+		                                        ctx->pMSGSO.data(), ctx->msg_buffer.data(),
+		                                        ctx->msg_buffer.size(), nog, fcomm);
+		timer_end("halo-stencil");
+	}
+
+
 	void msg_exchange(const kernel_params & params, mpi::grid_func & f)
 	{
 		MsgCtx *ctx = (MsgCtx*) f.halo_ctx;
@@ -205,7 +225,6 @@ namespace impls
 
 	void msg_exchange(const kernel_params & params, int k, int nog, real_t *so_data, len_t nx, len_t ny, void *msg_ctx)
 	{
-		int rank;
 		MsgCtx *ctx = (MsgCtx*) msg_ctx;
 		MPI_Fint fcomm = MPI_Comm_c2f(ctx->comm);
 
