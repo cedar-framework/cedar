@@ -123,7 +123,7 @@
                ENDDO
             ENDDO
 
-            call halo_exchange(K, KF, Q, II, JJ, halof, ctx)
+            call halo_exchange(K, Q, halof)
 
          ENDDO
 
@@ -168,7 +168,7 @@
                ENDDO
             ENDDO
 
-            call halo_exchange(K, KF, Q, II, JJ, halof, ctx)
+            call halo_exchange(K, Q, halof)
 
          ENDDO
       ENDIF

@@ -4,11 +4,12 @@
 #include <cedar/types.h>
 
 namespace cedar {
-	template<short ND>
-	struct halo_exchanger
+
+	class halo_exchanger
 	{
-		std::function<void(int k, int nog, real_t*, std::array<len_t, ND> len, void*)> exchange;
-		std::function<void(int k, int nog, real_t*, std::array<len_t, ND> len, void*)> stencil_exchange;
+	public:
+		virtual void exchange_func(int k, real_t *gf) = 0;
+		virtual void exchange_sten(int k, real_t *so) = 0;
 	};
 }
 

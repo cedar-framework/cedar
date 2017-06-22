@@ -182,28 +182,15 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	}
 
 
-	void halo_setup(grid_topo & topo,
-	                void **halo_ctx)
+	std::unique_ptr<halo_exchanger> halo_create(grid_topo & topo)
 	{
-		impls::setup_msg(*params, topo, halo_ctx);
+		return impls::setup_msg(*params, topo);
 	}
 
 
 	void halo_exchange(mpi::grid_func & f)
 	{
 		impls::msg_exchange(*params, f);
-	}
-
-
-	void halo_exchange(int k, int nog, real_t *so_data, std::array<len_t, 2> len, void *halo_ctx)
-	{
-		impls::msg_exchange(*params, k, nog, so_data, len[0], len[1], halo_ctx);
-	}
-
-
-	void halo_stencil_exchange(int k, int nog, real_t *so_data, std::array<len_t, 2> len, void *halo_ctx)
-	{
-		impls::msg_stencil_exchange(*params, k, nog, so_data, len[0], len[1], halo_ctx);
 	}
 
 

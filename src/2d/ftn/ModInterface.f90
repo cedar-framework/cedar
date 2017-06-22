@@ -27,23 +27,21 @@ module ModInterface
        integer, parameter :: len_t = C_INT
 
        interface
-          subroutine halo_exchange(k, nog, Q, II, JJ, ctx, halof) bind(C,name="halo_exchange")
+          subroutine halo_exchange(k, Q, halof) bind(C,name="halo_exchange")
             use iso_c_binding, only : C_PTR, C_INT, C_DOUBLE
-            integer(C_INT),value :: k, nog
+            integer(C_INT),value :: k
             real(C_DOUBLE) :: Q(II,JJ)
-            integer(C_INT),value :: II, JJ
-            type(C_PTR) :: ctx, halof
+            type(C_PTR) :: halof
           end subroutine halo_exchange
        end interface
 
 
        interface
-          subroutine halo_stencil_exchange(k, nog, SO, II, JJ, ctx, halof) bind(C,name="halo_stencil_exchange")
+          subroutine halo_stencil_exchange(k, SO, halof) bind(C,name="halo_stencil_exchange")
             use iso_c_binding, only : C_PTR, C_INT, C_DOUBLE
-            integer(C_INT),value :: k, nog
+            integer(C_INT),value :: k
             real(C_DOUBLE) :: SO(II,JJ)
-            integer(C_INT),value :: II, JJ
-            type(C_PTR) :: ctx, halof
+            type(C_PTR) :: halof
           end subroutine halo_stencil_exchange
        end interface
 

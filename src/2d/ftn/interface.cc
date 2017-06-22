@@ -23,13 +23,13 @@ extern "C" {
 	void halo_exchange(int k, int nog, cedar::real_t *q, cedar::len_t II,
 	                   cedar::len_t JJ, cedar::halo_exchanger<2> *halof, void *ctx)
 	{
-		halof->exchange(k, nog, q, {II, JJ}, ctx);
+		halof->exchange_func(k, q);
 	}
 
 
-	void halo_stencil_exchange(int k, int nog, cedar::real_t *q, cedar::len_t II,
+	void halo_stencil_exchange(int k, int nog, cedar::real_t *so, cedar::len_t II,
 	                           cedar::len_t JJ, cedar::halo_exchanger<2> *halof, void *ctx)
 	{
-		halof->stencil_exchange(k, nog, q, {II, JJ}, ctx);
+		halof->exchange_sten(k, so);
 	}
 }

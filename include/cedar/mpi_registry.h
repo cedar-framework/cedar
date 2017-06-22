@@ -40,22 +40,8 @@ public:
 	using relax_stencil = typename solver_types::relax_stencil;
 
 mpi_registry(std::shared_ptr<kernel_params> params): parent::kernel_registry(params) {
-		halof.exchange = [this](int k, int nog, real_t *so_data, std::array<len_t, ND> len, void *halo_ctx) {
-			this->halo_exchange(k, nog, so_data, len, halo_ctx);
-		};
-
-		halof.stencil_exchange = [this](int k, int nog, real_t *so_data, std::array<len_t, ND> len, void *halo_ctx) {
-			this->halo_stencil_exchange(k, nog, so_data, len, halo_ctx);
-		};
 	}
 mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {
-		halof.exchange = [this](int k, int nog, real_t *so_data, std::array<len_t, ND> len, void *halo_ctx) {
-			this->halo_exchange(k, nog, so_data, len, halo_ctx);
-		};
-
-		halof.stencil_exchange = [this](int k, int nog, real_t *so_data, std::array<len_t, ND> len, void *halo_ctx) {
-			this->halo_stencil_exchange(k, nog, so_data, len, halo_ctx);
-		};
 	}
 
 	void setup_nog(grid_topo &topo,
@@ -66,11 +52,10 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {
 	}
 
 
-	void halo_setup(grid_topo &topo,
-	                void **halo_ctx)
+	void halo_setup(grid_topo &topo)
 	{
 		log::debug << "Running kernel <halo_setup>" << std::endl;
-		static_cast<child*>(this)->halo_setup(topo, halo_ctx);
+		halof = static_cast<child*>(this)->halo_create(topo);
 	}
 
 
@@ -78,28 +63,6 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {
 	{
 		log::debug << "Running kernel <halo_exchange>" << std::endl;
 		static_cast<child*>(this)->halo_exchange(f);
-	}
-
-
-	void halo_exchange(grid_func &f, void *halo_ctx)
-	{
-		log::debug << "Running kernel <halo_exchange>" << std::endl;
-		f.halo_ctx = halo_ctx;
-		static_cast<child*>(this)->halo_exchange(f);
-	}
-
-
-	void halo_exchange(int k, int nog, real_t* so_data, std::array<len_t, ND> len, void *halo_ctx)
-	{
-		log::debug << "Running kernel <halo_exchange>" << std::endl;
-		static_cast<child*>(this)->halo_exchange(k, nog, so_data, len, halo_ctx);
-	}
-
-
-	void halo_stencil_exchange(int k, int nog, real_t* so_data, std::array<len_t, ND> len, void *halo_ctx)
-	{
-		log::debug << "Running kernel <halo_stencil_exchange>" << std::endl;
-		static_cast<child*>(this)->halo_stencil_exchange(k, nog, so_data, len, halo_ctx);
 	}
 
 
@@ -150,7 +113,7 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {
 	}
 
 protected:
-	halo_exchanger<ND> halof;
+	std::unique_ptr<halo_exchanger> halof;
 };
 
 }
