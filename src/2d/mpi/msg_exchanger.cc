@@ -108,11 +108,18 @@ MsgCtx::MsgCtx(grid_topo & topo) :
 }
 
 
-msg_exchanger::msg_exchanger(grid_topo & topo) : ctx(topo), dims(topo.nlevel(), 2)
+msg_exchanger::msg_exchanger(grid_topo & topo) : ctx(topo), dims(topo.nlevel(), 2), coord(2)
 {
-	for (auto i : range<int>(topo.nlevel())) {
-		dims(i, 0) = ctx.dimx(topo.coord(0), i) + 2;
-		dims(i, 1) = ctx.dimy(topo.coord(1), i) + 2;
+	coord(0) = topo.coord(0);
+	coord(1) = topo.coord(1);
+}
+
+
+void msg_exchanger::init()
+{
+	for (auto i : range<len_t>(dims.len(0))) {
+		dims(i, 0) = ctx.dimx(coord(0), i) + 2;
+		dims(i, 1) = ctx.dimy(coord(1), i) + 2;
 	}
 }
 

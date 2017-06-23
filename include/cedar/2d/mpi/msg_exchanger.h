@@ -55,6 +55,7 @@ class msg_exchanger : public halo_exchanger
 {
 public:
 	msg_exchanger(grid_topo & topo);
+	void init();
 	MsgCtx & context() { return ctx; }
 	void *context_ptr() { return &ctx; }
 	virtual void exchange_func(int k, real_t *gf) override;
@@ -68,6 +69,7 @@ private:
 	   the second is the dimension.
 	**/
 	array<len_t, len_t, 2> dims;
+	array<len_t, len_t, 1> coord;
 };
 
 

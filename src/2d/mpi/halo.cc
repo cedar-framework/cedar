@@ -57,6 +57,8 @@ namespace impls
 		                     ctx.proc_grid.data(), topo.nproc(0), topo.nproc(1),
 		                     topo.nlevel());
 
+		halof->init();
+
 		return halof;
 	}
 
