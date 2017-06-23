@@ -85,7 +85,7 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 	{
 		auto kernels = this->kernel_registry();
 		auto & bd = const_cast<cdr2::mpi::grid_func&>(b);
-		kernels->halo_exchange(bd, halo_ctx);
+		kernels->halo_exchange(bd);
 		return parent::solve(b);
 	}
 
@@ -94,7 +94,7 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 	{
 		auto kernels = this->kernel_registry();
 		auto & bd = const_cast<cdr2::mpi::grid_func&>(b);
-		kernels->halo_exchange(bd, halo_ctx);
+		kernels->halo_exchange(bd);
 		return parent::solve(b, x);
 	}
 
@@ -235,7 +235,6 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 
 private:
 	bool cg_solver_lu;
-	void *halo_ctx;
 };
 
 }}}

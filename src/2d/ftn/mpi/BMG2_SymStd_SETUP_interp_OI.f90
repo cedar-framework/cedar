@@ -2,7 +2,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
      &                KF, KC, SO, CI, &
      &                IIF, JJF, IIC, JJC, NOG, NOGm,&
      &                IGRD, IFD, NStncl,&
-     &                IBC, ctx, halof&
+     &                IBC, halof&
      &                ) BIND(C, NAME='MPI_BMG2_SymStd_SETUP_interp_OI')
 
 ! ======================================================================
@@ -65,7 +65,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
       INTEGER(len_t), VALUE :: IIC, IIF, JJC, JJF
       INTEGER(len_t) :: IGRD(NOGm,NBMG_pIGRD)
       REAL(real_t) :: CI(IIC,JJC,8), SO(IIF+1,JJF+1,NStncl)
-      TYPE(C_PTR) :: ctx, halof
+      TYPE(C_PTR) :: halof
 
 ! --------------------------
 !     Local Declarations:
@@ -244,7 +244,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
 
 
             DO I=LL, LR
-               call halo_exchange(kc, nog, CI(1,1,I), IIC, JJC, halof, ctx)
+               call halo_exchange(kc, CI(1,1,I), halof)
             ENDDO
 
 
@@ -273,7 +273,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
 
 
             DO I=LA, LB
-               call halo_exchange(kc, nog, CI(1,1,I), IIC, JJC, halof, ctx)
+               call halo_exchange(kc, CI(1,1,I), halof)
             ENDDO
 
 
@@ -319,7 +319,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
 
 
             DO I=LSW, LSE
-               call halo_exchange(kc, nog, CI(1,1,I), IIC, JJC, halof, ctx)
+               call halo_exchange(kc, CI(1,1,I), halof)
             ENDDO
 
 
@@ -353,7 +353,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
 
 
             DO I=LL, LR
-               call halo_exchange(kc, nog, CI(1,1,I), IIC, JJC, halof, ctx)
+               call halo_exchange(kc, CI(1,1,I), halof)
             ENDDO
 
 
@@ -382,7 +382,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
 
 
             DO I=LA, LB
-               call halo_exchange(kc, nog, CI(1,1,I), IIC, JJC, halof, ctx)
+               call halo_exchange(kc, CI(1,1,I), halof)
             ENDDO
 
 ! ----------------------------------------------------------------------
@@ -417,7 +417,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
 
 
             DO I=LSW, LSE
-               call halo_exchange(kc, nog, CI(1,1,I), IIC, JJC, halof, ctx)
+               call halo_exchange(kc, CI(1,1,I), halof)
             ENDDO
 
 

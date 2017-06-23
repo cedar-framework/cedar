@@ -34,7 +34,9 @@ namespace cedar { namespace cdr2 { namespace kernel {
 
 namespace impls
 {
-	void solve_cg_boxmg(const kernel_params & params, const solver<nine_pt> &cg_solver,
+	void solve_cg_boxmg(const kernel_params & params,
+	                    halo_exchanger *halof,
+	                    const solver<nine_pt> &cg_solver,
 	                    mpi::grid_func &x_par,
 	                    const mpi::grid_func &b)
 	{
@@ -44,8 +46,7 @@ namespace impls
 		auto &coarse_solver = const_cast<solver<nine_pt>&>(cg_solver);
 
 		grid_topo & topo = b_par.grid();
-		MsgCtx *ctx = (MsgCtx*) b_par.halo_ctx;
-
+		MsgCtx *ctx = (MsgCtx*) halof->context_ptr();
 
 		MPI_Comm_rank(topo.comm, &rank);
 		rank++; // 1 based indexing
@@ -85,6 +86,7 @@ namespace impls
 
 
 	void mpi_solve_cg_lu(const kernel_params & params,
+	                     halo_exchanger *halof,
 	                     mpi::grid_func &x_par,
 	                     const mpi::grid_func &b,
 	                     const mpi::grid_func & ABD,
@@ -96,7 +98,7 @@ namespace impls
 		mpi::grid_func & abd_data = const_cast<mpi::grid_func&>(ABD);
 
 		grid_topo & topo = b_par.grid();
-		MsgCtx *ctx = (MsgCtx*) b_par.halo_ctx;
+		MsgCtx *ctx = (MsgCtx*) halof->context_ptr();
 
 
 		MPI_Comm_rank(topo.comm, &rank);

@@ -8,9 +8,10 @@
 #include <cedar/2d/mpi/stencil_op.h>
 #include <cedar/2d/mpi/grid_func.h>
 
-namespace cedar { namespace cdr2 {
+namespace cedar { namespace cdr2 { namespace kernel {
 
-namespace mpi = cedar::cdr2::mpi;
+namespace impls
+{
 struct MsgCtx
 {
 	MsgCtx(grid_topo & topo);
@@ -55,6 +56,7 @@ class msg_exchanger : public halo_exchanger
 public:
 	msg_exchanger(grid_topo & topo);
 	MsgCtx & context() { return ctx; }
+	void *context_ptr() { return &ctx; }
 	virtual void exchange_func(int k, real_t *gf) override;
 	virtual void exchange_sten(int k, real_t *so) override;
 
@@ -66,6 +68,9 @@ private:
 	   the second is the dimension.
 	**/
 	array<len_t, len_t, 2> dims;
-}}
+};
+
+
+}}}}
 
 #endif

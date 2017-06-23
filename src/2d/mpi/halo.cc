@@ -30,7 +30,7 @@ namespace impls
 {
 
 
-	std::unique_ptr<halo_exchanger> setup_msg(const kernel_params & params, grid_topo & topo);
+	std::unique_ptr<halo_exchanger> setup_msg(const kernel_params & params, grid_topo & topo)
 	{
 		auto halof = std::make_unique<msg_exchanger>(topo);
 		auto & ctx = halof->context();
@@ -62,9 +62,9 @@ namespace impls
 
 
 	template<>
-	void msg_stencil_exchange(const kernel_params & params, mpi::stencil_op<five_pt> & sop)
+	void msg_stencil_exchange(const kernel_params & params, halo_exchanger *halof, mpi::stencil_op<five_pt> & sop)
 	{
-		MsgCtx *ctx = (MsgCtx*) sop.halo_ctx;
+		MsgCtx *ctx = (MsgCtx*) halof->context_ptr();
 		grid_topo &topo = sop.grid();
 		int nstencil;
 
@@ -83,9 +83,9 @@ namespace impls
 
 
 	template<>
-	void msg_stencil_exchange(const kernel_params & params, mpi::stencil_op<nine_pt> & sop)
+	void msg_stencil_exchange(const kernel_params & params, halo_exchanger *halof, mpi::stencil_op<nine_pt> & sop)
 	{
-		MsgCtx *ctx = (MsgCtx*) sop.halo_ctx;
+		MsgCtx *ctx = (MsgCtx*) halof->context_ptr();
 		grid_topo &topo = sop.grid();
 		int nstencil;
 
@@ -103,26 +103,9 @@ namespace impls
 	}
 
 
-	void msg_stencil_exchange(const kernel_params & params,
-	                          int k, int nog, real_t *so_data,
-	                          len_t nx, len_t ny, void *msg_ctx)
+	void msg_exchange(const kernel_params & params, halo_exchanger *halof, mpi::grid_func & f)
 	{
-		MsgCtx *ctx = (MsgCtx*) msg_ctx;
-
-		MPI_Fint fcomm = MPI_Comm_c2f(ctx->comm);
-
-		timer_begin("halo-stencil");
-		BMG2_SymStd_UTILS_update_stencil_ghosts(k, so_data, nx, ny,
-		                                        ctx->msg_geom.data(), ctx->msg_geom.size(),
-		                                        ctx->pMSGSO.data(), ctx->msg_buffer.data(),
-		                                        ctx->msg_buffer.size(), nog, fcomm);
-		timer_end("halo-stencil");
-	}
-
-
-	void msg_exchange(const kernel_params & params, mpi::grid_func & f)
-	{
-		MsgCtx *ctx = (MsgCtx*) f.halo_ctx;
+		MsgCtx *ctx = (MsgCtx*) halof->context_ptr();
 		grid_topo &topo = f.grid();
 
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);

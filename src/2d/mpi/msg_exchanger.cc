@@ -1,4 +1,5 @@
 #include <cedar/2d/mpi/msg_exchanger.h>
+#include <cedar/util/timer.h>
 
 
 extern "C" {
@@ -17,6 +18,7 @@ extern "C" {
 
 using namespace cedar;
 using namespace cedar::cdr2;
+using namespace cedar::cdr2::kernel::impls;
 
 MsgCtx::MsgCtx(grid_topo & topo) :
 	pMSG(NBMG_pMSG, topo.nlevel()),
@@ -109,31 +111,31 @@ MsgCtx::MsgCtx(grid_topo & topo) :
 msg_exchanger::msg_exchanger(grid_topo & topo) : ctx(topo), dims(topo.nlevel(), 2)
 {
 	for (auto i : range<int>(topo.nlevel())) {
-		dims(i, 0) = ctx->dimx(topo->coord(0), topo.nlevel()) + 2;
-		dims(i, 1) = ctx->dimy(topo->coord(1), topo.nlevel()) + 2;
+		dims(i, 0) = ctx.dimx(topo.coord(0), i) + 2;
+		dims(i, 1) = ctx.dimy(topo.coord(1), i) + 2;
 	}
 }
 
 
 void msg_exchanger::exchange_func(int k, real_t *gf)
 {
-		MPI_Fint fcomm = MPI_Comm_c2f(ctx.comm);
+		MPI_Fint fcomm = MPI_Comm_c2f(this->ctx.comm);
 
 		timer_begin("halo");
-		BMG2_SymStd_UTILS_update_ghosts(k, so_data, dims(k, 0), dims(k, 1),
+		BMG2_SymStd_UTILS_update_ghosts(k, gf, dims(k, 0), dims(k, 1),
 		                                ctx.msg_geom.data(),
 		                                ctx.msg_geom.size(), ctx.pMSG.data(), ctx.msg_buffer.data(),
-		                                ctx.msg_buffer.size(), nog, fcomm);
+		                                ctx.msg_buffer.size(), dims.len(0), fcomm);
 		timer_end("halo");
 }
 
 
 void msg_exchanger::exchange_sten(int k, real_t * so)
 {
-	MPI_Fint fcomm = MPI_Comm_c2f(ctx.comm);
+	MPI_Fint fcomm = MPI_Comm_c2f(this->ctx.comm);
 
 	timer_begin("halo-stencil");
-	BMG2_SymStd_UTILS_update_stencil_ghosts(k, so_data, dims(k,0), dims(k, 1),
+	BMG2_SymStd_UTILS_update_stencil_ghosts(k, so, dims(k, 0), dims(k, 1),
 	                                        ctx.msg_geom.data(), ctx.msg_geom.size(),
 	                                        ctx.pMSGSO.data(), ctx.msg_buffer.data(),
 	                                        ctx.msg_buffer.size(), dims.len(0), fcomm);

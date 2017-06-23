@@ -29,7 +29,8 @@ namespace impls
 
 	namespace mpi = cedar::cdr2::mpi;
 	template <class sten>
-		void mpi_residual_fortran(const kernel_params & params, const halo_exchanger<2> & halof,
+		void mpi_residual_fortran(const kernel_params & params,
+		                          halo_exchanger *halof,
 		                          const mpi::stencil_op<sten> & A,
 		                          const mpi::grid_func & x,
 		                          const mpi::grid_func & b, mpi::grid_func &r)
@@ -39,7 +40,7 @@ namespace impls
 		auto & xd = const_cast<mpi::grid_func&>(x);
 		auto & bd = const_cast<mpi::grid_func&>(b);
 		grid_topo & topo = Ad.grid();
-		MsgCtx *ctx = (MsgCtx*) Ad.halo_ctx;
+		MsgCtx *ctx = (MsgCtx*) halof->context_ptr();
 
 		nstencil = stencil_ndirs<sten>::value;
 		if (std::is_same<five_pt, sten>::value)
@@ -61,7 +62,7 @@ namespace impls
 		                         ctx->msg_geom.data(), ctx->msg_geom.size(),
 		                         ctx->pMSG.data(), ctx->msg_buffer.data(),
 		                         ctx->msg_buffer.size(), fcomm);
-		halof.exchange(k, nog, r.data(), {r.len(0), r.len(1)}, ctx);
+		halof->exchange_func(k, r.data());
 	}
 }
 

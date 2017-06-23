@@ -10,8 +10,7 @@ extern "C" {
 	                                real_t *Q, real_t *QC, real_t *RES, real_t *SO,
 	                                int nstncl, real_t *CI, len_t iic, len_t jjc,
 	                                len_t iif, len_t jjf, len_t iGs, len_t jGs,
-	                                len_t *iWorkMSG, len_t NMSGi, int *pMSG,
-	                                real_t *msg_buffer, len_t nmsgr, int mpicomm);
+	                                void *halof);
 }
 
 namespace cedar { namespace cdr2 { namespace kernel {
@@ -19,6 +18,7 @@ namespace cedar { namespace cdr2 { namespace kernel {
 namespace impls
 {
 	void mpi_fortran_interp(const kernel_params & params,
+	                        halo_exchanger *halof,
 	                        const inter::mpi::prolong_op & P,
 	                        const mpi::grid_func & coarse,
 	                        const mpi::grid_func & residual,
@@ -32,7 +32,6 @@ namespace impls
 		mpi::grid_func & coarsed = const_cast<mpi::grid_func&>(coarse);
 		mpi::grid_func & res = const_cast<mpi::grid_func&>(residual);
 		grid_topo & topo = Pd.grid();
-		MsgCtx *ctx = (MsgCtx*) Pd.halo_ctx;
 
 		real_t * fop_data;
 		topo_ptr topof;
@@ -58,10 +57,7 @@ namespace impls
 		                           Pd.data(),
 		                           coarsed.len(0), coarsed.len(1),
 		                           fine.len(0), fine.len(1),
-		                           topof->is(0), topof->is(1),
-		                           ctx->msg_geom.data(), ctx->msg_geom.size(),
-		                           ctx->pMSG.data(), ctx->msg_buffer.data(),
-		                           ctx->msg_buffer.size(), fcomm);
+		                           topof->is(0), topof->is(1), halof);
 	}
 }
 

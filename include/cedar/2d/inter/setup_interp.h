@@ -17,7 +17,7 @@ extern "C" {
 	                                     len_t iif, len_t jjf, len_t iic, len_t jjc,
 	                                     int nog, int nogm, len_t *igrd,
 	                                     int ifd, int nstncl, int ibc,
-	                                     void *ctx, void *halof);
+	                                     void *halof);
 	void BMG_get_bc(int, int*);
 }
 
@@ -58,7 +58,7 @@ namespace impls
 
 	template <class sten>
 	void mpi_setup_interp(const kernel_params & params,
-	                      const halo_exchanger<2> & halof,
+	                      halo_exchanger *halof,
 	                      const mpi::stencil_op<sten> & fop,
 	                      const mpi::stencil_op<nine_pt> & cop,
 	                      inter::mpi::prolong_op & P)
@@ -67,9 +67,7 @@ namespace impls
 		int kf, kc, nog;
 
 		auto & fopd = const_cast<mpi::stencil_op<sten>&>(fop);
-		auto & halofd = const_cast<halo_exchanger<2>&>(halof);
 		grid_topo & topo = fopd.grid();
-		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
 
 		store_fine_op(fopd, P);
 
@@ -89,7 +87,7 @@ namespace impls
 
 		MPI_BMG2_SymStd_SETUP_interp_OI(kf, kc, fopd.data(), P.data(),
 		                                fop.len(0), fop.len(1), cop.len(0), cop.len(1),
-		                                nog, nog, topo.IGRD(), ifd, nstencil, jpn, ctx, &halofd);
+		                                nog, nog, topo.IGRD(), ifd, nstencil, jpn, halof);
 	}
 }
 

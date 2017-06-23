@@ -17,7 +17,7 @@ extern "C" {
 	void MPI_BMG2_SymStd_SETUP_ITLI_ex(int kf, int kc, real_t *SO, real_t *SOC, real_t *CI,
 	                                   len_t IIF, len_t JJF, len_t IIC, len_t JJC, len_t iGs, len_t jGs,
 	                                   int nog, int ifd, int nstencil,
-	                                   void *ctx, void *halof);
+	                                   void *halof);
 }
 
 namespace cedar { namespace cdr2 { namespace kernel {
@@ -27,7 +27,7 @@ namespace impls
 	namespace mpi = cedar::cdr2::mpi;
 	template <class sten>
 	void mpi_galerkin_prod(const kernel_params & params,
-	                       const halo_exchanger<2> & halof,
+	                       halo_exchanger *halof,
 	                       const inter::mpi::prolong_op & P,
 	                       const mpi::stencil_op<sten> & fop,
 	                       mpi::stencil_op<nine_pt> & cop)
@@ -35,10 +35,8 @@ namespace impls
 		int ifd, nstencil;
 		int kf, kc, nog;
 		auto & Pd = const_cast<inter::mpi::prolong_op&>(P);
-		auto & halofd = const_cast<halo_exchanger<2>&>(halof);
 		auto & fopd = const_cast<mpi::stencil_op<sten>&>(fop);
 		grid_topo & topo = fopd.grid();
-		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
 
 		nstencil = stencil_ndirs<sten>::value;
 		if (std::is_same<five_pt, sten>::value)
@@ -54,7 +52,7 @@ namespace impls
 		                              fop.len(0), fop.len(1), cop.len(0), cop.len(1),
 		                              topo.is(0), topo.is(1),
 		                              nog, ifd, nstencil,
-		                              ctx, &halofd);
+		                              halof);
 	}
 }
 

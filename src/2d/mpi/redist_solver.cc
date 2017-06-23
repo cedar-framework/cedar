@@ -15,13 +15,14 @@ using namespace cedar;
 using namespace cedar::cdr2::mpi;
 
 redist_solver::redist_solver(const stencil_op<nine_pt> & so,
+                             halo_exchanger *halof,
                              std::shared_ptr<config::reader> conf,
                              std::array<int, 2> nblock) :
 	redundant(false), nblock(nblock), active(true), recv_id(-1)
 {
 	// Split communicator into collective processor blocks
 	auto & topo = so.grid();
-	msg_ctx * ctx = (msg_ctx*) so.halo_ctx;
+	msg_ctx * ctx = (msg_ctx*) halof->context_ptr();
 	auto ctopo = redist_topo(topo, *ctx);
 	so_redist = redist_operator(so, ctopo);
 	b_redist = grid_func(ctopo);

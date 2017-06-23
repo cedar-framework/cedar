@@ -1,7 +1,7 @@
       SUBROUTINE BMG2_SymStd_relax_GS ( &
      &                K, SO, QF, Q, SOR, II, JJ, &
      &                KF, IFD, NStncl, IRELAX_SYM, UPDOWN,&
-     &                iGs, jGs, ctx, halof&
+     &                iGs, jGs, halof&
      &                ) BIND(C, NAME='MPI_BMG2_SymStd_relax_GS')
 
 
@@ -63,7 +63,7 @@
 
       REAL(real_t) :: Q(II,JJ), QF(II,JJ), SO(II+1,JJ+1,NStncl), SOR(II,JJ,*)
 
-      TYPE(C_PTR) :: ctx, halof
+      TYPE(C_PTR) :: halof
 
 ! ----------------------------
 !     Local Declarations

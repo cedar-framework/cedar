@@ -25,7 +25,7 @@ namespace cedar {
 	template <class child,
 		class solver_types,
 		class redist_solver,
-		class serial_solver, short ND>
+		class serial_solver>
 class mpi_registry : public kernel_registry<child,
                                     		solver_types>
 {

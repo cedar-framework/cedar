@@ -2,7 +2,7 @@
      &                KF, KC, SO, SOC, CI, &
      &                IIF, JJF, IIC, JJC, iGs, jGs, &
      &                NOG, IFD, NStncl,&
-     &                ctx, halof&
+     &                halof&
      &                ) BIND(C, NAME='MPI_BMG2_SymStd_SETUP_ITLI_ex')
 
 ! ======================================================================
@@ -63,7 +63,7 @@
 
       REAL(real_t) :: CI(IIC,JJC,8), SO(IIF+1,JJF+1,NStncl), &
            SOC(IIC+1,JJC+1,5)
-      TYPE(C_PTR) :: ctx, halof
+      TYPE(C_PTR) :: halof
 
 ! --------------------------
 !     Local Declarations:
@@ -336,7 +336,7 @@
       ! note that the coarse stencil is always
       ! nine point
       !
-      call halo_stencil_exchange(KC, NOG, SOC, IIC, JJC, halof, ctx)
+      call halo_stencil_exchange(KC, SOC, halof)
 
 !   end of computation of grid kc difference operator, when kf
 !   difference operator is five point
