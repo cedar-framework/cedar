@@ -122,7 +122,7 @@ void msg_exchanger::exchange_func(int k, real_t *gf)
 		MPI_Fint fcomm = MPI_Comm_c2f(this->ctx.comm);
 
 		timer_begin("halo");
-		BMG2_SymStd_UTILS_update_ghosts(k, gf, dims(k, 0), dims(k, 1),
+		BMG2_SymStd_UTILS_update_ghosts(k, gf, dims(k-1, 0), dims(k-1, 1),
 		                                ctx.msg_geom.data(),
 		                                ctx.msg_geom.size(), ctx.pMSG.data(), ctx.msg_buffer.data(),
 		                                ctx.msg_buffer.size(), dims.len(0), fcomm);
@@ -135,7 +135,7 @@ void msg_exchanger::exchange_sten(int k, real_t * so)
 	MPI_Fint fcomm = MPI_Comm_c2f(this->ctx.comm);
 
 	timer_begin("halo-stencil");
-	BMG2_SymStd_UTILS_update_stencil_ghosts(k, so, dims(k, 0), dims(k, 1),
+	BMG2_SymStd_UTILS_update_stencil_ghosts(k, so, dims(k-1, 0), dims(k-1, 1),
 	                                        ctx.msg_geom.data(), ctx.msg_geom.size(),
 	                                        ctx.pMSGSO.data(), ctx.msg_buffer.data(),
 	                                        ctx.msg_buffer.size(), dims.len(0), fcomm);
