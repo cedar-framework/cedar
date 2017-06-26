@@ -1,12 +1,9 @@
       SUBROUTINE BMG3_SymStd_relax_GS( &
      &                KG, SO, QF, Q, SOR,&
      &                NLx, NLy, NLz, NGx, NGy, NGz, &
-     &                NOG, NOGm,&
+     &                NOG,&
      &                IFD, NStncl, NSORv, IRELAX_SYM, UPDOWN,&
-     &                iGs, jGs, kGs,&
-     &                MyProcI, MyProcJ, MyProcK, MyProc,&
-     &                ProcGrid, NProcI, NProcJ, NProcK, NProc,&
-     &                iWork, NMSGi, pMSG, MSG_Buffer, NMSGr, MPICOMM    &
+     &                iGs, jGs, kGs, halof&
      &                ) BIND(C, NAME='MPI_BMG3_SymStd_relax_GS')
 
 ! ======================================================================
@@ -63,18 +60,14 @@
 ! ------------------------------------------------
 !     Argument Declarations
 !
-      integer(len_t), value :: NGx, NGy, NGz, NLx, NLy, NLz, NMSGi, NMSGr,&
+      integer(len_t), value :: NGx, NGy, NGz, NLx, NLy, NLz,&
            iGs, jGs, kGs
-      integer(c_int), value :: IFD, IRELAX_SYM, KG, NOG, NOGm,&
+      integer(c_int), value :: IFD, IRELAX_SYM, KG, NOG,&
            NSORv, NStncl, UPDOWN
-      integer(c_int), value :: MyProc, MyProcI, MyProcJ, MyProcK,&
-           NProc, NProcI, NProcJ, NProcK, MPICOMM
-      integer(c_int) :: ProcGrid(NProcI,NProcJ,NProcK)
-      integer(len_t) :: iWork(NMSGi)
-      integer(c_int) :: pMSG(NBMG_pMSG,NOGm)
       real(real_t) :: Q(NLx,NLy,NLz), QF(NLx,NLy,NLz),&
-           SO(NLx+1,NLy+1,NLz+1,NStncl), SOR(NLx,NLy,NLz,NSORv),&
-           MSG_Buffer(NMSGr)
+           SO(NLx+1,NLy+1,NLz+1,NStncl), SOR(NLx,NLy,NLz,NSORv)
+      type(c_ptr) :: halof
+
 ! ------------------------------------------------
 !     Local Declarations
 !
@@ -82,7 +75,6 @@
 
       INTEGER pts, ibeg, iend
       INTEGER ptstart, ptend, ptstride
-      INTEGER ptrn, ierror
 
 ! ======================================================================
 
@@ -149,23 +141,9 @@
                ENDDO
                !
             ENDDO
-            !
-            ptrn = 1
-            !
-            CALL MSG_tbdx_send(Q, MSG_Buffer, &
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KG)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KG)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KG)),&
-     &           iWork(pMSG(ipL_MSG_Index,KG)),&
-     &           ptrn, ierror)
 
-            CALL MSG_tbdx_receive(Q, MSG_Buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KG)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KG)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KG)),&
-     &           iWork(pMSG(ipL_MSG_Index,KG)),&
-     &           ptrn, ierror)
-            !
+            call halo_exchange(KG, Q, halof)
+
          ENDDO   ! >>> END: loop over colors <<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
@@ -208,36 +186,12 @@
                END DO
                !
             END DO
-            !
-            ptrn = 1
-            !
-            CALL MSG_tbdx_send(Q, MSG_Buffer, &
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KG)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KG)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KG)),&
-     &           iWork(pMSG(ipL_MSG_Index,KG)),&
-     &           ptrn, ierror)
 
-            CALL MSG_tbdx_receive(Q, MSG_Buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KG)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KG)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KG)),&
-     &           iWork(pMSG(ipL_MSG_Index,KG)),&
-     &           ptrn, ierror)
-            !
-            !
+            call halo_exchange(KG, Q, halof)
+
          END DO   ! >>> END: loop over colors <<<<<<<<<<<<<<<<<<<<<<<<<<
 
       ENDIF
-
-      ptrn = 1
-
-      CALL MSG_tbdx_close(Q, MSG_Buffer,&
-     &     iWork(pMSG(ipL_MSG_NumAdjProc,KG)),&
-     &     iWork(pMSG(ipL_MSG_Proc,KG)),&
-     &     iWork(pMSG(ipL_MSG_Ipr,KG)),&
-     &     iWork(pMSG(ipL_MSG_Index,KG)),&
-     &     ptrn, ierror)
 
 ! ======================================================================
 

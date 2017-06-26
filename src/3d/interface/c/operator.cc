@@ -69,7 +69,6 @@ extern "C"
 			}
 		}
 
-		xgf.halo_ctx = sop.halo_ctx;
 		kreg.halo_exchange(xgf);
 
 		kreg.matvec(sop, xgf, bgf);

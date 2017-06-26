@@ -2,8 +2,7 @@
      &                KGF, KGC, SO, SOC, CI,&
      &                IIF, JJF, KKF, IIC, JJC, KKC, &
      &                NOG, ifd, NStncl, irelax, yo, &
-     &                NOGm, IGRD, iWork, NMSGi, pMSG,&
-     &                BUFFER, NMSGr, MyProc, MPICOMM, JPN&
+     &                NOGm, IGRD, JPN, halof&
      &                ) BIND(C, NAME='MPI_BMG3_SymStd_SETUP_interp_OI')
 
 ! ======================================================================
@@ -63,14 +62,12 @@
 !     Argument Declarations:
 !
       integer(c_int), value :: NOG, NOGm, NStncl, KGF, KGC, ifd, irelax
-      integer(c_int), value :: MPICOMM, myproc, JPN
-      integer(len_t), value :: IIF, JJF, KKF, IIC, JJC, KKC, NMSGi, NMSGr
-      integer(len_t) :: iWork(NMSGi), IGRD(NOGm,NBMG_pIGRD)
-      integer(c_int) :: pMSG(NBMG_pMSG,NOG)
+      integer(c_int), value :: JPN
+      integer(len_t), value :: IIF, JJF, KKF, IIC, JJC, KKC
+      integer(len_t) :: IGRD(NOGm,NBMG_pIGRD)
       real(real_t) :: CI(IIC,JJC,KKC,26), SO(IIF+1,JJF+1,KKF+1,NStncl)
       real(real_t) :: SOC(IIC+1,JJC+1,KKC+1,14), YO(IIF,JJF,2,14)
-      real(real_t) :: BUFFER(NMSGr)
-
+      type(c_ptr) :: halof
 ! --------------------------
 !     Local Declarations:
 !
@@ -418,28 +415,7 @@
          !      independent of the parameter ordering.
          !
          DO I=lxyl, lxzb
-
-            ptrn = 1
-            call MSG_tbdx_send(CI(1,1,1,I), buffer, &
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_receive(CI(1,1,1,I), buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_close(CI(1,1,1,I), buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
+            call halo_exchange(KGC, CI(1,1,1,I), halof)
          ENDDO
 
 
@@ -607,28 +583,7 @@
          !      independent of the parameter ordering.
          !
          DO I=lxyne, lyzse
-
-            ptrn = 1
-            call MSG_tbdx_send(CI(1,1,1,I), buffer, &
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_receive(CI(1,1,1,I), buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_close(CI(1,1,1,I), buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
+            call halo_exchange(KGC, CI(1,1,1,I), halof)
          ENDDO
 
 
@@ -788,28 +743,7 @@
          !      independent of the parameter ordering.
          !
          DO I=lbsw, ltse
-
-            ptrn = 1
-            call MSG_tbdx_send(CI(1,1,1,I), buffer, &
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_receive(CI(1,1,1,I), buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_close(CI(1,1,1,I), buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
+            call halo_exchange(KGC, CI(1,1,1,I), halof)
          ENDDO
 
 
@@ -919,28 +853,7 @@
          !      independent of the parameter ordering.
          !
          DO I=lxyl, lxzb
-
-            ptrn = 1
-            call MSG_tbdx_send(CI(1,1,1,I), buffer, &
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_receive(CI(1,1,1,I), buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_close(CI(1,1,1,I), buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
+            call halo_exchange(KGC, CI(1,1,1,I), halof)
          ENDDO
 
          !
@@ -1078,28 +991,7 @@
          !      independent of the parameter ordering.
          !
          DO I=lxyne, lyzse
-
-            ptrn = 1
-            call MSG_tbdx_send(CI(1,1,1,I), buffer, &
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_receive(CI(1,1,1,I), buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_close(CI(1,1,1,I), buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
+            call halo_exchange(KGC, CI(1,1,1,I), halof)
          ENDDO
 
 
@@ -1179,28 +1071,7 @@
          !      independent of the parameter ordering.
          !
          DO I=lbsw, ltse
-
-            ptrn = 1
-            call MSG_tbdx_send(CI(1,1,1,I), buffer, &
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_receive(CI(1,1,1,I), buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_close(CI(1,1,1,I), buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSG(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
+            call halo_exchange(KGC, CI(1,1,1,I), halof)
          ENDDO
 
 

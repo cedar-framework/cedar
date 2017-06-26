@@ -1,11 +1,10 @@
       SUBROUTINE BMG3_SymStd_interp_add(&
-     &                KCG, KFG, NOG,&
+     &                KCG, KFG,&
      &                Q ,QC, RES, SO, NStncl, CI,&
      &                IIC, JJC, KKC,&
      &                IIF, JJF, KKF,&
      &                iGs, jGs, kGs, &
-     &                iWork, NMSGi, pMSG,&
-     &                BUFFER, NMSGr, MPICOMM&
+     &                halof&
      &                ) BIND(C, NAME='MPI_BMG3_SymStd_interp_add')
 
 ! ======================================================================
@@ -60,14 +59,11 @@
 !     Argument Declarations
 !
       integer(len_t), value :: IIC, IIF, JJC, JJF, KKC, KKF
-      integer(c_int), value :: KCG, KFG, NOG, NStncl
-      integer(len_t), value :: iGs, jGs, kGs, NMSGi, NMSGr
-      integer(len_t) :: iWork(NMSGi)
-      integer(c_int) :: pMSG(NBMG_pMSG,NOG)
-      integer(c_int), value :: MPICOMM
+      integer(c_int), value :: KCG, KFG, NStncl
+      integer(len_t), value :: iGs, jGs, kGs
       real(real_t) :: CI(IIC,JJC,KKC,26), Q(IIF,JJF,KKF), QC(IIC,JJC,KKC)
       real(real_t) :: RES(IIF,JJF,KKF), SO(IIF+1,JJF+1,KKF+1,NStncl)
-      real(real_t) :: BUFFER(NMSGr)
+      type(c_ptr) :: halof
 
 ! ----------------------------
 !     Local Declarations
@@ -76,7 +72,6 @@
      &        JC, J, JJCF, JJCF1, JJC1,&
      &        KC, K, KKCF, KKCF1, KKC1
       INTEGER ISTART, JSTART, KSTART, ICSTART, JCSTART, KCSTART
-      INTEGER ierror, ptrn
       REAL*8  A, AQ
 
 ! ======================================================================
@@ -310,32 +305,7 @@
 
       enddo
 
-
-
-
-
-      ptrn = 1
-
-      call MSG_tbdx_send(Q, buffer, &
-     &     iWork(pMSG(ipL_MSG_NumAdjProc,KFG)),&
-     &     iWork(pMSG(ipL_MSG_Proc,KFG)),&
-     &     iWork(pMSG(ipL_MSG_Ipr,KFG)),&
-     &     iWork(pMSG(ipL_MSG_Index,KFG)),&
-     &     ptrn, ierror)
-
-      call MSG_tbdx_receive(Q, buffer,&
-     &     iWork(pMSG(ipL_MSG_NumAdjProc,KFG)),&
-     &     iWork(pMSG(ipL_MSG_Proc,KFG)),&
-     &     iWork(pMSG(ipL_MSG_Ipr,KFG)),&
-     &     iWork(pMSG(ipL_MSG_Index,KFG)),&
-     &     ptrn, ierror)
-
-      call MSG_tbdx_close(Q, buffer,&
-     &     iWork(pMSG(ipL_MSG_NumAdjProc,KFG)),&
-     &     iWork(pMSG(ipL_MSG_Proc,KFG)),&
-     &     iWork(pMSG(ipL_MSG_Ipr,KFG)),&
-     &     iWork(pMSG(ipL_MSG_Index,KFG)),&
-     &     ptrn, ierror)
+      call halo_exchange(KFG, Q, halof)
 
 ! ======================================================================
 

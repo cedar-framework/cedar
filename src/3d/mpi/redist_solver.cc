@@ -42,12 +42,13 @@ cdr3::stencil_op<xxvii_pt> redist_solver::redist_operator<cdr3::stencil_op, xxvi
 
 
 redist_solver::redist_solver(const stencil_op<xxvii_pt> & so,
+                             halo_exchanger *halof,
                              std::shared_ptr<config::reader> conf,
                              std::array<int, 3> nblock) :
 	ser_cg(nblock[0]*nblock[1]*nblock[2] == 1), nblock(nblock), active(true), recv_id(-1)
 {
 	auto & topo = so.grid();
-	msg_ctx * ctx = (msg_ctx*) so.halo_ctx;
+	msg_ctx * ctx = (msg_ctx*) halof->context_ptr();
 	auto ctopo = redist_topo(topo, *ctx);
 
 	if (ser_cg) {
@@ -72,7 +73,6 @@ redist_solver::redist_solver(const stencil_op<xxvii_pt> & so,
 			timer_down();
 			slv = std::make_unique<solver<xxvii_pt>>(so_redist, conf);
 			timer_up();
-			b_redist.halo_ctx = slv->levels.get(0).A.halo_ctx;
 			log::pop_level();
 			MSG_pause(&msg_comm);
 			MSG_play(parent_comm);

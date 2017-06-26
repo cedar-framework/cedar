@@ -34,13 +34,8 @@ TEST(MPIRelax3, Point7) {
 
 	// setup halo
 	{
-		void *halo_ctx;
-		kreg_mpi.halo_setup(so_mpi.grid(), &halo_ctx);
-		so_mpi.halo_ctx = halo_ctx;
+		kreg_mpi.halo_setup(so_mpi.grid());
 		kreg_mpi.halo_stencil_exchange(so_mpi);
-
-		b_mpi.halo_ctx = halo_ctx;
-		x_mpi.halo_ctx = halo_ctx;
 	}
 
 	relax_stencil sor_mpi(nx, ny, nz);

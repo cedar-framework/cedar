@@ -50,7 +50,6 @@ namespace impls
 		nog = topo.nlevel();
 		kf = kc + 1;
 
-		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 		MPI_BMG2_SymStd_interp_add(kc, kf, nog,
 		                           fine.data(), coarsed.data(), res.data(),
 		                           fop_data, nstencil,

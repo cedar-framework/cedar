@@ -4,11 +4,11 @@
 #include <type_traits>
 
 #include <cedar/kernel_params.h>
+#include <cedar/halo_exchanger.h>
 #include <cedar/3d/mpi/stencil_op.h>
 #include <cedar/3d/inter/mpi/prolong_op.h>
 #include <cedar/2d/ftn/BMG_parameters_c.h>
 #include <cedar/3d/mpi/halo.h>
-
 
 extern "C" {
 	using namespace cedar;
@@ -16,9 +16,7 @@ extern "C" {
 	                                     real_t *ci, len_t iif, len_t jjf, len_t kkf,
 	                                     len_t iic, len_t jjc, len_t kkc,
 	                                     int nog, int ifd, int nstencil, int irelax, real_t *yo,
-	                                     int nogm, len_t *IGRD, len_t *iwork, len_t NMSGi,
-	                                     int *pMSG, real_t *buffer, len_t nmsgr, int myproc,
-	                                     int mpicomm, int jpn);
+	                                     int nogm, len_t *IGRD, int jpn, void *halof);
 	void BMG_get_bc(int, int*);
 }
 
@@ -50,6 +48,7 @@ namespace impls
 
 	template<class sten>
 	void mpi_setup_interp(const kernel_params & params,
+	                      halo_exchanger * halof,
 	                      const mpi::stencil_op<sten> & fop,
 	                      const mpi::stencil_op<xxvii_pt> & cop,
 	                      inter::mpi::prolong_op & P)
@@ -60,7 +59,6 @@ namespace impls
 		auto & fopd = const_cast<mpi::stencil_op<sten>&>(fop);
 		auto & copd = const_cast<mpi::stencil_op<xxvii_pt>&>(cop);
 		grid_topo & topo = fopd.grid();
-		MsgCtx *ctx = (MsgCtx*) fopd.halo_ctx;
 
 		store_fine_op(fopd, P);
 
@@ -70,11 +68,6 @@ namespace impls
 			ifd = 1;
 		else
 			ifd = 0;
-
-		int rank;
-		MPI_Comm_rank(topo.comm, &rank);
-		rank++;
-		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
 		kc = topo.level();
 		nog = topo.nlevel();
@@ -90,9 +83,7 @@ namespace impls
 		                                cop.len(0), cop.len(1), cop.len(2),
 		                                nog, ifd, nstencil, BMG_RELAX_SYM,
 		                                yo.data(), nog, topo.IGRD(),
-		                                ctx->msg_geom.data(), ctx->msg_geom.size(),
-		                                ctx->pMSG.data(), ctx->msg_buffer.data(), ctx->msg_buffer.size(),
-		                                rank, fcomm, jpn);
+		                                jpn, halof);
 	}
 }
 
