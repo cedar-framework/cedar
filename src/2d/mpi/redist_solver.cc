@@ -70,7 +70,7 @@ stencil_op<cdr2::nine_pt> redist_solver::redist_operator(const stencil_op<nine_p
 	// save general case for later
 	stencil_op<nine_pt> rop(topo);
 
-	array<len_t,real_t,1> sbuf(5*so.len(0)*so.len(1));
+	array<real_t,1> sbuf(5*so.len(0)*so.len(1));
 	int idx = 0;
 	for (auto j : so.grange(1)) {
 		for (auto i : so.grange(0)) {
@@ -94,7 +94,7 @@ stencil_op<cdr2::nine_pt> redist_solver::redist_operator(const stencil_op<nine_p
 			rbuf_len += rcounts[idx];
 		}
 	}
-	array<len_t,real_t,1> rbuf(rbuf_len);
+	array<real_t,1> rbuf(rbuf_len);
 
 	if (redundant) {
 		MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
@@ -183,8 +183,8 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 	grid->is(1)++;
 
 	// get ready for allgatherv
-	nbx = array<len_t,len_t,1>(highi-lowi+1);
-	nby = array<len_t,len_t,1>(highj-lowj+1);
+	nbx = array<len_t,1>(highi-lowi+1);
+	nby = array<len_t,1>(highj-lowj+1);
 
 	for (auto j = lowj; j <= highj; j++) {
 		nby(j-lowj) = ctx.cg_nlocal(1, ctx.proc_grid(0,j)) - 2;
@@ -255,7 +255,7 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 
 void redist_solver::gather_rhs(const grid_func & b)
 {
-	array<len_t,real_t,1> sbuf(b.shape(0)*b.shape(1));
+	array<real_t,1> sbuf(b.shape(0)*b.shape(1));
 	int idx = 0;
 	for (auto j : b.range(1)) {
 		for (auto i : b.range(0)) {
@@ -276,7 +276,7 @@ void redist_solver::gather_rhs(const grid_func & b)
 			rbuf_len += rcounts[idx];
 		}
 	}
-	array<len_t,real_t,1> rbuf(rbuf_len);
+	array<real_t,1> rbuf(rbuf_len);
 	if (redundant) {
 		MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
 		               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
@@ -321,7 +321,7 @@ void redist_solver::scatter_sol(grid_func & x)
 			}
 		}
 
-		array<len_t, real_t, 1> sbuf(sbuf_len);
+		array<real_t, 1> sbuf(sbuf_len);
 		std::vector<int> scounts(nbx.len(0)*nby.len(0));
 		std::vector<int> displs(nbx.len(0)*nby.len(0));
 
@@ -396,7 +396,7 @@ void redist_solver::scatter_sol(grid_func & x)
 
 			igs--; jgs--; // include ghosts
 
-			array<len_t,real_t,2> sbuf(nbx(ci)+2, nby(cj)+2);
+			array<real_t,2> sbuf(nbx(ci)+2, nby(cj)+2);
 			for (auto jj : range(sbuf.len(1))) {
 				for (auto ii : range(sbuf.len(0))) {
 					sbuf(ii,jj) = x_redist(igs+ii,jgs+jj);

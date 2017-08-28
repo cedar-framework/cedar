@@ -55,9 +55,9 @@ protected:
 	bool active;
 	int recv_id;
 	std::vector<int> send_ids;
-	array<len_t, len_t, 1> nbx; /** number of d.o.f. for each processor in my block */
-	array<len_t, len_t, 1> nby; /** number of d.o.f. for each processor in my block */
-	array<len_t, len_t, 1> nbz; /** number of d.o.f. for each processor in my block */
+	array< len_t, 1> nbx; /** number of d.o.f. for each processor in my block */
+	array< len_t, 1> nby; /** number of d.o.f. for each processor in my block */
+	array< len_t, 1> nbz; /** number of d.o.f. for each processor in my block */
 	MPI_Fint msg_comm;
 	grid_func b_redist;
 	grid_func x_redist;
@@ -93,7 +93,7 @@ protected:
 	template <template<class> class target_operator> void gather_operator(const stencil_op<xxvii_pt> & src,
 		target_operator<xxvii_pt> & dest)
 	{
-		using buf_arr = array<len_t,real_t,1>;
+		using buf_arr = array<real_t,1>;
 
 		// Pack the operator
 		buf_arr sbuf(14*src.len(0)*src.len(1)*src.len(2));

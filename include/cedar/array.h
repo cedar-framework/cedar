@@ -21,7 +21,7 @@ namespace cedar {
    @tparam ND Number of dimensions.
  */
 template <typename len_type, typename data_type, unsigned short ND>
-class array : public virtual array_base<len_type>
+class aarray : public virtual array_base<len_type>
 {
 protected:
 	AlignedVector<data_type> vec;     /** Vector where the data is stored. */
@@ -45,8 +45,8 @@ public:
 		return pos-1;
 	}
 
-	array() {};
-	template <typename... T> array(T... args)
+	aarray() {};
+	template <typename... T> aarray(T... args)
 	{
 		reshape(std::forward<decltype(args)>(args)...);
 	}
@@ -178,6 +178,9 @@ public:
 
 	data_type * data() { return vec.data(); }
 };
+
+template<typename data_type, unsigned short ND>
+	using array = aarray<len_t, data_type, ND>;
 
 }
 #endif

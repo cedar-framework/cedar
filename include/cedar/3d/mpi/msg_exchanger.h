@@ -14,18 +14,18 @@ namespace impls
 	struct MsgCtx
 	{
 		MsgCtx(grid_topo & topo);
-		array<int,int,2> pMSG; // these should be int, len_t
-		array<int,int,2> pLS;
-		array<int,int,2> pMSGSO;
+		aarray<int,int,2> pMSG; // these should be int, len_t
+		aarray<int,int,2> pLS;
+		aarray<int,int,2> pMSGSO;
 		std::vector<len_t> msg_geom;
-		array<int,int,3> proc_grid;
+		aarray<int,int,3> proc_grid;
 		std::vector<int> proc_coord;
 		std::vector<len_t> dimxfine;
 		std::vector<len_t> dimyfine;
 		std::vector<len_t> dimzfine;
-		array<int,len_t,2> dimx;
-		array<int,len_t,2> dimy;
-		array<int,len_t,2> dimz;
+		aarray<int,len_t,2> dimx;
+		aarray<int,len_t,2> dimy;
+		aarray<int,len_t,2> dimz;
 		std::vector<real_t> msg_buffer;
 		int pSI_MSG;
 		int p_NLx_kg, p_NLy_kg, p_NLz_kg;
@@ -67,8 +67,8 @@ namespace impls
 		   exchange calls.  The first dimension is the grid number,
 		   the second is the dimension.
 		**/
-		array<len_t, len_t, 2> dims;
-		array<len_t, len_t, 1> coord;
+		array<len_t, 2> dims;
+		array<len_t, 1> coord;
 	};
 
 

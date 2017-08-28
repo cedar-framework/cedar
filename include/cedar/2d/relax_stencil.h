@@ -7,14 +7,14 @@
 namespace cedar { namespace cdr2 {
 
 
-class relax_stencil : public array<len_t, real_t,3>, public grid_quantity<len_t, 2>
+class relax_stencil : public array<real_t,3>, public grid_quantity<len_t, 2>
 {
 public:
 	relax_stencil() {};
 	relax_stencil(len_t nx, len_t ny, unsigned int nghosts=1);
 
-	using array<len_t,real_t,3>::index;
-	using array<len_t,real_t,3>::operator();
+	using array<real_t,3>::index;
+	using array<real_t,3>::operator();
 
 	/* len_t index(len_t i, len_t j, int dir) const */
 	/* { */
