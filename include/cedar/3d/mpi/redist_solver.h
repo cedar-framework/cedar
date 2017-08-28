@@ -35,7 +35,8 @@ public:
 	   @param[in] conf The config object to use for this solver
 	   @param[in] nblock The destination 3D distribution
 	*/
-	redist_solver(const stencil_op<xxvii_pt> & so, std::shared_ptr<config::reader> conf, std::array<int, 3> nblock);
+	redist_solver(const stencil_op<xxvii_pt> & so, halo_exchanger *halof,
+	              std::shared_ptr<config::reader> conf, std::array<int, 3> nblock);
 	/**
 	   Runs the redistributed solve phase
 	   @param[in] b rhs

@@ -1,10 +1,6 @@
       SUBROUTINE BMG3_SymStd_SETUP_ITLI07_ex(&
      &                KGF, KGC, SO, SOC, CI, IIF, JJF, KKF, IIC, JJC, &
-     &                KKC, iGs, jGs, kGS, NOG, NOGm, IGRD,&
-     &                iWORK, NMSGi, PMSGSO,&
-     &                BUFFER, NMSGr, NProc, ProcGrid, MyProcI, MyProcJ,&
-     &                MyProcK, NProcI, NProcJ, NProcK, DimX, DimY, DimZ,&
-     &                MPICOMM&
+     &                KKC, iGs, jGs, kGS, halof&
      &                ) BIND(C, NAME='MPI_BMG3_SymStd_SETUP_ITLI07_ex')
 
 ! ======================================================================
@@ -62,31 +58,23 @@
 !     Argument Declarations
 !
       integer(len_t), value :: iGs, jGs, kGs, IIC, JJC, KKC,&
-           IIF, JJF, KKF, NMSGi, NMSGr
-      integer(c_int), value :: NOG, NOGm, NProc, NProcI, NProcJ,&
-           NProcK, MyProcI, MyProcJ, MyProcK, MPICOMM,&
-           KGF, KGC
-      integer(len_t) :: iWork(NMSGi), IGRD(NOGm,29)
-      integer(c_int) :: pMSGSO(NBMG_pMSG,NOGm), ProcGrid(NProcI,NProcJ, NProcK)
+           IIF, JJF, KKF
+      integer(c_int), value :: KGF, KGC
       real(real_t) :: CI(IIC,JJC,KKC,26), SO(IIF+1,JJF+1,KKF+1,4),&
-           SOC(IIC+1,JJC+1,KKC+1,14), BUFFER(NMSGr)
-      integer(len_t) :: DimX(NprocI,NOGm), DimY(NprocJ,NOGm), DimZ(Nprock,NOGm)
-
+           SOC(IIC+1,JJC+1,KKC+1,14)
+      type(c_ptr) :: halof
 ! ----------------------------
 !     Local Declarations:
 !
-      INTEGER I, IIC1, IIC2, IC, J, JJC1, JJC2, JC, K, KC, KKC1, kpz,&
-     &        ptrn, ierror
+      INTEGER I, IIC1, IIC2, IC, J, JJC1, JJC2, JC, K, KC, KKC1
       REAL*8  CB, CBE, CBN, CBNW, CBNE, CBS, CBSE, CBSW, CBW,    &
      &        CE, CN, CNW, CNE, CO, CS, CSE, CSW, CW,&
      &        CTE, CTN, CTNW, CTNE, CT, CTS, CTSE, CTSW, CTW
 
       INTEGER LXGP, RXGP, LYGP, RYGP, LZGP, RZGP
-      INTEGER MyProc, ISTART, JSTART, KSTART, MPI_IERROR
+      INTEGER ISTART, JSTART, KSTART, kpz
 
 ! ======================================================================
-
-      MyProc = MSG_MyProc(MPICOMM)
 
       IIC1 = IIC-1
       IIC2 = IIC-2
@@ -983,34 +971,7 @@
             ENDDO
          ENDDO
 
-      DO kpz=1,14
-
-
-            ptrn = 1
-            call MSG_tbdx_send(SOC(1,1,1,kpz), buffer, &
-     &           iWork(pMSGSO(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSGSO(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSGSO(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSGSO(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_receive(SOC(1,1,1,kpz), buffer,&
-     &           iWork(pMSGSO(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSGSO(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSGSO(ipL_MSG_Ipr,KGC)),&
-     &           iWork(pMSGSO(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_close(SOC(1,1,1,kpz), buffer,&
-     &           iWork(pMSGSO(ipL_MSG_NumAdjProc,KGC)),&
-     &           iWork(pMSGSO(ipL_MSG_Proc,KGC)),&
-     &           iWork(pMSGSO(ipL_MSG_Ipr,KGC)), &
-     &           iWork(pMSGSO(ipL_MSG_Index,KGC)),&
-     &           ptrn, ierror)
-
-
-
-      ENDDO
+         call halo_stencil_exchange(KGC, SOC, halof)
 
 ! ======================================================================
 

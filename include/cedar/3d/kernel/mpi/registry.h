@@ -57,7 +57,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		                  const mpi::stencil_op<xxvii_pt> & cop,
 		                  inter::mpi::prolong_op & P)
 	{
-		impls::mpi_setup_interp(*params, fop, cop, P);
+		impls::mpi_setup_interp(*params, halof.get(), fop, cop, P);
 	}
 
 
@@ -66,7 +66,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		                   const mpi::stencil_op<sten> & fop,
 		                   mpi::stencil_op<xxvii_pt> & cop)
 	{
-		impls::mpi_galerkin_prod(*params, P, fop, cop);
+		impls::mpi_galerkin_prod(*params, halof.get(), P, fop, cop);
 	}
 
 
@@ -85,7 +85,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		           const relax_stencil & sor,
 		           cycle::Dir cdir)
 	{
-		impls::mpi_relax_rbgs_point(*params, so, x, b, sor, cdir);
+		impls::mpi_relax_rbgs_point(*params, halof.get(), so, x, b, sor, cdir);
 	}
 
 
@@ -94,7 +94,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	                const mpi::grid_func & residual,
 	                mpi::grid_func & fine)
 	{
-		impls::mpi_fortran_interp(*params, P, coarse, residual, fine);
+		impls::mpi_fortran_interp(*params, halof.get(), P, coarse, residual, fine);
 	}
 
 
@@ -112,7 +112,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	              const mpi::grid_func & b,
 	              mpi::grid_func & r)
 	{
-		impls::mpi_residual_fortran(*params, so, x, b, r);
+		impls::mpi_residual_fortran(*params, halof.get(), so, x, b, r);
 	}
 
 
@@ -121,27 +121,26 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	            const mpi::grid_func & x,
 	            mpi::grid_func & y)
 	{
-		impls::matvec(*params, so, x, y);
+		impls::matvec(*params, halof.get(), so, x, y);
 	}
 
 
-	void halo_setup(grid_topo & topo,
-	                void **halo_ctx)
+	std::unique_ptr<halo_exchanger> halo_create(grid_topo & topo)
 	{
-		impls::setup_msg(*params, topo, halo_ctx);
+		return impls::setup_msg(*params, topo);
 	}
 
 
 	void halo_exchange(mpi::grid_func & f)
 	{
-		impls::msg_exchange(*params, f);
+		impls::msg_exchange(*params, halof.get(), f);
 	}
 
 
 	template <class sten>
 		void halo_stencil_exchange(mpi::stencil_op<sten> & so)
 	{
-		impls::msg_stencil_exchange(*params, so);
+		impls::msg_stencil_exchange(*params, halof.get(), so);
 	}
 
 
@@ -149,7 +148,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		void setup_cg_lu(const mpi::stencil_op<sten> & so,
 		                 mpi::grid_func & ABD)
 	{
-		impls::mpi_setup_cg_lu(*params, so, ABD);
+		impls::mpi_setup_cg_lu(*params, halof.get(), so, ABD);
 	}
 
 
@@ -158,7 +157,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	              const mpi::grid_func &ABD,
 	              real_t *bbd)
 	{
-		impls::mpi_solve_cg_lu(*params, x, b, ABD, bbd);
+		impls::mpi_solve_cg_lu(*params, halof.get(), x, b, ABD, bbd);
 	}
 
 
@@ -168,7 +167,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	                     std::shared_ptr<mpi::redist_solver> * bmg,
 	                     std::vector<int> & nblocks)
 	{
-		impls::setup_cg_redist(*params, so, conf, bmg, nblocks);
+		impls::setup_cg_redist(*params, halof.get(), so, conf, bmg, nblocks);
 	}
 
 

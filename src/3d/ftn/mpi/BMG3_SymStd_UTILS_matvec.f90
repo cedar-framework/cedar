@@ -1,7 +1,6 @@
       SUBROUTINE BMG3_SymStd_UTILS_matvec( &
      &                       KG, SO, QF, Q, II, JJ, KK,&
-     &                       NOG, IFD, NStncl, &
-     &                       iWork, pMSG, BUFFER, MPICOMM&
+     &                       NOG, IFD, NStncl, halof&
      &                       ) BIND(C, NAME='MPI_BMG3_SymStd_UTILS_matvec')
 
 ! ======================================================================
@@ -59,18 +58,15 @@
 
       integer(len_t), VALUE :: II, JJ, KK
       integer(c_int), VALUE :: IFD, KG, NOG,&
-           NStncl, MPICOMM
-      integer(len_t) :: iWork(*)
-      integer(c_int) :: pMSG(NBMG_pMSG,NOG)
+           NStncl
       real(real_t) :: Q(II,JJ,KK), QF(II,JJ,KK)
       real(real_t) :: SO(II+1,JJ+1,KK+1,NStncl)
-      real(real_t) :: BUFFER(*)
+      type(c_ptr) :: halof
 
 ! ----------------------------
 !     Local Declarations
 !
       integer i, i1, j, j1, k, k1
-      INTEGER ierror, ptrn, MPI_IERROR
 
 ! ======================================================================
 
@@ -134,28 +130,7 @@
 
 ! ======================================================================
 
-      ptrn = 1
-
-      CALL MSG_tbdx_send(Q, BUFFER, &
-     &     iWork(pMSG(ipL_MSG_NumAdjProc,KG)),&
-     &     iWork(pMSG(ipL_MSG_Proc,KG)),&
-     &     iWork(pMSG(ipL_MSG_Ipr,KG)),&
-     &     iWork(pMSG(ipL_MSG_Index,KG)),&
-     &     ptrn, ierror)
-
-      CALL MSG_tbdx_receive(Q, BUFFER,&
-     &     iWork(pMSG(ipL_MSG_NumAdjProc,KG)),&
-     &     iWork(pMSG(ipL_MSG_Proc,KG)),&
-     &     iWork(pMSG(ipL_MSG_Ipr,KG)),&
-     &     iWork(pMSG(ipL_MSG_Index,KG)),&
-     &     ptrn, ierror)
-
-      CALL MSG_tbdx_close(Q, BUFFER,&
-     &     iWork(pMSG(ipL_MSG_NumAdjProc,KG)),&
-     &     iWork(pMSG(ipL_MSG_Proc,KG)),&
-     &     iWork(pMSG(ipL_MSG_Ipr,KG)),&
-     &     iWork(pMSG(ipL_MSG_Index,KG)),&
-     &     ptrn, ierror)
+      call halo_exchange(KG, Q, halof)
 
 ! ======================================================================
 

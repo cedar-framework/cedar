@@ -85,7 +85,7 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 	{
 		auto kernels = this->kernel_registry();
 		auto & bd = const_cast<cdr2::mpi::grid_func&>(b);
-		kernels->halo_exchange(bd, halo_ctx);
+		kernels->halo_exchange(bd);
 		return parent::solve(b);
 	}
 
@@ -94,7 +94,7 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 	{
 		auto kernels = this->kernel_registry();
 		auto & bd = const_cast<cdr2::mpi::grid_func&>(b);
-		kernels->halo_exchange(bd, halo_ctx);
+		kernels->halo_exchange(bd);
 		return parent::solve(b, x);
 	}
 
@@ -227,23 +227,14 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 	{
 		auto & sop = this->levels.template get<fsten>(0).A;
 
-		this->kreg->halo_setup(sop.grid(), &halo_ctx);
-		sop.halo_ctx = halo_ctx;
+		this->kreg->halo_setup(sop.grid());
 		this->kreg->halo_stencil_exchange(sop);
-
-		for (auto i :range<std::size_t>(this->levels.size()-1)) {
-			this->levels.get(i+1).x.halo_ctx = halo_ctx;
-			this->levels.get(i+1).b.halo_ctx = halo_ctx;
-			this->levels.get(i+1).res.halo_ctx = halo_ctx;
-			this->levels.get(i+1).A.halo_ctx = halo_ctx;
-			this->levels.get(i+1).P.halo_ctx = halo_ctx;
-		}
 	}
+
 	MPI_Comm comm;
 
 private:
 	bool cg_solver_lu;
-	void *halo_ctx;
 };
 
 }}}

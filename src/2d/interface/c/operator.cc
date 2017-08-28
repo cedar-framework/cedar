@@ -69,7 +69,7 @@ extern "C"
 		auto *op_cont = reinterpret_cast<op_container*>(op);
 		auto & sop = op_cont->op;
 
-		auto kreg = op_cont->kreg;
+		auto & kreg = op_cont->kreg;
 
 		auto & xgf = op_cont->xgf;
 		auto & bgf = op_cont->bgf;
@@ -82,7 +82,6 @@ extern "C"
 			}
 		}
 
-		xgf.halo_ctx = sop.halo_ctx;
 		kreg.halo_exchange(xgf);
 
 		kreg.matvec(sop, xgf, bgf);

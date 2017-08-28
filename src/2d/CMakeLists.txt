@@ -24,13 +24,12 @@ if(ENABLE_MPI)
   list(APPEND sources
 	${interface_SOURCES}
 	${util_SOURCES}
-	matvec.cc
 	mpi/grid_func.cc
 	mpi/halo.cc
 	mpi/stencil_op.cc
 	mpi/redist_solver.cc
-	mpi/residual.cc
 	mpi/gallery.cc
+	mpi/msg_exchanger.cc
 	)
 endif()
 

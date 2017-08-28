@@ -3,6 +3,7 @@
 
 #include <cedar/kernel_registry.h>
 #include <cedar/mpi/grid_topo.h>
+#include <cedar/halo_exchanger.h>
 
 namespace cedar {
 
@@ -38,8 +39,10 @@ public:
 	using restrict_op = typename solver_types::restrict_op;
 	using relax_stencil = typename solver_types::relax_stencil;
 
-mpi_registry(std::shared_ptr<kernel_params> params): parent::kernel_registry(params) {}
-mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {}
+mpi_registry(std::shared_ptr<kernel_params> params): parent::kernel_registry(params) {
+	}
+mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {
+	}
 
 	void setup_nog(grid_topo &topo,
 	               len_t min_coarse, int *nog)
@@ -49,25 +52,16 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {}
 	}
 
 
-	void halo_setup(grid_topo &topo,
-	                void **halo_ctx)
+	void halo_setup(grid_topo &topo)
 	{
 		log::debug << "Running kernel <halo_setup>" << std::endl;
-		static_cast<child*>(this)->halo_setup(topo, halo_ctx);
+		halof = static_cast<child*>(this)->halo_create(topo);
 	}
 
 
 	void halo_exchange(grid_func &f)
 	{
-		log::debug << "Running kernel <halo_exchange" << std::endl;
-		static_cast<child*>(this)->halo_exchange(f);
-	}
-
-
-	void halo_exchange(grid_func &f, void *halo_ctx)
-	{
 		log::debug << "Running kernel <halo_exchange>" << std::endl;
-		f.halo_ctx = halo_ctx;
 		static_cast<child*>(this)->halo_exchange(f);
 	}
 
@@ -117,6 +111,9 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {}
 		log::debug << "Running kernel <solve_cg_redist>" << std::endl;
 		static_cast<child*>(this)->solve_cg_redist(bmg, x, b);
 	}
+
+protected:
+	std::unique_ptr<halo_exchanger> halof;
 };
 
 }

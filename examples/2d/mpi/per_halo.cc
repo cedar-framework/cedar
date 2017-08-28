@@ -126,10 +126,7 @@ int main(int argc, char *argv[])
 	mpi::stencil_op<five_pt> so(grid);
 	auto kreg = kernel::mpi::registry(conf);
 
-	void *halo_ctx;
-	kreg.halo_setup(*grid, &halo_ctx);
-	b.halo_ctx = halo_ctx;
-	so.halo_ctx = halo_ctx;
+	kreg.halo_setup(*grid);
 
 	fill_gfunc(b);
 	draw(b, "before");
