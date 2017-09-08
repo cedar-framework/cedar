@@ -45,7 +45,7 @@ public:
 
 	friend std::ostream & operator<<(std::ostream & os, const grid_topo & obj);
 
-private:
+protected:
 	igrd_t igrd;
 	int lvl;
 	int nlvl;
