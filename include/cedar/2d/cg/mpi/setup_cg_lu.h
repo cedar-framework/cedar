@@ -4,7 +4,7 @@
 #include <cedar/kernel_params.h>
 #include <cedar/2d/mpi/stencil_op.h>
 #include <cedar/2d/mpi/grid_func.h>
-#include <cedar/2d/mpi/halo.h>
+#include <cedar/2d/mpi/msg_exchanger.h>
 #include <cedar/2d/ftn/mpi/BMG_workspace_c.h>
 
 extern "C" {
@@ -23,7 +23,7 @@ namespace impls
 {
 	namespace mpi = cedar::cdr2::mpi;
 	template <class sten>
-		void mpi_setup_cg_lu(const kernel_params & params, halo_exchanger * halof,
+		void mpi_setup_cg_lu(const kernel_params & params, mpi::msg_exchanger * halof,
 		                     const mpi::stencil_op<sten> & so,
 		                     grid_func & ABD)
 	{

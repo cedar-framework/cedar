@@ -1,6 +1,6 @@
 #include "cedar/2d/ftn/BMG_parameters_c.h"
 #include "cedar/2d/inter/mpi/prolong_op.h"
-#include "cedar/2d/mpi/halo.h"
+#include "cedar/halo_exchanger.h"
 
 #include "cedar/2d/inter/interp.h"
 
@@ -18,7 +18,7 @@ namespace cedar { namespace cdr2 { namespace kernel {
 namespace impls
 {
 	void mpi_fortran_interp(const kernel_params & params,
-	                        halo_exchanger *halof,
+	                        halo_exchanger_base *halof,
 	                        const inter::mpi::prolong_op & P,
 	                        const mpi::grid_func & coarse,
 	                        const mpi::grid_func & residual,

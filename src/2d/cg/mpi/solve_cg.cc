@@ -1,5 +1,5 @@
 #include <mpi.h>
-#include "cedar/2d/mpi/halo.h"
+#include "cedar/2d/mpi/msg_exchanger.h"
 #include "cedar/2d/mpi/grid_func.h"
 #include "cedar/2d/ftn/BMG_parameters_c.h"
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
@@ -35,7 +35,7 @@ namespace cedar { namespace cdr2 { namespace kernel {
 namespace impls
 {
 	void solve_cg_boxmg(const kernel_params & params,
-	                    halo_exchanger *halof,
+	                    mpi::msg_exchanger *halof,
 	                    const solver<nine_pt> &cg_solver,
 	                    mpi::grid_func &x_par,
 	                    const mpi::grid_func &b)
@@ -86,7 +86,7 @@ namespace impls
 
 
 	void mpi_solve_cg_lu(const kernel_params & params,
-	                     halo_exchanger *halof,
+	                     mpi::msg_exchanger *halof,
 	                     mpi::grid_func &x_par,
 	                     const mpi::grid_func &b,
 	                     const mpi::grid_func & ABD,

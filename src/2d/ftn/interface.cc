@@ -20,13 +20,13 @@ extern "C" {
 		cedar::timer_end(string);
 	}
 
-	void halo_exchange(int k, cedar::real_t *q, cedar::halo_exchanger *halof)
+	void halo_exchange(int k, cedar::real_t *q, cedar::halo_exchanger_base *halof)
 	{
 		halof->exchange_func(k, q);
 	}
 
 
-	void halo_stencil_exchange(int k, cedar::real_t *so, cedar::halo_exchanger *halof)
+	void halo_stencil_exchange(int k, cedar::real_t *so, cedar::halo_exchanger_base *halof)
 	{
 		halof->exchange_sten(k, so);
 	}

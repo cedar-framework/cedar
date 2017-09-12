@@ -8,7 +8,6 @@
 #include "cedar/2d/grid_func.h"
 #include "cedar/2d/mpi/stencil_op.h"
 #include "cedar/2d/inter/mpi/prolong_op.h"
-#include "cedar/2d/mpi/halo.h"
 #include "cedar/2d/ftn/BMG_parameters_c.h"
 
 
@@ -27,7 +26,7 @@ namespace impls
 	namespace mpi = cedar::cdr2::mpi;
 	template <class sten>
 	void mpi_galerkin_prod(const kernel_params & params,
-	                       halo_exchanger *halof,
+	                       halo_exchanger_base *halof,
 	                       const inter::mpi::prolong_op & P,
 	                       const mpi::stencil_op<sten> & fop,
 	                       mpi::stencil_op<nine_pt> & cop)

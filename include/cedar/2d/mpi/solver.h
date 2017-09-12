@@ -14,7 +14,7 @@
 #include <cedar/2d/inter/mpi/prolong_op.h>
 #include <cedar/2d/inter/mpi/restrict_op.h>
 #include <cedar/2d/kernel/mpi/registry.h>
-#include <cedar/2d/mpi/halo.h>
+#include <cedar/2d/mpi/msg_exchanger.h>
 #include <cedar/2d/solver.h>
 #include <cedar/perf/predict.h>
 

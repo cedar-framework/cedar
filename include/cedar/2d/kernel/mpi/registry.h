@@ -8,7 +8,6 @@
 #include <cedar/2d/mpi/types.h>
 
 #include <cedar/2d/matvec.h>
-#include <cedar/2d/mpi/halo.h>
 #include <cedar/2d/relax/mpi/relax.h>
 #include <cedar/2d/relax_stencil.h>
 #include <cedar/2d/mpi/grid_func.h>
@@ -16,6 +15,7 @@
 #include <cedar/2d/mpi/grid_func.h>
 #include <cedar/2d/solver.h>
 #include <cedar/2d/mpi/stencil_op.h>
+#include <cedar/2d/mpi/msg_exchanger.h>
 #include <cedar/2d/inter/mpi/prolong_op.h>
 #include <cedar/2d/inter/mpi/restrict_op.h>
 #include <cedar/2d/inter/mpi/galerkin_prod.h>
@@ -32,15 +32,17 @@ namespace cedar { namespace cdr2 { namespace mpi {
 
 namespace cedar { namespace cdr2 { namespace kernel { namespace mpi {
 	namespace mpi = cedar::cdr2::mpi;
-	class registry : public mpi_registry<registry, cdr2::mpi::stypes, cdr2::mpi::redist_solver, solver<nine_pt>>
+	class registry : public mpi_registry<registry, cdr2::mpi::stypes, cdr2::mpi::redist_solver, solver<nine_pt>,
+		mpi::msg_exchanger>
 {
 public:
-	using parent = mpi_registry<registry, cdr2::mpi::stypes, cdr2::mpi::redist_solver, solver<nine_pt>>;
+	using parent = mpi_registry<registry, cdr2::mpi::stypes, cdr2::mpi::redist_solver, solver<nine_pt>, mpi::msg_exchanger>;
 registry(std::shared_ptr<kernel_params> params): parent::mpi_registry(params) {}
 registry(config::reader & conf) : parent::mpi_registry(conf) {}
 
 	using parent::halo_exchange;
-
+	using parent::halo_setup;
+	using parent::halo_stencil_exchange;
 
 	void setup_nog(grid_topo & topo,
 	               len_t min_coarse, int *nog)
@@ -180,25 +182,6 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	                mpi::grid_func & fine)
 	{
 		impls::mpi_fortran_interp(*params, halof.get(), P, coarse, residual, fine);
-	}
-
-
-	std::unique_ptr<halo_exchanger> halo_create(grid_topo & topo)
-	{
-		return impls::setup_msg(*params, topo);
-	}
-
-
-	void halo_exchange(mpi::grid_func & f)
-	{
-		impls::msg_exchange(*params, halof.get(), f);
-	}
-
-
-	template <class sten>
-		void halo_stencil_exchange(mpi::stencil_op<sten> & so)
-	{
-		impls::msg_stencil_exchange(*params, halof.get(), so);
 	}
 
 

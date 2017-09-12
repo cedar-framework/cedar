@@ -4,7 +4,7 @@
 #include "cedar/2d/ftn/BMG_parameters_c.h"
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 #include <cedar/kernel_params.h>
-#include "cedar/2d/mpi/halo.h"
+#include "cedar/2d/mpi/msg_exchanger.h"
 #include <cedar/halo_exchanger.h>
 #include "cedar/cycle/types.h"
 #include "cedar/2d/stencil_op.h"
@@ -41,7 +41,7 @@ namespace impls
 	namespace mpi = cedar::cdr2::mpi;
 	template<class sten>
 	void mpi_relax_rbgs_point(const kernel_params & params,
-	                          halo_exchanger *halof,
+	                          halo_exchanger_base *halof,
 	                          const mpi::stencil_op<sten> & so,
 	                          mpi::grid_func & x,
 	                          const mpi::grid_func & b,
@@ -78,7 +78,7 @@ namespace impls
 
 	template<class sten>
 	void mpi_relax_lines_x(const kernel_params & params,
-	                       halo_exchanger * halof,
+	                       mpi::msg_exchanger * halof,
 	                       const mpi::stencil_op<sten> & so,
 	                       mpi::grid_func & x,
 	                       const mpi::grid_func & b,
@@ -123,7 +123,7 @@ namespace impls
 
 	template<class sten>
 	void mpi_relax_lines_y(const kernel_params & params,
-	                       halo_exchanger *halof,
+	                       mpi::msg_exchanger *halof,
 	                       const mpi::stencil_op<sten> & so,
 	                       mpi::grid_func & x,
 	                       const mpi::grid_func & b,

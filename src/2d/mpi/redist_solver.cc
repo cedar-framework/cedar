@@ -15,7 +15,7 @@ using namespace cedar;
 using namespace cedar::cdr2::mpi;
 
 redist_solver::redist_solver(const stencil_op<nine_pt> & so,
-                             halo_exchanger *halof,
+                             mpi::msg_exchanger *halof,
                              std::shared_ptr<config::reader> conf,
                              std::array<int, 2> nblock) :
 	redundant(false), nblock(nblock), active(true), recv_id(-1)

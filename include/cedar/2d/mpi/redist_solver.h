@@ -8,7 +8,7 @@
 #include <cedar/mpi/redist_comms.h>
 #include <cedar/2d/mpi/solver.h>
 #include <cedar/2d/mpi/stencil_op.h>
-#include <cedar/2d/mpi/halo.h>
+#include <cedar/2d/mpi/msg_exchanger.h>
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
@@ -35,7 +35,7 @@ public:
 	   @param[in] nblock The destination 2D distribution
 	*/
 	redist_solver(const stencil_op<nine_pt> & so,
-	              halo_exchanger *halof,
+	              mpi::msg_exchanger *halof,
 	              std::shared_ptr<config::reader> conf,
 	              std::array<int, 2> nblock);
 	/**

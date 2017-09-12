@@ -4,7 +4,7 @@
 #include <memory>
 
 #include <cedar/kernel_params.h>
-#include <cedar/halo_exchanger.h>
+#include <cedar/2d/mpi/msg_exchanger.h>
 #include <cedar/2d/mpi/stencil_op.h>
 
 namespace cedar { namespace cdr2 { namespace mpi {
@@ -19,7 +19,7 @@ namespace impls {
 	namespace mpi = cedar::cdr2::mpi;
 	template <class sten>
 	void setup_cg_redist(const kernel_params & params,
-	                     halo_exchanger *halof,
+	                     mpi::msg_exchanger *halof,
 	                     const mpi::stencil_op<sten> & so,
 	                     std::shared_ptr<config::reader> conf,
 	                     std::shared_ptr<mpi::redist_solver> * slv,

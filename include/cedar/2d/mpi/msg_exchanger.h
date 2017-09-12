@@ -3,6 +3,7 @@
 
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 
+#include <cedar/kernel_params.h>
 #include <cedar/halo_exchanger.h>
 #include <cedar/mpi/grid_topo.h>
 #include <cedar/2d/mpi/stencil_op.h>
@@ -50,16 +51,22 @@ struct MsgCtx
 		return nlocal(0, dim, ijrank);
 	}
 };
+}}
 
-class msg_exchanger : public halo_exchanger
+namespace mpi {
+
+class msg_exchanger : public halo_exchanger_base
 {
+	using MsgCtx = kernel::impls::MsgCtx;
 public:
-	msg_exchanger(grid_topo & topo);
-	void init();
+	msg_exchanger(const kernel_params & params, grid_topo & topo);
 	MsgCtx & context() { return ctx; }
 	void *context_ptr() { return &ctx; }
 	virtual void exchange_func(int k, real_t *gf) override;
 	virtual void exchange_sten(int k, real_t *so) override;
+	template<class sten>
+		void exchange(mpi::stencil_op<sten> & so);
+	void exchange(mpi::grid_func & f);
 
 private:
 	MsgCtx ctx;
@@ -73,6 +80,6 @@ private:
 };
 
 
-}}}}
+}}}
 
 #endif

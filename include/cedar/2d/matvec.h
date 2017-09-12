@@ -4,7 +4,7 @@
 #include <cedar/kernel_params.h>
 #include <cedar/2d/mpi/stencil_op.h>
 #include <cedar/2d/mpi/grid_func.h>
-#include <cedar/2d/mpi/halo.h>
+#include <cedar/halo_exchanger.h>
 
 
 extern "C" {
@@ -21,7 +21,7 @@ namespace impls
 	namespace mpi = cedar::cdr2::mpi;
 	template <class sten>
 	void matvec(const kernel_params & params,
-	            halo_exchanger *halof,
+	            halo_exchanger_base *halof,
 	            const mpi::stencil_op<sten> & so,
 	            const mpi::grid_func & x,
 	            mpi::grid_func & y)

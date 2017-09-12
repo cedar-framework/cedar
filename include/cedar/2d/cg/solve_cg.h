@@ -5,6 +5,7 @@
 #include <cedar/2d/grid_func.h>
 #include <cedar/2d/mpi/grid_func.h>
 #include <cedar/halo_exchanger.h>
+#include <cedar/2d/mpi/msg_exchanger.h>
 
 namespace cedar { namespace cdr2 {
 		template<class> class solver;
@@ -25,7 +26,7 @@ namespace impls
 
 
 	void mpi_solve_cg_lu(const kernel_params & params,
-	                     halo_exchanger *halof,
+	                     mpi::msg_exchanger *halof,
 	                     mpi::grid_func &x,
 	                     const mpi::grid_func &b,
 	                     const mpi::grid_func & ABD,
@@ -33,7 +34,7 @@ namespace impls
 
 
 	void solve_cg_boxmg(const kernel_params & params,
-	                    halo_exchanger *halof,
+	                    mpi::msg_exchanger *halof,
 	                    const solver<nine_pt> & cg_solver,
 	                    mpi::grid_func &x,
 	                    const mpi::grid_func &b);

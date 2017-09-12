@@ -5,7 +5,7 @@
 
 namespace cedar {
 
-	class halo_exchanger
+	class halo_exchanger_base
 	{
 	public:
 		virtual void exchange_func(int k, real_t *gf) = 0;

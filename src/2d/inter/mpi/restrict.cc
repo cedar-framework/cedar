@@ -1,7 +1,6 @@
 #include "cedar/2d/ftn/BMG_parameters_c.h"
 #include "cedar/2d/inter/mpi/prolong_op.h"
 
-#include "cedar/2d/mpi/halo.h"
 #include "cedar/2d/inter/restrict.h"
 
 extern "C" {

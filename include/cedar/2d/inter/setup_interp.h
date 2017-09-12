@@ -8,7 +8,6 @@
 #include "cedar/2d/inter/prolong_op.h"
 #include "cedar/2d/mpi/stencil_op.h"
 #include "cedar/2d/inter/mpi/prolong_op.h"
-#include "cedar/2d/mpi/halo.h"
 
 
 extern "C" {
@@ -58,7 +57,7 @@ namespace impls
 
 	template <class sten>
 	void mpi_setup_interp(const kernel_params & params,
-	                      halo_exchanger *halof,
+	                      halo_exchanger_base *halof,
 	                      const mpi::stencil_op<sten> & fop,
 	                      const mpi::stencil_op<nine_pt> & cop,
 	                      inter::mpi::prolong_op & P)

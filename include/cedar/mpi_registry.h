@@ -3,7 +3,6 @@
 
 #include <cedar/kernel_registry.h>
 #include <cedar/mpi/grid_topo.h>
-#include <cedar/halo_exchanger.h>
 
 namespace cedar {
 
@@ -25,7 +24,8 @@ namespace cedar {
 	template <class child,
 		class solver_types,
 		class redist_solver,
-		class serial_solver>
+		class serial_solver,
+		class halo_exchanger>
 class mpi_registry : public kernel_registry<child,
                                     		solver_types>
 {
@@ -55,14 +55,16 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {
 	void halo_setup(grid_topo &topo)
 	{
 		log::debug << "Running kernel <halo_setup>" << std::endl;
-		halof = static_cast<child*>(this)->halo_create(topo);
+		//halof = static_cast<child*>(this)->halo_create(topo);
+		halof = std::make_unique<halo_exchanger>(*(this->params), topo);
 	}
 
 
 	void halo_exchange(grid_func &f)
 	{
 		log::debug << "Running kernel <halo_exchange>" << std::endl;
-		static_cast<child*>(this)->halo_exchange(f);
+		//static_cast<child*>(this)->halo_exchange(f);
+		halof->exchange(f);
 	}
 
 
@@ -70,7 +72,8 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {
 	void halo_stencil_exchange(stencil_op<sten> & so)
 	{
 		log::debug << "Running kernel <halo_stencil_exchange>" << std::endl;
-		static_cast<child*>(this)->halo_stencil_exchange(so);
+		//static_cast<child*>(this)->halo_stencil_exchange(so);
+		halof->exchange(so);
 	}
 
 

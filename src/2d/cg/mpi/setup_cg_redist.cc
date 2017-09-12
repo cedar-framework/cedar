@@ -10,7 +10,7 @@ namespace impls
 
 	template<>
 	void setup_cg_redist(const kernel_params & params,
-	                     halo_exchanger *halof,
+	                     mpi::msg_exchanger *halof,
 	                     const mpi::stencil_op<nine_pt> & so,
 	                     std::shared_ptr<config::reader> conf,
 	                     std::shared_ptr<mpi::redist_solver> * slv,
@@ -27,7 +27,7 @@ namespace impls
 
 	template<>
 	void setup_cg_redist(const kernel_params & params,
-	                     halo_exchanger *halof,
+	                     mpi::msg_exchanger *halof,
 	                     const mpi::stencil_op<five_pt> & so,
 	                     std::shared_ptr<config::reader> conf,
 	                     std::shared_ptr<mpi::redist_solver> * slv,
