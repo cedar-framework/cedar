@@ -2,16 +2,22 @@
 #define CEDAR_HALO_EXCHANGER_H
 
 #include <cedar/types.h>
+#include <cedar/2d/mpi/msg_exchanger.h>
 
 namespace cedar {
 
-	class halo_exchanger_base
-	{
-	public:
-		virtual void exchange_func(int k, real_t *gf) = 0;
-		virtual void exchange_sten(int k, real_t *so) = 0;
-		virtual void *context_ptr() = 0;
+	template<unsigned int nd>
+		struct halo_exchanger_t {
+			typedef void type;
+		};
+
+	template<>
+		struct halo_exchanger_t<2> {
+		typedef cedar::cdr2::mpi::msg_exchanger type;
 	};
+
+	template <unsigned int nd>
+		using halo_exchanger = typename halo_exchanger_t<nd>::type;
 }
 
 #endif

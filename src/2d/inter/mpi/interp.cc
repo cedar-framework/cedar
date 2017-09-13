@@ -1,6 +1,6 @@
 #include "cedar/2d/ftn/BMG_parameters_c.h"
 #include "cedar/2d/inter/mpi/prolong_op.h"
-#include "cedar/halo_exchanger.h"
+#include "cedar/halo_exchanger_base.h"
 
 #include "cedar/2d/inter/interp.h"
 

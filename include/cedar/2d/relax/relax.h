@@ -2,7 +2,7 @@
 #define CEDAR_2D_KERNEL_RELAX_H
 
 #include <cedar/kernel_params.h>
-#include <cedar/halo_exchanger.h>
+#include <cedar/halo_exchanger_base.h>
 #include "cedar/cycle/types.h"
 #include "cedar/2d/stencil_op.h"
 #include "cedar/2d/relax_stencil.h"

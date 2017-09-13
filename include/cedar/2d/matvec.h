@@ -4,7 +4,7 @@
 #include <cedar/kernel_params.h>
 #include <cedar/2d/mpi/stencil_op.h>
 #include <cedar/2d/mpi/grid_func.h>
-#include <cedar/halo_exchanger.h>
+#include <cedar/halo_exchanger_base.h>
 
 
 extern "C" {

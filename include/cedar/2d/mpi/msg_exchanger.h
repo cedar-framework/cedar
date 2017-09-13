@@ -4,7 +4,7 @@
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 
 #include <cedar/kernel_params.h>
-#include <cedar/halo_exchanger.h>
+#include <cedar/halo_exchanger_base.h>
 #include <cedar/mpi/grid_topo.h>
 #include <cedar/2d/mpi/stencil_op.h>
 #include <cedar/2d/mpi/grid_func.h>

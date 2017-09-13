@@ -5,7 +5,7 @@
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 #include <cedar/kernel_params.h>
 #include "cedar/2d/mpi/msg_exchanger.h"
-#include <cedar/halo_exchanger.h>
+#include <cedar/halo_exchanger_base.h>
 #include "cedar/cycle/types.h"
 #include "cedar/2d/stencil_op.h"
 #include "cedar/2d/relax_stencil.h"

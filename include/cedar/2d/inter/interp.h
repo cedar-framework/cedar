@@ -2,7 +2,7 @@
 #define CEDAR_2D_KERNEL_INTERP_H
 
 #include <cedar/kernel_params.h>
-#include <cedar/halo_exchanger.h>
+#include <cedar/halo_exchanger_base.h>
 #include "cedar/2d/stencil_op.h"
 #include "cedar/2d/inter/prolong_op.h"
 #include "cedar/2d/grid_func.h"

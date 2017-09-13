@@ -4,7 +4,7 @@
 #include <cedar/kernel_params.h>
 #include <cedar/2d/grid_func.h>
 #include <cedar/2d/mpi/grid_func.h>
-#include <cedar/halo_exchanger.h>
+#include <cedar/halo_exchanger_base.h>
 #include <cedar/2d/mpi/msg_exchanger.h>
 
 namespace cedar { namespace cdr2 {

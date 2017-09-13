@@ -1,7 +1,7 @@
 #include "cedar/util/log.h"
 #include <cedar/types.h>
 #include <cedar/util/time_log.h>
-#include <cedar/halo_exchanger.h>
+#include <cedar/halo_exchanger_base.h>
 
 extern "C" {
 
