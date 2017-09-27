@@ -6,7 +6,7 @@
 #include <cedar/halo_exchanger.h>
 #include <cedar/3d/mpi/stencil_op.h>
 #include <cedar/3d/mpi/grid_func.h>
-#include <cedar/3d/mpi/halo.h>
+#include <cedar/halo_exchanger.h>
 
 extern "C" {
 	using namespace cedar;
@@ -23,7 +23,7 @@ namespace impls
 	namespace mpi = cedar::cdr3::mpi;
 	template<class sten>
 	void mpi_residual_fortran(const kernel_params & params,
-	                          halo_exchanger * halof,
+	                          halo_exchanger_base * halof,
 	                          const mpi::stencil_op<sten> & A,
 	                          const mpi::grid_func & x,
 	                          const mpi::grid_func & b,

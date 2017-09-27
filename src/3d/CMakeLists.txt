@@ -25,7 +25,6 @@ if(ENABLE_MPI)
   list(APPEND sources
 	mpi/grid_func.cc
 	mpi/stencil_op.cc
-	mpi/halo.cc
     mpi/msg_exchanger.cc
 	mpi/gallery.cc
 	mpi/redist_solver.cc)

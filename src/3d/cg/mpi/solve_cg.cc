@@ -1,6 +1,6 @@
 #include "cedar/2d/ftn/BMG_parameters_c.h"
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
-#include <cedar/3d/mpi/halo.h>
+#include <cedar/3d/mpi/msg_exchanger.h>
 
 #include <cedar/3d/cg/solve_cg.h>
 #include <cedar/3d/mpi/redist_solver.h>
@@ -22,7 +22,7 @@ namespace cedar { namespace cdr3 { namespace kernel {
 namespace impls
 {
 	void mpi_solve_cg_lu(const kernel_params & params,
-	                     halo_exchanger *halof,
+	                     mpi::msg_exchanger *halof,
 	                     mpi::grid_func &x_par,
 	                     const mpi::grid_func &b,
 	                     const mpi::grid_func & ABD,

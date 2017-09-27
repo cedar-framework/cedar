@@ -9,7 +9,6 @@
 #include <cedar/cycle/types.h>
 #include <cedar/3d/mpi/grid_func.h>
 #include <cedar/3d/mpi/stencil_op.h>
-#include <cedar/3d/mpi/halo.h>
 
 
 extern "C" {
@@ -30,7 +29,7 @@ namespace impls
 
 	template<class sten>
 	void mpi_relax_rbgs_point(const kernel_params & params,
-	                          halo_exchanger *halof,
+	                          halo_exchanger_base *halof,
 	                          const mpi::stencil_op<sten> & so,
 	                          mpi::grid_func & x,
 	                          const mpi::grid_func & b,

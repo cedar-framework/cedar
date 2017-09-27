@@ -13,6 +13,14 @@ using namespace cedar::cdr3::kernel::impls;
 
 extern "C" {
 	using namespace cedar;
+	void BMG_get_bc(int, int*);
+	void BMG3_SymStd_SETUP_MSG(int *pMSG, int *pMSGSO, len_t *imsg_geom,
+	                           len_t nmsgi, int *pSI_MSG, int IBC, len_t *IGRD,
+	                           int nog, int nogm, int nproc, int myproc,
+	                           len_t *dimx, len_t *dimy, len_t *dimz,
+	                           len_t *dimxfine, len_t *dimyfine, len_t *dimzfine,
+	                           int *proc_grid, int nproci, int nprocj, int nprock,
+	                           int mpicomm);
 	void BMG3_SymStd_SETUP_fine_stencil(int kf, real_t *so,
 	                                    len_t nlx, len_t nly, len_t nlz,
 	                                    int nstencil,
@@ -129,11 +137,34 @@ MsgCtx::MsgCtx(grid_topo & topo) :
 }
 
 
-msg_exchanger::msg_exchanger(grid_topo & topo): ctx(topo), dims(topo.nlevel(),3), coord(3)
+namespace cedar { namespace cdr3 { namespace mpi {
+
+msg_exchanger::msg_exchanger(const kernel_params & params, grid_topo & topo):
+	ctx(topo), dims(topo.nlevel(),3), coord(3)
 {
 	for (auto i : range<int>(3)) {
 		coord(i) = topo.coord(i);
 	}
+
+		int rank;
+		int ibc;
+
+		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+
+		MPI_Comm_rank(topo.comm, &rank);
+		rank++; // Fortran likes to be difficult...
+
+		BMG_get_bc(params.per_mask(), &ibc);
+
+		BMG3_SymStd_SETUP_MSG(ctx.pMSG.data(), ctx.pMSGSO.data(),
+		                      ctx.msg_geom.data(), ctx.msg_geom.size(),
+		                      &ctx.pSI_MSG, ibc, topo.IGRD(), topo.nlevel(),
+		                      topo.nlevel(), topo.nproc(), rank,
+		                      ctx.dimx.data(), ctx.dimy.data(), ctx.dimz.data(),
+		                      ctx.dimxfine.data(), ctx.dimyfine.data(), ctx.dimzfine.data(),
+		                      ctx.proc_grid.data(), topo.nproc(0), topo.nproc(1), topo.nproc(2),
+		                      fcomm);
+		this->init();
 }
 
 
@@ -169,3 +200,18 @@ void msg_exchanger::exchange_sten(int k, real_t * so)
 	                                        ctx.msg_buffer.size(), dims.len(0));
 	timer_end("halo-stencil");
 }
+
+
+void msg_exchanger::exchange(mpi::grid_func & f)
+{
+		grid_topo &topo = f.grid();
+
+		BMG3_SymStd_UTILS_update_ghosts(topo.level()+1, f.data(),
+		                                f.len(0), f.len(1), f.len(2),
+		                                ctx.msg_geom.data(), ctx.msg_geom.size(),
+		                                ctx.pMSG.data(), ctx.msg_buffer.data(),
+		                                ctx.msg_buffer.size(), topo.nlevel());
+}
+
+
+}}}

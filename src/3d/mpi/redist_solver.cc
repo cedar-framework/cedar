@@ -42,7 +42,7 @@ cdr3::stencil_op<xxvii_pt> redist_solver::redist_operator<cdr3::stencil_op, xxvi
 
 
 redist_solver::redist_solver(const stencil_op<xxvii_pt> & so,
-                             halo_exchanger *halof,
+                             mpi::msg_exchanger *halof,
                              std::shared_ptr<config::reader> conf,
                              std::array<int, 3> nblock) :
 	ser_cg(nblock[0]*nblock[1]*nblock[2] == 1), nblock(nblock), active(true), recv_id(-1)

@@ -6,7 +6,7 @@
 #include <cedar/kernel_params.h>
 #include <cedar/halo_exchanger.h>
 #include <cedar/3d/mpi/stencil_op.h>
-#include <cedar/3d/mpi/halo.h>
+#include <cedar/halo_exchanger.h>
 #include <cedar/3d/inter/mpi/prolong_op.h>
 #include <cedar/2d/ftn/BMG_parameters_c.h>
 
@@ -34,7 +34,7 @@ namespace impls
 
 	template<class sten>
 	void mpi_galerkin_prod(const kernel_params & params,
-	                       halo_exchanger * halof,
+	                       halo_exchanger_base * halof,
 	                       const inter::mpi::prolong_op & P,
 	                       const mpi::stencil_op<sten> & fop,
 	                       mpi::stencil_op<xxvii_pt> & cop)

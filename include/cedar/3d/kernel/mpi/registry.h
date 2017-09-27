@@ -8,12 +8,12 @@
 #include <cedar/3d/mpi/types.h>
 
 #include <cedar/3d/matvec.h>
-#include <cedar/3d/mpi/halo.h>
 #include <cedar/3d/relax_stencil.h>
 #include <cedar/3d/mpi/grid_func.h>
 #include <cedar/mpi/grid_topo.h>
 #include <cedar/3d/mpi/grid_func.h>
 #include <cedar/3d/solver.h>
+#include <cedar/3d/mpi/msg_exchanger.h>
 #include <cedar/3d/mpi/stencil_op.h>
 #include <cedar/3d/mpi/residual.h>
 #include <cedar/3d/matvec.h>
@@ -36,14 +36,16 @@ namespace cedar { namespace cdr3 { namespace mpi {
 namespace cedar { namespace cdr3 { namespace kernel { namespace mpi {
 namespace mpi = cedar::cdr3::mpi;
 
-class registry : public mpi_registry<registry, cdr3::mpi::stypes, cdr3::mpi::redist_solver, solver<xxvii_pt>>
+class registry : public mpi_registry<registry, cdr3::mpi::stypes, cdr3::mpi::redist_solver, solver<xxvii_pt>,
+	mpi::msg_exchanger>
 {
 public:
-	using parent = mpi_registry<registry, cdr3::mpi::stypes, cdr3::mpi::redist_solver, solver<xxvii_pt>>;
+	using parent = mpi_registry<registry, cdr3::mpi::stypes, cdr3::mpi::redist_solver, solver<xxvii_pt>, mpi::msg_exchanger>;
 registry(std::shared_ptr<kernel_params> params): parent::mpi_registry(params) {}
 registry(config::reader & conf) : parent::mpi_registry(conf) {}
 
-	using parent::halo_exchange;
+	using parent::halo_setup;
+	using parent::halo_stencil_exchange;
 
 	void setup_nog(grid_topo & topo,
 	               len_t min_coarse, int *nog)
@@ -122,25 +124,6 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	            mpi::grid_func & y)
 	{
 		impls::matvec(*params, halof.get(), so, x, y);
-	}
-
-
-	std::unique_ptr<halo_exchanger> halo_create(grid_topo & topo)
-	{
-		return impls::setup_msg(*params, topo);
-	}
-
-
-	void halo_exchange(mpi::grid_func & f)
-	{
-		impls::msg_exchange(*params, halof.get(), f);
-	}
-
-
-	template <class sten>
-		void halo_stencil_exchange(mpi::stencil_op<sten> & so)
-	{
-		impls::msg_stencil_exchange(*params, halof.get(), so);
 	}
 
 

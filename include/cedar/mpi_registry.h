@@ -56,7 +56,7 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {
 	{
 		log::debug << "Running kernel <halo_setup>" << std::endl;
 		//halof = static_cast<child*>(this)->halo_create(topo);
-		halof = std::make_unique<halo_exchanger>(*(this->params), topo);
+		halof = std::make_shared<halo_exchanger>(*(this->params), topo);
 	}
 
 
@@ -115,8 +115,10 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {
 		static_cast<child*>(this)->solve_cg_redist(bmg, x, b);
 	}
 
+	std::shared_ptr<halo_exchanger> get_halo_exchanger() { return halof; }
+
 protected:
-	std::unique_ptr<halo_exchanger> halof;
+	std::shared_ptr<halo_exchanger> halof;
 };
 
 }

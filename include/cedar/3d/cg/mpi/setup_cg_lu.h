@@ -5,6 +5,7 @@
 #include "cedar/2d/ftn/BMG_parameters_c.h"
 #include <cedar/kernel_params.h>
 #include <cedar/halo_exchanger.h>
+#include <cedar/3d/mpi/msg_exchanger.h>
 #include <cedar/3d/mpi/stencil_op.h>
 
 
@@ -25,7 +26,7 @@ namespace impls
 
 	template<class sten>
 	void mpi_setup_cg_lu(const kernel_params & params,
-	                     halo_exchanger * halof,
+	                     mpi::msg_exchanger * halof,
 	                     const mpi::stencil_op<sten> & so,
 	                     grid_func & ABD)
 	{

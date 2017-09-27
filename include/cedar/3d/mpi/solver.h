@@ -11,7 +11,7 @@
 #include <cedar/perf/predict.h>
 #include <cedar/3d/level_container.h>
 #include <cedar/3d/kernel/mpi/registry.h>
-#include <cedar/3d/mpi/halo.h>
+#include <cedar/3d/mpi/msg_exchanger.h>
 
 namespace cedar { namespace cdr3 { namespace mpi {
 

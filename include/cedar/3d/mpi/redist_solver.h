@@ -9,7 +9,7 @@
 #include <cedar/3d/solver.h>
 #include <cedar/3d/mpi/solver.h>
 #include <cedar/3d/stencil_op.h>
-#include <cedar/3d/mpi/halo.h>
+#include <cedar/3d/mpi/msg_exchanger.h>
 
 namespace cedar { namespace cdr3 { namespace mpi {
 
@@ -35,7 +35,7 @@ public:
 	   @param[in] conf The config object to use for this solver
 	   @param[in] nblock The destination 3D distribution
 	*/
-	redist_solver(const stencil_op<xxvii_pt> & so, halo_exchanger *halof,
+	redist_solver(const stencil_op<xxvii_pt> & so, mpi::msg_exchanger *halof,
 	              std::shared_ptr<config::reader> conf, std::array<int, 3> nblock);
 	/**
 	   Runs the redistributed solve phase

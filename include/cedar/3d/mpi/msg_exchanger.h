@@ -3,9 +3,21 @@
 
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 #include <cedar/array.h>
+#include <cedar/kernel_params.h>
 #include <cedar/mpi/grid_topo.h>
 #include <cedar/halo_exchanger.h>
 #include <cedar/3d/mpi/grid_func.h>
+#include <cedar/3d/mpi/stencil_op.h>
+
+extern "C" {
+	using namespace cedar;
+	void BMG3_SymStd_SETUP_fine_stencil(int kf, real_t *so,
+	                                    len_t nlx, len_t nly, len_t nlz,
+	                                    int nstencil,
+	                                    len_t *iwork, len_t nmsgi, int *pMSGSO,
+	                                    real_t *buffer, len_t nmsgr,
+	                                    int mpicomm);
+}
 
 namespace cedar { namespace cdr3 { namespace kernel {
 namespace impls
@@ -48,17 +60,23 @@ namespace impls
 			return nlocal(0, dim, ijkrank);
 		}
 	};
+}}
 
+namespace mpi {
 
-	class msg_exchanger : public halo_exchanger
+	class msg_exchanger : public halo_exchanger_base
 	{
+		using MsgCtx = kernel::impls::MsgCtx;
 	public:
-		msg_exchanger(grid_topo & topo);
+		msg_exchanger(const kernel_params & params, grid_topo & topo);
 		void init();
 		MsgCtx & context() { return ctx; }
 		void * context_ptr() { return &ctx;}
 		virtual void exchange_func(int k, real_t *gf);
 		virtual void exchange_sten(int k, real_t * so);
+		template<class sten>
+			void exchange(mpi::stencil_op<sten> & so);
+		void exchange(mpi::grid_func & f);
 
 	private:
 		MsgCtx ctx;
@@ -71,6 +89,21 @@ namespace impls
 		array<len_t, 1> coord;
 	};
 
+	template<class sten>
+		void msg_exchanger::exchange(mpi::stencil_op<sten> & sop)
+	{
+		grid_topo &topo = sop.grid();
+		int nstencil = stencil_ndirs<sten>::value;
 
-}}}}
+		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+
+		BMG3_SymStd_SETUP_fine_stencil(topo.level()+1, sop.data(),
+		                               sop.len(0), sop.len(1), sop.len(2),
+		                               nstencil,
+		                               ctx.msg_geom.data(), ctx.msg_geom.size(),
+		                               ctx.pMSGSO.data(), ctx.msg_buffer.data(),
+		                               ctx.msg_buffer.size(), fcomm);
+	}
+}}}
+
 #endif
