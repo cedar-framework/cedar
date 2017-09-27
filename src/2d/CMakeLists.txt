@@ -29,6 +29,7 @@ if(ENABLE_MPI)
 	mpi/redist_solver.cc
 	mpi/gallery.cc
 	mpi/msg_exchanger.cc
+	mpi/tausch_exchanger.cc
 	)
 endif()
 

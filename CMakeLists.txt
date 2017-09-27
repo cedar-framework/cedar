@@ -26,7 +26,12 @@ find_package(MPI REQUIRED)
 include_directories(${MPI_C_INCLUDE_PATH})
 include_directories(${MPI_Fortran_INCLUDE_PATH})
 
-set(cedar-deps ${Boost_LIBRARIES} ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${MPI_CXX_LIBRARIES} ${MPI_C_LIBRARIES} ${MPI_Fortran_LIBRARIES})
+# find_package(tausch REQUIRED)
+set(tausch_LIBRARIES -ltausch -L/home/andrew/local/lib)
+set(tausch_INCLUDE_DIR /home/andrew/local/include)
+include_directories(${tausch_INCLUDE_DIR})
+
+set(cedar-deps ${Boost_LIBRARIES} ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${MPI_CXX_LIBRARIES} ${MPI_C_LIBRARIES} ${MPI_Fortran_LIBRARIES} ${tausch_LIBRARIES})
 
 add_subdirectory(src)
 add_library(cedar ${cedar_src})
