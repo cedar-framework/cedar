@@ -5,7 +5,7 @@
 #include <cedar/array.h>
 #include <cedar/kernel_params.h>
 #include <cedar/mpi/grid_topo.h>
-#include <cedar/halo_exchanger.h>
+#include <cedar/halo_exchanger_base.h>
 #include <cedar/3d/mpi/grid_func.h>
 #include <cedar/3d/mpi/stencil_op.h>
 
