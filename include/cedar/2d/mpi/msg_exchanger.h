@@ -1,5 +1,5 @@
-#ifndef CEDAR_MSG_EXCHANGER_H
-#define CEDAR_MSG_EXCHANGER_H
+#ifndef CEDAR_2D_MSG_EXCHANGER_H
+#define CEDAR_2D_MSG_EXCHANGER_H
 
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 
