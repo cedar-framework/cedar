@@ -10,7 +10,6 @@ namespace cedar {
 	public:
 		virtual void exchange_func(int k, real_t *gf) = 0;
 		virtual void exchange_sten(int k, real_t *so) = 0;
-		virtual void *context_ptr() = 0;
 	};
 }
 

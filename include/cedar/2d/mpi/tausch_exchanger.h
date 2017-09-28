@@ -23,7 +23,7 @@ public:
 	void exchange(mpi::grid_func & f);
 
 protected:
-	std::unique_ptr<Tausch<double>> tausch;
+	std::unique_ptr<Tausch<real_t>> tausch;
 	std::array<bool, halo_dir::count> active;
 };
 
