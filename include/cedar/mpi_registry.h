@@ -52,11 +52,11 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {
 	}
 
 
-	void halo_setup(grid_topo &topo)
+	void halo_setup(std::vector<topo_ptr> topos)
 	{
 		log::debug << "Running kernel <halo_setup>" << std::endl;
 		//halof = static_cast<child*>(this)->halo_create(topo);
-		halof = std::make_shared<halo_exchanger>(*(this->params), topo);
+		halof = std::make_shared<halo_exchanger>(*(this->params), topos);
 	}
 
 

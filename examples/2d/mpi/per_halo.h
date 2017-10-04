@@ -85,7 +85,8 @@ void run_test(config::reader & conf, std::shared_ptr<grid_topo> grid,
               mpi::stencil_op<five_pt> & so, mpi::grid_func & b)
 {
 	auto parms = build_kernel_params(conf);
-	halo_exchanger halof(*parms, *grid);
+	std::vector<topo_ptr> topos({grid});
+	halo_exchanger halof(*parms, topos);
 
 	draw(b, "before");
 	halof.exchange(b);

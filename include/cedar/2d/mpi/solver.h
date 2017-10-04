@@ -227,7 +227,13 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 	{
 		auto & sop = this->levels.template get<fsten>(0).A;
 
-		this->kreg->halo_setup(sop.grid());
+		std::vector<topo_ptr> topos;
+		topos.push_back(sop.grid_ptr());
+
+		for (std::size_t i = 1; i < this->nlevels(); i++)
+			topos.push_back(this->levels.get(i).A.grid_ptr());
+
+		this->kreg->halo_setup(topos);
 		this->kreg->halo_stencil_exchange(sop);
 	}
 

@@ -15,7 +15,8 @@ class tausch_exchanger : public halo_exchanger_base
 {
 	enum halo_dir { left=0, right=1, down=2, up=3, count };
 public:
-	tausch_exchanger(const kernel_params & params, grid_topo & topo);
+	tausch_exchanger(const kernel_params & params,
+	                 std::vector<topo_ptr> topo);
 	virtual void exchange_func(int k, real_t * gf);
 	virtual void exchange_sten(int k, real_t * so);
 	template<class sten>
@@ -24,7 +25,16 @@ public:
 
 protected:
 	std::unique_ptr<Tausch<real_t>> tausch;
-	std::array<bool, halo_dir::count> active;
+	std::vector<bool> send_active;
+	std::vector<bool> recv_active;
+
+private:
+	void set_level_spec(int lvl, int rank,
+	                    grid_topo & topo,
+	                    std::vector<TauschHaloSpec> & remote_spec,
+	                    std::vector<TauschHaloSpec> & local_spec);
+	std::size_t index(int lvl, int dir) { return lvl*halo_dir::count + dir; }
+	std::size_t nlevels;
 };
 
 template<class sten>

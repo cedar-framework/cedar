@@ -59,7 +59,8 @@ class msg_exchanger : public halo_exchanger_base
 {
 	using MsgCtx = kernel::impls::MsgCtx;
 public:
-	msg_exchanger(const kernel_params & params, grid_topo & topo);
+	msg_exchanger(const kernel_params & params,
+	              std::vector<topo_ptr> topos);
 	MsgCtx & context() { return ctx; }
 	void *context_ptr() { return &ctx; }
 	virtual void exchange_func(int k, real_t *gf) override;
