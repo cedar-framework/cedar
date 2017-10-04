@@ -25,6 +25,7 @@ public:
 
 protected:
 	std::unique_ptr<Tausch<real_t>> tausch;
+	std::unique_ptr<Tausch<real_t>> tausch_so;
 	std::vector<bool> send_active;
 	std::vector<bool> recv_active;
 
@@ -33,6 +34,12 @@ private:
 	                    grid_topo & topo,
 	                    std::vector<TauschHaloSpec> & remote_spec,
 	                    std::vector<TauschHaloSpec> & local_spec);
+	void set_level_spec_so(int lvl, int rank,
+	                       grid_topo & topo,
+	                       std::vector<TauschHaloSpec> & remote_spec,
+	                       std::vector<TauschHaloSpec> & local_spec);
+	void init_gfunc(std::vector<topo_ptr> & topos);
+	void init_so(std::vector<topo_ptr> & topos);
 	std::size_t index(int lvl, int dir) { return lvl*halo_dir::count + dir; }
 	std::size_t nlevels;
 };
@@ -40,7 +47,26 @@ private:
 template<class sten>
 	void tausch_exchanger::exchange(mpi::stencil_op<sten> & so)
 {
+	auto lvl = so.grid().level();
 
+	for (int dir = 0; dir < halo_dir::count; dir++) {
+		if (recv_active[index(lvl, dir)])
+			tausch_so->postReceive(TAUSCH_CwC, index(lvl, dir), index(lvl, dir));
+	}
+
+	for (int dir = 0; dir < halo_dir::count; dir++) {
+		if (send_active[index(lvl, dir)]) {
+			for (int sdir = 0; sdir < stencil_ndirs<sten>::value; sdir++)
+				tausch_so->packSendBuffer(TAUSCH_CwC, index(lvl,dir), sdir, so.data() + so.index(0,0,sdir));
+			tausch_so->send(TAUSCH_CwC, index(lvl,dir), index(lvl,dir));
+
+		}
+		if (recv_active[index(lvl, dir)]) {
+			tausch_so->recv(TAUSCH_CwC, index(lvl,dir));
+			for (int sdir = 0; sdir < stencil_ndirs<sten>::value; sdir++)
+				tausch_so->unpackRecvBuffer(TAUSCH_CwC, index(lvl,dir), sdir, so.data() + so.index(0,0,sdir));
+		}
+	}
 }
 
 }}}

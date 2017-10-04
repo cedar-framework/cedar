@@ -94,9 +94,10 @@ void run_test(config::reader & conf, std::shared_ptr<grid_topo> grid,
 	draw(b, "after");
 
 
-	// draw_so(so, "before");
-	// kreg.halo_stencil_exchange(so);
-	// draw_so(so, "after");
+	draw_so(so, "before");
+	halof.exchange(so);
+	MPI_Barrier(grid->comm);
+	draw_so(so, "after");
 
 	log::status << "Finished Test" << std::endl;
 
