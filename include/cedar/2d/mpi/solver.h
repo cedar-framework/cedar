@@ -111,7 +111,7 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 		if (!cg_conf)
 			cg_conf = this->conf;
 
-		if (cg_solver_str != "LU") {
+		if (cg_solver_str == "redist") {
 			auto & fgrid = this->levels.template get<fsten>(0).A.grid();
 			auto choice = choose_redist<2>(*(this->conf),
 			                               std::array<int,2>({fgrid.nproc(0), fgrid.nproc(1)}),
