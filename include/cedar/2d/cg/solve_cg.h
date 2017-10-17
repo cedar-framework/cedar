@@ -10,9 +10,6 @@
 namespace cedar { namespace cdr2 {
 		template<class> class solver;
 		enum class nine_pt;
-		namespace mpi {
-			class redist_solver;
-		}
 }}
 
 namespace cedar { namespace cdr2 { namespace kernel {
@@ -38,10 +35,6 @@ namespace impls
 	                    const solver<nine_pt> & cg_solver,
 	                    mpi::grid_func &x,
 	                    const mpi::grid_func &b);
-
-	void solve_cg_redist(const kernel_params & params, const mpi::redist_solver & cg_solver,
-	                     mpi::grid_func &x,
-	                     const mpi::grid_func &b);
 }
 
 }}}

@@ -18,12 +18,10 @@ namespace cedar {
 
 	   @tparam child The class that is inheriting this base.
 	   @tparam solver_types A structured listing of types used in a multilevel solve.
-	   @tparam redist_solver Class for a redistributed coarse-grid solver.
 	   @tparam serial_solver Class for a serial coarse-grid solve.
 	*/
 	template <class child,
 		class solver_types,
-		class redist_solver,
 		class serial_solver,
 		class halo_exchanger>
 class mpi_registry : public kernel_registry<child,
@@ -93,26 +91,6 @@ mpi_registry(config::reader & conf) : parent::kernel_registry(conf) {
 	{
 		log::debug << "Running kernel <solve_cg_boxmg>" << std::endl;
 		static_cast<child*>(this)->solve_cg_boxmg(bmg, x, b);
-	}
-
-
-	template <class sten>
-	void setup_cg_redist(const stencil_op<sten> & so,
-	                     std::shared_ptr<config::reader> conf,
-	                     std::shared_ptr<redist_solver> * bmg,
-	                     std::vector<int> & nblocks)
-	{
-		log::debug << "Running kernel <setup_cg_redist>" << std::endl;
-		static_cast<child*>(this)->setup_cg_redist(so, conf, bmg, nblocks);
-	}
-
-
-	void solve_cg_redist(const redist_solver &bmg,
-	                     grid_func & x,
-	                     const grid_func & b)
-	{
-		log::debug << "Running kernel <solve_cg_redist>" << std::endl;
-		static_cast<child*>(this)->solve_cg_redist(bmg, x, b);
 	}
 
 	std::shared_ptr<halo_exchanger> get_halo_exchanger() { return halof; }

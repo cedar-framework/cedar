@@ -20,23 +20,16 @@
 #include <cedar/2d/inter/mpi/restrict_op.h>
 #include <cedar/2d/inter/mpi/galerkin_prod.h>
 #include <cedar/2d/cg/setup_cg_boxmg.h>
-#include <cedar/2d/cg/setup_cg_redist.h>
 #include <cedar/2d/cg/mpi/setup_cg_lu.h>
 #include <cedar/2d/kernel/setup_nog.h>
 
-namespace cedar { namespace cdr2 { namespace mpi {
-			class redist_solver;
-		}
-	}
-}
-
 namespace cedar { namespace cdr2 { namespace kernel { namespace mpi {
 	namespace mpi = cedar::cdr2::mpi;
-	class registry : public mpi_registry<registry, cdr2::mpi::stypes, cdr2::mpi::redist_solver, solver<nine_pt>,
+	class registry : public mpi_registry<registry, cdr2::mpi::stypes, solver<nine_pt>,
 		mpi::msg_exchanger>
 {
 public:
-	using parent = mpi_registry<registry, cdr2::mpi::stypes, cdr2::mpi::redist_solver, solver<nine_pt>, mpi::msg_exchanger>;
+	using parent = mpi_registry<registry, cdr2::mpi::stypes, solver<nine_pt>, mpi::msg_exchanger>;
 registry(std::shared_ptr<kernel_params> params): parent::mpi_registry(params) {}
 registry(config::reader & conf) : parent::mpi_registry(conf) {}
 
@@ -198,24 +191,6 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	                    const mpi::grid_func &b)
 	{
 		impls::solve_cg_boxmg(*params, halof.get(), bmg, x, b);
-	}
-
-
-	template <class sten>
-	void setup_cg_redist(const mpi::stencil_op<sten> & so,
-	                     std::shared_ptr<config::reader> conf,
-	                     std::shared_ptr<mpi::redist_solver> * bmg,
-	                     std::vector<int> & nblocks)
-	{
-		impls::setup_cg_redist(*params, halof.get(), so, conf, bmg, nblocks);
-	}
-
-
-	void solve_cg_redist(const mpi::redist_solver &bmg,
-	                     mpi::grid_func & x,
-	                     const mpi::grid_func & b)
-	{
-		impls::solve_cg_redist(*params, bmg, x, b);
 	}
 };
 

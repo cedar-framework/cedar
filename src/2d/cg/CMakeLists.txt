@@ -6,8 +6,7 @@ set(sources
 if (ENABLE_MPI)
   list(APPEND sources
 	cg/mpi/setup_cg_boxmg.cc
-	cg/mpi/solve_cg.cc
-	cg/mpi/setup_cg_redist.cc)
+	cg/mpi/solve_cg.cc)
 endif()
 
 set(cg_SOURCES ${sources} PARENT_SCOPE)

@@ -17,6 +17,8 @@
 #include <cedar/2d/mpi/msg_exchanger.h>
 #include <cedar/2d/solver.h>
 #include <cedar/perf/predict.h>
+#include <cedar/2d/mpi/redist_solver.h>
+#include <cedar/2d/redist/multilevel_wrapper.h>
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
@@ -105,55 +107,47 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 		auto & cop = this->levels.get(this->levels.size() - 1).A;
 		std::string cg_solver_str = this->conf->template get<std::string>("solver.cg-solver", "LU");
 
-		if (cg_solver_str == "LU")
-			cg_solver_lu = true;
-		else
-			cg_solver_lu = false;
+		auto cg_conf = this->conf->getconf("cg-config");
+		if (!cg_conf)
+			cg_conf = this->conf;
 
-		if (cg_solver_lu) {
-			auto & coarse_topo = cop.grid();
-			auto nxc = coarse_topo.nglobal(0);
-			auto nyc = coarse_topo.nglobal(1);
-			this->ABD = mpi::grid_func(nxc+2, nxc*nyc);
-			this->bbd = new real_t[this->ABD.len(1)];
-			parent::setup_cg_solve();
-		} else {
-			auto cg_conf = this->conf->getconf("cg-config");
-			if (!cg_conf)
-				cg_conf = this->conf;
-
-			if (cg_solver_str == "redist") {
-				// TODO: should this be the coarse grid!
-				auto & fgrid = this->levels.template get<fsten>(0).A.grid();
-				auto choice = choose_redist<2>(*(this->conf),
-				                               std::array<int,2>({fgrid.nproc(0), fgrid.nproc(1)}),
-				                               std::array<len_t,2>({fgrid.nglobal(0), fgrid.nglobal(1)}));
-				MPI_Bcast(choice.data(), 2, MPI_INT, 0, fgrid.comm);
-				if ((choice[0] == 1) or (choice[1] == 1)) {
-					cg_solver_str = "boxmg";
-				} else {
-					log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " cores" << std::endl;
-					std::shared_ptr<mpi::redist_solver> cg_bmg;
-					std::vector<int> nblocks(choice.begin(), choice.end());
-					kernels->setup_cg_redist(cop, cg_conf, &cg_bmg, nblocks);
-					this->coarse_solver = [&,cg_bmg,kernels,params](mpi::grid_func &x, const mpi::grid_func &b) {
-						kernels->solve_cg_redist(*cg_bmg, x, b);
-						if (params->per_mask())
-							kernels->halo_exchange(x);
-					};
-				}
-			}
-
-			if (cg_solver_str == "boxmg") {
-				std::shared_ptr<cdr2::solver<nine_pt>> cg_bmg;
-				kernels->setup_cg_boxmg(cop, cg_conf, &cg_bmg);
+		if (cg_solver_str != "LU") {
+			auto & fgrid = this->levels.template get<fsten>(0).A.grid();
+			auto choice = choose_redist<2>(*(this->conf),
+			                               std::array<int,2>({fgrid.nproc(0), fgrid.nproc(1)}),
+			                               std::array<len_t,2>({fgrid.nglobal(0), fgrid.nglobal(1)}));
+			MPI_Bcast(choice.data(), 2, MPI_INT, 0, fgrid.comm);
+			if ((choice[0] != 1) and (choice[1] != 1)) {
+				log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " cores" << std::endl;
+				auto cg_bmg = std::make_shared<mpi::redist_solver<multilevel_wrapper<mpi::solver<nine_pt>>>>(cop,
+					                       kernels->get_halo_exchanger().get(),
+					                       cg_conf,
+					                       choice);
 				this->coarse_solver = [&,cg_bmg,kernels,params](mpi::grid_func &x, const mpi::grid_func &b) {
-					kernels->solve_cg_boxmg(*cg_bmg, x, b);
+					cg_bmg->solve(x, b);
 					if (params->per_mask())
 						kernels->halo_exchange(x);
 				};
+				return;
 			}
 		}
+
+		std::array<int, 2> choice{{1,1}};
+
+		log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " cores" << std::endl;
+		auto cg_bmg = std::make_shared<
+			mpi::redist_solver<
+			multilevel_wrapper<
+			cdr2::solver<nine_pt>
+			>>>(cop,
+			    kernels->get_halo_exchanger().get(),
+			    cg_conf,
+			    choice);
+		this->coarse_solver = [&,cg_bmg,kernels,params](mpi::grid_func &x, const mpi::grid_func &b) {
+			cg_bmg->solve(x, b);
+			if (params->per_mask())
+				kernels->halo_exchange(x);
+		};
 	}
 
 

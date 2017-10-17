@@ -4,7 +4,6 @@
 #include "cedar/2d/ftn/BMG_parameters_c.h"
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 #include "cedar/2d/solver.h"
-#include "cedar/2d/mpi/redist_solver.h"
 
 #include "cedar/2d/cg/solve_cg.h"
 
@@ -122,20 +121,6 @@ namespace impls
 		                        ctx->msg_buffer.size(), fcomm);
 
 
-	}
-
-
-	void solve_cg_redist(const kernel_params & params,
-	                     const mpi::redist_solver & cg_solver,
-	                     mpi::grid_func &x,
-	                     const mpi::grid_func &b)
-	{
-		/*
-		  should move work vectors outside redist_solver
-		  to eliminate need for this const_cast
-		*/
-		auto & slv = const_cast<mpi::redist_solver&>(cg_solver);
-		slv.solve(b,x);
 	}
 }
 

@@ -26,7 +26,6 @@ if(ENABLE_MPI)
 	${util_SOURCES}
 	mpi/grid_func.cc
 	mpi/stencil_op.cc
-	mpi/redist_solver.cc
 	mpi/gallery.cc
 	mpi/msg_exchanger.cc
 	mpi/tausch_exchanger.cc
