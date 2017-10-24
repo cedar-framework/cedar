@@ -29,6 +29,7 @@ if(ENABLE_MPI)
 	mpi/gallery.cc
 	mpi/msg_exchanger.cc
 	mpi/tausch_exchanger.cc
+	redist/cholesky_solver.cc
 	)
 endif()
 

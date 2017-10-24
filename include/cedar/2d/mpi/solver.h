@@ -19,6 +19,7 @@
 #include <cedar/perf/predict.h>
 #include <cedar/2d/mpi/redist_solver.h>
 #include <cedar/2d/redist/multilevel_wrapper.h>
+#include <cedar/2d/redist/cholesky_solver.h>
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
@@ -135,19 +136,30 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 		std::array<int, 2> choice{{1,1}};
 
 		log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " cores" << std::endl;
-		auto cg_bmg = std::make_shared<
-			mpi::redist_solver<
-			multilevel_wrapper<
-			cdr2::solver<nine_pt>
-			>>>(cop,
-			    kernels->get_halo_exchanger().get(),
-			    cg_conf,
-			    choice);
-		this->coarse_solver = [&,cg_bmg,kernels,params](mpi::grid_func &x, const mpi::grid_func &b) {
-			cg_bmg->solve(x, b);
-			if (params->per_mask())
-				kernels->halo_exchange(x);
-		};
+		if (cg_solver_str == "LU") {
+			auto cg_bmg = std::make_shared<mpi::redist_solver<cholesky_solver>>(cop,
+			                                                                    kernels->get_halo_exchanger().get(),
+			                                                                    cg_conf, choice);
+			this->coarse_solver = [&,cg_bmg,kernels,params](mpi::grid_func &x, const mpi::grid_func &b) {
+				cg_bmg->solve(x, b);
+				if (params->per_mask())
+					kernels->halo_exchange(x);
+			};
+		} else {
+			auto cg_bmg = std::make_shared<
+				mpi::redist_solver<
+				multilevel_wrapper<
+				cdr2::solver<nine_pt>
+				>>>(cop,
+				    kernels->get_halo_exchanger().get(),
+				    cg_conf,
+				    choice);
+			this->coarse_solver = [&,cg_bmg,kernels,params](mpi::grid_func &x, const mpi::grid_func &b) {
+				cg_bmg->solve(x, b);
+				if (params->per_mask())
+					kernels->halo_exchange(x);
+			};
+		}
 	}
 
 
