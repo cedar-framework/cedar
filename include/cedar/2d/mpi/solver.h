@@ -20,6 +20,7 @@
 #include <cedar/2d/mpi/redist_solver.h>
 #include <cedar/2d/redist/multilevel_wrapper.h>
 #include <cedar/2d/redist/cholesky_solver.h>
+#include <cedar/2d/redist/setup_redist.h>
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
@@ -120,15 +121,12 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 			MPI_Bcast(choice.data(), 2, MPI_INT, 0, fgrid.comm);
 			if ((choice[0] != 1) and (choice[1] != 1)) {
 				log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " cores" << std::endl;
-				auto cg_bmg = std::make_shared<mpi::redist_solver<multilevel_wrapper<mpi::solver<nine_pt>>>>(cop,
-					                       kernels->get_halo_exchanger().get(),
-					                       cg_conf,
-					                       choice);
-				this->coarse_solver = [&,cg_bmg,kernels,params](mpi::grid_func &x, const mpi::grid_func &b) {
-					cg_bmg->solve(x, b);
-					if (params->per_mask())
-						kernels->halo_exchange(x);
-				};
+				using inner_solver = multilevel_wrapper<mpi::solver<nine_pt>>;
+				this->coarse_solver = create_redist_solver<inner_solver>(kernels,
+				                                                         *this->conf,
+				                                                         cop,
+				                                                         cg_conf,
+				                                                         choice);
 				return;
 			}
 		}
@@ -137,28 +135,18 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 
 		log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " cores" << std::endl;
 		if (cg_solver_str == "LU") {
-			auto cg_bmg = std::make_shared<mpi::redist_solver<cholesky_solver>>(cop,
-			                                                                    kernels->get_halo_exchanger().get(),
-			                                                                    cg_conf, choice);
-			this->coarse_solver = [&,cg_bmg,kernels,params](mpi::grid_func &x, const mpi::grid_func &b) {
-				cg_bmg->solve(x, b);
-				if (params->per_mask())
-					kernels->halo_exchange(x);
-			};
+				this->coarse_solver = create_redist_solver<cholesky_solver>(kernels,
+				                                                            *this->conf,
+				                                                            cop,
+				                                                            cg_conf,
+				                                                            choice);
 		} else {
-			auto cg_bmg = std::make_shared<
-				mpi::redist_solver<
-				multilevel_wrapper<
-				cdr2::solver<nine_pt>
-				>>>(cop,
-				    kernels->get_halo_exchanger().get(),
-				    cg_conf,
-				    choice);
-			this->coarse_solver = [&,cg_bmg,kernels,params](mpi::grid_func &x, const mpi::grid_func &b) {
-				cg_bmg->solve(x, b);
-				if (params->per_mask())
-					kernels->halo_exchange(x);
-			};
+			using inner_solver = multilevel_wrapper<cdr2::solver<nine_pt>>;
+			this->coarse_solver = create_redist_solver<inner_solver>(kernels,
+			                                                         *this->conf,
+			                                                         cop,
+			                                                         cg_conf,
+			                                                         choice);
 		}
 	}
 
