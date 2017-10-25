@@ -22,6 +22,9 @@ public:
 	template<class sten>
 		void exchange(mpi::stencil_op<sten> & so);
 	void exchange(mpi::grid_func & f);
+	virtual aarray<int, len_t, 2> & leveldims(int k) {
+		return dims[k];
+	}
 
 protected:
 	std::unique_ptr<Tausch<real_t>> tausch;
@@ -40,8 +43,13 @@ private:
 	                       std::vector<TauschHaloSpec> & local_spec);
 	void init_gfunc(std::vector<topo_ptr> & topos);
 	void init_so(std::vector<topo_ptr> & topos);
+	void init_dims(grid_topo & topo);
 	std::size_t index(int lvl, int dir) { return lvl*halo_dir::count + dir; }
 	std::size_t nlevels;
+	/* aarray<int, len_t, 2> dimx; */
+	/* aarray<int, len_t, 2> dimy; */
+	std::array<aarray<int, len_t, 2>, 2> dims;
+	std::array<std::vector<len_t>, 2> dimfine;
 };
 
 template<class sten>

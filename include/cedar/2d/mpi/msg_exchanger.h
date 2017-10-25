@@ -68,6 +68,12 @@ public:
 	template<class sten>
 		void exchange(mpi::stencil_op<sten> & so);
 	void exchange(mpi::grid_func & f);
+	virtual aarray<int, len_t, 2> & leveldims(int k) {
+		if (k == 0)
+			return ctx.dimx;
+		else
+			return ctx.dimy;
+	}
 
 private:
 	MsgCtx ctx;

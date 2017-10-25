@@ -1,10 +1,17 @@
 #include <cedar/2d/mpi/tausch_exchanger.h>
 
+extern "C" {
+	using namespace cedar;
+	void BMG2_SymStd_SETUP_Tausch(int nog, len_t *dimx, len_t *dimy,
+	                              len_t *dimxfine, len_t *dimyfine, int nproci, int nprocj);
+}
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
 tausch_exchanger::tausch_exchanger(const kernel_params & params,
-                                   std::vector<topo_ptr> topos) : nlevels(topos.size())
+                                   std::vector<topo_ptr> topos) : nlevels(topos.size()),
+                                                                  dims{{aarray<int, len_t, 2>(topos[0]->nproc(0), nlevels),
+			aarray<int, len_t, 2>(topos[0]->nproc(1), nlevels)}}
 {
 	init_gfunc(topos);
 	init_so(topos);
@@ -35,6 +42,38 @@ tausch_exchanger::tausch_exchanger(const kernel_params & params,
 			}
 		}
 	}
+
+	init_dims(*topos[0]);
+}
+
+
+void tausch_exchanger::init_dims(grid_topo & topo)
+{
+	auto & dimxfine = dimfine[0];
+	auto & dimyfine = dimfine[1];
+
+	if (topo.dimyfine.size() > 0) {
+		dimyfine = topo.dimyfine;
+	} else {
+		dimyfine.reserve(topo.nproc(1));
+		for (auto j : range(topo.nproc(1))) {
+			dimyfine[j] = topo.nlocal(1) - 2;
+		}
+	}
+
+	if (topo.dimxfine.size() > 0) {
+		dimxfine = topo.dimxfine;
+	} else {
+		dimxfine.reserve(topo.nproc(0));
+		for (auto i : range(topo.nproc(0))) {
+			dimxfine[i] = topo.nlocal(0) - 2;
+		}
+	}
+
+	BMG2_SymStd_SETUP_Tausch(topo.nlevel(),
+	                         dims[0].data(), dims[1].data(),
+	                         dimxfine.data(), dimyfine.data(),
+	                         topo.nproc(0), topo.nproc(1));
 }
 
 

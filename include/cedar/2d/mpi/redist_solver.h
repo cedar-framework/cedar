@@ -35,7 +35,6 @@ template<class inner_solver>
 class redist_solver
 {
 public:
-	using msg_ctx = cedar::cdr2::kernel::impls::MsgCtx;
 	/**
 	   Performs redistribution of the grid topology and stencil
 	   operator given the destination 2D distribution.  This also
@@ -46,7 +45,7 @@ public:
 	   @param[in] nblock The destination 2D distribution
 	*/
 	redist_solver(const stencil_op<nine_pt> & so,
-	              mpi::msg_exchanger *halof,
+	              halo_exchanger_base *halof,
 	              std::shared_ptr<config::reader> conf,
 	              std::array<int, 2> nblock);
 	/**
@@ -76,10 +75,13 @@ protected:
 	/** Redistributes the processor grid.
 
 	    @param[in] fine_topo The source topology to redistribute
-	    @param[in] msg_ctx The MSG context struct
+	    @param[in] dimx number of grid points on each processor. shape(proc_coord_x, level)
+	    @param[in] dimy number of grid points on each processor. shape(proc_coord_y, level)
 	    @returns The redistrubted processor grid topology
 	*/
-	std::shared_ptr<grid_topo> redist_topo(const grid_topo & fine_topo, msg_ctx & ctx);
+	std::shared_ptr<grid_topo> redist_topo(const grid_topo & fine_topo,
+	                                       aarray<int, len_t, 2> & dimx,
+	                                       aarray<int, len_t, 2> & dimy);
 	/** Redistributes the operator.
 
 	    @param[in] so Source operator to redistribute
@@ -101,15 +103,14 @@ protected:
 
 template<class inner_solver>
 redist_solver<inner_solver>::redist_solver(const stencil_op<nine_pt> & so,
-                                           mpi::msg_exchanger *halof,
+                                           halo_exchanger_base *halof,
                                            std::shared_ptr<config::reader> conf,
                                            std::array<int, 2> nblock) :
 	redundant(false), nblock(nblock), active(true), recv_id(-1)
 {
 	// Split communicator into collective processor blocks
 	auto & topo = so.grid();
-	msg_ctx * ctx = (msg_ctx*) halof->context_ptr();
-	auto ctopo = redist_topo(topo, *ctx);
+	auto ctopo = redist_topo(topo, halof->leveldims(0), halof->leveldims(1));
 	redist_operator(so, ctopo);
 
 	if (inner_solver::is_serial) {
@@ -244,7 +245,9 @@ void redist_solver<inner_solver>::redist_operator(const stencil_op<nine_pt> & so
 
 
 template<class inner_solver>
-std::shared_ptr<grid_topo> redist_solver<inner_solver>::redist_topo(const grid_topo & fine_topo, msg_ctx & ctx)
+	std::shared_ptr<grid_topo> redist_solver<inner_solver>::redist_topo(const grid_topo & fine_topo,
+	                                                                    aarray<int, len_t, 2> & dimx,
+	                                                                    aarray<int, len_t, 2> & dimy)
 {
 	// std::cout << fine_topo.coord(0) << " " << fine_topo.coord(1) << " => ("
 	//           << fine_topo.nglobal(0) << ", " << fine_topo.nglobal(1) << ") ("
@@ -277,17 +280,17 @@ std::shared_ptr<grid_topo> redist_solver<inner_solver>::redist_topo(const grid_t
 	auto lowj = partj.low(grid->coord(1));
 	auto highj = partj.high(grid->coord(1));
 	for (auto i = lowi; i <= highi; i++) {
-		grid->nlocal(0) += ctx.cg_nlocal(0, ctx.proc_grid(i, lowj)) - 2; // remove ghosts
+		grid->nlocal(0) += dimx(i, 0);
 	}
 	for (auto j = lowj; j <= highj; j++) {
-		grid->nlocal(1) += ctx.cg_nlocal(1, ctx.proc_grid(lowi, j)) - 2; // remove ghosts
+		grid->nlocal(1) += dimy(j, 0);
 	}
 	for (unsigned int i = 0; i < lowi; i++) {
-		grid->is(0) += ctx.cg_nlocal(0, ctx.proc_grid(i, lowj)) - 2; // remove ghosts
+		grid->is(0) += dimx(i, 0);
 	}
 	grid->is(0)++; // 1 based indexing
 	for (unsigned int j = 0; j < lowj; j++) {
-		grid->is(1) += ctx.cg_nlocal(1, ctx.proc_grid(lowi, j)) - 2; // remove ghosts
+		grid->is(1) += dimy(j, 0);
 	}
 	grid->is(1)++;
 
@@ -296,11 +299,11 @@ std::shared_ptr<grid_topo> redist_solver<inner_solver>::redist_topo(const grid_t
 	nby = array<len_t,1>(highj-lowj+1);
 
 	for (auto j = lowj; j <= highj; j++) {
-		nby(j-lowj) = ctx.cg_nlocal(1, ctx.proc_grid(0,j)) - 2;
+		nby(j-lowj) = dimy(j, 0);
 	}
 
 	for (auto i = lowi; i <= highi; i++) {
-		nbx(i-lowi) = ctx.cg_nlocal(0, ctx.proc_grid(i,0)) - 2;
+		nbx(i-lowi) = dimx(i, 0);
 	}
 
 	// set dimxfine, dimyfine needed for MSG setup
@@ -308,14 +311,14 @@ std::shared_ptr<grid_topo> redist_solver<inner_solver>::redist_topo(const grid_t
 	for (auto i : range(grid->nproc(0))) {
 		grid->dimxfine[i] = 0;
 		for (auto ii = parti.low(i); ii <= parti.high(i); ii++) {
-			grid->dimxfine[i] += ctx.cg_nlocal(0, ctx.proc_grid(ii, 0)) - 2;
+			grid->dimxfine[i] += dimx(ii, 0);
 		}
 	}
 	grid->dimyfine.resize(grid->nproc(1));
 	for (auto j : range(grid->nproc(1))) {
 		grid->dimyfine[j] = 0;
 		for (auto jj = partj.low(j); jj <= partj.high(j); jj++) {
-			grid->dimyfine[j] += ctx.cg_nlocal(1, ctx.proc_grid(0,jj)) - 2;
+			grid->dimyfine[j] += dimy(jj, 0);
 		}
 	}
 
