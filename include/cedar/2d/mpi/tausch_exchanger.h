@@ -56,6 +56,7 @@ template<class sten>
 	void tausch_exchanger::exchange(mpi::stencil_op<sten> & so)
 {
 	auto lvl = so.grid().level();
+	lvl = nlevels - lvl - 1;
 
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (recv_active[index(lvl, dir)])

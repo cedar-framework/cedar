@@ -25,11 +25,12 @@
 
 namespace cedar { namespace cdr2 { namespace kernel { namespace mpi {
 	namespace mpi = cedar::cdr2::mpi;
-	class registry : public mpi_registry<registry, cdr2::mpi::stypes, solver<nine_pt>,
-		mpi::msg_exchanger>
+	template<class halo = mpi::msg_exchanger>
+	class registry : public mpi_registry<registry<halo>, cdr2::mpi::stypes, solver<nine_pt>,
+		halo>
 {
 public:
-	using parent = mpi_registry<registry, cdr2::mpi::stypes, solver<nine_pt>, mpi::msg_exchanger>;
+	using parent = mpi_registry<registry<halo>, cdr2::mpi::stypes, solver<nine_pt>, halo>;
 registry(std::shared_ptr<kernel_params> params): parent::mpi_registry(params) {}
 registry(config::reader & conf) : parent::mpi_registry(conf) {}
 
@@ -40,7 +41,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	void setup_nog(grid_topo & topo,
 	               len_t min_coarse, int *nog)
 	{
-		impls::fortran_setup_nog(*params, topo, min_coarse, nog);
+		impls::fortran_setup_nog(*this->params, topo, min_coarse, nog);
 	}
 
 	template <class sten>
@@ -48,7 +49,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		                  const mpi::stencil_op<nine_pt> & cop,
 		                  inter::mpi::prolong_op & P)
 	{
-		impls::mpi_setup_interp(*params, halof.get(), fop, cop, P);
+		impls::mpi_setup_interp(*this->params, this->halof.get(), fop, cop, P);
 	}
 
 	template <class sten>
@@ -56,21 +57,22 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		                   const mpi::stencil_op<sten> & fop,
 		                   mpi::stencil_op<nine_pt> & cop)
 	{
-		impls::mpi_galerkin_prod(*params, halof.get(), P, fop, cop);
+		impls::mpi_galerkin_prod(*this->params, this->halof.get(), P, fop, cop);
 	}
 
 	template <class sten>
 		void setup_relax(const mpi::stencil_op<sten> & so,
 		                 relax_stencil & sor)
 	{
-		impls::mpi_setup_rbgs_point(*params, so, sor);
+		impls::mpi_setup_rbgs_point(*this->params, so, sor);
 	}
 
 	template <class sten>
 		void setup_relax_x(const mpi::stencil_op<sten> & so,
 		                   relax_stencil & sor)
 	{
-		impls::mpi_setup_rbgs_x(*params, so, sor);
+		log::error << "Kernel is temporarily disabled!" << std::endl;
+		/* impls::mpi_setup_rbgs_x(*this->params, so, sor); */
 	}
 
 
@@ -78,7 +80,8 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		void setup_relax_y(const mpi::stencil_op<sten> & so,
 		                   relax_stencil & sor)
 	{
-		impls::mpi_setup_rbgs_y(*params, so, sor);
+		log::error << "Kernel is temporarily disabled!" << std::endl;
+		/* impls::mpi_setup_rbgs_y(*this->params, so, sor); */
 	}
 
 
@@ -87,7 +90,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		                   relax_stencil & sor)
 	{
 		// TODO: add this
-		//impls::setup_relax_xy(*params, so, sor);
+		//impls::setup_relax_xy(*this->params, so, sor);
 	}
 
 
@@ -98,14 +101,15 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		           const relax_stencil & sor,
 		           cycle::Dir cdir)
 	{
-		impls::mpi_relax_rbgs_point(*params, halof.get(), so, x, b, sor, cdir);
+		impls::mpi_relax_rbgs_point(*this->params, this->halof.get(), so, x, b, sor, cdir);
 	}
 
 	template<class sten>
 		void setup_cg_lu(const mpi::stencil_op<sten> & so,
 		                 mpi::grid_func & ABD)
 	{
-		impls::mpi_setup_cg_lu(*params, halof.get(), so, ABD);
+		log::error << "This kernel (solve_cg) is deprecated for mpi solver!" << std::endl;
+		/* impls::mpi_setup_cg_lu(*this->params, this->halof.get(), so, ABD); */
 	}
 
 
@@ -117,7 +121,8 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	                   mpi::grid_func &res,
 	                   cycle::Dir cdir)
 	{
-		impls::mpi_relax_lines_x(*params, halof.get(), so, x, b, sor, res, cdir);
+		log::error << "Kernel is temporarily disabled!" << std::endl;
+		/* impls::mpi_relax_lines_x(*this->params, this->halof.get(), so, x, b, sor, res, cdir); */
 	}
 
 
@@ -129,7 +134,8 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		                   mpi::grid_func &res,
 		                   cycle::Dir cdir)
 	{
-		impls::mpi_relax_lines_y(*params, halof.get(), so, x, b, sor, res, cdir);
+		log::error << "Kernel is temporarily disabled!" << std::endl;
+		/* impls::mpi_relax_lines_y(*this->params, this->halof.get(), so, x, b, sor, res, cdir); */
 	}
 
 
@@ -138,7 +144,8 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	              const mpi::grid_func &ABD,
 	              real_t *bbd)
 	{
-		impls::mpi_solve_cg_lu(*params, halof.get(), x, b, ABD, bbd);
+		log::error << "This kernel (solve_cg) is deprecated for mpi solver!" << std::endl;
+		/* impls::mpi_solve_cg_lu(*this->params, this->halof.get(), x, b, ABD, bbd); */
 	}
 
 
@@ -147,7 +154,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	            const mpi::grid_func & x,
 	            mpi::grid_func & y)
 	{
-		impls::matvec(*params, halof.get(), so, x, y);
+		impls::matvec(*this->params, this->halof.get(), so, x, y);
 	}
 
 
@@ -155,7 +162,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	            const mpi::grid_func & x,
 	            mpi::grid_func & y)
 	{
-		impls::mpi_fortran_restrict(*params, R, x, y);
+		impls::mpi_fortran_restrict(*this->params, R, x, y);
 	}
 
 
@@ -165,7 +172,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	              const mpi::grid_func & b,
 	              mpi::grid_func & r)
 	{
-		impls::mpi_residual_fortran(*params, halof.get(), so, x, b, r);
+		impls::mpi_residual_fortran(*this->params, this->halof.get(), so, x, b, r);
 	}
 
 
@@ -174,7 +181,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	                const mpi::grid_func & residual,
 	                mpi::grid_func & fine)
 	{
-		impls::mpi_fortran_interp(*params, halof.get(), P, coarse, residual, fine);
+		impls::mpi_fortran_interp(*this->params, this->halof.get(), P, coarse, residual, fine);
 	}
 
 
@@ -183,14 +190,16 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	                    std::shared_ptr<config::reader> conf,
 	                    std::shared_ptr<solver<nine_pt>> *bmg)
 	{
-		impls::setup_cg_boxmg(*params, halof.get(), so, conf, bmg);
+		log::error << "This kernel (setup_cg_boxmg) is deprecated for mpi solver!" << std::endl;
+		/* impls::setup_cg_boxmg(*this->params, this->halof.get(), so, conf, bmg); */
 	}
 
 	void solve_cg_boxmg(const solver<nine_pt> &bmg,
 	                    mpi::grid_func &x,
 	                    const mpi::grid_func &b)
 	{
-		impls::solve_cg_boxmg(*params, halof.get(), bmg, x, b);
+		log::error << "This kernel (solve_cg_boxmg) is deprecated for mpi solver!" << std::endl;
+		/* impls::solve_cg_boxmg(*this->params, this->halof.get(), bmg, x, b); */
 	}
 };
 

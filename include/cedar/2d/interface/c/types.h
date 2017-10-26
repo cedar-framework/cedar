@@ -16,7 +16,7 @@ namespace cedar { namespace cdr2 {
 			mpi::stencil_op<nine_pt> op;
 			mpi::grid_func xgf;
 			mpi::grid_func bgf;
-			kernel::mpi::registry kreg;
+			kernel::mpi::registry<> kreg;
 		};
 
 }}

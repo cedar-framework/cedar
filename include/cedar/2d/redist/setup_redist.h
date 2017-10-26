@@ -6,9 +6,9 @@
 
 namespace cedar { namespace cdr2 {
 
-template<class inner_solver>
+template<class inner_solver, class T>
 std::function<void(mpi::grid_func &, const mpi::grid_func &)>
-	create_redist_solver(std::shared_ptr<typename kernel::mpi::registry::parent> kernels,
+	create_redist_solver(std::shared_ptr<T> kernels,
                      config::reader & conf,
                      mpi::stencil_op<nine_pt> & cop,
                      std::shared_ptr<config::reader> cg_conf,

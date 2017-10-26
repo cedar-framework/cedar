@@ -302,6 +302,7 @@ void tausch_exchanger::exchange_sten(int k, real_t * so)
 void tausch_exchanger::exchange(mpi::grid_func & f)
 {
 	auto lvl = f.grid().level();
+	lvl = nlevels - lvl - 1;
 
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (recv_active[index(lvl, dir)])

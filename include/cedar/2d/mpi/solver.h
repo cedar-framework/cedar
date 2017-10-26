@@ -45,16 +45,16 @@ level2mpi(stencil_op<sten> & A) : parent::level(A)
 };
 
 
-template<class fsten>
+template<class fsten, class halo_exchanger>
 	class solver: public multilevel<level_container<level2mpi, fsten>,
-	typename kernel::mpi::registry::parent, fsten, cdr2::mpi::solver<fsten>>
+	typename kernel::mpi::registry<halo_exchanger>::parent, fsten, cdr2::mpi::solver<fsten,halo_exchanger>>
 {
 public:
 	using parent = multilevel<level_container<level2mpi, fsten>,
-		typename kernel::mpi::registry::parent, fsten, cdr2::mpi::solver<fsten>>;
+		typename kernel::mpi::registry<halo_exchanger>::parent, fsten, cdr2::mpi::solver<fsten,halo_exchanger>>;
 solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().comm)
 	{
-		this->kreg = std::make_shared<kernel::mpi::registry>(*(this->conf));
+		this->kreg = std::make_shared<kernel::mpi::registry<halo_exchanger>>(*(this->conf));
 		parent::setup(fop);
 	}
 
@@ -62,7 +62,7 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 	solver(mpi::stencil_op<fsten> & fop,
 	       std::shared_ptr<config::reader> conf) : parent::multilevel(fop, conf), comm(fop.grid().comm)
 	{
-		this->kreg = std::make_shared<kernel::mpi::registry>(*(this->conf));
+		this->kreg = std::make_shared<kernel::mpi::registry<halo_exchanger>>(*(this->conf));
 		parent::setup(fop);
 	}
 

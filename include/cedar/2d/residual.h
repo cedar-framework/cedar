@@ -14,8 +14,7 @@ extern "C" {
 	                              real_t *SO, real_t *QF, real_t *Q, real_t *RES,
 	                              len_t ii, len_t jj, int ifd, int nstencil,
 	                              int irelax, int irelax_sym,
-	                              len_t *iWorkMSG, len_t NMSGi, int *pMSG,
-	                              real_t *msg_buffer, len_t nmsgr, int mpicomm);
+	                              int mpicomm);
 }
 
 
@@ -29,7 +28,7 @@ namespace impls
 	namespace mpi = cedar::cdr2::mpi;
 	template <class sten>
 		void mpi_residual_fortran(const kernel_params & params,
-		                          mpi::msg_exchanger *halof,
+		                          halo_exchanger_base *halof,
 		                          const mpi::stencil_op<sten> & A,
 		                          const mpi::grid_func & x,
 		                          const mpi::grid_func & b, mpi::grid_func &r)
@@ -39,7 +38,6 @@ namespace impls
 		auto & xd = const_cast<mpi::grid_func&>(x);
 		auto & bd = const_cast<mpi::grid_func&>(b);
 		grid_topo & topo = Ad.grid();
-		MsgCtx *ctx = (MsgCtx*) halof->context_ptr();
 
 		nstencil = stencil_ndirs<sten>::value;
 		if (std::is_same<five_pt, sten>::value)
@@ -57,10 +55,7 @@ namespace impls
 		MPI_BMG2_SymStd_residual(k, kf, nog,
 		                         Ad.data(), bd.data(), xd.data(), r.data(),
 		                         r.len(0), r.len(1), ifd, nstencil,
-		                         irelax, irelax_sym,
-		                         ctx->msg_geom.data(), ctx->msg_geom.size(),
-		                         ctx->pMSG.data(), ctx->msg_buffer.data(),
-		                         ctx->msg_buffer.size(), fcomm);
+		                         irelax, irelax_sym, fcomm);
 		halof->exchange_func(k, r.data());
 	}
 }

@@ -17,37 +17,6 @@
 #include "per_halo.h"
 
 
-static void fill_gfunc(cedar::cdr2::mpi::grid_func & b)
-{
-	auto & topo = b.grid();
-	b.set(-1);
-	for (auto j : b.range(1)) {
-		for (auto i : b.range(0)) {
-			b(i,j) = topo.coord(1)*topo.nproc(0) + topo.coord(0);
-		}
-	}
-}
-
-
-static void fill_stencil(cedar::cdr2::mpi::stencil_op<cedar::cdr2::five_pt> & so)
-{
-	using namespace cedar;
-	using namespace cedar::cdr2;
-
-	so.set(-1);
-
-	auto & topo = so.grid();
-
-	for (auto j : so.range(1)) {
-		for (auto i : so.range(0)) {
-			so(i,j,five_pt::c) = 100*topo.coord(0) + 10*topo.coord(1);
-			so(i,j,five_pt::w) = 100*topo.coord(0) + 10*topo.coord(1) + 1;
-			so(i,j,five_pt::s) = 100*topo.coord(0) + 10*topo.coord(1) + 2;
-		}
-	}
-}
-
-
 int main(int argc, char *argv[])
 {
 	using namespace cedar;

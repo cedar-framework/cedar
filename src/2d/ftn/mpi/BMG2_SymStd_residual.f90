@@ -2,8 +2,7 @@
      &                K, KF, NOG, &
      &                SO, QF, Q, RES,&
      &                II, JJ, IFD, NStncl, IRELAX, IRELAX_SYM,&
-     &                iWorkMSG, NMSGi, pMSG, &
-     &                MSG_Buffer, NMSGr, MPICOMM&
+     &                MPICOMM&
      &                ) BIND(C, NAME='MPI_BMG2_SymStd_residual')
 
 ! ======================================================================
@@ -61,8 +60,6 @@
 !     Includes
 !
       INCLUDE 'mpif.h'
-      INCLUDE 'MSG_f90.h'
-
 
       INCLUDE 'BMG_constants_f90.h'
       INCLUDE 'BMG_stencils_f90.h'
@@ -71,15 +68,12 @@
 ! ----------------------------
 !     Argument Declarations
 !
-      INTEGER(len_t), VALUE :: II, JJ, NMSGi, NMSGr
+      INTEGER(len_t), VALUE :: II, JJ
       INTEGER(C_INT), VALUE :: NOG, NStncl, IFD, IRELAX, IRELAX_SYM, K, KF
       INTEGER :: MPICOMM
-      INTEGER(len_t) :: iWorkMSG(NMSGi)
-      INTEGER(C_INT) :: pMSG(NBMG_pMSG,NOG)
 
       REAL(real_t) :: Q(II,JJ), QF(II,JJ),&
-           SO(II+1,JJ+1,NStncl), RES(II,JJ), &
-           MSG_Buffer(NMSGr)
+           SO(II+1,JJ+1,NStncl), RES(II,JJ)
 
 ! ----------------------------
 !     Local Declarations

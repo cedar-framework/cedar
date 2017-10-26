@@ -4,6 +4,7 @@
 #include <cedar/types.h>
 #include <cedar/2d/mpi/grid_func.h>
 #include <cedar/2d/mpi/stencil_op.h>
+#include <cedar/2d/mpi/solver.h>
 #include <cedar/2d/kernel/mpi/registry.h>
 #include <cedar/2d/util/topo.h>
 #include <cedar/2d/mpi/tausch_exchanger.h>
@@ -14,6 +15,38 @@
 
 using namespace cedar;
 using namespace cedar::cdr2;
+
+
+static void fill_gfunc(cedar::cdr2::mpi::grid_func & b)
+{
+	auto & topo = b.grid();
+	b.set(-1);
+	for (auto j : b.range(1)) {
+		for (auto i : b.range(0)) {
+			b(i,j) = topo.coord(1)*topo.nproc(0) + topo.coord(0);
+		}
+	}
+}
+
+
+template<class sten>
+static void fill_stencil(cedar::cdr2::mpi::stencil_op<sten> & so)
+{
+	using namespace cedar;
+	using namespace cedar::cdr2;
+
+	so.set(-1);
+
+	auto & topo = so.grid();
+
+	for (auto j : so.range(1)) {
+		for (auto i : so.range(0)) {
+			for (int k = 0; k < stencil_ndirs<sten>::value; k++) {
+				so(i,j,static_cast<sten>(k)) = 100*topo.coord(0) + 10*topo.coord(1) + k;
+			}
+		}
+	}
+}
 
 
 static void draw(const cedar::cdr2::mpi::grid_func & b, std::string prefix)
@@ -36,7 +69,8 @@ static void draw(const cedar::cdr2::mpi::grid_func & b, std::string prefix)
 }
 
 
-static void draw_so(const cedar::cdr2::mpi::stencil_op<cedar::cdr2::five_pt> & so, std::string prefix)
+template<class sten>
+static void draw_so(const cedar::cdr2::mpi::stencil_op<sten> & so, std::string prefix)
 {
 	using namespace cedar;
 	using namespace cedar::cdr2;
@@ -60,7 +94,7 @@ static void draw_so(const cedar::cdr2::mpi::stencil_op<cedar::cdr2::five_pt> & s
 
 	auto & topo = so.grid();
 
-	for (int i = 0; i < 3; ++i) {
+	for (int i = 0; i < stencil_ndirs<sten>::value; ++i) {
 		osv.emplace_back(std::make_shared<std::ofstream>("output/" + prefix + "-stencil-" +
 		                                                 std::to_string(topo.coord(0)) +
 		                                                 "." + std::to_string(topo.coord(1)) +
@@ -69,14 +103,13 @@ static void draw_so(const cedar::cdr2::mpi::stencil_op<cedar::cdr2::five_pt> & s
 
 	for (auto j : so.grange(1)) {
 		for (auto i : so.grange(0)) {
-			*osv[0] << format(so(i,j,five_pt::c)) << " ";
-			*osv[1] << format(so(i,j,five_pt::w)) << " ";
-			*osv[2] << format(so(i,j,five_pt::s)) << " ";
+			for (int k = 0; k < stencil_ndirs<sten>::value; k++)
+				*osv[0] << format(so(i,j,static_cast<sten>(k))) << " ";
 		}
-		for (int i = 0; i < 3; ++i) *(osv[i]) << '\n';
+		for (int i = 0; i < stencil_ndirs<sten>::value; ++i) *(osv[i]) << '\n';
 	}
 
-	for (int i = 0; i < 3; ++i) osv[i]->close();
+	for (int i = 0; i < stencil_ndirs<sten>::value; ++i) osv[i]->close();
 }
 
 
@@ -85,19 +118,29 @@ void run_test(config::reader & conf, std::shared_ptr<grid_topo> grid,
               mpi::stencil_op<five_pt> & so, mpi::grid_func & b)
 {
 	auto parms = build_kernel_params(conf);
-	std::vector<topo_ptr> topos{{grid}};
-	halo_exchanger halof(*parms, topos);
 
-	draw(b, "before");
-	halof.exchange(b);
-	MPI_Barrier(grid->comm);
-	draw(b, "after");
+	mpi::solver<five_pt, halo_exchanger> slv(so);
+	auto kreg = slv.kernel_registry();
+
+	draw(b, "before-0");
+	draw_so(so, "before-0");
+	kreg->halo_exchange(b);
+	kreg->halo_stencil_exchange(so);
+	draw(b, "after-0");
+	draw_so(so, "after-0");
 
 
-	draw_so(so, "before");
-	halof.exchange(so);
-	MPI_Barrier(grid->comm);
-	draw_so(so, "after");
+	for (std::size_t lvl = 1; lvl < slv.nlevels(); lvl++) {
+		auto & level = slv.levels.get(lvl);
+		fill_gfunc(level.b);
+		fill_stencil(level.A);
+		draw(level.b, "before-" + std::to_string(lvl));
+		draw_so(level.A, "before-" + std::to_string(lvl));
+		kreg->halo_exchange(level.b);
+		kreg->halo_stencil_exchange(level.A);
+		draw(level.b, "after-" + std::to_string(lvl));
+		draw_so(level.A, "after-" + std::to_string(lvl));
+	}
 
 	log::status << "Finished Test" << std::endl;
 
