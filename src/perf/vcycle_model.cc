@@ -1,6 +1,9 @@
 #include <cmath>
 #include <iostream>
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 #include <cedar/perf/vcycle_model.h>
 
 

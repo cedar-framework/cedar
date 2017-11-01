@@ -93,7 +93,7 @@ topo_ptr create_topo(MPI_Comm comm, int npx, int npy, len_t nx, len_t ny)
 }
 
 
-topo_ptr create_topo(config::reader & conf)
+topo_ptr create_topo(config::reader & conf, MPI_Comm comm)
 {
 	auto islocal = conf.get<bool>("grid.local", true);
 	auto ndofs = conf.getvec<len_t>("grid.n");
@@ -110,16 +110,16 @@ topo_ptr create_topo(config::reader & conf)
 			npy = nprocs[1];
 		}
 		if (npx == 0 or npy == 0) {
-			grid = create_topo(MPI_COMM_WORLD, nx, ny);
+			grid = create_topo(comm, nx, ny);
 		} else {
 			int size;
-			MPI_Comm_size(MPI_COMM_WORLD, &size);
+			MPI_Comm_size(comm, &size);
 			assert(size == npx*npy);
-			grid = create_topo(MPI_COMM_WORLD, npx, npy, nx, ny);
+			grid = create_topo(comm, npx, npy, nx, ny);
 		}
 		log::status << "Running local solve" << std::endl;
 	} else {
-		grid = create_topo_global(MPI_COMM_WORLD, nx, ny);
+		grid = create_topo_global(comm, nx, ny);
 		log::status << "Running global solve" << std::endl;
 	}
 

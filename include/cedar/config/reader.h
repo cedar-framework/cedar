@@ -1,20 +1,21 @@
 #ifndef CONFIG_READER_H
 #define CONFIG_READER_H
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 #include <string>
 #include <vector>
 #include <memory>
+#include <fstream>
+#include "json.hpp"
 
 namespace cedar {
 namespace config
 {
+	using json = nlohmann::json;
     class reader
     {
         public:
-            reader();
-            reader(boost::property_tree::ptree && ptri): pt(std::move(ptri)), fname("") {}
+	    reader();
+    reader(json && stree) : root(std::move(stree)), fname("") {}
             template <typename T>
 	            reader(T&& fname);
             template <typename OptionType>
@@ -52,7 +53,7 @@ namespace config
 
         private:
             void read();
-            boost::property_tree::ptree pt;
+            json root;
             std::string fname;
 
     };
@@ -63,66 +64,50 @@ namespace config
     template <typename OptionType>
         void reader::set(std::string path, OptionType val)
         {
-	        pt.put(path, val);
+	        std::replace(path.begin(), path.end(), '.', '/');
+	        std::string rpath("/" + path);
+	        root[json::json_pointer(rpath)] = val;
         }
 
     template <typename OptionType>
         void reader::setvec(std::string path, std::vector<OptionType> vec)
         {
-            using boost::property_tree::ptree;
-            ptree &pos = pt.get_child(path);
-            pos.clear();
-
-            for (typename std::vector<OptionType>::iterator it=vec.begin();it != vec.end();++it){
-                pt.put(path + ".", *it);
-            }
-
+	        set<std::vector<OptionType>>(path, vec);
         }
 
-    template <typename OptionType>
-        OptionType reader::get(std::string path)
+    template <class otype>
+        otype reader::get(std::string path)
         {
-            return pt.get<OptionType>(path);
+	        std::replace(path.begin(), path.end(), '.', '/');
+	        std::string rpath("/" + path);
+	        return root[json::json_pointer(rpath)].get<otype>();
         }
-
-    template <typename OptionType>
-        OptionType reader::get(std::string path, OptionType default_value)
+    template <class otype>
+        otype reader::get(std::string path, otype default_value)
         {
-            return pt.get<OptionType>(path, default_value);
+	        std::replace(path.begin(), path.end(), '.', '/');
+	        std::string rpath("/" + path);
+	        try {
+		        return root[json::json_pointer(rpath)].get<otype>();
+	        } catch(...) {
+		        return default_value;
+	        }
         }
 
-    template <typename OptionType>
-        std::vector<OptionType> reader::getvec(std::string path)
+    template <class otype>
+        std::vector<otype> reader::getvec(std::string path)
         {
-            std::vector<OptionType> retvec;
-            using boost::property_tree::ptree;
-            boost::optional<ptree&> child = pt.get_child_optional(path);
-            if (child) {
-                ptree &pos = pt.get_child(path);
-                std::for_each(pos.begin(), pos.end(), [&retvec](ptree::value_type &v) {
-                        retvec.push_back(v.second.get_value<OptionType>());
-                        });
-            }
-            return retvec;
+	        try {
+		        return get<std::vector<otype>>(path);
+	        } catch(...) {
+		        return std::vector<otype>();
+	        }
         }
 
-    template <typename OptionType>
-	    std::vector<std::vector<OptionType>> reader::getnvec(std::string path)
+    template <typename otype>
+	    std::vector<std::vector<otype>> reader::getnvec(std::string path)
     {
-	    std::vector<std::vector<OptionType>> retvec;
-	    using boost::property_tree::ptree;
-	    boost::optional<ptree&> child = pt.get_child_optional(path);
-	    if (child) {
-		    ptree &pos = pt.get_child(path);
-		    std::for_each(pos.begin(), pos.end(), [&retvec](ptree::value_type &v) {
-				    std::vector<OptionType> toadd;
-				    std::for_each(v.second.begin(), v.second.end(), [&toadd](ptree::value_type &v) {
-						    toadd.push_back(v.second.get_value<OptionType>());
-					    });
-				    retvec.push_back(toadd);
-			    });
-	    }
-	    return retvec;
+	    return get<std::vector<std::vector<otype>>>(path);
     }
 }
 }

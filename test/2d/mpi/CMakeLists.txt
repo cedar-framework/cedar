@@ -15,3 +15,8 @@ set_par_sizes(test-mpi-cgredist-2d 16)
 
 configure_file(test-cgredist-0.json ${CMAKE_BINARY_DIR}/test-cgredist-0.json COPYONLY)
 configure_file(test-cgredist-1.json ${CMAKE_BINARY_DIR}/test-cgredist-1.json COPYONLY)
+
+
+add_par_unit(test-mpi-halo-2d ${CMAKE_CURRENT_SOURCE_DIR}/test_halo.cc ${CMAKE_CURRENT_SOURCE_DIR}/../../mpi_main.cc)
+target_link_libraries(test-mpi-halo-2d cedar ${cedar-deps})
+set_par_sizes(test-mpi-halo-2d 9)

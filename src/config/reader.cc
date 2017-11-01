@@ -1,7 +1,5 @@
 #include <cedar/config/reader.h>
 
-#include <boost/filesystem.hpp>
-
 namespace cedar { namespace config
 {
 	reader::reader():
@@ -12,10 +10,9 @@ namespace cedar { namespace config
 
     void reader::read()
     {
-	    if (!(fname == "")) {
-		    if (!boost::filesystem::exists(fname))
-			    fname = "../" + fname;
-		    boost::property_tree::json_parser::read_json(fname, pt);
+	    if (not (fname == "")) {
+		    std::ifstream cfile(fname);
+		    root = json::parse(cfile);
 	    }
     }
 
@@ -26,14 +23,13 @@ namespace cedar { namespace config
 
 	std::shared_ptr<reader> reader::getconf(std::string path)
 	{
-		using boost::property_tree::ptree;
-
-		boost::optional<ptree&> child = pt.get_child_optional(path);
-		if (child) {
-			ptree kid = pt.get_child(path);
-			return std::make_shared<reader>(std::move(kid));
-		} else {
-			return nullptr;
-		}
+	    std::replace(path.begin(), path.end(), '.', '/');
+	    std::string rpath("/" + path);
+	    try {
+		    json stree = root[json::json_pointer(rpath)];
+		    return std::make_shared<reader>(std::move(stree));
+	    } catch(...) {
+		    return nullptr;
+	    }
 	}
 }}
