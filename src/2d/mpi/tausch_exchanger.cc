@@ -190,7 +190,7 @@ void tausch_exchanger::set_level_spec(int lvl, int rank,
 		remote_spec[index(lvl,halo_dir::up)].remoteMpiRank = rank - topo.nproc(0);
 
 	local_spec[index(lvl,halo_dir::up)].haloX = 0;
-	local_spec[index(lvl,halo_dir::up)].haloY = topo.nproc(1) - 2;
+	local_spec[index(lvl,halo_dir::up)].haloY = topo.nlocal(1) - 2;
 	local_spec[index(lvl,halo_dir::up)].haloWidth = topo.nlocal(0);
 	local_spec[index(lvl,halo_dir::up)].haloHeight = 1;
 	if (topo.coord(1) == (topo.nproc(1) - 1))
@@ -269,7 +269,7 @@ void tausch_exchanger::set_level_spec_so(int lvl, int rank,
 		remote_spec[index(lvl,halo_dir::up)].remoteMpiRank = rank - topo.nproc(0);
 
 	local_spec[index(lvl,halo_dir::up)].haloX = 0;
-	local_spec[index(lvl,halo_dir::up)].haloY = topo.nproc(1) - 2;
+	local_spec[index(lvl,halo_dir::up)].haloY = topo.nlocal(1) - 2;
 	local_spec[index(lvl,halo_dir::up)].haloWidth = topo.nlocal(0);
 	local_spec[index(lvl,halo_dir::up)].haloHeight = 1;
 	if (topo.coord(1) == (topo.nproc(1) - 1))

@@ -1,6 +1,8 @@
 #ifndef CEDAR_TEST_2D_MPI_HALO_H
 #define CEDAR_TEST_2D_MPI_HALO_H
 
+#include <gtest/gtest.h>
+#include <mpi.h>
 
 #include <cedar/types.h>
 #include <cedar/2d/mpi/grid_func.h>
@@ -159,6 +161,24 @@ void run_test(MPI_Comm comm, std::array<int, 2> & proc, int per_mask)
 		kreg->halo_stencil_exchange(level.A);
 		test_gfunc(*params, level.b);
 		test_stencil(*params, level.A);
+	}
+}
+
+
+template<class halo_exchanger>
+	void test_driver(std::vector<std::array<int,2>> & procs)
+{
+	for (auto & proc : procs) {
+		int np = proc[0]*proc[1];
+		int rank;
+		MPI_Comm comm;
+		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		MPI_Comm_split(MPI_COMM_WORLD, rank < np, rank, &comm);
+		if (rank < np) {
+			for (int per_mask = 0; per_mask < 4; per_mask++) {
+				run_test<halo_exchanger>(comm, proc, per_mask);
+			}
+		}
 	}
 }
 
