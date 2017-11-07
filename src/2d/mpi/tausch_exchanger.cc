@@ -11,7 +11,8 @@ namespace cedar { namespace cdr2 { namespace mpi {
 tausch_exchanger::tausch_exchanger(const kernel_params & params,
                                    std::vector<topo_ptr> topos) : nlevels(topos.size()),
                                                                   dims{{aarray<int, len_t, 2>(topos[0]->nproc(0), nlevels),
-			aarray<int, len_t, 2>(topos[0]->nproc(1), nlevels)}}
+			aarray<int, len_t, 2>(topos[0]->nproc(1), nlevels)}},
+                                                                  coord{{topos[0]->coord(0), topos[0]->coord(1)}}
 {
 	init_gfunc(topos);
 	init_so(topos);
@@ -293,10 +294,56 @@ void tausch_exchanger::set_level_spec_so(int lvl, int rank,
 
 void tausch_exchanger::exchange_func(int k, real_t * gf)
 {
+	int lvl = nlevels - k - 1;
+	for (int dir = 0; dir < halo_dir::count; dir++) {
+		if (recv_active[index(lvl, dir)])
+			tausch->postReceive(TAUSCH_CwC, index(lvl, dir), index(lvl, dir));
+	}
+
+	for (int dir = 0; dir < halo_dir::count; dir++) {
+		if (send_active[index(lvl, dir)]) {
+			tausch->packSendBuffer(TAUSCH_CwC, index(lvl,dir), 0, gf);
+			tausch->send(TAUSCH_CwC, index(lvl,dir), index(lvl,dir));
+
+		}
+		if (recv_active[index(lvl, dir)]) {
+			tausch->recv(TAUSCH_CwC, index(lvl,dir));
+			tausch->unpackRecvBuffer(TAUSCH_CwC, index(lvl,dir), 0, gf);
+		}
+	}
 }
 
 void tausch_exchanger::exchange_sten(int k, real_t * so)
 {
+	int lvl = nlevels - k - 1;
+
+	auto & ldim = leveldims(k-1);
+
+	len_t II = ldim(coord[0], 0) + 2;
+	len_t JJ = ldim(coord[1], 1) + 2;
+
+	for (int dir = 0; dir < halo_dir::count; dir++) {
+		if (recv_active[index(lvl, dir)])
+			tausch_so->postReceive(TAUSCH_CwC, index(lvl, dir), index(lvl, dir));
+	}
+
+	for (int dir = 0; dir < halo_dir::count; dir++) {
+		if (send_active[index(lvl, dir)]) {
+			for (int sdir = 0; sdir < 5; sdir++) {
+				len_t offset = (JJ+1)*(II+1)*sdir;
+				tausch_so->packSendBuffer(TAUSCH_CwC, index(lvl,dir), sdir, so + offset);
+			}
+			tausch_so->send(TAUSCH_CwC, index(lvl,dir), index(lvl,dir));
+
+		}
+		if (recv_active[index(lvl, dir)]) {
+			tausch_so->recv(TAUSCH_CwC, index(lvl,dir));
+			for (int sdir = 0; sdir < 5; sdir++) {
+				len_t offset = (JJ+1)*(II+1)*sdir;
+				tausch_so->unpackRecvBuffer(TAUSCH_CwC, index(lvl,dir), sdir, so + offset);
+			}
+		}
+	}
 }
 
 void tausch_exchanger::exchange(mpi::grid_func & f)

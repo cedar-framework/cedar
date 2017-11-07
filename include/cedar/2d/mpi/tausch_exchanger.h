@@ -46,10 +46,9 @@ private:
 	void init_dims(grid_topo & topo);
 	std::size_t index(int lvl, int dir) { return lvl*halo_dir::count + dir; }
 	std::size_t nlevels;
-	/* aarray<int, len_t, 2> dimx; */
-	/* aarray<int, len_t, 2> dimy; */
 	std::array<aarray<int, len_t, 2>, 2> dims;
 	std::array<std::vector<len_t>, 2> dimfine;
+	std::array<int, 2> coord;
 };
 
 template<class sten>
