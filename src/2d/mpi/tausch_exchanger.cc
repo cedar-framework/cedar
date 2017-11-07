@@ -294,7 +294,7 @@ void tausch_exchanger::set_level_spec_so(int lvl, int rank,
 
 void tausch_exchanger::exchange_func(int k, real_t * gf)
 {
-	int lvl = nlevels - k - 1;
+	int lvl = nlevels - k;
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (recv_active[index(lvl, dir)])
 			tausch->postReceive(TAUSCH_CwC, index(lvl, dir), index(lvl, dir));
@@ -315,12 +315,13 @@ void tausch_exchanger::exchange_func(int k, real_t * gf)
 
 void tausch_exchanger::exchange_sten(int k, real_t * so)
 {
-	int lvl = nlevels - k - 1;
+	int lvl = nlevels - k;
 
-	auto & ldim = leveldims(k-1);
+	auto & dimx = leveldims(0);
+	auto & dimy = leveldims(1);
 
-	len_t II = ldim(coord[0], 0) + 2;
-	len_t JJ = ldim(coord[1], 1) + 2;
+	len_t II = dimx(coord[0], k-1) + 2;
+	len_t JJ = dimy(coord[1], k-1) + 2;
 
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (recv_active[index(lvl, dir)])
