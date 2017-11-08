@@ -1,103 +1,58 @@
 #include <mpi.h>
+#include <iostream>
 #include <memory>
+#include <math.h>
 
-// #include <cedar/kernel_params.h>
-// #include <cedar/types.h>
-// #include <cedar/kernel.h>
-// #include <cedar/kernel_name.h>
-// #include <cedar/2d/kernel/mpi/registry.h>
-// #include <cedar/2d/mpi/grid_func.h>
-// #include <cedar/2d/util/topo.h>
-// #include <cedar/2d/util/mpi_grid.h>
+#include <cedar/types.h>
+#include <cedar/2d/mpi/grid_func.h>
+#include <cedar/2d/mpi/stencil_op.h>
+#include <cedar/2d/kernel/mpi/registry.h>
+#include <cedar/2d/util/topo.h>
+#include <cedar/2d/mpi/tausch_exchanger.h>
+#include <cedar/2d/mpi/msg_exchanger.h>
+#include <cedar/kernel_params.h>
 
-// #include <cedar/util/time_log.h>
+#include <cedar/util/time_log.h>
+
+#include "halo.h"
 
 
 int main(int argc, char *argv[])
 {
-	// TODO: rewrite
-	// using namespace cedar;
-	// using namespace cedar::cdr2;
+	using namespace cedar;
+	using namespace cedar::cdr2;
 
-	// int provided;
+	int provided;
 
-	// MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
+	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
 
-	// timer_init(MPI_COMM_WORLD);
+	timer_init(MPI_COMM_WORLD);
 
-	// config::reader conf("halo-config.json");
-	// log::init(conf);
+	config::reader conf("halo-config.json");
+	log::init(conf);
+	log::status << "Beginning test" << std::endl;
+	auto grid = util::create_topo(conf);
 
-	// auto islocal = conf.get<bool>("grid.local", true);
-	// auto ndofs = conf.getvec<len_t>("grid.n");
-	// auto niters = conf.get<len_t>("niters");
-	// auto nx = ndofs[0];
-	// auto ny = ndofs[1];
-	// topo_ptr grid;
-	// if (islocal) {
-	// 	auto nprocs = conf.getvec<int>("grid.np");
-	// 	int npx = 0;
-	// 	int npy = 0;
-	// 	if (nprocs.size() >= 2) {
-	// 		npx = nprocs[0];
-	// 		npy = nprocs[1];
-	// 	}
-	// 	if (npx == 0 or npy == 0) {
-	// 		grid = cdr2::util::create_topo(MPI_COMM_WORLD, nx, ny);
-	// 	} else {
-	// 		int size;
-	// 		MPI_Comm_size(MPI_COMM_WORLD, &size);
-	// 		assert(size == npx*npy);
-	// 		grid = cdr2::util::create_topo(MPI_COMM_WORLD, npx, npy, nx, ny);
-	// 	}
-	// 	log::status << "Running local topo" << std::endl;
-	// } else {
-	// 	grid = cdr2::util::create_topo_global(MPI_COMM_WORLD, nx, ny);
-	// 	log::status << "Running global topo" << std::endl;
-	// }
+	mpi::grid_func b(grid);
+	mpi::stencil_op<five_pt> so(grid);
 
-	// mpi::grid_func b(grid);
-	// b.set(0);
+	fill_gfunc(b);
+	fill_stencil(so);
 
-	// auto kreg = std::make_shared<cedar::cdr2::kernel::mpi::registry>(conf);
+	auto exchanger_str = conf.get<std::string>("halo-exchanger", "msg");
 
-	// // register alternative kernel setup/exchange kernels
-	// using halo_setup_t = cedar::kernel<grid_topo&, void**>;
-	// using halo_exchange_t = cedar::kernel<mpi::grid_func&>;
-	// kreg->add(kernel_name::halo_setup, "user",
-	//           halo_setup_t([](const kernel_params & params,
-	//                           grid_topo & topo,
-	//                           void **user_ctx) -> void
-	//                        {
-	// 	                       timer_begin("halo-setup");
-	// 	                       // custom halo setup
-	// 	                       timer_end("halo-setup");
-	//                        }, nullptr));
+	if (exchanger_str == "msg") {
+		log::status << "Using MSG for halo exchange" << std::endl;
+		run_halo<mpi::msg_exchanger>(conf, grid, so, b);
+	} else {
+		log::status << "Using Tausch for halo exchange" << std::endl;
+		run_halo<mpi::tausch_exchanger>(conf, grid, so, b);
+	}
 
-	// kreg->add(kernel_name::halo_exchange, "user",
-	//           halo_exchange_t([](const kernel_params & params, mpi::grid_func & f) -> void
-	//                           {
-	// 	                       timer_begin("halo-exchange");
-	// 	                       // custom halo exchange
-	// 	                       timer_end("halo-exchange");
-	//                           }, nullptr));
+	timer_save("timings-" + exchanger_str + ".json");
 
-	// cedar::cdr2::kernel::mpi::factory::init(kreg, conf);
+	log::status << "Finished Test" << std::endl;
 
-	// void *halo_ctx;
-	// kreg->halo_setup(*grid, &halo_ctx);
-	// b.halo_ctx = halo_ctx;
-
-	// MPI_Barrier(MPI_COMM_WORLD); // synchronize before timing
-	// for (auto i : range<len_t>(niters)) {
-	// 	(void)i;
-	// 	kreg->halo_exchange(b);
-	// }
-
-	// timer_save("timings.json");
-
-	// log::status << "Finished Test" << std::endl;
-
-	// MPI_Finalize();
-	// return 0;
+	MPI_Finalize();
+	return 0;
 }
