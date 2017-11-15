@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 #include <fstream>
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace cedar {
 namespace config
