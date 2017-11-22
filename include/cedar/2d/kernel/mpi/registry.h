@@ -71,8 +71,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		void setup_relax_x(const mpi::stencil_op<sten> & so,
 		                   relax_stencil & sor)
 	{
-		log::error << "Kernel is temporarily disabled!" << std::endl;
-		/* impls::mpi_setup_rbgs_x(*this->params, so, sor); */
+		impls::mpi_setup_rbgs_x(*this->params, so, sor);
 	}
 
 
@@ -80,8 +79,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		void setup_relax_y(const mpi::stencil_op<sten> & so,
 		                   relax_stencil & sor)
 	{
-		log::error << "Kernel is temporarily disabled!" << std::endl;
-		/* impls::mpi_setup_rbgs_y(*this->params, so, sor); */
+		impls::mpi_setup_rbgs_y(*this->params, so, sor);
 	}
 
 
@@ -108,7 +106,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		void setup_cg_lu(const mpi::stencil_op<sten> & so,
 		                 mpi::grid_func & ABD)
 	{
-		log::error << "This kernel (solve_cg) is deprecated for mpi solver!" << std::endl;
+		log::error << "This kernel (solve_cg) is unavailable for mpi solver!" << std::endl;
 		/* impls::mpi_setup_cg_lu(*this->params, this->halof.get(), so, ABD); */
 	}
 
@@ -121,8 +119,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	                   mpi::grid_func &res,
 	                   cycle::Dir cdir)
 	{
-		log::error << "Kernel is temporarily disabled!" << std::endl;
-		/* impls::mpi_relax_lines_x(*this->params, this->halof.get(), so, x, b, sor, res, cdir); */
+		impls::mpi_relax_lines_x(*this->params, this->halof.get(), so, x, b, sor, res, cdir);
 	}
 
 
@@ -134,8 +131,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		                   mpi::grid_func &res,
 		                   cycle::Dir cdir)
 	{
-		log::error << "Kernel is temporarily disabled!" << std::endl;
-		/* impls::mpi_relax_lines_y(*this->params, this->halof.get(), so, x, b, sor, res, cdir); */
+		impls::mpi_relax_lines_y(*this->params, this->halof.get(), so, x, b, sor, res, cdir);
 	}
 
 
