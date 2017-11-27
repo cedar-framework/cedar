@@ -8,10 +8,23 @@ extern "C" {
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
+
+line_pkg::line_pkg(grid_topo & topo):
+	datadist{{array<len_t, 2>(2, topo.nproc(0)),
+			array<len_t, 2>(2, topo.nproc(1))}}
+{
+	MPI_Comm_split(topo.comm, topo.coord(1), topo.coord(0),
+	               &linecomm[0]);
+	MPI_Comm_split(topo.comm, topo.coord(0), topo.coord(1),
+	               &linecomm[1]);
+}
+
+
 tausch_exchanger::tausch_exchanger(const kernel_params & params,
                                    std::vector<topo_ptr> topos) : nlevels(topos.size()),
                                                                   dims{{aarray<int, len_t, 2>(topos[0]->nproc(0), nlevels),
 			aarray<int, len_t, 2>(topos[0]->nproc(1), nlevels)}},
+                                                                  line_data(*topos[0]),
                                                                   coord{{topos[0]->coord(0), topos[0]->coord(1)}}
 {
 	init_gfunc(topos);
@@ -75,6 +88,32 @@ void tausch_exchanger::init_dims(grid_topo & topo)
 	                         dims[0].data(), dims[1].data(),
 	                         dimxfine.data(), dimyfine.data(),
 	                         topo.nproc(0), topo.nproc(1));
+	init_datadist();
+}
+
+
+void tausch_exchanger::init_datadist()
+{
+	auto & dimxfine = dimfine[0];
+	auto & dimyfine = dimfine[1];
+	auto & xdatadist = line_data.datadist[0];
+	auto & ydatadist = line_data.datadist[1];
+
+	xdatadist(0, 0) = 2;
+	xdatadist(1, 0) = xdatadist(0, 0) + dimxfine[0] - 1;
+	for (auto i : range<len_t>(1, xdatadist.len(1))) {
+		xdatadist(0, i) = xdatadist(1, i-1) + 1;
+		xdatadist(1, i) = xdatadist(0, i) + dimxfine[i] - 1;
+	}
+
+	ydatadist(0, 0) = 2;
+	ydatadist(1, 0) = ydatadist(0, 0) + dimyfine[0] - 1;
+	for (auto j : range<len_t>(1, ydatadist.len(1))) {
+		ydatadist(0, j) = ydatadist(1, j-1) + 1;
+		ydatadist(1, j) = ydatadist(0, j) + dimyfine[j] - 1;
+	}
+
+	line_data.linebuf.reserve(std::max(dimxfine[0], dimyfine[0])*8*std::max(ydatadist.len(1), xdatadist.len(1)));
 }
 
 

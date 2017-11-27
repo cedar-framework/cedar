@@ -2,7 +2,7 @@
      &                K, SO, QF, Q, SOR, B,&
      &                II, JJ, iGs, jGs,&
      &                NOG, NStncl, IRELAX_SYM, UPDOWN,&
-     &                DATADIST, iWork, NMSGi, pMSG, RWORK, NMSGr,&
+     &                DATADIST, RWORK, NMSGr,&
      &                MPICOMM, XLINECOMM, YLINECOMM, halof&
      &                ) BIND(C,NAME='MPI_BMG2_SymStd_relax_lines_y')
 
@@ -59,12 +59,10 @@
 ! ----------------------------
 !     Argument Declarations
 !
-      integer(len_t), value :: II, JJ, NMSGi, NMSGr
+      integer(len_t), value :: II, JJ, NMSGr
       integer(c_int), value :: NOG, NStncl
       integer(len_t), value :: iGs, jGs
       integer(c_int), value :: IRELAX_SYM, K, UPDOWN
-      integer(len_t) :: iWork(NMSGi)
-      integer(c_int) :: pMSG(NBMG_pMSG,NOG)
       integer, value :: MPICOMM
       integer(c_int), value :: XLINECOMM, YLINECOMM
       integer(len_t) :: DATADIST(2,*)

@@ -23,13 +23,13 @@ extern "C" {
 	void MPI_BMG2_SymStd_relax_lines_x(int k, real_t *SO, real_t *QF, real_t *Q, real_t *SOR,
 	                                   real_t *B, len_t II, len_t JJ, len_t iGs, len_t jGs,
 	                                   int nog, int nstencil, int irelax_sym, int updown,
-	                                   len_t *datadist, len_t *iwork, len_t nmsgi, int *pMSG,
+	                                   len_t *datadist,
 	                                   real_t *rwork, len_t nmsgr, int mpicomm,
 	                                   int xlinecomm, int ylinecomm, void *halof);
 	void MPI_BMG2_SymStd_relax_lines_y(int k, real_t *SO, real_t *QF, real_t *Q, real_t *SOR,
 	                                   real_t *B, len_t II, len_t JJ, len_t iGs, len_t jGs,
 	                                   int nog, int nstencil, int irelax_sym, int updown,
-	                                   len_t *datadist, len_t *iwork, len_t nmsgi, int *pMSG,
+	                                   len_t *datadist,
 	                                   real_t *rwork, len_t nmsgr, int mpicomm,
 	                                   int xlinecomm, int ylinecomm, void *halof);
 }
@@ -108,40 +108,38 @@ namespace impls
 	                       mpi::grid_func & res,
 	                       cycle::Dir cycle_dir)
 	{
-		log::error << "Tausch exchanger does not support line relaxation" << std::endl;
-		/* using namespace cedar::cdr2; */
-		/* int k, kf; */
-		/* int updown, nstencil; */
+		using namespace cedar::cdr2;
+		int k, kf;
+		int updown, nstencil;
 
-		/* auto & sod = const_cast<mpi::stencil_op<sten>&>(so); */
-		/* grid_topo & topo = sod.grid(); */
-		/* MsgCtx *ctx = (MsgCtx*) halof->context_ptr(); */
-		/* relax_stencil & sord = const_cast<relax_stencil&>(sor); */
-		/* mpi::grid_func & bd = const_cast<mpi::grid_func&>(b); */
+		mpi::line_pkg & line_info = halof->line_data;
+		auto & sod = const_cast<mpi::stencil_op<sten>&>(so);
+		grid_topo & topo = sod.grid();
+		relax_stencil & sord = const_cast<relax_stencil&>(sor);
+		mpi::grid_func & bd = const_cast<mpi::grid_func&>(b);
 
-		/* k = topo.level()+1; */
-		/* kf = topo.nlevel(); */
+		k = topo.level()+1;
+		kf = topo.nlevel();
 
-		/* nstencil = stencil_ndirs<sten>::value; */
+		nstencil = stencil_ndirs<sten>::value;
 
-		/* if (cycle_dir == cycle::Dir::UP) updown = BMG_UP; */
-		/* else updown = BMG_DOWN; */
+		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
+		else updown = BMG_DOWN;
 
-		/* // ibc = BMG_BCs_definite; */
-		/* MPI_Fint fcomm = MPI_Comm_c2f(topo.comm); */
-		/* MPI_Fint xlinecomm = MPI_Comm_c2f(ctx->xlinecomm); */
-		/* MPI_Fint ylinecomm = MPI_Comm_c2f(ctx->ylinecomm); */
+		// ibc = BMG_BCs_definite;
+		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+		MPI_Fint xlinecomm = MPI_Comm_c2f(line_info.linecomm[0]);
+		MPI_Fint ylinecomm = MPI_Comm_c2f(line_info.linecomm[1]);
 
-		/* cedar::len_t * xdatadist = &ctx->msg_geom.data()[ctx->pLS(ipL_LS_XDataDist,k-1)-1]; */
+		cedar::len_t * xdatadist = line_info.datadist[0].data();
 
-		/* MPI_BMG2_SymStd_relax_lines_x(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(), */
-		/*                               so.len(0), so.len(1), topo.is(0), topo.is(1), */
-		/*                               kf, nstencil, BMG_RELAX_SYM, updown, */
-		/*                               xdatadist, */
-		/*                               ctx->msg_geom.data(), ctx->msg_geom.size(), */
-		/*                               ctx->pMSG.data(), ctx->msg_buffer.data(), */
-		/*                               ctx->msg_buffer.size(), fcomm, */
-		/*                               xlinecomm, ylinecomm, halof); */
+		MPI_BMG2_SymStd_relax_lines_x(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
+		                              so.len(0), so.len(1), topo.is(0), topo.is(1),
+		                              kf, nstencil, BMG_RELAX_SYM, updown,
+		                              xdatadist,
+		                              line_info.linebuf.data(),
+		                              line_info.linebuf.size(), fcomm,
+		                              xlinecomm, ylinecomm, halof);
 	}
 
 
@@ -155,40 +153,38 @@ namespace impls
 		                       mpi::grid_func & res,
 		                       cycle::Dir cycle_dir)
 	{
-		log::error << "Tausch exchanger does not support line relaxation" << std::endl;
-		/* using namespace cedar::cdr2; */
-		/* int k, kf; */
-		/* int updown, nstencil; */
+		using namespace cedar::cdr2;
+		int k, kf;
+		int updown, nstencil;
 
-		/* auto & sod = const_cast<mpi::stencil_op<sten>&>(so); */
-		/* grid_topo & topo = sod.grid(); */
-		/* MsgCtx *ctx = (MsgCtx*) halof->context_ptr(); */
-		/* relax_stencil & sord = const_cast<relax_stencil&>(sor); */
-		/* mpi::grid_func & bd = const_cast<mpi::grid_func&>(b); */
+		mpi::line_pkg & line_info = halof->line_data;
+		auto & sod = const_cast<mpi::stencil_op<sten>&>(so);
+		grid_topo & topo = sod.grid();
+		relax_stencil & sord = const_cast<relax_stencil&>(sor);
+		mpi::grid_func & bd = const_cast<mpi::grid_func&>(b);
 
-		/* k = topo.level()+1; */
-		/* kf = topo.nlevel(); */
+		k = topo.level()+1;
+		kf = topo.nlevel();
 
-		/* nstencil = stencil_ndirs<sten>::value; */
+		nstencil = stencil_ndirs<sten>::value;
 
-		/* if (cycle_dir == cycle::Dir::UP) updown = BMG_UP; */
-		/* else updown = BMG_DOWN; */
+		if (cycle_dir == cycle::Dir::UP) updown = BMG_UP;
+		else updown = BMG_DOWN;
 
-		/* // ibc = BMG_BCs_definite; */
-		/* MPI_Fint fcomm = MPI_Comm_c2f(topo.comm); */
-		/* MPI_Fint xlinecomm = MPI_Comm_c2f(ctx->xlinecomm); */
-		/* MPI_Fint ylinecomm = MPI_Comm_c2f(ctx->ylinecomm); */
+		// ibc = BMG_BCs_definite;
+		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+		MPI_Fint xlinecomm = MPI_Comm_c2f(line_info.linecomm[0]);
+		MPI_Fint ylinecomm = MPI_Comm_c2f(line_info.linecomm[1]);
 
-		/* cedar::len_t * ydatadist = &ctx->msg_geom.data()[ctx->pLS(ipL_LS_YDataDist,k-1)-1]; */
+		cedar::len_t * ydatadist = line_info.datadist[1].data();
 
-		/* MPI_BMG2_SymStd_relax_lines_y(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(), */
-		/*                               so.len(0), so.len(1), topo.is(0), topo.is(1), */
-		/*                               kf, nstencil, BMG_RELAX_SYM, updown, */
-		/*                               ydatadist, */
-		/*                               ctx->msg_geom.data(), ctx->msg_geom.size(), */
-		/*                               ctx->pMSG.data(), ctx->msg_buffer.data(), */
-		/*                               ctx->msg_buffer.size(), fcomm, */
-		/*                               xlinecomm, ylinecomm, halof); */
+		MPI_BMG2_SymStd_relax_lines_y(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
+		                              so.len(0), so.len(1), topo.is(0), topo.is(1),
+		                              kf, nstencil, BMG_RELAX_SYM, updown,
+		                              ydatadist,
+		                              line_info.linebuf.data(),
+		                              line_info.linebuf.size(), fcomm,
+		                              xlinecomm, ylinecomm, halof);
 	}
 
 
@@ -231,8 +227,7 @@ namespace impls
 		                              so.len(0), so.len(1), topo.is(0), topo.is(1),
 		                              kf, nstencil, BMG_RELAX_SYM, updown,
 		                              xdatadist,
-		                              ctx->msg_geom.data(), ctx->msg_geom.size(),
-		                              ctx->pMSG.data(), ctx->msg_buffer.data(),
+		                              ctx->msg_buffer.data(),
 		                              ctx->msg_buffer.size(), fcomm,
 		                              xlinecomm, ylinecomm, halof);
 	}
@@ -276,8 +271,7 @@ namespace impls
 		                              so.len(0), so.len(1), topo.is(0), topo.is(1),
 		                              kf, nstencil, BMG_RELAX_SYM, updown,
 		                              ydatadist,
-		                              ctx->msg_geom.data(), ctx->msg_geom.size(),
-		                              ctx->pMSG.data(), ctx->msg_buffer.data(),
+		                              ctx->msg_buffer.data(),
 		                              ctx->msg_buffer.size(), fcomm,
 		                              xlinecomm, ylinecomm, halof);
 	}

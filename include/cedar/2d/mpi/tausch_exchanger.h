@@ -11,6 +11,15 @@
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
+
+struct line_pkg
+{
+	line_pkg(grid_topo & topo);
+	std::vector<real_t> linebuf;
+	std::array<MPI_Comm, 2> linecomm;
+	std::array<array<len_t, 2>, 2> datadist;
+};
+
 class tausch_exchanger : public halo_exchanger_base
 {
 	enum halo_dir { left=0, right=1, down=2, up=3, count };
@@ -25,6 +34,7 @@ public:
 	virtual aarray<int, len_t, 2> & leveldims(int k) {
 		return dims[k];
 	}
+	line_pkg line_data;
 
 protected:
 	std::unique_ptr<Tausch<real_t>> tausch;
@@ -44,6 +54,7 @@ private:
 	void init_gfunc(std::vector<topo_ptr> & topos);
 	void init_so(std::vector<topo_ptr> & topos);
 	void init_dims(grid_topo & topo);
+	void init_datadist();
 	std::size_t index(int lvl, int dir) { return lvl*halo_dir::count + dir; }
 	std::size_t nlevels;
 	std::array<aarray<int, len_t, 2>, 2> dims;
