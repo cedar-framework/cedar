@@ -10,7 +10,7 @@
 
       INTEGER II, JJ, JBEG, NPts, NLines
 
-      INTEGER K, NOLX, NOG, NSOR, NMSGr 
+      INTEGER K, NOLX, NOG, NSOR, NMSGr
 
       INTEGER XCOMM(2,2:NOLX)
 
@@ -33,33 +33,39 @@
       !
       ! Get my coarse level rank
       !
-      IF (XCOMM(2,2) .NE. MPI_COMM_NULL) THEN 
+      IF (XCOMM(2,2) .NE. MPI_COMM_NULL) THEN
          CALL MPI_COMM_RANK(XCOMM(2,2), My_L1_Rank, IERR)
-      END IF 
+      END IF
 
       DO kl = 2, NOLX-1
 
-         IF (XCOMM(2,kl+1) .NE. MPI_COMM_NULL) THEN 
+         IF (XCOMM(2,kl+1) .NE. MPI_COMM_NULL) THEN
 
             !
             ! Get the size of the fine level process group
             !
-            
+
             CALL MPI_COMM_SIZE(XCOMM(2,kl+1), SIZE, IERR)
 
-            ! 
-            ! Scatter Solution to processes in this subgroup 
-            ! 
-            IF (XCOMM(2,kl) .NE. MPI_COMM_NULL) THEN 
-
-               CALL MPI_SCATTER(RWORK(My_L1_Rank*NLINES*8+1),&
-     &              NLINES*8,&
-     &              MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
-     &              MPI_DOUBLE_PRECISION,0,XCOMM(2,kl),IERR) 
+            !
+            ! Scatter Solution to processes in this subgroup
+            !
+            IF (XCOMM(2,kl) .NE. MPI_COMM_NULL) THEN
+               if (My_L1_Rank .eq. 0) then
+                  CALL MPI_SCATTER(RWORK(My_L1_Rank*NLINES*8+1),&
+                       &              NLINES*8,&
+                       &              MPI_DOUBLE_PRECISION,MPI_IN_PLACE, NLINES*8, &
+                       &              MPI_DOUBLE_PRECISION,0,XCOMM(2,kl),IERR)
+               else
+                  CALL MPI_SCATTER(0.0d0,&
+                       &              NLINES*8,&
+                       &              MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
+                       &              MPI_DOUBLE_PRECISION,0,XCOMM(2,kl),IERR)
+               endif
 
             !
-            ! Send interface solution from this level to 
-            ! LineSolve_C to compute solution.  
+            ! Send interface solution from this level to
+            ! LineSolve_C to compute solution.
             !
                CALL C_Wrapper(&
      &              TDG(TDSX_SOR_PTRS(kl,K)),&
@@ -67,7 +73,7 @@
      &              NLines, NMSGr,&
      &              My_L1_Rank)
 
-            END IF 
+            END IF
 
             !
             ! Get my fine level rank
@@ -76,20 +82,20 @@
 
             !
             ! Copy Solution from TDG(:,:,4) into RWORK
-            ! for use on the next level. 
+            ! for use on the next level.
             !
-            IF (XCOMM(2,kl) .NE. MPI_COMM_NULL) THEN 
+            IF (XCOMM(2,kl) .NE. MPI_COMM_NULL) THEN
                CALL BMG2_SymStd_TDG_2_RWork(&
      &              TDG(TDSX_SOR_PTRS(kl,K)),&
      &              RWORK, NLines, SIZE, &
-     &              My_L1_Rank, My_L2_Rank) 
-            END IF 
+     &              My_L1_Rank, My_L2_Rank)
+            END IF
 
             My_L1_Rank = My_L2_Rank
-                      
-         END IF 
 
-      END DO 
+         END IF
+
+      END DO
 
 !     CALL MPI_FINALIZE(IERR)
 !     STOP
@@ -104,9 +110,16 @@
       ! Scatter solution to next-to-finest level interface
       ! system
       !
-      CALL MPI_SCATTER(RWORK(My_L2_Rank*NLINES*8+1),NLINES*8,&
-     &     MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
-     &     MPI_DOUBLE_PRECISION,0,XCOMM(2,NOLX),IERR) 
+
+      if (My_L2_Rank .eq. 0) then
+         CALL MPI_SCATTER(RWORK(My_L2_Rank*NLINES*8+1),NLINES*8,&
+              &     MPI_DOUBLE_PRECISION,MPI_IN_PLACE, NLINES*8, &
+              &     MPI_DOUBLE_PRECISION,0,XCOMM(2,NOLX),IERR)
+      else
+         CALL MPI_SCATTER(0.0d0,NLINES*8,&
+              &     MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
+              &     MPI_DOUBLE_PRECISION,0,XCOMM(2,NOLX),IERR)
+      endif
 
       !
       ! Pointers into RWORK
@@ -125,8 +138,8 @@
 
       END DO
 
-      RETURN 
-      END 
+      RETURN
+      END
 
 ! =================================================================
 
@@ -153,7 +166,7 @@
 
          MULT = MULT + 1
 
-      END DO 
+      END DO
 
       RETURN
-      END 
+      END

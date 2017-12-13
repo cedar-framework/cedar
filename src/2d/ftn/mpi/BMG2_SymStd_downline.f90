@@ -73,11 +73,19 @@
       ! Gather interface equations to head node
       !
       IF (pgSIZE .GT. 1) THEN
-         CALL MPI_GATHER(RWORK, NLines*8, &
-     &        MPI_DOUBLE_PRECISION,&
-     &        RWORK, NLines*8, &
-     &        MPI_DOUBLE_PRECISION,&
-     &        0, XCOMM(2,NOLX), IERR)
+         if (myrank .eq. 0) then
+            CALL MPI_GATHER(MPI_IN_PLACE, NLines*8, &
+                 &        MPI_DOUBLE_PRECISION,&
+                 &        RWORK, NLines*8, &
+                 &        MPI_DOUBLE_PRECISION,&
+                 &        0, XCOMM(2,NOLX), IERR)
+         else
+            CALL MPI_GATHER(RWORK, NLines*8, &
+                 &        MPI_DOUBLE_PRECISION,&
+                 &        0.0d0, NLines*8, &
+                 &        MPI_DOUBLE_PRECISION,&
+                 &        0, XCOMM(2,NOLX), IERR)
+         endif
       END IF
 
 !     CALL DUMP_RWORK(RWORK, 0, pgSIZE, NLines)
@@ -129,11 +137,19 @@
             ! the group head node
             !
             IF (pgSIZE .GT. 1) THEN
-               CALL MPI_GATHER(RWORK, NLines*8, &
-     &              MPI_DOUBLE_PRECISION,&
-     &              RWORK, NLines*8, &
-     &              MPI_DOUBLE_PRECISION,&
-     &              0, XCOMM(2,kl), IERR)
+               if (myrank .eq. 0) then
+                  CALL MPI_GATHER(MPI_IN_PLACE, NLines*8, &
+                       &              MPI_DOUBLE_PRECISION,&
+                       &              RWORK, NLines*8, &
+                       &              MPI_DOUBLE_PRECISION,&
+                       &              0, XCOMM(2,kl), IERR)
+               else
+                  CALL MPI_GATHER(RWORK, NLines*8, &
+                       &              MPI_DOUBLE_PRECISION,&
+                       &              0.0d0, NLines*8, &
+                       &              MPI_DOUBLE_PRECISION,&
+                       &              0, XCOMM(2,kl), IERR)
+               endif
             END IF
 
 !           write(*,*) ''
