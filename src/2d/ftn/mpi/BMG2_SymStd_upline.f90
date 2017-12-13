@@ -14,7 +14,7 @@
 
       INTEGER XCOMM(2,2:NOLX)
 
-      INTEGER TDSX_SOR_PTRS(NOLX,NOG)
+      INTEGER TDSX_SOR_PTRS(NOLX)
 
       REAL*8 SOR(II,JJ,2), RWORK(NMSGr)
 
@@ -68,7 +68,7 @@
             ! LineSolve_C to compute solution.
             !
                CALL C_Wrapper(&
-     &              TDG(TDSX_SOR_PTRS(kl,K)),&
+     &              TDG(TDSX_SOR_PTRS(kl)),&
      &              RWORK, SIZE,&
      &              NLines, NMSGr,&
      &              My_L1_Rank)
@@ -86,7 +86,7 @@
             !
             IF (XCOMM(2,kl) .NE. MPI_COMM_NULL) THEN
                CALL BMG2_SymStd_TDG_2_RWork(&
-     &              TDG(TDSX_SOR_PTRS(kl,K)),&
+     &              TDG(TDSX_SOR_PTRS(kl)),&
      &              RWORK, NLines, SIZE, &
      &              My_L1_Rank, My_L2_Rank)
             END IF
