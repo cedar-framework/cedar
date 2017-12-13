@@ -46,9 +46,20 @@ if (ENABLE_MPI)
 	ftn/mpi/BMG2_SymStd_relax_GS.f90
 	ftn/mpi/BMG2_SymStd_relax_lines_x.f90
 	ftn/mpi/BMG2_SymStd_relax_lines_y.f90
+	ftn/mpi/BMG2_SymStd_relax_lines_x_ml.f90
 	ftn/mpi/BMG2_SymStd_LineSolve_A.f90
 	ftn/mpi/BMG2_SymStd_LineSolve_B.f90
 	ftn/mpi/BMG2_SymStd_LineSolve_C.f90
+	ftn/mpi/BMG2_SymStd_LineSolve_A_ml.f90
+	ftn/mpi/BMG2_SymStd_LineSolve_B_ml.f90
+	ftn/mpi/BMG2_SymStd_LineSolve_C_ml.f90
+	ftn/mpi/BMG2_SymStd_downline.f90
+	ftn/mpi/BMG2_SymStd_upline.f90
+	ftn/mpi/BMG2_SymStd_SETUP_ADD_SOR_PTRS.f90
+	ftn/mpi/BMG2_SymStd_SETUP_comm.f90
+	ftn/mpi/BMG2_SymStd_SETUP_trisolve.f90
+	ftn/mpi/BMG2_SymStd_RWork_2_TDG.f90
+	ftn/mpi/BMG2_SymStd_TDG_2_RWork.f90
 	ftn/mpi/BMG2_SymStd_restrict.f90
 	ftn/mpi/BMG2_SymStd_residual.f90
 	ftn/mpi/BMG2_SymStd_interp_add.f90

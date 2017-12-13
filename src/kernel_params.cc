@@ -15,6 +15,7 @@ std::shared_ptr<kernel_params> build_kernel_params(config::reader & conf)
 	for (int i = 0; i < pers.size(); ++i) params->periodic[i] = pers[i];
 	params->relax_symmetric = true;
 	params->definite = true;
+	params->ml_relax = conf.get<bool>("solver.ml-relax", false);
 
 	return params;
 }

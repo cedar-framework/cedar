@@ -13,6 +13,7 @@ namespace cedar
 		std::array<bool,3> periodic;
 		bool relax_symmetric;
 		bool definite;
+		bool ml_relax;
 
 		int per_mask() const {
 			int mask = 0;

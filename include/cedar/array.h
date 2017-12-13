@@ -51,6 +51,10 @@ public:
 		reshape(std::forward<decltype(args)>(args)...);
 	}
 
+	template <typename... T> void init(T... args)
+	{
+		reshape(std::forward<decltype(args)>(args)...);
+	}
 
 	template <typename... T> void reshape(T... args)
 	{

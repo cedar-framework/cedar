@@ -1,0 +1,181 @@
+      SUBROUTINE BMG2_SymStd_downline(SOR,Q,II,JJ,&
+     &                JBEG, RWORK, NPts, NLines, &
+     &                K, NOLX, XCOMM, NSOR, TDG, &
+     &                NMSGr, NOG, TDSX_SOR_PTRS,&
+     &                pgSIZE)
+
+      IMPLICIT NONE
+
+      INCLUDE 'mpif.h'
+
+      INTEGER II, JJ, JBEG, NPts, NLines
+
+      INTEGER K, NOLX, NOG, NSOR, NMSGr
+
+      INTEGER XCOMM(2,2:NOLX)
+
+      INTEGER TDSX_SOR_PTRS(NOLX)
+
+      REAL*8 SOR(II,JJ,2), RWORK(NMSGr)
+
+      REAL*8 Q(II,JJ), TDG(NSOR)
+
+      INTEGER pgSIZE, N, MyRank, IERR, kl
+
+      INTEGER I, J, MULT, grank
+
+      REAL*8 D, OD
+      INTEGER DOCHOL(100)
+      SAVE    DOCHOL
+
+
+      IF (DOCHOL(100).ne.123456) then
+         DOCHOL(100) = 123456
+         DO I=1,99
+            DOCHOL(I) = -1
+         ENDDO
+      ENDIF
+
+      CALL MPI_COMM_RANK(XCOMM(1,NOLX), grank, IERR)
+
+! =======================================================
+! Initialize IDs and pgSIZE
+! =======================================================
+
+      CALL MPI_COMM_SIZE(XCOMM(2,NOLX), pgSIZE, IERR)
+      CALL MPI_COMM_RANK(XCOMM(2,NOLX), MyRank, IERR)
+
+! =======================================================
+! Do first step in downward pass
+! =======================================================
+
+      !
+      ! Compute local interface system
+      !
+      MULT = 0
+      NLines = 0
+      DO J=JBEG, JJ-1, 2
+
+         CALL BMG2_SymStd_LineSolve_A(SOR(2,J,1),&
+     &             SOR(2,J,2), Q(2,J),&
+     &             RWORK(MULT*8+1),&
+     &             NPts, DOCHOL(K))
+
+         MULT = MULT + 1
+
+      END DO
+
+
+
+      NLines = MULT
+
+      !
+      ! Gather interface equations to head node
+      !
+      IF (pgSIZE .GT. 1) THEN
+         CALL MPI_GATHER(RWORK, NLines*8, &
+     &        MPI_DOUBLE_PRECISION,&
+     &        RWORK, NLines*8, &
+     &        MPI_DOUBLE_PRECISION,&
+     &        0, XCOMM(2,NOLX), IERR)
+      END IF
+
+!     CALL DUMP_RWORK(RWORK, 0, pgSIZE, NLines)
+
+!     CALL MPI_FINALIZE(IERR)
+!     STOP
+
+! =======================================================
+! Loop over the lower levels and coarsen
+! =======================================================
+
+      DO kl = NOLX-1, 2, -1
+
+         IF (MyRank .EQ. 0) THEN
+
+            !
+            ! If I'm the head node, copy inteface
+            ! system into TDG data structure.
+            !
+
+            CALL BMG2_SymStd_RWork_2_TDG(&
+     &           TDG(TDSX_SOR_PTRS(kl)),&
+     &           RWORK, pgSIZE, NLines, N,&
+     &           K, kl)
+
+!           write(*,*) ''
+!           CALL dump_TDG(
+!    &           TDG(TDSX_SOR_PTRS(kl,K)),
+!    &           pgSIZE, grank, NLines)
+
+            ! Form the local interface system
+            ! for this level
+            !
+            CALL A_Wrapper(&
+     &           TDG(TDSX_SOR_PTRS(kl)),&
+     &           RWORK, N, pgSIZE, &
+     &           JBEG, JJ, NLines, DOCHOL(k))
+
+
+            !
+            ! Get the pgSIZE and MyRank for this level
+            !
+            CALL MPI_COMM_SIZE(XCOMM(2,kl), pgSIZE, IERR)
+            CALL MPI_COMM_RANK(XCOMM(2,kl), MyRank, IERR)
+
+            !
+            ! If there is more than one process in
+            ! this group then gather everything to
+            ! the group head node
+            !
+            IF (pgSIZE .GT. 1) THEN
+               CALL MPI_GATHER(RWORK, NLines*8, &
+     &              MPI_DOUBLE_PRECISION,&
+     &              RWORK, NLines*8, &
+     &              MPI_DOUBLE_PRECISION,&
+     &              0, XCOMM(2,kl), IERR)
+            END IF
+
+!           write(*,*) ''
+!           CALL DUMP_RWORK(RWORK, 0, pgSIZE, NLines)
+
+         END IF
+
+!        CALL MPI_FINALIZE(IERR)
+!        STOP
+
+      END DO
+
+      DOCHOL(k) = 1
+
+
+      RETURN
+      END
+
+! ============================================================
+
+      SUBROUTINE A_Wrapper(TDG, RWORK, Npts, &
+     &                     pgSIZE, JBEG, JJ, NLines, FLG)
+
+         IMPLICIT NONE
+
+         INTEGER JBEG, JJ, Npts, NLines, pgSIZE
+
+         REAL*8 TDG(2*pgSIZE+2,NLines,4)
+         REAL*8 RWORK(8*NLines)
+         INTEGER FLG
+
+         INTEGER MULT, J
+
+         MULT = 0
+         DO J=1, NLines
+            CALL BMG2_SymStd_LineSolve_A(TDG(2,J,1),&
+     &                TDG(2,J,2), TDG(2,J,4),&
+     &                RWORK(MULT*8+1),&
+     &                NPts, FLG)
+
+            MULT = MULT + 1
+         END DO
+
+      RETURN
+      END

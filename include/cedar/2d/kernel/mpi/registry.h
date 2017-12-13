@@ -9,6 +9,7 @@
 
 #include <cedar/2d/matvec.h>
 #include <cedar/2d/relax/mpi/relax.h>
+#include <cedar/2d/relax/mpi/ml_relax.h>
 #include <cedar/2d/relax_stencil.h>
 #include <cedar/2d/mpi/grid_func.h>
 #include <cedar/mpi/grid_topo.h>
@@ -31,8 +32,10 @@ namespace cedar { namespace cdr2 { namespace kernel { namespace mpi {
 {
 public:
 	using parent = mpi_registry<registry<halo>, cdr2::mpi::stypes, solver<nine_pt>, halo>;
-registry(std::shared_ptr<kernel_params> params): parent::mpi_registry(params) {}
-registry(config::reader & conf) : parent::mpi_registry(conf) {}
+registry(std::shared_ptr<kernel_params> params): parent::mpi_registry(params),
+     xrelax(mpi::relax_dir::x), yrelax(mpi::relax_dir::y) {}
+registry(config::reader & conf) : parent::mpi_registry(conf),
+     xrelax(mpi::relax_dir::x), yrelax(mpi::relax_dir::y) {}
 
 	using parent::halo_exchange;
 	using parent::halo_setup;
@@ -71,7 +74,11 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		void setup_relax_x(const mpi::stencil_op<sten> & so,
 		                   relax_stencil & sor)
 	{
-		impls::mpi_setup_rbgs_x(*this->params, so, sor);
+		if (this->params->ml_relax) {
+			xrelax.setup(*this->params, so, sor);
+		} else {
+			impls::mpi_setup_rbgs_x(*this->params, so, sor);
+		}
 	}
 
 
@@ -79,7 +86,11 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		void setup_relax_y(const mpi::stencil_op<sten> & so,
 		                   relax_stencil & sor)
 	{
-		impls::mpi_setup_rbgs_y(*this->params, so, sor);
+		if (this->params->ml_relax) {
+			yrelax.setup(*this->params, so, sor);
+		} else {
+			impls::mpi_setup_rbgs_y(*this->params, so, sor);
+		}
 	}
 
 
@@ -119,7 +130,11 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	                   mpi::grid_func &res,
 	                   cycle::Dir cdir)
 	{
-		impls::mpi_relax_lines_x(*this->params, this->halof.get(), so, x, b, sor, res, cdir);
+		if (this->params->ml_relax) {
+			xrelax.solve(*this->params, this->halof.get(), so, x, b, sor, res, cdir);
+		} else {
+			impls::mpi_relax_lines_x(*this->params, this->halof.get(), so, x, b, sor, res, cdir);
+		}
 	}
 
 
@@ -131,7 +146,11 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		                   mpi::grid_func &res,
 		                   cycle::Dir cdir)
 	{
-		impls::mpi_relax_lines_y(*this->params, this->halof.get(), so, x, b, sor, res, cdir);
+		if (this->params->ml_relax) {
+			yrelax.solve(*this->params, this->halof.get(), so, x, b, sor, res, cdir);
+		} else {
+			impls::mpi_relax_lines_y(*this->params, this->halof.get(), so, x, b, sor, res, cdir);
+		}
 	}
 
 
@@ -197,6 +216,10 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		log::error << "This kernel (solve_cg_boxmg) is deprecated for mpi solver!" << std::endl;
 		/* impls::solve_cg_boxmg(*this->params, this->halof.get(), bmg, x, b); */
 	}
+
+protected:
+	mpi::ml_line_relaxer xrelax, yrelax;
+
 };
 
 }}}}
