@@ -115,7 +115,7 @@
       DO J=JBEG,JJ-1,2
 !MB      DO J=JBEG,JBEG  ! previous line was commented out
 
-         CALL BMG2_SymStd_LineSolve_C (SOR(2,J,1),&
+         CALL BMG2_SymStd_LineSolve_C_ml(SOR(2,J,1),&
      &        SOR(2,J,2), Q(1,J),&
      &        RWORK(MULT*8 + 1),&
      &        Npts, SIZE,&
@@ -145,7 +145,7 @@
       MULT = 0
       DO J=1,NLines
 !MB      DO J=1,1  ! previous line was commented out
-         CALL BMG2_SymStd_LineSolve_C(TDG(2,J,1),&
+         CALL BMG2_SymStd_LineSolve_C_ml(TDG(2,J,1),&
      &                    TDG(2,J,2), TDG(1,J,4), &
      &                    RWORK(MULT*8 + 1), &
      &                    2*SIZE, SIZE,&

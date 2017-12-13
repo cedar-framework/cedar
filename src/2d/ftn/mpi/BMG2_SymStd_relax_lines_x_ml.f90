@@ -197,7 +197,7 @@
          MULT = 0
          DO J=JBEG,J1,2
 
-            CALL BMG2_SymStd_LineSolve_B ( RWORK(MULT*8+1), &
+            CALL BMG2_SymStd_LineSolve_B_ml( RWORK(MULT*8+1), &
      &           RWORK(MULT*8+1), &
      &           RWORK(CP*NLINES*8 + AT),&
      &           RWORK(CP*NLINES*8 + BT),&

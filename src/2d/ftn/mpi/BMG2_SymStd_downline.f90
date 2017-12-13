@@ -56,7 +56,7 @@
       NLines = 0
       DO J=JBEG, JJ-1, 2
 
-         CALL BMG2_SymStd_LineSolve_A(SOR(2,J,1),&
+         CALL BMG2_SymStd_LineSolve_A_ml(SOR(2,J,1),&
      &             SOR(2,J,2), Q(2,J),&
      &             RWORK(MULT*8+1),&
      &             NPts, DOCHOL(K))
@@ -169,7 +169,7 @@
 
          MULT = 0
          DO J=1, NLines
-            CALL BMG2_SymStd_LineSolve_A(TDG(2,J,1),&
+            CALL BMG2_SymStd_LineSolve_A_ml(TDG(2,J,1),&
      &                TDG(2,J,2), TDG(2,J,4),&
      &                RWORK(MULT*8+1),&
      &                NPts, FLG)
