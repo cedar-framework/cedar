@@ -25,13 +25,26 @@
       INTEGER I, J, MULT, grank
 
       REAL*8 D, OD
-      INTEGER DOCHOL(100)
+      INTEGER DOCHOL(200)
+      integer flag_stride
       SAVE    DOCHOL
 
+      if (jbeg .eq. 2) then
+         flag_stride = 0
+      else
+         flag_stride = 100
+      endif
 
-      IF (DOCHOL(100).ne.123456) then
+      IF ((JBEG .eq. 2) .and. (DOCHOL(100).ne.123456)) then
          DOCHOL(100) = 123456
          DO I=1,99
+            DOCHOL(I) = -1
+         ENDDO
+      ENDIF
+
+      IF ((JBEG .eq. 3) .and. (DOCHOL(200).ne.123456)) then
+         DOCHOL(200) = 123456
+         DO I=101,199
             DOCHOL(I) = -1
          ENDDO
       ENDIF
@@ -59,7 +72,7 @@
          CALL BMG2_SymStd_LineSolve_A_ml(SOR(2,J,1),&
      &             SOR(2,J,2), Q(2,J),&
      &             RWORK(MULT*8+1),&
-     &             NPts, DOCHOL(K))
+     &             NPts, DOCHOL(K+flag_stride))
 
          MULT = MULT + 1
 
@@ -122,7 +135,7 @@
             CALL A_Wrapper(&
      &           TDG(TDSX_SOR_PTRS(kl)),&
      &           RWORK, N, pgSIZE, &
-     &           JBEG, JJ, NLines, DOCHOL(k))
+     &           JBEG, JJ, NLines, DOCHOL(k+flag_stride))
 
 
             !
@@ -162,7 +175,7 @@
 
       END DO
 
-      DOCHOL(k) = 1
+      DOCHOL(k+flag_stride) = 1
 
 
       RETURN
