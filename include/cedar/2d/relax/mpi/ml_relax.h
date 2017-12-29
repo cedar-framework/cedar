@@ -1,6 +1,8 @@
 #ifndef CEDAR_2D_KERNEL_RELAX_MPI_ML_H
 #define CEDAR_2D_KERNEL_RELAX_MPI_ML_H
 
+#include <stdbool.h>
+
 #include "cedar/2d/ftn/BMG_parameters_c.h"
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 #include <cedar/2d/mpi/msg_exchanger.h>
@@ -22,7 +24,8 @@ extern "C" {
 	                                      int nog, int nstencil, int irelax_sym, int updown,
 	                                      len_t *datadist, real_t *rwork, len_t nmsgr,
 	                                      MPI_Fint mpicomm, MPI_Fint *xcomm, int nolx,
-	                                      int *tdsx_sor_ptrs, len_t nsor, real_t *tdg, void *halof);
+	                                      int *tdsx_sor_ptrs, len_t nsor, real_t *tdg,
+	                                      bool *fact_flags, void *halof);
 }
 
 namespace cedar { namespace cdr2 { namespace mpi {
@@ -66,6 +69,7 @@ class ml_line_relaxer
 {
 public:
 	ml_line_relaxer(relax_dir dir) : dir(dir) {}
+	~ml_line_relaxer() { delete[] fact_flags; }
 
 	void init_ndim(int nproc, int nproc_other, int coord, int coord_other, len_t nlines, len_t nlines_other,
 	               int min_gsz, int nog, MPI_Comm comm)
@@ -86,6 +90,9 @@ public:
 			int rwork_size = std::max(4 * nlines_other * nproc + 5 * nlines,
 			                          4 * nlines * nproc_other + 5 * nlines_other);
 			rwork.init(rwork_size);
+			fact_flags = new bool[2 * nog];
+			for (auto i : range<std::size_t>(2 * nog))
+				fact_flags[i] = true;
 	}
 
 
@@ -151,12 +158,13 @@ public:
 		len_t * datadist = get_datadist<halo_exchanger>(halof, k, dir);
 
 		std::function<void(int k, real_t *so, real_t *qf, real_t *q,
-	                                      real_t *sor, real_t *res,
-	                                      len_t II, len_t JJ, len_t igs, len_t jgs,
-	                                      int nog, int nstencil, int irelax_sym, int updown,
-	                                      len_t *datadist, real_t *rwork, len_t nmsgr,
-	                                      MPI_Fint mpicomm, MPI_Fint *xcomm, int nolx,
-		                   int *tdsx_sor_ptrs, len_t nsor, real_t *tdg, void *halof)> relax_lines;
+		                   real_t *sor, real_t *res,
+		                   len_t II, len_t JJ, len_t igs, len_t jgs,
+		                   int nog, int nstencil, int irelax_sym, int updown,
+		                   len_t *datadist, real_t *rwork, len_t nmsgr,
+		                   MPI_Fint mpicomm, MPI_Fint *xcomm, int nolx,
+		                   int *tdsx_sor_ptrs, len_t nsor, real_t *tdg,
+		                   bool *fact_flags, void *halof)> relax_lines;
 
 		if (dir == relax_dir::x)
 			relax_lines = MPI_BMG2_SymStd_relax_lines_x_ml;
@@ -166,17 +174,19 @@ public:
 		            kf, nstencil, BMG_RELAX_SYM, updown,
 		            datadist, rwork.data(), rwork.len(0),
 		            fcomm, this->comms.data(), this->nlevels,
-		            sor_ptrs.data(), tdg.len(0), tdg.data(), halof);
+		            sor_ptrs.data(), tdg.len(0), tdg.data(),
+		            fact_flags, halof);
 	}
 
 
 protected:
-	relax_dir dir;
-	int nlevels;
-	array<int, 1> sor_ptrs;
-	array<real_t, 1> tdg;
-	array<real_t, 1> rwork;
-	array<MPI_Fint, 2> comms;
+	relax_dir dir;             /** Direction of simultaneously relaxed unknowns */
+	int nlevels;               /** Number of levels in tridiagonal solve */
+	array<int, 1> sor_ptrs;    /** Pointers into tridiagonal workspace */
+	bool *fact_flags;          /** flags for factorization */
+	array<real_t, 1> tdg;      /** Tridiagonal solver workspace array */
+	array<real_t, 1> rwork;    /** Buffer workspace for tridiagonal solver */
+	array<MPI_Fint, 2> comms;  /** Communicators for ml lines */
 };
 
 }}}

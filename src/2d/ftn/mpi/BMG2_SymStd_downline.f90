@@ -2,8 +2,9 @@
      &                JBEG, RWORK, NPts, NLines, &
      &                K, NOLX, XCOMM, NSOR, TDG, &
      &                NMSGr, NOG, TDSX_SOR_PTRS,&
-     &                pgSIZE)
+     &                pgSIZE, fact_flags)
 
+      use iso_c_binding, only: c_bool
       IMPLICIT NONE
 
       INCLUDE 'mpif.h'
@@ -25,29 +26,18 @@
       INTEGER I, J, MULT, grank
 
       REAL*8 D, OD
-      INTEGER DOCHOL(200)
-      integer flag_stride
-      SAVE    DOCHOL
+      integer :: flag_stride
+      logical(c_bool) :: fact_flags(2 * NOG)
+      ! Flag for the interface system
+      logical(c_bool) :: inter_flag
 
+      ! always factorize interface systems
+      inter_flag = .true.
       if (jbeg .eq. 2) then
          flag_stride = 0
       else
-         flag_stride = 100
+         flag_stride = NOLX
       endif
-
-      IF ((JBEG .eq. 2) .and. (DOCHOL(100).ne.123456)) then
-         DOCHOL(100) = 123456
-         DO I=1,99
-            DOCHOL(I) = -1
-         ENDDO
-      ENDIF
-
-      IF ((JBEG .eq. 3) .and. (DOCHOL(200).ne.123456)) then
-         DOCHOL(200) = 123456
-         DO I=101,199
-            DOCHOL(I) = -1
-         ENDDO
-      ENDIF
 
       CALL MPI_COMM_RANK(XCOMM(1,NOLX), grank, IERR)
 
@@ -72,7 +62,7 @@
          CALL BMG2_SymStd_LineSolve_A_ml(SOR(2,J,1),&
      &             SOR(2,J,2), Q(2,J),&
      &             RWORK(MULT*8+1),&
-     &             NPts, DOCHOL(K+flag_stride))
+     &             NPts, fact_flags(K+flag_stride))
 
          MULT = MULT + 1
 
@@ -135,7 +125,7 @@
             CALL A_Wrapper(&
      &           TDG(TDSX_SOR_PTRS(kl)),&
      &           RWORK, N, pgSIZE, &
-     &           JBEG, JJ, NLines, DOCHOL(k+flag_stride))
+     &           JBEG, JJ, NLines, inter_flag)
 
 
             !
@@ -175,7 +165,7 @@
 
       END DO
 
-      DOCHOL(k+flag_stride) = 1
+      fact_flags(k+flag_stride) = .false.
 
 
       RETURN
@@ -186,13 +176,14 @@
       SUBROUTINE A_Wrapper(TDG, RWORK, Npts, &
      &                     pgSIZE, JBEG, JJ, NLines, FLG)
 
+         use iso_c_binding, only: c_bool
          IMPLICIT NONE
 
          INTEGER JBEG, JJ, Npts, NLines, pgSIZE
 
          REAL*8 TDG(2*pgSIZE+2,NLines,4)
          REAL*8 RWORK(8*NLines)
-         INTEGER FLG
+         logical(c_bool) :: FLG
 
          INTEGER MULT, J
 

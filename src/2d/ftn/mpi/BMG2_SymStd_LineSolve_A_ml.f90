@@ -42,6 +42,7 @@
 !
 ! ======================================================================
 
+      use iso_c_binding, only: c_bool
       IMPLICIT NONE
 
 ! ---------------------------
@@ -55,7 +56,7 @@
       INTEGER  NPts
       REAL*8   D(NPts), OD(NPts+1), Q(NPts)
       REAL*8   IED(8)
-      INTEGER  FLG
+      logical(c_bool) :: FLG
 
 ! ----------------------------
 !     Local Declarations
@@ -116,7 +117,7 @@
         ! and store it over SOR
         !
 
-        IF (FLG .LT. 0) THEN
+        IF (FLG) THEN
            CALL DPTTRF(NPts-2, D(2), OD(3), INFO)
         ENDIF
 
