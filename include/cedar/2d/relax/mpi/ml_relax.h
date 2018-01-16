@@ -68,8 +68,8 @@ template<>
 class ml_line_relaxer
 {
 public:
-	ml_line_relaxer(relax_dir dir) : dir(dir) {}
-	~ml_line_relaxer() { delete[] fact_flags; }
+	ml_line_relaxer(relax_dir dir) : dir(dir), initialized(false) {}
+	~ml_line_relaxer() { if (initialized) delete[] fact_flags; }
 
 	void init_ndim(int nproc, int nproc_other, int coord, int coord_other, len_t nlines, len_t nlines_other,
 	               int min_gsz, int nog, MPI_Comm comm)
@@ -91,6 +91,7 @@ public:
 			                          4 * nlines * nproc_other + 5 * nlines_other);
 			rwork.init(rwork_size);
 			fact_flags = new bool[2 * nog];
+			initialized = true;
 			for (auto i : range<std::size_t>(2 * nog))
 				fact_flags[i] = true;
 	}
@@ -187,6 +188,7 @@ protected:
 	array<real_t, 1> tdg;      /** Tridiagonal solver workspace array */
 	array<real_t, 1> rwork;    /** Buffer workspace for tridiagonal solver */
 	array<MPI_Fint, 2> comms;  /** Communicators for ml lines */
+	bool initialized;
 };
 
 }}}
