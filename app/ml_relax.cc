@@ -91,13 +91,13 @@ int main(int argc, char *argv[])
 
 	kreg.setup_relax_x(so, sor);
 
+	MPI_Barrier(MPI_COMM_WORLD); // synchronize before timing solve
+
 	timer_begin("line-relax");
 	for (auto i : range(niters)) {
 		kreg.relax_lines_x(so, x, b, sor, res, cycle::Dir::DOWN);
 	}
 	timer_end("line-relax");
-
-	MPI_Barrier(MPI_COMM_WORLD); // synchronize before timing solve
 
 	timer_save("timings.json");
 
