@@ -78,6 +78,7 @@ public:
 			MPI_BMG2_SymStd_SETUP_trisolve(nproc, nlines, min_gsz, nog,
 			                               &nspace, &this->nlevels);
 			comms.init(2, this->nlevels - 1);
+			comms.set(MPI_COMM_NULL);
 			MPI_Comm gcomm;
 			MPI_Comm_split(comm, coord_other, coord, &gcomm);
 			comms(0, this->nlevels - 2) = MPI_Comm_c2f(gcomm);
