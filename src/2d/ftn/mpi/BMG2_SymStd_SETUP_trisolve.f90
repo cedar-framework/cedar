@@ -33,6 +33,10 @@
       NL = NLines
       NSPACE = 0
 
+      if (NOG .eq. 1) then
+         NOG = NOG + 1
+      endif
+
       DO kg = 2, NOG
 
          NL = 1 + ( NLines - 1 ) / 2**(kg-2)
