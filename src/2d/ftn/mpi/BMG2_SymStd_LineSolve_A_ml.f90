@@ -42,6 +42,7 @@
 !
 ! ======================================================================
 
+      use ModInterface
       use iso_c_binding, only: c_bool
       IMPLICIT NONE
 
@@ -117,8 +118,10 @@
         ! and store it over SOR
         !
 
-        IF (FLG) THEN
-           CALL DPTTRF(NPts-2, D(2), OD(3), INFO)
+         IF (FLG) THEN
+            call ftimer_begin(C_CHAR_"tri-fact"//C_NULL_CHAR)
+            CALL DPTTRF(NPts-2, D(2), OD(3), INFO)
+            call ftimer_end(C_CHAR_"tri-fact"//C_NULL_CHAR)
         ENDIF
 
         !Initialize RHS vector to ZERO
@@ -135,7 +138,9 @@
         !
         ! Solve subsystem to get alpha's (for upper interface eqn)
         !
+        call ftimer_begin(C_CHAR_"tri-solve-alpha"//C_NULL_CHAR)
         CALL DPTTRS(NPts-2, 1,  D(2), OD(3), RHS(1), NPts-2, INFO)
+        call ftimer_end(C_CHAR_"tri-solve-alpha"//C_NULL_CHAR)
 
         !
         ! Should try to store this RHS vector in SOR somewhere
@@ -180,7 +185,9 @@
         !
         ! Solve subsystem to get betas's
         !
+        call ftimer_begin(C_CHAR_"tri-solve-beta"//C_NULL_CHAR)
         CALL DPTTRS(NPts-2, 1,  D(2), OD(3), RHS(1), NPts-2, INFO)
+        call ftimer_end(C_CHAR_"tri-solve-beta"//C_NULL_CHAR)
 
         !
         ! Should try to store this RHS vector in SOR somewhere

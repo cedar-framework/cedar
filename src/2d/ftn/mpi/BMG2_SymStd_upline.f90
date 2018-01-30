@@ -52,7 +52,7 @@
             ! Scatter Solution to processes in this subgroup
             !
             IF (XCOMM(2,kl) .NE. MPI_COMM_NULL) THEN
-               call ftimer_begin("comm-inter");
+               call ftimer_begin(C_CHAR_"comm-inter"//C_NULL_CHAR)
                if (My_L1_Rank .eq. 0) then
                   CALL MPI_SCATTER(RWORK(My_L1_Rank*NLINES*8+1),&
                        &              NLINES*8,&
@@ -63,7 +63,7 @@
                        &              NLINES*8,&
                        &              MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
                        &              MPI_DOUBLE_PRECISION,0,XCOMM(2,kl),IERR)
-                  call ftimer_end("comm-inter");
+                  call ftimer_end(C_CHAR_"comm-inter"//C_NULL_CHAR)
                endif
 
             !
@@ -114,7 +114,7 @@
       ! system
       !
 
-      call ftimer_begin("comm-inter");
+      call ftimer_begin(C_CHAR_"comm-inter"//C_NULL_CHAR)
       if (My_L2_Rank .eq. 0) then
          CALL MPI_SCATTER(RWORK(My_L2_Rank*NLINES*8+1),NLINES*8,&
               &     MPI_DOUBLE_PRECISION,MPI_IN_PLACE, NLINES*8, &
@@ -124,7 +124,7 @@
               &     MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
               &     MPI_DOUBLE_PRECISION,0,XCOMM(2,NOLX),IERR)
       endif
-      call ftimer_end("comm-inter");
+      call ftimer_end(C_CHAR_"comm-inter"//C_NULL_CHAR)
 
       !
       ! Pointers into RWORK

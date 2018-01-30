@@ -77,7 +77,7 @@
       ! Gather interface equations to head node
       !
       IF (pgSIZE .GT. 1) THEN
-         call ftimer_begin("comm-inter");
+         call ftimer_begin(C_CHAR_"comm-inter"//C_NULL_CHAR)
          if (myrank .eq. 0) then
             CALL MPI_GATHER(MPI_IN_PLACE, NLines*8, &
                  &        MPI_DOUBLE_PRECISION,&
@@ -91,7 +91,7 @@
                  &        MPI_DOUBLE_PRECISION,&
                  &        0, XCOMM(2,NOLX), IERR)
          endif
-         call ftimer_end("comm-inter");
+         call ftimer_end(C_CHAR_"comm-inter"//C_NULL_CHAR)
       END IF
 
 !     CALL DUMP_RWORK(RWORK, 0, pgSIZE, NLines)
@@ -143,7 +143,7 @@
             ! the group head node
             !
             IF (pgSIZE .GT. 1) THEN
-               call ftimer_begin("comm-inter");
+               call ftimer_begin(C_CHAR_"comm-inter"//C_NULL_CHAR)
                if (myrank .eq. 0) then
                   CALL MPI_GATHER(MPI_IN_PLACE, NLines*8, &
                        &              MPI_DOUBLE_PRECISION,&
@@ -157,7 +157,7 @@
                        &              MPI_DOUBLE_PRECISION,&
                        &              0, XCOMM(2,kl), IERR)
                endif
-               call ftimer_end("comm-inter");
+               call ftimer_end(C_CHAR_"comm-inter"//C_NULL_CHAR)
             END IF
 
 !           write(*,*) ''
