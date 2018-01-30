@@ -226,7 +226,9 @@
 
          ! ====================================================
 
+         call ftimer_begin("comm-halo")
          call halo_exchange(K, Q, halof)
+         call ftimer_end("comm-halo")
 
       ENDDO
 

@@ -4,6 +4,7 @@
      &                NMSGr, NOG, TDSX_SOR_PTRS,&
      &                SIZE)
 
+      use ModInterface
       IMPLICIT NONE
 
       INCLUDE 'mpif.h'
@@ -51,6 +52,7 @@
             ! Scatter Solution to processes in this subgroup
             !
             IF (XCOMM(2,kl) .NE. MPI_COMM_NULL) THEN
+               call ftimer_begin("comm-inter");
                if (My_L1_Rank .eq. 0) then
                   CALL MPI_SCATTER(RWORK(My_L1_Rank*NLINES*8+1),&
                        &              NLINES*8,&
@@ -61,6 +63,7 @@
                        &              NLINES*8,&
                        &              MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
                        &              MPI_DOUBLE_PRECISION,0,XCOMM(2,kl),IERR)
+                  call ftimer_end("comm-inter");
                endif
 
             !
@@ -111,6 +114,7 @@
       ! system
       !
 
+      call ftimer_begin("comm-inter");
       if (My_L2_Rank .eq. 0) then
          CALL MPI_SCATTER(RWORK(My_L2_Rank*NLINES*8+1),NLINES*8,&
               &     MPI_DOUBLE_PRECISION,MPI_IN_PLACE, NLINES*8, &
@@ -120,6 +124,7 @@
               &     MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
               &     MPI_DOUBLE_PRECISION,0,XCOMM(2,NOLX),IERR)
       endif
+      call ftimer_end("comm-inter");
 
       !
       ! Pointers into RWORK
