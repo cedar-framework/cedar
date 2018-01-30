@@ -69,7 +69,13 @@ class ml_line_relaxer
 {
 public:
 	ml_line_relaxer(relax_dir dir) : dir(dir), initialized(false) {}
-	~ml_line_relaxer() { if (initialized) delete[] fact_flags; }
+	~ml_line_relaxer()
+	{
+		if (initialized) {
+			for (std::size_t i = 0; i < fact_flags.size(); i++)
+				delete[] fact_flags[i];
+		}
+	}
 
 	void init_ndim(int nproc, int nproc_other, int coord, int coord_other, len_t nlines, len_t nlines_other,
 	               int min_gsz, int nog, MPI_Comm comm)
@@ -83,18 +89,21 @@ public:
 			MPI_Comm_split(comm, coord_other, coord, &gcomm);
 			comms(0, this->nlevels - 2) = MPI_Comm_c2f(gcomm);
 			MPI_BMG2_SymStd_SETUP_comm(comms.data(), this->nlevels, coord+1, min_gsz);
-			sor_ptrs.init(this->nlevels);
+			sor_ptrs.emplace_back(this->nlevels);
 			BMG2_SymStd_SETUP_ADD_SOR_PTRS(nproc, nlines, min_gsz, this->nlevels,
-			                               &workspace_size, sor_ptrs.data());
+			                               &workspace_size, sor_ptrs.back().data());
 			workspace_size += (nlines + 2)*(nlines_other + 2)*4;
-			tdg.init(workspace_size);
-			int rwork_size = std::max(4 * nlines_other * nproc + 5 * nlines,
-			                          4 * nlines * nproc_other + 5 * nlines_other);
-			rwork.init(rwork_size);
-			fact_flags = new bool[2 * nog];
+			tdg.emplace_back(workspace_size);
+			// this bound may not be correct!
+			int rwork_size = std::max(8 * nlines_other * nproc + 8 * nlines,
+			                          8 * nlines * nproc_other + 8 * nlines_other);
+			rwork.emplace_back(rwork_size);
+			bool *fflags;
+			fflags = new bool[2 * nog];
 			initialized = true;
 			for (auto i : range<std::size_t>(2 * nog))
-				fact_flags[i] = true;
+				fflags[i] = true;
+			fact_flags.push_back(fflags);
 	}
 
 
@@ -174,21 +183,21 @@ public:
 		relax_lines(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
 		            so.len(0), so.len(1), topo.is(0), topo.is(1),
 		            kf, nstencil, BMG_RELAX_SYM, updown,
-		            datadist, rwork.data(), rwork.len(0),
+		            datadist, rwork[kf-k].data(), rwork[kf-k].len(0),
 		            fcomm, this->comms.data(), this->nlevels,
-		            sor_ptrs.data(), tdg.len(0), tdg.data(),
-		            fact_flags, halof);
+		            sor_ptrs[kf-k].data(), tdg[kf-k].len(0), tdg[kf-k].data(),
+		            fact_flags[kf-k], halof);
 	}
 
 
 protected:
-	relax_dir dir;             /** Direction of simultaneously relaxed unknowns */
-	int nlevels;               /** Number of levels in tridiagonal solve */
-	array<int, 1> sor_ptrs;    /** Pointers into tridiagonal workspace */
-	bool *fact_flags;          /** flags for factorization */
-	array<real_t, 1> tdg;      /** Tridiagonal solver workspace array */
-	array<real_t, 1> rwork;    /** Buffer workspace for tridiagonal solver */
-	array<MPI_Fint, 2> comms;  /** Communicators for ml lines */
+	relax_dir dir;                          /** Direction of simultaneously relaxed unknowns */
+	int nlevels;                            /** Number of levels in tridiagonal solve */
+	std::vector<array<int, 1>> sor_ptrs;    /** Pointers into tridiagonal workspace */
+	std::vector<bool*> fact_flags;          /** flags for factorization */
+	std::vector<array<real_t, 1>> tdg;      /** Tridiagonal solver workspace array */
+	std::vector<array<real_t, 1>> rwork;    /** Buffer workspace for tridiagonal solver */
+	array<MPI_Fint, 2> comms;               /** Communicators for ml lines */
 	bool initialized;
 };
 
