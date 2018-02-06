@@ -118,7 +118,7 @@ public:
 		auto & sod = const_cast<mpi::stencil_op<sten>&>(so);
 
 		auto & topo = sod.grid();
-		int min_gsz = 3;
+		int min_gsz = params.min_gsz;
 
 		if (dir == relax_dir::x) {
 			init_ndim(topo.nproc(0), topo.nproc(1),
