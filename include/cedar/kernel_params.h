@@ -14,6 +14,7 @@ namespace cedar
 		bool relax_symmetric;
 		bool definite;
 		bool ml_relax;
+		int min_gsz;
 
 		int per_mask() const {
 			int mask = 0;

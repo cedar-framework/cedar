@@ -16,6 +16,7 @@ std::shared_ptr<kernel_params> build_kernel_params(config::reader & conf)
 	params->relax_symmetric = true;
 	params->definite = true;
 	params->ml_relax = conf.get<bool>("solver.ml-relax", false);
+	params->min_gsz = conf.get<int>("solver.min-gsz", 3);
 
 	return params;
 }

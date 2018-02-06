@@ -38,19 +38,10 @@ namespace cedar {
 
 
 		void end(std::string label) {
-			if (stimes[lvl].find(label) == stimes[lvl].end()) {
-				log::error << label << " timer never began!" << std::endl;
-			}
-
 			auto endtime = timer_util<mmode>::now();
 			auto elapsed = timer_util<mmode>::duration(stimes[lvl][label], endtime);
-			if (ltimes[lvl].find(label) == ltimes[lvl].end()) {
-				ltimes[lvl][label] = elapsed;
-				counts[lvl][label] = 1;
-			} else {
-				ltimes[lvl][label] += elapsed;
-				counts[lvl][label] += 1;
-			}
+			ltimes[lvl][label] += elapsed;
+			counts[lvl][label] += 1;
 		}
 		void up() { lvl--; }
 		void down() {
