@@ -47,7 +47,6 @@
 !
 ! ======================================================================
 
-      use ModInterface
       IMPLICIT NONE
 
 ! -----------------------------
@@ -105,9 +104,7 @@
       F(2) = F(2) - OD(2)*F(1)
       F(NPts-1) = F(NPts-1) - OD(NPts)*F(NPts)
 
-      call ftimer_begin(C_CHAR_"tri-solve"//C_NULL_CHAR)
       CALL DPTTRS(NPts-2, 1, D(2), OD(3), F(2), NPts-2, INFO)
-      call ftimer_end(C_CHAR_"tri-solve"//C_NULL_CHAR)
 
       IF (INFO .NE. 0) THEN
          write(*,*) 'Uh oh...'
