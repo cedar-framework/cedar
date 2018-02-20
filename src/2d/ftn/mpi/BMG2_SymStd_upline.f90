@@ -2,8 +2,10 @@
      &                JBEG, RWORK, NPts, NLines, &
      &                K, NOLX, XCOMM, NSOR, TDG, &
      &                NMSGr, NOG, TDSX_SOR_PTRS,&
-     &                SIZE)
+     &                SIZE, shm_enabled, shm_buff,&
+     &                shm_len, shm_win)
 
+      use iso_c_binding, only: c_bool, c_int
       IMPLICIT NONE
 
       INCLUDE 'mpif.h'
@@ -22,7 +24,11 @@
 
       INTEGER SIZE, N, My_L1_Rank, My_L2_Rank, IERR, kl
 
-      INTEGER I, J, AT, FT, MULT, grank
+      INTEGER I, J, AT, FT, MULT, grank, idx
+      integer shm_win
+      integer(c_int) :: shm_len
+      real*8 shm_buff(shm_len)
+      logical(c_bool) :: shm_enabled
 
 ! =============================================================
 ! Loop over all lower levels
@@ -111,32 +117,67 @@
       ! system
       !
 
-      if (My_L2_Rank .eq. 0) then
-         CALL MPI_SCATTER(RWORK(My_L2_Rank*NLINES*8+1),NLINES*8,&
-              &     MPI_DOUBLE_PRECISION,MPI_IN_PLACE, NLINES*8, &
-              &     MPI_DOUBLE_PRECISION,0,XCOMM(2,NOLX),IERR)
+      if (shm_enabled) then
+         if (My_L2_Rank .eq. 0) then
+            call MPI_Win_lock_all(MPI_MODE_NOCHECK, shm_win, ierr)
+            do k=0, SIZE-1
+               do i=1, nlines
+                  do j=1, 8
+                     idx = k * (nlines*8) + (i*8 + j) + 1
+                     shm_buff(idx) = rwork(idx)
+                  enddo
+               enddo
+            enddo
+            call MPI_Win_sync(shm_win, ierr)
+         endif
+         call MPI_Barrier(XCOMM(2,NOLX), ierr)
       else
-         CALL MPI_SCATTER(0.0d0,NLINES*8,&
-              &     MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
-              &     MPI_DOUBLE_PRECISION,0,XCOMM(2,NOLX),IERR)
+         if (My_L2_Rank .eq. 0) then
+            CALL MPI_SCATTER(RWORK(My_L2_Rank*NLINES*8+1),NLINES*8,&
+                 &     MPI_DOUBLE_PRECISION,MPI_IN_PLACE, NLINES*8, &
+                 &     MPI_DOUBLE_PRECISION,0,XCOMM(2,NOLX),IERR)
+         else
+            CALL MPI_SCATTER(0.0d0,NLINES*8,&
+                 &     MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
+                 &     MPI_DOUBLE_PRECISION,0,XCOMM(2,NOLX),IERR)
+         endif
       endif
+
+      ! call ml_relax_shm_up(ml_obj, rwork)
 
       !
       ! Pointers into RWORK
       !
-      MULT = 0
-      DO J=JBEG,JJ-1,2
-!MB      DO J=JBEG,JBEG  ! previous line was commented out
 
-         CALL BMG2_SymStd_LineSolve_C_ml(SOR(2,J,1),&
-     &        SOR(2,J,2), Q(1,J),&
-     &        RWORK(MULT*8 + 1),&
-     &        Npts, SIZE,&
-     &        My_L1_Rank)
+      if (shm_enabled) then
+         MULT = 0
+         DO J=JBEG,JJ-1,2
+            !MB      DO J=JBEG,JBEG  ! previous line was commented out
+            idx = My_L2_Rank * nlines * 8 + MULT * 8 + 1
+            CALL BMG2_SymStd_LineSolve_C_ml(SOR(2,J,1),&
+                 &        SOR(2,J,2), Q(1,J),&
+                 &        shm_buff(idx),&
+                 &        Npts, SIZE,&
+                 &        My_L1_Rank)
 
-         MULT = MULT+1
+            MULT = MULT+1
 
-      END DO
+         END DO
+      else
+         MULT = 0
+         DO J=JBEG,JJ-1,2
+            !MB      DO J=JBEG,JBEG  ! previous line was commented out
+
+            CALL BMG2_SymStd_LineSolve_C_ml(SOR(2,J,1),&
+                 &        SOR(2,J,2), Q(1,J),&
+                 &        RWORK(MULT*8 + 1),&
+                 &        Npts, SIZE,&
+                 &        My_L1_Rank)
+
+            MULT = MULT+1
+
+         END DO
+      endif
 
       RETURN
       END

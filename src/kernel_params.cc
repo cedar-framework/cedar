@@ -15,9 +15,17 @@ std::shared_ptr<kernel_params> build_kernel_params(config::reader & conf)
 	for (int i = 0; i < pers.size(); ++i) params->periodic[i] = pers[i];
 	params->relax_symmetric = true;
 	params->definite = true;
-	params->ml_relax = conf.get<bool>("solver.ml-relax", false);
-	params->min_gsz = conf.get<int>("solver.min-gsz", 3);
+	params->ml_relax.init(conf);
 
 	return params;
 }
+
+
+void ml_relax_params::init(config::reader & conf)
+{
+	this->enabled = conf.get<bool>("solver.ml-relax-enabled", false);
+	this->min_gsz = conf.get<int>("solver.ml-relax.min-gsz", 3);
+	this->shm = conf.get<bool>("solver.ml-relax.shm", false);
+}
+
 }

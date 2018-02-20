@@ -74,7 +74,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf),
 		void setup_relax_x(const mpi::stencil_op<sten> & so,
 		                   relax_stencil & sor)
 	{
-		if (this->params->ml_relax) {
+		if (this->params->ml_relax.enabled) {
 			xrelax.setup(*this->params, so, sor);
 		} else {
 			impls::mpi_setup_rbgs_x(*this->params, so, sor);
@@ -86,7 +86,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf),
 		void setup_relax_y(const mpi::stencil_op<sten> & so,
 		                   relax_stencil & sor)
 	{
-		if (this->params->ml_relax) {
+		if (this->params->ml_relax.enabled) {
 			yrelax.setup(*this->params, so, sor);
 		} else {
 			impls::mpi_setup_rbgs_y(*this->params, so, sor);
@@ -130,7 +130,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf),
 	                   mpi::grid_func &res,
 	                   cycle::Dir cdir)
 	{
-		if (this->params->ml_relax) {
+		if (this->params->ml_relax.enabled) {
 			xrelax.solve(*this->params, this->halof.get(), so, x, b, sor, res, cdir);
 		} else {
 			impls::mpi_relax_lines_x(*this->params, this->halof.get(), so, x, b, sor, res, cdir);
@@ -146,7 +146,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf),
 		                   mpi::grid_func &res,
 		                   cycle::Dir cdir)
 	{
-		if (this->params->ml_relax) {
+		if (this->params->ml_relax.enabled) {
 			yrelax.solve(*this->params, this->halof.get(), so, x, b, sor, res, cdir);
 		} else {
 			impls::mpi_relax_lines_y(*this->params, this->halof.get(), so, x, b, sor, res, cdir);

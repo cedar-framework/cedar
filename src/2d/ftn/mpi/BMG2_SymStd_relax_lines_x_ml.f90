@@ -6,7 +6,8 @@
      &                MPICOMM, &
      &                XCOMM, NOLX,&
      &                TDSX_SOR_PTRS, &
-     &                NSOR, TDG, fact_flags, halof)&
+     &                NSOR, TDG, fact_flags, &
+     &                shm_enabled, shm_buff, shm_len, shm_win, halof)&
      BIND(C, NAME='MPI_BMG2_SymStd_relax_lines_x_ml')
 
 ! ======================================================================
@@ -65,16 +66,19 @@
 
       integer(len_t), value :: iGs, jGs
 
-      integer, value :: MPICOMM
+      integer, value :: MPICOMM, shm_win
       integer :: XCOMM(2, 2:NOLX)
       integer(c_int) :: TDSX_SOR_PTRS(NOLX)
       integer(len_t) :: DATADIST(2,*)
       integer(c_int), value :: NOLX
+      integer(c_int), value :: shm_len
 
       real(real_t) :: B(II,JJ), Q(II,JJ), QF(II,JJ), SO(II+1,JJ+1,NStncl)
       real(real_t) :: SOR(II,JJ,2), RWORK(NMSGr), TDG(NSOR)
+      real(real_t) :: shm_buff(shm_len)
 
       logical(c_bool) :: fact_flags(2 * NOG)
+      logical(c_bool), value :: shm_enabled
       type(c_ptr) :: halof
 
 ! ----------------------------
@@ -178,7 +182,8 @@
      &            JBEG, RWORK, Npts, NLines, &
      &            K, NOLX, XCOMM, NSOR, TDG, &
      &            NMSGr, NOG, TDSX_SOR_PTRS,&
-     &            CP, fact_flags)
+     &            CP, fact_flags, shm_enabled,&
+     &            shm_buff, shm_len, shm_win)
 
 
          ! Pointers into RWORK
@@ -220,7 +225,7 @@
      &            JBEG, RWORK, Npts, NLines, &
      &            K, NOLX, XCOMM, NSOR, TDG, &
      &            NMSGr, NOG, TDSX_SOR_PTRS,&
-     &            CP)
+     &            CP, shm_enabled, shm_buff, shm_len, shm_win)
 
 
 

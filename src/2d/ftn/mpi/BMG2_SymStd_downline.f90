@@ -2,9 +2,10 @@
      &                JBEG, RWORK, NPts, NLines, &
      &                K, NOLX, XCOMM, NSOR, TDG, &
      &                NMSGr, NOG, TDSX_SOR_PTRS,&
-     &                pgSIZE, fact_flags)
+     &                pgSIZE, fact_flags, shm_enabled,&
+     &                shm_buff, shm_len, shm_win)
 
-      use iso_c_binding, only: c_bool
+      use iso_c_binding, only: c_bool, c_int
       IMPLICIT NONE
 
       INCLUDE 'mpif.h'
@@ -23,13 +24,17 @@
 
       INTEGER pgSIZE, N, MyRank, IERR, kl
 
-      INTEGER I, J, MULT, grank
+      INTEGER I, J, MULT, grank, idx
+      integer(c_int) :: shm_len
 
       REAL*8 D, OD
+      real*8 shm_buff(shm_len)
       integer :: flag_stride
+      integer :: shm_win
       logical(c_bool) :: fact_flags(2 * NOG)
       ! Flag for the interface system
       logical(c_bool) :: inter_flag
+      logical(c_bool) :: shm_enabled
 
       ! always factorize interface systems
       inter_flag = .true.
@@ -68,26 +73,47 @@
 
       END DO
 
-
-
       NLines = MULT
 
       !
       ! Gather interface equations to head node
       !
       IF (pgSIZE .GT. 1) THEN
-         if (myrank .eq. 0) then
-            CALL MPI_GATHER(MPI_IN_PLACE, NLines*8, &
-                 &        MPI_DOUBLE_PRECISION,&
-                 &        RWORK, NLines*8, &
-                 &        MPI_DOUBLE_PRECISION,&
-                 &        0, XCOMM(2,NOLX), IERR)
+         if (shm_enabled) then
+            call MPI_Win_lock_all(MPI_MODE_NOCHECK, shm_win, ierr)
+            do i=1, nlines
+               do j=1, 8
+                  idx = myrank * (nlines*8) + (i*8 + j) + 1
+                  shm_buff(idx) = rwork((i*8 + j) + 1)
+               enddo
+            enddo
+            call MPI_Win_sync(shm_win, ierr)
+            call MPI_Barrier(XCOMM(2,NOLX), ierr)
+
+            if ((NOLX .eq. 2) .and. (MyRank .eq. 0)) then
+               do k=0,pgsize
+                  do i=1, nlines
+                     do j=1,8
+                        idx = (k * nlines * 8) + (i*8 + j) + 1
+                        rwork(idx) = shm_buff(idx)
+                     enddo
+                  enddo
+               enddo
+            endif
          else
-            CALL MPI_GATHER(RWORK, NLines*8, &
-                 &        MPI_DOUBLE_PRECISION,&
-                 &        0.0d0, NLines*8, &
-                 &        MPI_DOUBLE_PRECISION,&
-                 &        0, XCOMM(2,NOLX), IERR)
+            if (myrank .eq. 0) then
+               CALL MPI_GATHER(MPI_IN_PLACE, NLines*8, &
+                    &        MPI_DOUBLE_PRECISION,&
+                    &        RWORK, NLines*8, &
+                    &        MPI_DOUBLE_PRECISION,&
+                    &        0, XCOMM(2,NOLX), IERR)
+            else
+               CALL MPI_GATHER(RWORK, NLines*8, &
+                    &        MPI_DOUBLE_PRECISION,&
+                    &        0.0d0, NLines*8, &
+                    &        MPI_DOUBLE_PRECISION,&
+                    &        0, XCOMM(2,NOLX), IERR)
+            endif
          endif
       END IF
 
@@ -109,10 +135,17 @@
             ! system into TDG data structure.
             !
 
-            CALL BMG2_SymStd_RWork_2_TDG(&
-     &           TDG(TDSX_SOR_PTRS(kl)),&
-     &           RWORK, pgSIZE, NLines, N,&
-     &           K, kl)
+            if (shm_enabled .and. (kl .eq. NOLX-1)) then
+               CALL BMG2_SymStd_RWork_2_TDG(&
+                    &           TDG(TDSX_SOR_PTRS(kl)),&
+                    &           shm_buff, pgSIZE, NLines, N,&
+                    &           K, kl)
+            else
+               CALL BMG2_SymStd_RWork_2_TDG(&
+                    &           TDG(TDSX_SOR_PTRS(kl)),&
+                    &           RWORK, pgSIZE, NLines, N,&
+                    &           K, kl)
+            endif
 
 !           write(*,*) ''
 !           CALL dump_TDG(
