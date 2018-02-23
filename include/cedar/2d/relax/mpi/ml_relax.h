@@ -14,7 +14,7 @@ extern "C" {
 	void MPI_BMG2_SymStd_SETUP_trisolve(int nproc, len_t nlines, int min_gsz, int nog, int *nspace,
 	                               int *nol);
 	void BMG2_SymStd_SETUP_ADD_SOR_PTRS(int nproc, len_t nlines, int min_gsz, int nol, int *poffset,
-	                                    int *psor_lev);
+	                                    int *psor_lev, bool shm_enabled, int node_size, int shm_size);
 	void MPI_BMG2_SymStd_SETUP_comm(MPI_Fint *comm, int nol, int rank, int min_gsz);
 	void MPI_BMG2_SymStd_SETUP_lines_x(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl);
 	void MPI_BMG2_SymStd_SETUP_lines_y(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl);
@@ -92,7 +92,7 @@ public:
 			MPI_BMG2_SymStd_SETUP_comm(comms.data(), this->nlevels, coord+1, min_gsz);
 			sor_ptrs.emplace_back(this->nlevels);
 			BMG2_SymStd_SETUP_ADD_SOR_PTRS(nproc, nlines, min_gsz, this->nlevels,
-			                               &workspace_size, sor_ptrs.back().data());
+			                               &workspace_size, sor_ptrs.back().data(), shm, 0, 0);
 			workspace_size += (nlines + 2)*(nlines_other + 2)*4;
 			tdg.emplace_back(workspace_size);
 			// this bound may not be correct!
@@ -136,18 +136,21 @@ public:
 		// add space for shm level
 		nspace += (2 * shm_size + 2) * nlines * 4;
 		// add shared memory level
-		this->nlevels++;
+		if (this->nlevels > 2)
+			this->nlevels++;
 
 		comms.init(2, this->nlevels - 1);
 		comms.set(MPI_COMM_NULL);
 		comms(0, this->nlevels - 2) = MPI_Comm_c2f(linecomm);
 		comms(1, this->nlevels - 2) = MPI_Comm_c2f(shm_comm);
-		comms(0, this->nlevels - 3) = MPI_Comm_c2f(node_comm);
+		if (this->nlevels > 2)
+			comms(0, this->nlevels - 3) = MPI_Comm_c2f(node_comm);
 
 		if (shm_rank == 0) {
 			int myproc;
 			MPI_Comm_rank(node_comm, &myproc);
-			MPI_BMG2_SymStd_SETUP_comm(comms.data(), this->nlevels-1, myproc+1, min_gsz);
+			if (this->nlevels > 2)
+				MPI_BMG2_SymStd_SETUP_comm(comms.data(), this->nlevels-1, myproc+1, min_gsz);
 		}
 	}
 
@@ -161,7 +164,7 @@ public:
 			init_comms_shm(comm, coord, coord_other, nlines, min_gsz, nog);
 			MPI_Comm_size(shm_comm, &shm_size);
 			shm_len = shm_size * nlines * 8;
-			MPI_Win_allocate_shared(shm_len, 1, MPI_INFO_NULL, shm_comm, &shm_buff, &shm_win);
+			MPI_Win_allocate_shared(shm_len*sizeof(real_t), 1, MPI_INFO_NULL, shm_comm, &shm_buff, &shm_win);
 		}
 
 		int node_count;
@@ -169,13 +172,10 @@ public:
 		MPI_Comm_size(shm_comm, &shm_size);
 
 		int workspace_size;
-		sor_ptrs.emplace_back(this->nlevels-1);
-		BMG2_SymStd_SETUP_ADD_SOR_PTRS(node_count, nlines, min_gsz, this->nlevels-1,
-		                               &workspace_size, sor_ptrs.back().data());
-		// add shm level
-		auto &ptrs = sor_ptrs.back();
-		ptrs(this->nlevels - 2) = 0;
-		ptrs(this->nlevels - 3) = (2*shm_size+2)*nlines*4;
+		sor_ptrs.emplace_back(this->nlevels);
+		BMG2_SymStd_SETUP_ADD_SOR_PTRS(node_count, nlines, min_gsz, this->nlevels,
+		                               &workspace_size, sor_ptrs.back().data(),
+		                               this->shm, node_count, shm_size);
 		workspace_size += (nlines + 2)*(nlines_other + 2)*4;
 		tdg.emplace_back(workspace_size);
 		// this bound may not be correct!

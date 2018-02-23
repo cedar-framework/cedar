@@ -23,7 +23,7 @@ std::shared_ptr<kernel_params> build_kernel_params(config::reader & conf)
 
 void ml_relax_params::init(config::reader & conf)
 {
-	this->enabled = conf.get<bool>("solver.ml-relax-enabled", false);
+	this->enabled = conf.get<bool>("solver.ml-relax.enabled", false);
 	this->min_gsz = conf.get<int>("solver.ml-relax.min-gsz", 3);
 	this->shm = conf.get<bool>("solver.ml-relax.shm", false);
 }

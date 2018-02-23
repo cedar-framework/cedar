@@ -129,6 +129,7 @@
                enddo
             enddo
             call MPI_Win_sync(shm_win, ierr)
+            call MPI_Win_unlock_all(shm_win, ierr)
          endif
          call MPI_Barrier(XCOMM(2,NOLX), ierr)
       else

@@ -89,6 +89,7 @@
             enddo
             call MPI_Win_sync(shm_win, ierr)
             call MPI_Barrier(XCOMM(2,NOLX), ierr)
+            call MPI_Win_unlock_all(shm_win, ierr)
 
             if ((NOLX .eq. 2) .and. (MyRank .eq. 0)) then
                do k=0,pgsize
