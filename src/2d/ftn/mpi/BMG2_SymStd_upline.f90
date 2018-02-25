@@ -24,7 +24,7 @@
 
       INTEGER SIZE, N, My_L1_Rank, My_L2_Rank, IERR, kl
 
-      INTEGER I, J, AT, FT, MULT, grank, idx
+      INTEGER I, J, AT, FT, MULT, grank, idx, rnum
       integer shm_win
       integer(c_int) :: shm_len
       real*8 shm_buff(shm_len)
@@ -120,10 +120,10 @@
       if (shm_enabled) then
          if (My_L2_Rank .eq. 0) then
             call MPI_Win_lock_all(MPI_MODE_NOCHECK, shm_win, ierr)
-            do k=0, SIZE-1
+            do rnum=0, SIZE-1
                do i=1, nlines
                   do j=1, 8
-                     idx = k * (nlines*8) + (i*8 + j) + 1
+                     idx = rnum * (nlines*8) + (i*8 + j) + 1
                      shm_buff(idx) = rwork(idx)
                   enddo
                enddo

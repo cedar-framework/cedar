@@ -24,7 +24,7 @@
 
       INTEGER pgSIZE, N, MyRank, IERR, kl
 
-      INTEGER I, J, MULT, grank, idx
+      INTEGER I, J, MULT, grank, idx, rnum
       integer(c_int) :: shm_len
 
       REAL*8 D, OD
@@ -92,10 +92,10 @@
             call MPI_Win_unlock_all(shm_win, ierr)
 
             if ((NOLX .eq. 2) .and. (MyRank .eq. 0)) then
-               do k=0,pgsize
+               do rnum=0,pgsize
                   do i=1, nlines
                      do j=1,8
-                        idx = (k * nlines * 8) + (i*8 + j) + 1
+                        idx = (rnum * nlines * 8) + (i*8 + j) + 1
                         rwork(idx) = shm_buff(idx)
                      enddo
                   enddo

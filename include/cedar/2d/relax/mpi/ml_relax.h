@@ -255,6 +255,7 @@ public:
 
 		// ibc = BMG_BCs_definite;
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+		MPI_Fint fwin = MPI_Win_c2f(shm_win);
 
 		len_t * datadist = get_datadist<halo_exchanger>(halof, k, dir);
 
@@ -277,7 +278,7 @@ public:
 		            datadist, rwork[kf-k].data(), rwork[kf-k].len(0),
 		            fcomm, this->comms.data(), this->nlevels,
 		            sor_ptrs[kf-k].data(), tdg[kf-k].len(0), tdg[kf-k].data(),
-		            fact_flags[kf-k], shm, shm_buff, shm_len, shm_win, halof);
+		            fact_flags[kf-k], shm, shm_buff, shm_len, fwin, halof);
 	}
 
 
