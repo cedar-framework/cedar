@@ -123,7 +123,7 @@
             do rnum=0, SIZE-1
                do i=1, nlines
                   do j=1, 8
-                     idx = rnum * (nlines*8) + (i*8 + j) + 1
+                     idx = rnum * (nlines*8) + ((i-1)*8 + j)
                      shm_buff(idx) = rwork(idx)
                   enddo
                enddo

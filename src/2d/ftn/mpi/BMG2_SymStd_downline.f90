@@ -83,8 +83,8 @@
             call MPI_Win_lock_all(MPI_MODE_NOCHECK, shm_win, ierr)
             do i=1, nlines
                do j=1, 8
-                  idx = myrank * (nlines*8) + (i*8 + j) + 1
-                  shm_buff(idx) = rwork((i*8 + j) + 1)
+                  idx = myrank * (nlines*8) + ((i-1)*8 + j)
+                  shm_buff(idx) = rwork((i-1)*8 + j)
                enddo
             enddo
             call MPI_Win_sync(shm_win, ierr)
@@ -95,7 +95,7 @@
                do rnum=0,pgsize
                   do i=1, nlines
                      do j=1,8
-                        idx = (rnum * nlines * 8) + (i*8 + j) + 1
+                        idx = (rnum * nlines * 8) + ((i-1)*8 + j)
                         rwork(idx) = shm_buff(idx)
                      enddo
                   enddo
