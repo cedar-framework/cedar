@@ -117,20 +117,6 @@
 
       if (shm_enabled) then
          call ml_relax_shm_up(puper, rwork, nlines)
-         ! if (My_L2_Rank .eq. 0) then
-         !    call MPI_Win_lock_all(MPI_MODE_NOCHECK, shm_win, ierr)
-         !    do rnum=0, SIZE-1
-         !       do i=1, nlines
-         !          do j=1, 8
-         !             idx = rnum * (nlines*8) + ((i-1)*8 + j)
-         !             shm_buff(idx) = rwork(idx)
-         !          enddo
-         !       enddo
-         !    enddo
-         !    call MPI_Win_sync(shm_win, ierr)
-         !    call MPI_Win_unlock_all(shm_win, ierr)
-         ! endif
-         ! call MPI_Barrier(XCOMM(2,NOLX), ierr)
       else
          if (My_L2_Rank .eq. 0) then
             CALL MPI_SCATTER(RWORK(My_L2_Rank*NLINES*8+1),NLINES*8,&
@@ -143,41 +129,24 @@
          endif
       endif
 
-      ! call ml_relax_shm_up(ml_obj, rwork)
-
       !
       ! Pointers into RWORK
       !
 
-      if (shm_enabled) then
-         ! MULT = 0
-         ! DO J=JBEG,JJ-1,2
-         !    !MB      DO J=JBEG,JBEG  ! previous line was commented out
-         !    idx = My_L2_Rank * nlines * 8 + MULT * 8 + 1
-         !    CALL BMG2_SymStd_LineSolve_C_ml(SOR(2,J,1),&
-         !         &        SOR(2,J,2), Q(1,J),&
-         !         &        shm_buff(idx),&
-         !         &        Npts, SIZE,&
-         !         &        My_L1_Rank)
+      MULT = 0
+      DO J=JBEG,JJ-1,2
+         !MB      DO J=JBEG,JBEG  ! previous line was commented out
 
-         !    MULT = MULT+1
+         CALL BMG2_SymStd_LineSolve_C_ml(SOR(2,J,1),&
+              &        SOR(2,J,2), Q(1,J),&
+              &        RWORK(MULT*8 + 1),&
+              &        Npts, SIZE,&
+              &        My_L1_Rank)
 
-         ! END DO
-      else
-         MULT = 0
-         DO J=JBEG,JJ-1,2
-            !MB      DO J=JBEG,JBEG  ! previous line was commented out
+         MULT = MULT+1
 
-            CALL BMG2_SymStd_LineSolve_C_ml(SOR(2,J,1),&
-                 &        SOR(2,J,2), Q(1,J),&
-                 &        RWORK(MULT*8 + 1),&
-                 &        Npts, SIZE,&
-                 &        My_L1_Rank)
+      END DO
 
-            MULT = MULT+1
-
-         END DO
-      endif
 
       RETURN
       END

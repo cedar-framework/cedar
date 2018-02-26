@@ -127,7 +127,7 @@
 
 ! ======================================================================
 
-      DO JBEG=JBEG_START, JBEG_START, JBEG_STRIDE
+      DO JBEG=JBEG_START, JBEG_END, JBEG_STRIDE
 
          IF ( NStncl.EQ.5 ) THEN
             !

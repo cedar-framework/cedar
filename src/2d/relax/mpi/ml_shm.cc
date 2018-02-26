@@ -43,16 +43,17 @@ void ml_relax_pup::unpack(real_t *rwork, int nlines)
 		real_t *seg;
 		MPI_Aint seg_size;
 		int disp_unit;
-		for (int proc = 0; proc < size; proc++) {
+		for (int proc = 1; proc < size; proc++) {
 			MPI_Win_shared_query(shm_win, proc, &seg_size, &disp_unit, &seg);
-			std::memcpy(rwork + (proc * nlines * 8), seg, nlines*8*sizeof(real_t));
+			std::memcpy(seg, rwork + (proc * nlines * 8), nlines*8*sizeof(real_t));
 		}
 	}
 
 	MPI_Win_sync(shm_win);
 	MPI_Barrier(shm_comm);
 
-	std::memcpy(rwork, shm_buff, nlines * 8 * sizeof(real_t));
+	if (rank != 0)
+		std::memcpy(rwork, shm_buff, nlines * 8 * sizeof(real_t));
 
 	MPI_Win_unlock_all(shm_win);
 }
