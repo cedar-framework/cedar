@@ -3,9 +3,10 @@
      &                K, NOLX, XCOMM, NSOR, TDG, &
      &                NMSGr, NOG, TDSX_SOR_PTRS,&
      &                pgSIZE, fact_flags, shm_enabled,&
-     &                shm_buff, shm_len, shm_win)
+     &                puper)
 
-      use iso_c_binding, only: c_bool, c_int
+      use iso_c_binding, only: c_bool, c_int, c_ptr
+      use ModInterface
       IMPLICIT NONE
 
       INCLUDE 'mpif.h'
@@ -25,16 +26,14 @@
       INTEGER pgSIZE, N, MyRank, IERR, kl
 
       INTEGER I, J, MULT, grank, idx, rnum
-      integer(c_int) :: shm_len
 
       REAL*8 D, OD
-      real*8 shm_buff(shm_len)
       integer :: flag_stride
-      integer :: shm_win
       logical(c_bool) :: fact_flags(2 * NOG)
       ! Flag for the interface system
       logical(c_bool) :: inter_flag
       logical(c_bool) :: shm_enabled
+      type(c_ptr) :: puper
 
       ! always factorize interface systems
       inter_flag = .true.
@@ -80,27 +79,7 @@
       !
       IF (pgSIZE .GT. 1) THEN
          if (shm_enabled) then
-            call MPI_Win_lock_all(MPI_MODE_NOCHECK, shm_win, ierr)
-            do i=1, nlines
-               do j=1, 8
-                  idx = myrank * (nlines*8) + ((i-1)*8 + j)
-                  shm_buff(idx) = rwork((i-1)*8 + j)
-               enddo
-            enddo
-            call MPI_Win_sync(shm_win, ierr)
-            call MPI_Barrier(XCOMM(2,NOLX), ierr)
-            call MPI_Win_unlock_all(shm_win, ierr)
-
-            if ((NOLX .eq. 2) .and. (MyRank .eq. 0)) then
-               do rnum=0,pgsize
-                  do i=1, nlines
-                     do j=1,8
-                        idx = (rnum * nlines * 8) + ((i-1)*8 + j)
-                        rwork(idx) = shm_buff(idx)
-                     enddo
-                  enddo
-               enddo
-            endif
+            call ml_relax_shm_down(puper, rwork, nlines)
          else
             if (myrank .eq. 0) then
                CALL MPI_GATHER(MPI_IN_PLACE, NLines*8, &
@@ -135,18 +114,10 @@
             ! If I'm the head node, copy inteface
             ! system into TDG data structure.
             !
-
-            if (shm_enabled .and. (kl .eq. NOLX-1)) then
-               CALL BMG2_SymStd_RWork_2_TDG(&
-                    &           TDG(TDSX_SOR_PTRS(kl)),&
-                    &           shm_buff, pgSIZE, NLines, N,&
-                    &           K, kl)
-            else
-               CALL BMG2_SymStd_RWork_2_TDG(&
-                    &           TDG(TDSX_SOR_PTRS(kl)),&
-                    &           RWORK, pgSIZE, NLines, N,&
-                    &           K, kl)
-            endif
+            CALL BMG2_SymStd_RWork_2_TDG(&
+                 &           TDG(TDSX_SOR_PTRS(kl)),&
+                 &           RWORK, pgSIZE, NLines, N,&
+                 &           K, kl)
 
 !           write(*,*) ''
 !           CALL dump_TDG(

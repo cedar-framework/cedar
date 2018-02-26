@@ -7,6 +7,7 @@
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 #include <cedar/2d/mpi/msg_exchanger.h>
 #include <cedar/2d/mpi/tausch_exchanger.h>
+#include <cedar/2d/relax/mpi/ml_shm.h>
 
 
 extern "C" {
@@ -25,8 +26,8 @@ extern "C" {
 	                                      len_t *datadist, real_t *rwork, len_t nmsgr,
 	                                      MPI_Fint mpicomm, MPI_Fint *xcomm, int nolx,
 	                                      int *tdsx_sor_ptrs, len_t nsor, real_t *tdg,
-	                                      bool *fact_flags, bool shm_enabled, real_t *shm_buff,
-	                                      int shm_len, MPI_Fint shm_win, void *halof);
+	                                      bool *fact_flags, bool shm_enabled,
+	                                      void *puper, void *halof);
 }
 
 namespace cedar { namespace cdr2 { namespace mpi {
@@ -162,9 +163,9 @@ public:
 		int shm_size;
 		if (not initialized) {
 			init_comms_shm(comm, coord, coord_other, nlines, min_gsz, nog);
-			MPI_Comm_size(shm_comm, &shm_size);
-			shm_len = shm_size * nlines * 8;
+			int shm_len = nlines * 8;
 			MPI_Win_allocate_shared(shm_len*sizeof(real_t), 1, MPI_INFO_NULL, shm_comm, &shm_buff, &shm_win);
+			puper.init(shm_comm, node_comm, shm_win, shm_buff);
 		}
 
 		int node_count;
@@ -266,8 +267,8 @@ public:
 		                   len_t *datadist, real_t *rwork, len_t nmsgr,
 		                   MPI_Fint mpicomm, MPI_Fint *xcomm, int nolx,
 		                   int *tdsx_sor_ptrs, len_t nsor, real_t *tdg,
-		                   bool *fact_flags, bool shm_enabled, real_t *shm_buff,
-		                   int shm_len, MPI_Fint shm_win, void *halof)> relax_lines;
+		                   bool *fact_flags, bool shm_enabled,
+		                   void *puper, void *halof)> relax_lines;
 
 		if (dir == relax_dir::x)
 			relax_lines = MPI_BMG2_SymStd_relax_lines_x_ml;
@@ -278,7 +279,7 @@ public:
 		            datadist, rwork[kf-k].data(), rwork[kf-k].len(0),
 		            fcomm, this->comms.data(), this->nlevels,
 		            sor_ptrs[kf-k].data(), tdg[kf-k].len(0), tdg[kf-k].data(),
-		            fact_flags[kf-k], shm, shm_buff, shm_len, fwin, halof);
+		            fact_flags[kf-k], shm, &puper, halof);
 	}
 
 
@@ -294,8 +295,8 @@ protected:
 	MPI_Comm node_comm;
 	MPI_Win shm_win;
 	double *shm_buff;
-	int shm_len;
 	bool shm;
+	ml_relax_pup puper;
 	bool initialized;
 };
 

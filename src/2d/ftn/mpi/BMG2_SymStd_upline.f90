@@ -2,10 +2,10 @@
      &                JBEG, RWORK, NPts, NLines, &
      &                K, NOLX, XCOMM, NSOR, TDG, &
      &                NMSGr, NOG, TDSX_SOR_PTRS,&
-     &                SIZE, shm_enabled, shm_buff,&
-     &                shm_len, shm_win)
+     &                SIZE, shm_enabled, puper)
 
       use iso_c_binding, only: c_bool, c_int
+      use ModInterface
       IMPLICIT NONE
 
       INCLUDE 'mpif.h'
@@ -25,10 +25,8 @@
       INTEGER SIZE, N, My_L1_Rank, My_L2_Rank, IERR, kl
 
       INTEGER I, J, AT, FT, MULT, grank, idx, rnum
-      integer shm_win
-      integer(c_int) :: shm_len
-      real*8 shm_buff(shm_len)
       logical(c_bool) :: shm_enabled
+      type(c_ptr) :: puper
 
 ! =============================================================
 ! Loop over all lower levels
@@ -118,20 +116,21 @@
       !
 
       if (shm_enabled) then
-         if (My_L2_Rank .eq. 0) then
-            call MPI_Win_lock_all(MPI_MODE_NOCHECK, shm_win, ierr)
-            do rnum=0, SIZE-1
-               do i=1, nlines
-                  do j=1, 8
-                     idx = rnum * (nlines*8) + ((i-1)*8 + j)
-                     shm_buff(idx) = rwork(idx)
-                  enddo
-               enddo
-            enddo
-            call MPI_Win_sync(shm_win, ierr)
-            call MPI_Win_unlock_all(shm_win, ierr)
-         endif
-         call MPI_Barrier(XCOMM(2,NOLX), ierr)
+         call ml_relax_shm_up(puper, rwork, nlines)
+         ! if (My_L2_Rank .eq. 0) then
+         !    call MPI_Win_lock_all(MPI_MODE_NOCHECK, shm_win, ierr)
+         !    do rnum=0, SIZE-1
+         !       do i=1, nlines
+         !          do j=1, 8
+         !             idx = rnum * (nlines*8) + ((i-1)*8 + j)
+         !             shm_buff(idx) = rwork(idx)
+         !          enddo
+         !       enddo
+         !    enddo
+         !    call MPI_Win_sync(shm_win, ierr)
+         !    call MPI_Win_unlock_all(shm_win, ierr)
+         ! endif
+         ! call MPI_Barrier(XCOMM(2,NOLX), ierr)
       else
          if (My_L2_Rank .eq. 0) then
             CALL MPI_SCATTER(RWORK(My_L2_Rank*NLINES*8+1),NLINES*8,&
@@ -151,19 +150,19 @@
       !
 
       if (shm_enabled) then
-         MULT = 0
-         DO J=JBEG,JJ-1,2
-            !MB      DO J=JBEG,JBEG  ! previous line was commented out
-            idx = My_L2_Rank * nlines * 8 + MULT * 8 + 1
-            CALL BMG2_SymStd_LineSolve_C_ml(SOR(2,J,1),&
-                 &        SOR(2,J,2), Q(1,J),&
-                 &        shm_buff(idx),&
-                 &        Npts, SIZE,&
-                 &        My_L1_Rank)
+         ! MULT = 0
+         ! DO J=JBEG,JJ-1,2
+         !    !MB      DO J=JBEG,JBEG  ! previous line was commented out
+         !    idx = My_L2_Rank * nlines * 8 + MULT * 8 + 1
+         !    CALL BMG2_SymStd_LineSolve_C_ml(SOR(2,J,1),&
+         !         &        SOR(2,J,2), Q(1,J),&
+         !         &        shm_buff(idx),&
+         !         &        Npts, SIZE,&
+         !         &        My_L1_Rank)
 
-            MULT = MULT+1
+         !    MULT = MULT+1
 
-         END DO
+         ! END DO
       else
          MULT = 0
          DO J=JBEG,JJ-1,2
