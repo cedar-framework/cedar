@@ -1,3 +1,5 @@
+![](doc/logo/cedar-logo.png)
+
 # Cedar
 
 The Cedar Framework is a robust, variational multigrid library implementing
