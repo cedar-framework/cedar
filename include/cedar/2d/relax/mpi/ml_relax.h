@@ -137,7 +137,7 @@ public:
 		// add space for shm level
 		nspace += (2 * shm_size + 2) * nlines * 4;
 		// add shared memory level
-		if (this->nlevels > 2)
+		if (node_size > 1)
 			this->nlevels++;
 
 		comms.init(2, this->nlevels - 1);
@@ -174,7 +174,7 @@ public:
 
 		int workspace_size;
 		sor_ptrs.emplace_back(this->nlevels);
-		BMG2_SymStd_SETUP_ADD_SOR_PTRS(node_count, nlines, min_gsz, this->nlevels,
+		BMG2_SymStd_SETUP_ADD_SOR_PTRS(nproc, nlines, min_gsz, this->nlevels,
 		                               &workspace_size, sor_ptrs.back().data(),
 		                               this->shm, node_count, shm_size);
 		workspace_size += (nlines + 2)*(nlines_other + 2)*4;
