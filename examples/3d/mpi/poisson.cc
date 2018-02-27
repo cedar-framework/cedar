@@ -107,14 +107,14 @@ int main(int argc, char *argv[])
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
 
 	timer_init(MPI_COMM_WORLD);
-	config::reader conf("config.json");
-	auto grid = util::create_topo(conf);
+	auto conf = std::make_shared<config::reader>("config.json");
+	auto grid = util::create_topo(*conf);
 
 	auto so = mpi::gallery::poisson(grid);
 	mpi::grid_func b(grid);
 
 	set_problem(b);
-	mpi::solver bmg(std::move(so));
+	mpi::solver<seven_pt> bmg(so, conf);
 
 	MPI_Barrier(MPI_COMM_WORLD); // synchronize before timing solve
 	auto x = bmg.solve(b);

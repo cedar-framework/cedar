@@ -1,21 +1,42 @@
 #ifndef CEDAR_LEVEL_H
 #define CEDAR_LEVEL_H
 
-#include <memory>
-
-#include "cedar/discrete_op.h"
-
-namespace cedar {
-template <class grid_func>
-struct Level
+namespace cedar
 {
-	Level() {}
-    /* Level(core::discrete_op &A, core::discrete_op &P) :A(A),P(P) {} */
-	/* core::discrete_op & A; */
-	/* core::discrete_op & P; */
-	std::function<void(const discrete_op<grid_func> & A, grid_func &x, const grid_func &b)> presmoother;
-	std::function<void(const discrete_op<grid_func> & A, grid_func &x, const grid_func &b)> postsmoother;
-	//discrete_op & R;
+
+/**
+   Base class for data that is stored on each level of a multilevel
+   solve.
+
+   @tparam sten The type of stencil used in the stencil_operator (e.g., five point or nine point in 2D)
+   @tparam solver_types A structured listing of types used in a multilevel solve.
+*/
+template<class sten, class solver_types>
+struct level
+{
+	template<class stencil>
+	using stencil_op = typename solver_types::template stencil_op<stencil>;
+	using grid_func = typename solver_types::grid_func;
+	using prolong_op = typename solver_types::prolong_op;
+	using restrict_op = typename solver_types::restrict_op;
+	using relax_stencil = typename solver_types::relax_stencil;
+
+level(stencil_op<sten> & A) : A(A) {}
+	template<class... Args>
+	level(Args&&... args) : Adata(std::forward<Args>(args)...),
+		A(Adata), P(std::forward<Args>(args)...), x(std::forward<Args>(args)...),
+		res(std::forward<Args>(args)...), b(std::forward<Args>(args)...) {}
+	stencil_op<sten> Adata;
+	stencil_op<sten> & A;
+	prolong_op  P;
+	restrict_op R;
+	grid_func x;
+	grid_func res;
+	grid_func b;
+	std::array<relax_stencil, 2> SOR;
+
+	std::function<void(const stencil_op<sten> & A, grid_func & x, const grid_func & b)> presmoother;
+	std::function<void(const stencil_op<sten> & A, grid_func & x, const grid_func & b)> postsmoother;
 };
 
 }

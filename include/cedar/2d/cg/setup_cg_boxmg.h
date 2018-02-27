@@ -4,8 +4,8 @@
 #include <memory>
 
 #include <cedar/kernel_params.h>
-#include "cedar/2d/mpi/stencil_op.h"
-#include "cedar/2d/solver.h"
+#include <cedar/2d/mpi/stencil_op.h>
+#include <cedar/2d/solver.h>
 
 
 namespace cedar { namespace cdr2 { namespace kernel {
@@ -13,10 +13,12 @@ namespace cedar { namespace cdr2 { namespace kernel {
 namespace impls
 {
 	namespace mpi = cedar::cdr2::mpi;
+	template <class sten>
 	void setup_cg_boxmg(const kernel_params & params,
-	                    const mpi::stencil_op & so,
+	                    mpi::msg_exchanger *halof,
+	                    const mpi::stencil_op<sten> & so,
 	                    std::shared_ptr<config::reader> conf,
-	                    std::shared_ptr<solver> *slv);
+	                    std::shared_ptr<solver<sten>> *slv);
 }
 
 }}}

@@ -74,11 +74,12 @@ TEST(SerialPoisson2, Isotropic) {
 	set_problem(b);
 
 	auto conf = std::make_shared<config::reader>("");
-	solver bmg(std::move(so), conf);
+	log::init(*conf);
+	solver<five_pt> bmg(so, conf);
 
 	auto sol = bmg.solve(b);
 
-	ASSERT_LT(std::abs(bmg.level(-1).res.lp_norm<2>()),
+	ASSERT_LT(std::abs(bmg.levels.template get<five_pt>(0).res.lp_norm<2>()),
 	          1e-8);
 
 	grid_func exact_sol(sol.shape(0), sol.shape(1));
@@ -105,12 +106,13 @@ TEST(SerialPoisson2, StretchX) {
 	set_problem(b);
 
 	auto conf = std::make_shared<config::reader>("");
+	log::init(*conf);
 	conf->set("solver.relaxation", "line-x");
-	solver bmg(std::move(so), conf);
+	solver<five_pt> bmg(so, conf);
 
 	auto sol = bmg.solve(b);
 
-	ASSERT_LT(std::abs(bmg.level(-1).res.lp_norm<2>()),
+	ASSERT_LT(std::abs(bmg.levels.template get<five_pt>(0).res.lp_norm<2>()),
 	          1e-8);
 
 	grid_func exact_sol(sol.shape(0), sol.shape(1));
@@ -137,12 +139,13 @@ TEST(SerialPoisson2, StretchY) {
 	set_problem(b);
 
 	auto conf = std::make_shared<config::reader>("");
+	log::init(*conf);
 	conf->set("solver.relaxation", "line-y");
-	solver bmg(std::move(so), conf);
+	solver<five_pt> bmg(so, conf);
 
 	auto sol = bmg.solve(b);
 
-	ASSERT_LT(std::abs(bmg.level(-1).res.lp_norm<2>()),
+	ASSERT_LT(std::abs(bmg.levels.template get<five_pt>(0).res.lp_norm<2>()),
 	          1e-8);
 
 	grid_func exact_sol(sol.shape(0), sol.shape(1));

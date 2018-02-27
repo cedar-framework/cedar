@@ -1,12 +1,25 @@
-#ifndef CEDAR_2D_CORE_TYPES_H
-#define CEDAR_2D_CORE_TYPES_H
+#ifndef CEDAR_2D_TYPES_H
+#define CEDAR_2D_TYPES_H
 
-#include <vector>
+#include <cedar/solver_types.h>
+#include <cedar/2d/base_types.h>
+#include <cedar/2d/stencil_op.h>
+#include <cedar/2d/grid_func.h>
+#include <cedar/2d/inter/restrict_op.h>
+#include <cedar/2d/inter/prolong_op.h>
+#include <cedar/2d/relax_stencil.h>
 
-#include "cedar/2d/base_types.h"
-
-namespace cedar { namespace cdr2 {
-	enum class dir {C=BMG2_C,W=BMG2_W,SW=BMG2_SW,S=BMG2_S,SE=BMG2_SE,N=BMG2_N,NE=BMG2_NE,E=BMG2_E,NW=BMG2_NW,NUM_DIRS};
-}}
+namespace cedar
+{
+	namespace cdr2
+	{
+		using stypes = solver_types<
+			stencil_op,
+			grid_func,
+			inter::prolong_op,
+			inter::restrict_op,
+			relax_stencil>;
+	}
+}
 
 #endif

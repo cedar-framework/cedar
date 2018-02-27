@@ -1,7 +1,6 @@
 #include <cedar/2d/ftn/BMG_parameters_c.h>
-#include <cedar/3d/mpi/halo.h>
 
-#include <cedar/3d/inter/restrict.h>
+#include <cedar/3d/inter/mpi/restrict.h>
 
 extern "C" {
 	using namespace cedar;
@@ -21,18 +20,16 @@ namespace impls
 	                          const mpi::grid_func & fine,
 	                          mpi::grid_func & coarse)
 	{
-		int kf, kc, nog;
+		int kf, kc;
 		auto & Rd = const_cast<inter::mpi::restrict_op&>(R);
 		inter::mpi::prolong_op & P = Rd.getP();
 		grid_topo & topo = P.grid();
 		const grid_topo & fine_topo = fine.grid();
-		MsgCtx *ctx = (MsgCtx*) P.halo_ctx;
 		auto & fined = const_cast<mpi::grid_func&>(fine);
 
-		nog = kf = topo.nlevel();
+		kf = topo.nlevel();
 		kc = topo.level();
 
-		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 		MPI_BMG3_SymStd_restrict(kf, kc,
 		                         fined.data(), coarse.data(), P.data(),
 		                         fined.len(0), fined.len(1), fined.len(2),

@@ -24,7 +24,7 @@ grid_func & grid_func::operator=(grid_func &&gf)
 
 
 grid_func::grid_func(len_t nx, len_t ny, unsigned int nghosts) :
-	array<len_t,real_t,2>(nx+2*nghosts, ny+2*nghosts)
+	array<real_t,2>(nx+2*nghosts, ny+2*nghosts)
 {
 	num_ghosts = nghosts;
 	range_[0] = cedar::range(static_cast<len_t>(nghosts), static_cast<len_t>(nx + nghosts));
@@ -115,19 +115,6 @@ grid_func grid_func::ones_like(const grid_func &like)
 	}
 
 	return ret;
-}
-
-
-grid_func & grid_func::operator+=(iadd_t package)
-{
-	auto kernels = std::get<0>(package).get_registry();
-	kernels->run(kernel_name::interp_add,
-	             std::get<0>(package),
-	             std::get<1>(package),
-	             std::get<2>(package),
-	             static_cast<grid_func&>(*this));
-
-	return *this;
 }
 
 

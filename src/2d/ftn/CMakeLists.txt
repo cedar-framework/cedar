@@ -53,6 +53,7 @@ if (ENABLE_MPI)
 	ftn/mpi/BMG2_SymStd_residual.f90
 	ftn/mpi/BMG2_SymStd_interp_add.f90
 	ftn/mpi/BMG2_SymStd_UTILS_update_ghosts.f90
+	ftn/mpi/BMG2_SymStd_UTILS_update_stencil_ghosts.f90
 	ftn/mpi/BMG2_SymStd_UTILS_matvec.f90
 	ftn/mpi/BMG2_SymStd_SETUP_cg_LU.f90
 	ftn/mpi/BMG2_SymStd_SOLVE_cg_LU.f90

@@ -7,17 +7,16 @@
 
 namespace cedar { namespace cdr2 { namespace inter { namespace mpi {
 namespace mpi = cedar::cdr2::mpi;
-class restrict_op : public mpi::stencil_op
+class restrict_op
 {
 public:
-restrict_op() {}
+restrict_op() : P(nullptr) {}
 restrict_op(prolong_op * P) : P(P) {}
 	void associate(prolong_op *P) { this->P = P; }
 	prolong_op & getP() { return *P; }
 	const prolong_op & getP() const { return *P; }
-	virtual void apply(const mpi::grid_func &x, mpi::grid_func &y) const;
-	virtual void residual(const mpi::grid_func &x, const mpi::grid_func &b, mpi::grid_func &r) const{}
-	friend mpi::grid_func operator*(const restrict_op &R, const mpi::grid_func &x);
+	friend std::ostream & operator<< (std::ostream &os, const restrict_op & R);
+
 private:
 	prolong_op * P;
 };

@@ -4,7 +4,6 @@ set(sources
 
 if(ENABLE_MPI)
   list(APPEND sources
-	relax/mpi/relax.cc
 	relax/mpi/setup_relax.cc)
 endif()
 

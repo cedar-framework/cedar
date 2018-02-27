@@ -2,7 +2,7 @@
 
 using namespace cedar::cdr2;
 
-relax_stencil::relax_stencil(len_t nx, len_t ny, unsigned int nghosts) : array(nx+2*nghosts,ny+nghosts*2,2)
+relax_stencil::relax_stencil(len_t nx, len_t ny, unsigned int nghosts) : array<real_t,3>(nx+2*nghosts,ny+nghosts*2,2)
 {
 	num_ghosts = nghosts;
 	range_[0] = cedar::range(static_cast<len_t>(nghosts), static_cast<len_t>(nx + nghosts));

@@ -112,14 +112,15 @@ TEST(MPIPoisson3, Isotropic) {
 
 	set_problem(b);
 	auto conf = std::make_shared<config::reader>("");
+	log::init(*conf);
 	conf->set("solver.relaxation", "point");
 	conf->set("solver.cg-solver", "LU");
 
-	mpi::solver bmg(std::move(so), conf);
+	mpi::solver<seven_pt> bmg(so, conf);
 
 	auto sol = bmg.solve(b);
 
-	ASSERT_LT(std::abs(bmg.level(-1).res.lp_norm<2>()),
+	ASSERT_LT(std::abs(bmg.levels.template get<seven_pt>(0).res.lp_norm<2>()),
 	          1e-8);
 
 	mpi::grid_func exact_sol(grid);

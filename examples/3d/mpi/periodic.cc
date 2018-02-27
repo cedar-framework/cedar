@@ -12,18 +12,16 @@
 #include <cedar/util/time_log.h>
 
 
-static cedar::cdr3::mpi::stencil_op create_op(cedar::topo_ptr grid, std::array<bool, 3> periodic)
+static cedar::cdr3::mpi::stencil_op<cedar::cdr3::seven_pt> create_op(cedar::topo_ptr grid, std::array<bool, 3> periodic)
 {
 	using namespace cedar;
 	using namespace cedar::cdr3;
 
-	auto so = mpi::stencil_op(grid);
-	auto & o = so.stencil();
-	o.five_pt() = true;
+	mpi::stencil_op<seven_pt> so(grid);
 
 	auto & topo = so.grid();
 
-	o.set(0);
+	so.set(0);
 
 	real_t nlx = topo.nlocal(0) - 2;
 	real_t nly = topo.nlocal(1) - 2;
@@ -92,7 +90,7 @@ static cedar::cdr3::mpi::stencil_op create_op(cedar::topo_ptr grid, std::array<b
 	for (auto k : range<len_t>(1, kend)) {
 		for (auto j : range<len_t>(jbeg, jend)) {
 			for (auto i : range<len_t>(1, iend)) {
-				o(i,j,k,dir::PS) = 1.0 * yh;
+				so(i,j,k,seven_pt::ps) = 1.0 * yh;
 			}
 		}
 	}
@@ -100,7 +98,7 @@ static cedar::cdr3::mpi::stencil_op create_op(cedar::topo_ptr grid, std::array<b
 	for (auto k : range<len_t>(1, kend)) {
 		for (auto j : range<len_t>(1, jend)) {
 			for (auto i : range<len_t>(ibeg, iend)) {
-				o(i,j,k,dir::PW) = 1.0 * xh;
+				so(i,j,k,seven_pt::pw) = 1.0 * xh;
 			}
 		}
 	}
@@ -108,7 +106,7 @@ static cedar::cdr3::mpi::stencil_op create_op(cedar::topo_ptr grid, std::array<b
 	for (auto k : range<len_t>(kbeg, kend)) {
 		for (auto j : range<len_t>(1, jend)) {
 			for (auto i : range<len_t>(1, iend)) {
-				o(i,j,k,dir::B) = 1.0 * zh;
+				so(i,j,k,seven_pt::b) = 1.0 * zh;
 			}
 		}
 	}
@@ -116,7 +114,7 @@ static cedar::cdr3::mpi::stencil_op create_op(cedar::topo_ptr grid, std::array<b
 	for (auto k : range<len_t>(1, k1)) {
 		for (auto j : range<len_t>(1, j1)) {
 			for (auto i : range<len_t>(1, i1)) {
-				o(i,j,k,dir::P) = 2*xh + 2*yh + 2*zh;
+				so(i,j,k,seven_pt::p) = 2*xh + 2*yh + 2*zh;
 			}
 		}
 	}
@@ -253,7 +251,7 @@ int main(int argc, char *argv[])
 
 	set_problem(b, params->periodic);
 
-	mpi::solver bmg(std::move(so), conf);
+	mpi::solver<seven_pt> bmg(so, conf);
 
 	{
 		std::string suffix(std::to_string(grid->coord(0)) + "." +
@@ -262,9 +260,9 @@ int main(int argc, char *argv[])
 		std::ofstream ffile("output/fine-" + suffix);
 		std::ofstream rfile("output/restrict-" + suffix);
 		std::ofstream cfile("output/coarse-" + suffix);
-		ffile << bmg.level(-1).A;
-		rfile << bmg.level(-1).P;
-		cfile << bmg.level(-2).A;
+		ffile << bmg.levels.get<seven_pt>(0).A;
+		rfile << bmg.levels.get<seven_pt>(0).P;
+		cfile << bmg.levels.get(1).A;
 		rfile.close();
 		ffile.close();
 		cfile.close();

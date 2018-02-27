@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 	grid_func b(nx, ny, nz);
 	set_problem(b);
 
-	solver bmg(std::move(so));
+	solver<seven_pt> bmg(so);
 
 	auto sol = bmg.solve(b);
 

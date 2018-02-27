@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
 	set_problem(b);
 
-	solver bmg(std::move(so));
+	solver<five_pt> bmg(so);
 
 	auto sol = bmg.solve(b);
 

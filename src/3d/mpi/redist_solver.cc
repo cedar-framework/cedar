@@ -15,9 +15,9 @@ using namespace cedar::cdr3::mpi;
 
 namespace cedar { namespace cdr3 { namespace mpi {
 template<>
-stencil_op redist_solver::redist_operator<stencil_op>(const stencil_op & so, topo_ptr topo)
+stencil_op<xxvii_pt> redist_solver::redist_operator<stencil_op,xxvii_pt>(const stencil_op<xxvii_pt> & so, topo_ptr topo)
 {
-	auto rop = stencil_op(topo);
+	stencil_op<xxvii_pt> rop(topo);
 
 	gather_operator<stencil_op>(so, rop);
 
@@ -25,13 +25,14 @@ stencil_op redist_solver::redist_operator<stencil_op>(const stencil_op & so, top
 }
 
 template<>
-cdr3::stencil_op redist_solver::redist_operator<cdr3::stencil_op>(const stencil_op & so, topo_ptr topo)
+cdr3::stencil_op<xxvii_pt> redist_solver::redist_operator<cdr3::stencil_op, xxvii_pt>(const stencil_op<xxvii_pt> & so,
+	     topo_ptr topo)
 {
 	assert(topo->nproc() == 1);
 
-	auto rop = cdr3::stencil_op(topo->nlocal(0) - 2,
-	                            topo->nlocal(1) - 2,
-	                            topo->nlocal(2) - 2);
+	cdr3::stencil_op<xxvii_pt> rop(topo->nlocal(0) - 2,
+	                               topo->nlocal(1) - 2,
+	                               topo->nlocal(2) - 2);
 
 	gather_operator<cdr3::stencil_op>(so, rop);
 
@@ -40,38 +41,38 @@ cdr3::stencil_op redist_solver::redist_operator<cdr3::stencil_op>(const stencil_
 }}}
 
 
-redist_solver::redist_solver(const stencil_op & so,
+redist_solver::redist_solver(const stencil_op<xxvii_pt> & so,
+                             mpi::msg_exchanger *halof,
                              std::shared_ptr<config::reader> conf,
                              std::array<int, 3> nblock) :
 	ser_cg(nblock[0]*nblock[1]*nblock[2] == 1), nblock(nblock), active(true), recv_id(-1)
 {
 	auto & topo = so.grid();
-	msg_ctx * ctx = (msg_ctx*) so.halo_ctx;
+	msg_ctx * ctx = (msg_ctx*) halof->context_ptr();
 	auto ctopo = redist_topo(topo, *ctx);
 
 	if (ser_cg) {
 		b_redist_ser = grid_func(ctopo->nlocal(0)-2, ctopo->nlocal(1)-2, ctopo->nlocal(2)-2);
 		x_redist_ser = grid_func(ctopo->nlocal(0)-2, ctopo->nlocal(1)-2, ctopo->nlocal(2)-2);
+		so_redist_ser = redist_operator<cdr3::stencil_op, xxvii_pt>(so, ctopo);
 	} else {
 		b_redist = grid_func(ctopo);
 		x_redist = grid_func(ctopo);
+		so_redist = redist_operator<mpi::stencil_op, xxvii_pt>(so, ctopo);
 	}
 
 	if (active) {
 		if (ser_cg) {
-			auto rop = redist_operator<cdr3::stencil_op>(so, ctopo);
 			log::push_level("serial", *conf);
-			slv_ser = std::make_unique<cdr3::solver>(std::move(rop), conf);
+			slv_ser = std::make_unique<cdr3::solver<xxvii_pt>>(so_redist_ser, conf);
 			log::pop_level();
 		} else {
-			auto rop = redist_operator<mpi::stencil_op>(so, ctopo);
 			MPI_Fint parent_comm;
 			MSG_pause(&parent_comm);
 			log::push_level("redist", *conf);
 			timer_down();
-			slv = std::make_unique<solver>(std::move(rop), conf);
+			slv = std::make_unique<solver<xxvii_pt>>(so_redist, conf);
 			timer_up();
-			b_redist.halo_ctx = slv->level(-1).A.halo_ctx;
 			log::pop_level();
 			MSG_pause(&msg_comm);
 			MSG_play(parent_comm);
@@ -114,7 +115,7 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 
 std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_topo, msg_ctx & ctx)
 {
-	using len_arr = array<int, len_t, 1>;
+	using len_arr = aarray<int, len_t, 1>;
 	auto igrd = std::make_shared<std::vector<len_t>>(NBMG_pIGRD);
 	auto grid = std::make_shared<grid_topo>(igrd, 0, 1);
 
@@ -160,9 +161,9 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 	}
 	grid->is(2)++;
 
-	nbx = array<len_t, len_t, 1>(high(0) - low(0) + 1);
-	nby = array<len_t, len_t, 1>(high(1) - low(1) + 1);
-	nbz = array<len_t, len_t, 1>(high(2) - low(2) + 1);
+	nbx = array<len_t, 1>(high(0) - low(0) + 1);
+	nby = array<len_t, 1>(high(1) - low(1) + 1);
+	nbz = array<len_t, 1>(high(2) - low(2) + 1);
 
 	for (auto i = low(0); i <= high(0); i++) {
 		nbx(i-low(0)) = ctx.cg_nlocal(0, ctx.proc_grid(i,0,0)) - 2;
@@ -238,7 +239,7 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 
 void redist_solver::gather_rhs(const grid_func & b)
 {
-	using buf_arr = array<len_t,real_t,1>;
+	using buf_arr = array<real_t,1>;
 
 	buf_arr sbuf(b.shape(0)*b.shape(1)*b.shape(2));
 	int idx = 0;
@@ -361,7 +362,7 @@ void redist_solver::scatter_sol(grid_func & x)
 
 			igs--; jgs--; kgs--; // include ghosts
 
-			array<len_t,real_t,3> sbuf(nbx(ci)+2, nby(cj)+2, nbz(ck)+2);
+			array<real_t,3> sbuf(nbx(ci)+2, nby(cj)+2, nbz(ck)+2);
 			for (auto kk : range(sbuf.len(2))) {
 				for (auto jj : range(sbuf.len(1))) {
 					for (auto ii : range(sbuf.len(0))) {

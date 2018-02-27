@@ -161,7 +161,7 @@ float vcycle_model::tcgsolve() const
 	float time = 0;
 
 	if (!isleaf) {
-		int p = grid(0).nproc();
+		// int p = grid(0).nproc();
 		int gather_size = 1;
 		len_t cg_size = 1;
 		for (auto i : range(nd)) {

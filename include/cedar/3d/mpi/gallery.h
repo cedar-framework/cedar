@@ -6,7 +6,7 @@
 
 namespace cedar { namespace cdr3 { namespace mpi { namespace gallery {
 
-stencil_op poisson(topo_ptr grid);
+stencil_op<seven_pt> poisson(topo_ptr grid);
 
 }}}}
 

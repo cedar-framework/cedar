@@ -2,7 +2,6 @@
 #include <random>
 #include <cedar/2d/grid_func.h>
 #include <cedar/2d/stencil_op.h>
-#include <cedar/2d/kernel/factory.h>
 #include <cedar/perf/params.h>
 
 using namespace cedar;

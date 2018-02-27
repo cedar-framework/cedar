@@ -14,16 +14,17 @@ extern "C" {
 using namespace cedar;
 using namespace cedar::cdr2::mpi;
 
-redist_solver::redist_solver(const stencil_op & so,
+redist_solver::redist_solver(const stencil_op<nine_pt> & so,
+                             mpi::msg_exchanger *halof,
                              std::shared_ptr<config::reader> conf,
                              std::array<int, 2> nblock) :
 	redundant(false), nblock(nblock), active(true), recv_id(-1)
 {
 	// Split communicator into collective processor blocks
 	auto & topo = so.grid();
-	msg_ctx * ctx = (msg_ctx*) so.halo_ctx;
+	msg_ctx * ctx = (msg_ctx*) halof->context_ptr();
 	auto ctopo = redist_topo(topo, *ctx);
-	auto rop = redist_operator(so, ctopo);
+	so_redist = redist_operator(so, ctopo);
 	b_redist = grid_func(ctopo);
 	x_redist = grid_func(ctopo);
 
@@ -31,7 +32,7 @@ redist_solver::redist_solver(const stencil_op & so,
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
 		log::push_level("redist", *conf);
-		slv = std::make_unique<solver>(std::move(rop), conf);
+		slv = std::make_unique<solver<nine_pt>>(so_redist, conf);
 		log::pop_level();
 		MSG_pause(&msg_comm);
 		MSG_play(parent_comm);
@@ -64,25 +65,20 @@ void redist_solver::solve(const grid_func & b, grid_func & x)
 }
 
 
-stencil_op redist_solver::redist_operator(const stencil_op & so, topo_ptr topo)
+stencil_op<cdr2::nine_pt> redist_solver::redist_operator(const stencil_op<nine_pt> & so, topo_ptr topo)
 {
-	auto rop = stencil_op(topo);
-
-	auto & sten = so.stencil();
-	auto & rsten = rop.stencil();
 	// save general case for later
-	assert(sten.five_pt() == false);
-	rsten.five_pt() = false;
+	stencil_op<nine_pt> rop(topo);
 
-	array<len_t,real_t,1> sbuf(5*sten.len(0)*sten.len(1));
+	array<real_t,1> sbuf(5*so.len(0)*so.len(1));
 	int idx = 0;
-	for (auto j : sten.grange(1)) {
-		for (auto i : sten.grange(0)) {
-			sbuf(idx) = sten(i,j,dir::C);
-			sbuf(idx+1) = sten(i,j,dir::W);
-			sbuf(idx+2) = sten(i,j,4);
-			sbuf(idx+3) = sten(i,j,dir::S);
-			sbuf(idx+4) = sten(i,j,dir::SW);
+	for (auto j : so.grange(1)) {
+		for (auto i : so.grange(0)) {
+			sbuf(idx) = so(i,j,nine_pt::c);
+			sbuf(idx+1) = so(i,j,nine_pt::w);
+			sbuf(idx+2) = so(i,j,nine_pt::nw);
+			sbuf(idx+3) = so(i,j,nine_pt::s);
+			sbuf(idx+4) = so(i,j,nine_pt::sw);
 			idx += 5;
 		}
 	}
@@ -98,7 +94,7 @@ stencil_op redist_solver::redist_operator(const stencil_op & so, topo_ptr topo)
 			rbuf_len += rcounts[idx];
 		}
 	}
-	array<len_t,real_t,1> rbuf(rbuf_len);
+	array<real_t,1> rbuf(rbuf_len);
 
 	if (redundant) {
 		MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
@@ -121,11 +117,11 @@ stencil_op redist_solver::redist_operator(const stencil_op & so, topo_ptr topo)
 				ny = nby(j);
 				for (auto jj: range(ny+2)) {
 					for (auto ii : range(nx+2)) {
-						rsten(igs+ii-1,jgs+jj-1,dir::C) = rbuf(idx);
-						rsten(igs+ii-1,jgs+jj-1,dir::W) = rbuf(idx+1);
-						rsten(igs+ii-1,jgs+jj-1,4) = rbuf(idx+2);
-						rsten(igs+ii-1,jgs+jj-1,dir::S) = rbuf(idx+3);
-						rsten(igs+ii-1,jgs+jj-1,dir::SW) = rbuf(idx+4);
+						rop(igs+ii-1,jgs+jj-1,nine_pt::c) = rbuf(idx);
+						rop(igs+ii-1,jgs+jj-1,nine_pt::w) = rbuf(idx+1);
+						rop(igs+ii-1,jgs+jj-1,nine_pt::nw) = rbuf(idx+2);
+						rop(igs+ii-1,jgs+jj-1,nine_pt::s) = rbuf(idx+3);
+						rop(igs+ii-1,jgs+jj-1,nine_pt::sw) = rbuf(idx+4);
 						idx += 5;
 					}
 				}
@@ -187,8 +183,8 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 	grid->is(1)++;
 
 	// get ready for allgatherv
-	nbx = array<len_t,len_t,1>(highi-lowi+1);
-	nby = array<len_t,len_t,1>(highj-lowj+1);
+	nbx = array<len_t,1>(highi-lowi+1);
+	nby = array<len_t,1>(highj-lowj+1);
 
 	for (auto j = lowj; j <= highj; j++) {
 		nby(j-lowj) = ctx.cg_nlocal(1, ctx.proc_grid(0,j)) - 2;
@@ -231,8 +227,8 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 	block_id = key;
 
 	// Find out if my processor will be included in redundant solve
-	int ci = fine_topo.coord(0) - lowi;
-	int cj = fine_topo.coord(1) - lowj;
+	// int ci = fine_topo.coord(0) - lowi;
+	// int cj = fine_topo.coord(1) - lowj;
 
 	int nactivex = (fine_topo.nproc(0) / nblock[0]);
 	int nactivey = (fine_topo.nproc(1) / nblock[1]);
@@ -259,7 +255,7 @@ std::shared_ptr<grid_topo> redist_solver::redist_topo(const grid_topo & fine_top
 
 void redist_solver::gather_rhs(const grid_func & b)
 {
-	array<len_t,real_t,1> sbuf(b.shape(0)*b.shape(1));
+	array<real_t,1> sbuf(b.shape(0)*b.shape(1));
 	int idx = 0;
 	for (auto j : b.range(1)) {
 		for (auto i : b.range(0)) {
@@ -280,7 +276,7 @@ void redist_solver::gather_rhs(const grid_func & b)
 			rbuf_len += rcounts[idx];
 		}
 	}
-	array<len_t,real_t,1> rbuf(rbuf_len);
+	array<real_t,1> rbuf(rbuf_len);
 	if (redundant) {
 		MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
 		               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
@@ -325,7 +321,7 @@ void redist_solver::scatter_sol(grid_func & x)
 			}
 		}
 
-		array<len_t, real_t, 1> sbuf(sbuf_len);
+		array<real_t, 1> sbuf(sbuf_len);
 		std::vector<int> scounts(nbx.len(0)*nby.len(0));
 		std::vector<int> displs(nbx.len(0)*nby.len(0));
 
@@ -400,7 +396,7 @@ void redist_solver::scatter_sol(grid_func & x)
 
 			igs--; jgs--; // include ghosts
 
-			array<len_t,real_t,2> sbuf(nbx(ci)+2, nby(cj)+2);
+			array<real_t,2> sbuf(nbx(ci)+2, nby(cj)+2);
 			for (auto jj : range(sbuf.len(1))) {
 				for (auto ii : range(sbuf.len(0))) {
 					sbuf(ii,jj) = x_redist(igs+ii,jgs+jj);
@@ -411,8 +407,8 @@ void redist_solver::scatter_sol(grid_func & x)
 		}
 
 	} else if (redundant and (recv_id > -1)) {
-		int ci = block_id % nbx.len(0);
-		int cj = block_id / nbx.len(0);
+		// int ci = block_id % nbx.len(0);
+		// int cj = block_id / nbx.len(0);
 
 		MPI_Recv(x.data(), x.len(0)*x.len(1), MPI_DOUBLE, recv_id, 0, rcomms.pblock_comm, MPI_STATUS_IGNORE);
 	}

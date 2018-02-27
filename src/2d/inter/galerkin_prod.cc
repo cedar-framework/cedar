@@ -4,8 +4,8 @@
 
 extern "C" {
 	using namespace cedar;
-	void BMG2_SymStd_SETUP_ITLI_ex(int kf, int kc, real_t *so, real_t *soc, real_t *ci,
-	                               len_t iif, len_t jjf, len_t iic, len_t jjc, int nog,
+	void BMG2_SymStd_SETUP_ITLI_ex(real_t *so, real_t *soc, real_t *ci,
+	                               len_t iif, len_t jjf, len_t iic, len_t jjc,
 	                               int ifd, int nstncl, int ipn);
 	void BMG_get_bc(int, int*);
 }
@@ -17,38 +17,59 @@ namespace impls
 {
 	using namespace cedar::cdr2;
 
+	template<>
 	void galerkin_prod(const kernel_params & params,
-	                   int kf, int kc, int nog,
 	                   const inter::prolong_op & P,
-	                   const stencil_op & fop,
-	                   stencil_op & cop)
+	                   const stencil_op<five_pt> & fop,
+	                   stencil_op<nine_pt> & cop)
 	{
 		using namespace cedar::cdr2;
 		len_t iif, jjf, iic, jjc;
 		int nstencil, ipn, ifd;
 
-		const grid_stencil &fsten = fop.stencil();
-		grid_stencil & csten = cop.stencil();
-		stencil_op &fopd = const_cast<stencil_op&>(fop);
+		auto & fopd = const_cast<stencil_op<five_pt>&>(fop);
 		inter::prolong_op &Pd = const_cast<inter::prolong_op&>(P);
 
-		iif = fsten.len(0);
-		jjf = fsten.len(1);
-		iic = csten.len(0);
-		jjc = csten.len(1);
+		iif = fop.len(0);
+		jjf = fop.len(1);
+		iic = cop.len(0);
+		jjc = cop.len(1);
 
-		if (fsten.five_pt()) {
-			ifd = 1;
-			nstencil = 5;
-		} else {
-			ifd = 0;
-			nstencil = 9;
-		}
+		ifd = 1;
+		nstencil = 5;
 
 		BMG_get_bc(params.per_mask(), &ipn);
 
-		BMG2_SymStd_SETUP_ITLI_ex(kf, kc, fopd.data(), cop.data(), Pd.data(),
-		                          iif, jjf, iic, jjc, nog, ifd, nstencil, ipn);
+		BMG2_SymStd_SETUP_ITLI_ex(fopd.data(), cop.data(), Pd.data(),
+		                          iif, jjf, iic, jjc, ifd, nstencil, ipn);
+
+	}
+
+	template<>
+	void galerkin_prod(const kernel_params & params,
+	                   const inter::prolong_op & P,
+	                   const stencil_op<nine_pt> & fop,
+	                   stencil_op<nine_pt> & cop)
+	{
+		using namespace cedar::cdr2;
+		len_t iif, jjf, iic, jjc;
+		int nstencil, ipn, ifd;
+
+		auto & fopd = const_cast<stencil_op<nine_pt>&>(fop);
+		inter::prolong_op &Pd = const_cast<inter::prolong_op&>(P);
+
+		iif = fop.len(0);
+		jjf = fop.len(1);
+		iic = cop.len(0);
+		jjc = cop.len(1);
+
+		ifd = 0;
+		nstencil = 9;
+
+		BMG_get_bc(params.per_mask(), &ipn);
+
+		BMG2_SymStd_SETUP_ITLI_ex(fopd.data(), cop.data(), Pd.data(),
+		                          iif, jjf, iic, jjc, ifd, nstencil, ipn);
 
 	}
 }

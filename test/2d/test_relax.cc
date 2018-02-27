@@ -8,6 +8,7 @@
 
 #include <cedar/2d/gallery.h>
 #include <cedar/cycle/types.h>
+#include <cedar/2d/kernel/registry.h>
 
 
 TEST(SerialRelax2, Point5) {
@@ -18,24 +19,26 @@ TEST(SerialRelax2, Point5) {
 	len_t nx = 31;
 	len_t ny = nx;
 
+	config::reader conf("");
+	log::init(conf);
+	kernel::registry kreg(conf);
+
 	auto so = gallery::poisson(nx, ny);
 	auto b = grid_func::zeros(nx, ny);
 	auto x = grid_func::ones(nx, ny);
 
 	relax_stencil sor(nx, ny);
 
-	auto kreg = so.get_registry();
-
-	kreg->setup_relax(so, sor);
+	kreg.setup_relax(so, sor);
 
 	for (auto i : range(nsweeps)) {
 		(void)i;
-		kreg->relax(so, x, b, sor, cycle::Dir::DOWN);
+		kreg.relax(so, x, b, sor, cycle::Dir::DOWN);
 	}
 
 	for (auto i : range(nsweeps)) {
 		(void)i;
-		kreg->relax(so, x, b, sor, cycle::Dir::UP);
+		kreg.relax(so, x, b, sor, cycle::Dir::UP);
 	}
 
 	grid_func pyx(nx, ny, 0);
@@ -64,19 +67,21 @@ TEST(SerialRelax2, Point9) {
 
 	relax_stencil sor(nx, ny);
 
-	auto kreg = so.get_registry();
+	config::reader conf("");
+	log::init(conf);
+	kernel::registry kreg(conf);
 
-	kreg->setup_relax(so, sor);
+	kreg.setup_relax(so, sor);
 
 	for (auto i : range(nsweeps)) {
 		(void)i;
-		kreg->relax(so, x, b, sor, cycle::Dir::DOWN);
+		kreg.relax(so, x, b, sor, cycle::Dir::DOWN);
 	}
 
 
 	for (auto i : range(nsweeps)) {
 		(void)i;
-		kreg->relax(so, x, b, sor, cycle::Dir::UP);
+		kreg.relax(so, x, b, sor, cycle::Dir::UP);
 	}
 
 	grid_func pyx(nx, ny, 0);
@@ -99,23 +104,23 @@ TEST(SerialRelax2, LineX5) {
 	len_t nx = 132;
 	len_t ny = 132;
 
+	config::reader conf("");
+	log::init(conf);
+	kernel::registry kreg(conf);
+
 	auto so = gallery::diag_diffusion(nx, ny, 1, .0001);
 	auto b = grid_func::zeros(nx, ny);
 	auto x = grid_func::random(nx, ny);
 
-	auto & sten = so.stencil();
-
 	relax_stencil sor(nx, ny);
 
-	auto kreg = so.get_registry();
-
-	kreg->setup_relax_x(so, sor);
+	kreg.setup_relax_x(so, sor);
 
 	grid_func tmp(nx, ny);
 
 	for (auto i : range(nsweeps)) {
 		(void)i;
-		kreg->relax_lines_x(so, x, b, sor, tmp, cycle::Dir::DOWN);
+		kreg.relax_lines_x(so, x, b, sor, tmp, cycle::Dir::DOWN);
 	}
 
 	double max_high_freq = get_high_freq(nx, ny, x.data());
@@ -133,23 +138,23 @@ TEST(SerialRelax2, LineY5) {
 	len_t nx = 132;
 	len_t ny = 132;
 
+	config::reader conf("");
+	log::init(conf);
+	kernel::registry kreg(conf);
+
 	auto so = gallery::diag_diffusion(nx, ny, .0001, 1);
 	auto b = grid_func::zeros(nx, ny);
 	auto x = grid_func::random(nx, ny);
 
-	auto & sten = so.stencil();
-
 	relax_stencil sor(nx, ny);
 
-	auto kreg = so.get_registry();
-
-	kreg->setup_relax_y(so, sor);
+	kreg.setup_relax_y(so, sor);
 
 	grid_func tmp(nx, ny);
 
 	for (auto i : range(nsweeps)) {
 		(void)i;
-		kreg->relax_lines_y(so, x, b, sor, tmp, cycle::Dir::DOWN);
+		kreg.relax_lines_y(so, x, b, sor, tmp, cycle::Dir::DOWN);
 	}
 
 	double max_high_freq = get_high_freq(nx, ny, x.data());

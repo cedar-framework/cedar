@@ -6,25 +6,21 @@
 #include <cedar/types.h>
 #include <cedar/2d/mpi/grid_func.h>
 #include <cedar/2d/util/topo.h>
-#include <cedar/2d/util/mpi_grid.h>
 #include <cedar/2d/mpi/solver.h>
 #include <cedar/2d/mpi/gallery.h>
 
 #include <cedar/util/time_log.h>
 
 
-static cedar::cdr2::mpi::stencil_op create_op(cedar::topo_ptr grid, std::array<bool, 3> periodic)
+static cedar::cdr2::mpi::stencil_op<cedar::cdr2::five_pt> create_op(cedar::topo_ptr grid, std::array<bool, 3> periodic)
 {
 	using namespace cedar;
 	using namespace cedar::cdr2;
 
-	auto so = mpi::stencil_op(grid);
-	auto & o = so.stencil();
-	o.five_pt() = true;
-
+	auto so = mpi::stencil_op<five_pt>(grid);
 	auto & topo = so.grid();
 
-	o.set(0);
+	so.set(0);
 
 	real_t nlx = topo.nlocal(0) - 2;
 	real_t nly = topo.nlocal(1) - 2;
@@ -75,19 +71,19 @@ static cedar::cdr2::mpi::stencil_op create_op(cedar::topo_ptr grid, std::array<b
 
 	for (auto j : range<len_t>(jbeg, jend)) {
 		for (auto i : range<len_t>(1, iend)) {
-			o(i,j,dir::S) = 1.0 * yh;
+			so(i,j,five_pt::s) = yh;
 		}
 	}
 
 	for (auto j : range<len_t>(1, jend)) {
 		for (auto i : range<len_t>(ibeg, iend)) {
-			o(i,j,dir::W) = xh;
+			so(i,j,five_pt::w) = xh;
 		}
 	}
 
 	for (auto j : range<len_t>(1, j1)) {
 		for (auto i : range<len_t>(1, i1)) {
-			o(i,j,dir::C) = 2*xh + 2*yh;
+			so(i,j,five_pt::c) = 2*xh + 2*yh;
 		}
 	}
 
@@ -205,7 +201,7 @@ int main(int argc, char *argv[])
 
 	set_problem(b, params->periodic);
 
-	mpi::solver bmg(std::move(so), conf);
+	mpi::solver<five_pt> bmg(so, conf);
 
 	// {
 	// 	std::string suffix(std::to_string(grid->coord(0)) + "." +

@@ -43,7 +43,9 @@ public:
 	std::vector<len_t> dimyfine;
 	std::vector<len_t> dimzfine;
 
-private:
+	friend std::ostream & operator<<(std::ostream & os, const grid_topo & obj);
+
+protected:
 	igrd_t igrd;
 	int lvl;
 	int nlvl;

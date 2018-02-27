@@ -6,10 +6,8 @@
 #include <cedar/types.h>
 #include <cedar/2d/mpi/grid_func.h>
 #include <cedar/2d/mpi/stencil_op.h>
-#include <cedar/2d/kernel/mpi/factory.h>
 #include <cedar/2d/kernel/mpi/registry.h>
 #include <cedar/2d/util/topo.h>
-#include <cedar/2d/util/mpi_grid.h>
 
 #include <cedar/util/time_log.h>
 
@@ -34,7 +32,7 @@ static void draw(const cedar::cdr2::mpi::grid_func & b, std::string prefix)
 }
 
 
-static void draw_so(const cedar::cdr2::mpi::stencil_op & so, std::string prefix)
+static void draw_so(const cedar::cdr2::mpi::stencil_op<cedar::cdr2::five_pt> & so, std::string prefix)
 {
 	using namespace cedar;
 	using namespace cedar::cdr2;
@@ -57,7 +55,6 @@ static void draw_so(const cedar::cdr2::mpi::stencil_op & so, std::string prefix)
 	};
 
 	auto & topo = so.grid();
-	auto & o = so.stencil();
 
 	for (int i = 0; i < 3; ++i) {
 		osv.emplace_back(std::make_shared<std::ofstream>("output/" + prefix + "-stencil-" +
@@ -66,11 +63,11 @@ static void draw_so(const cedar::cdr2::mpi::stencil_op & so, std::string prefix)
 		                                                 "-" + std::to_string(i)));
 	}
 
-	for (auto j : o.grange(1)) {
-		for (auto i : o.grange(0)) {
-			*osv[0] << format(o(i,j,dir::C)) << " ";
-			*osv[1] << format(o(i,j,dir::W)) << " ";
-			*osv[2] << format(o(i,j,dir::S)) << " ";
+	for (auto j : so.grange(1)) {
+		for (auto i : so.grange(0)) {
+			*osv[0] << format(so(i,j,five_pt::c)) << " ";
+			*osv[1] << format(so(i,j,five_pt::w)) << " ";
+			*osv[2] << format(so(i,j,five_pt::s)) << " ";
 		}
 		for (int i = 0; i < 3; ++i) *(osv[i]) << '\n';
 	}
@@ -91,20 +88,20 @@ static void fill_gfunc(cedar::cdr2::mpi::grid_func & b)
 }
 
 
-static void fill_stencil(cedar::cdr2::mpi::stencil_op & so)
+static void fill_stencil(cedar::cdr2::mpi::stencil_op<cedar::cdr2::five_pt> & so)
 {
 	using namespace cedar;
 	using namespace cedar::cdr2;
-	auto & o = so.stencil();
-	o.set(-1);
+
+	so.set(-1);
 
 	auto & topo = so.grid();
 
-	for (auto j : o.range(1)) {
-		for (auto i : o.range(0)) {
-			o(i,j,dir::C) = 100*topo.coord(0) + 10*topo.coord(1);
-			o(i,j,dir::W) = 100*topo.coord(0) + 10*topo.coord(1) + 1;
-			o(i,j,dir::S) = 100*topo.coord(0) + 10*topo.coord(1) + 2;
+	for (auto j : so.range(1)) {
+		for (auto i : so.range(0)) {
+			so(i,j,five_pt::c) = 100*topo.coord(0) + 10*topo.coord(1);
+			so(i,j,five_pt::w) = 100*topo.coord(0) + 10*topo.coord(1) + 1;
+			so(i,j,five_pt::s) = 100*topo.coord(0) + 10*topo.coord(1) + 2;
 		}
 	}
 }
@@ -126,23 +123,19 @@ int main(int argc, char *argv[])
 
 
 	mpi::grid_func b(grid);
-	mpi::stencil_op so(grid);
-	auto kreg = std::make_shared<cedar::cdr2::kernel::mpi::registry>();
-	cedar::cdr2::kernel::mpi::factory::init(kreg, conf);
+	mpi::stencil_op<five_pt> so(grid);
+	auto kreg = kernel::mpi::registry(conf);
 
-	void *halo_ctx;
-	kreg->halo_setup(*grid, &halo_ctx);
-	b.halo_ctx = halo_ctx;
-	so.halo_ctx = halo_ctx;
+	kreg.halo_setup(*grid);
 
 	fill_gfunc(b);
 	draw(b, "before");
-	kreg->halo_exchange(b);
+	kreg.halo_exchange(b);
 	draw(b, "after");
 
 	fill_stencil(so);
 	draw_so(so, "before");
-	kreg->halo_stencil_exchange(so);
+	kreg.halo_stencil_exchange(so);
 	draw_so(so, "after");
 
 	log::status << "Finished Test" << std::endl;

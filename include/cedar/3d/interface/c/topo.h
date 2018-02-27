@@ -7,10 +7,10 @@
 extern "C" {
 #endif
 
-struct cdr3_topology;
-typedef struct cdr3_topology* cdr3_topo;
+struct bmg3_topology;
+typedef struct bmg3_topology* bmg3_topo;
 
-cdr3_topo cdr3_topo_create(MPI_Comm comm,
+bmg3_topo bmg3_topo_create(MPI_Comm comm,
                            unsigned int ngx,
                            unsigned int ngy,
                            unsigned int ngz,

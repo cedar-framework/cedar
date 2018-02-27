@@ -1,7 +1,7 @@
       SUBROUTINE BMG3_SymStd_SETUP_interp_OI( &
-     &                kgf, kgc, so, soc, ci,&
+     &                so, soc, ci,&
      &                iif, jjf, kkf, iic, jjc, kkc, &
-     &                NOG, ifd, NStncl, irelax, JPN, yo&
+     &                ifd, NStncl, irelax, JPN, yo&
      &                ) BIND(C, NAME='BMG3_SymStd_SETUP_interp_OI')
 
 ! ======================================================================
@@ -54,8 +54,7 @@
 ! ---------------------------
 !     Argument Declarations:
 !
-      integer(c_int), value :: NOG, NStncl, ifd, irelax, JPN
-      integer(c_int), value :: kgc, kgf
+      integer(c_int), value :: NStncl, ifd, irelax, JPN
       integer(len_t), value :: iic, iif, jjc, jjf, kkc, kkf
       real(real_t) :: ci(iic, jjc, kkc, 26), &
            so(iif, jjf, kkf, NStncl), soc(iic,jjc,kkc,14), &
@@ -118,7 +117,7 @@
             enddo
          enddo
 
-         if(kgf.lt.NOG.or.ifd.ne.1) then
+         if(ifd.ne.1) then
 
 ! **********************************************************************
 !   begin computation of i when k difference operator is 27 point
@@ -920,7 +919,7 @@
             enddo
          enddo
 
-         if(kgf.lt.NOG.or.ifd.ne.1) then
+         if(ifd.ne.1) then
 
 ! **********************************************************************
 !   begin computation of i when k difference operator is 27 point

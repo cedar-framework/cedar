@@ -1,32 +1,41 @@
-#ifndef CEDAR_2D_CORE_MPI_STENCIL_OP_H
-#define CEDAR_2D_CORE_MPI_STENCIL_OP_H
+#ifndef CEDAR_2D_MPI_STENCIL_OP_H
+#define CEDAR_2D_MPI_STENCIL_OP_H
 
 #include <mpi.h>
 
-#include <cedar/2d/stencil_op_base.h>
 #include <cedar/mpi/par_object.h>
-#include <cedar/2d/mpi/grid_func.h>
-#include <cedar/2d/kernel/mpi/registry.h>
+#include <cedar/2d/stencil_op.h>
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
-class stencil_op : public stencil_op_base<grid_func, kernel::mpi::registry>, public par_object
+template <class sten>
+class stencil_op : public cdr2::stencil_op<sten>, public par_object
 {
 public:
 	stencil_op() {}
-	stencil_op(topo_ptr grid);
-    stencil_op(len_t nx, len_t ny, bool intergrid=false): stencil_op_base(nx,ny,intergrid) {}
-	virtual grid_func residual(const grid_func &x, const grid_func &b) const;
-	friend std::ostream & operator<< (std::ostream &os, const stencil_op & op);
-	virtual void apply(const grid_func &x, grid_func &y) const
-	{
-		stencil_op_base::apply<stencil_op>(x, y);
-	}
-	virtual void residual(const grid_func &x, const grid_func & b, grid_func &r) const
-	{
-		stencil_op_base::residual<stencil_op>(x, b, r);
-	}
+stencil_op(topo_ptr grd) :
+	cdr2::stencil_op<sten>(grd->nlocal(0)-1, grd->nlocal(1)-1), // remove only one ghost since MPI needs an extra ghost
+		par_object(grd, grd->comm)
+		{
+			// TODO: verify this
+			// Fortran kernels expect the extra ghost to be excluded from extents
+			this->range_[0] = cedar::range(static_cast<len_t>(1), grd->nlocal(0)-1);
+			this->range_[1] = cedar::range(static_cast<len_t>(1), grd->nlocal(1)-1);
+			this->grange_[0] = cedar::range(static_cast<len_t>(0), grd->nlocal(0));
+			this->grange_[1] = cedar::range(static_cast<len_t>(0), grd->nlocal(1));
+			this->len(0)--;
+			this->len(1)--;
+		}
+	using cdr2::stencil_op<sten>::shape;
+	using cdr2::stencil_op<sten>::len;
+	using cdr2::stencil_op<sten>::set;
+	using cdr2::stencil_op<sten>::operator();
+	using cdr2::stencil_op<sten>::range;
+	using cdr2::stencil_op<sten>::grange;
 };
+
+template <class sten>
+	std::ostream & operator<<(std::ostream & os, const stencil_op<sten> & obj);
 
 }}}
 

@@ -1,6 +1,6 @@
       SUBROUTINE BMG2_SymStd_SETUP_interp_OI(&
-     &                KF, KC, SO, SOC, CI,&
-     &                IIF, JJF, IIC, JJC, NOG, IFD, NStncl, JPN, IRELAX&
+     &                SO, SOC, CI,&
+     &                IIF, JJF, IIC, JJC, IFD, NStncl, JPN, IRELAX&
      &                ) BIND(C, NAME='BMG2_SymStd_SETUP_interp_OI')
 
 ! ======================================================================
@@ -54,7 +54,7 @@
 !    Argument Declarations:
 !
       integer(len_t), value :: IIC, IIF, JJC, JJF
-      integer(c_int), value :: IFD, IRELAX, KC, KF, NOG, NStncl, JPN
+      integer(c_int), value :: IFD, IRELAX, NStncl, JPN
       real(real_t) :: CI(IIC,JJC,8), SO(IIF,JJF,NStncl), SOC(IIC,JJC,5)
 
 ! --------------------------
@@ -105,7 +105,7 @@
 !******************************
 !   begin computation of i when kf difference operator is nine point
 !
-      IF ( IFD.NE.1 .OR. KF.LT.NOG ) THEN
+      IF ( IFD.NE.1 ) THEN
 
             J=0
             DO JC=2,JJC1
@@ -318,7 +318,7 @@
 
 !******************************
 !   begin computation of i when kf difference operator is nine point
-      IF ( IFD.NE.1 .OR. KF.LT.NOG ) THEN
+      IF ( IFD.NE.1 ) THEN
 
          J=0
          DO JC=2,JJC1

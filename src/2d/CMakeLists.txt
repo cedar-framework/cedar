@@ -11,13 +11,8 @@ set(sources
   ${kernel_SOURCES}
   ${relax_SOURCES}
   grid_func.cc
-  grid_stencil.cc
-  stencil_op.cc
-  boundary_iterator.cc
-  matvec.cc
   relax_stencil.cc
   residual.cc
-  solver.cc
   stencil_op.cc
   gallery.cc
   )
@@ -30,12 +25,10 @@ if(ENABLE_MPI)
 	${interface_SOURCES}
 	${util_SOURCES}
 	mpi/grid_func.cc
-	mpi/halo.cc
-	mpi/solver.cc
 	mpi/stencil_op.cc
 	mpi/redist_solver.cc
-	mpi/residual.cc
 	mpi/gallery.cc
+	mpi/msg_exchanger.cc
 	)
 endif()
 

@@ -14,60 +14,95 @@ namespace cedar { namespace cdr2 { namespace kernel {
 namespace impls
 {
 	using namespace cedar::cdr2;
+
+	template<>
 	void mpi_setup_rbgs_point(const kernel_params & params,
-	                          const mpi::stencil_op & so,
+	                          const mpi::stencil_op<five_pt> & so,
 	                          relax_stencil & sor)
 	{
-		int nx, ny, nstencil;
+		int nstencil;
 
-		const grid_stencil & so_sten = so.stencil();
-		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);
+		auto & sod = const_cast<mpi::stencil_op<five_pt>&>(so);
 
-		nx = so_sten.len(0);
-		ny = so_sten.len(1);
+		nstencil = 3;
 
-		if (so_sten.five_pt()) nstencil = 3;
-		else nstencil = 5;
-
-		MPI_BMG2_SymStd_SETUP_recip(sod.data(), sor.data(), nx, ny, nstencil);
+		MPI_BMG2_SymStd_SETUP_recip(sod.data(), sor.data(), so.len(0), so.len(1), nstencil);
 	}
 
 
+	template<>
+	void mpi_setup_rbgs_point(const kernel_params & params,
+	                          const mpi::stencil_op<nine_pt> & so,
+	                          relax_stencil & sor)
+	{
+		int nstencil;
+
+		auto & sod = const_cast<mpi::stencil_op<nine_pt>&>(so);
+
+		nstencil = 5;
+
+		MPI_BMG2_SymStd_SETUP_recip(sod.data(), sor.data(), so.len(0), so.len(1), nstencil);
+	}
+
+
+	template<>
 	void mpi_setup_rbgs_x(const kernel_params & params,
-	                      const mpi::stencil_op & so,
+	                      const mpi::stencil_op<five_pt> & so,
 	                      relax_stencil & sor)
 	{
-		int nx, ny, nstencil;
+		int nstencil;
 
-		const grid_stencil & so_sten = so.stencil();
-		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);
+		auto & sod = const_cast<mpi::stencil_op<five_pt>&>(so);
 
-		nx = so_sten.len(0);
-		ny = so_sten.len(1);
 
-		if (so_sten.five_pt()) nstencil = 3;
-		else nstencil = 5;
+		nstencil = 3;
 
-		MPI_BMG2_SymStd_SETUP_lines_x(sod.data(), sor.data(), nx, ny, nstencil);
+		MPI_BMG2_SymStd_SETUP_lines_x(sod.data(), sor.data(), so.len(0), so.len(1), nstencil);
 	}
 
 
-	void mpi_setup_rbgs_y(const kernel_params & params,
-	                      const mpi::stencil_op & so,
+	template<>
+	void mpi_setup_rbgs_x(const kernel_params & params,
+	                      const mpi::stencil_op<nine_pt> & so,
 	                      relax_stencil & sor)
 	{
-		int nx, ny, nstencil;
+		int nstencil;
 
-		const grid_stencil & so_sten = so.stencil();
-		mpi::stencil_op & sod = const_cast<mpi::stencil_op&>(so);
+		auto & sod = const_cast<mpi::stencil_op<nine_pt>&>(so);
 
-		nx = so_sten.len(0);
-		ny = so_sten.len(1);
+		nstencil = 5;
 
-		if (so_sten.five_pt()) nstencil = 3;
-		else nstencil = 5;
+		MPI_BMG2_SymStd_SETUP_lines_x(sod.data(), sor.data(), so.len(0), so.len(1), nstencil);
+	}
 
-		MPI_BMG2_SymStd_SETUP_lines_y(sod.data(), sor.data(), nx, ny, nstencil);
+
+	template<>
+	void mpi_setup_rbgs_y(const kernel_params & params,
+	                      const mpi::stencil_op<five_pt> & so,
+	                      relax_stencil & sor)
+	{
+		int nstencil;
+
+		auto & sod = const_cast<mpi::stencil_op<five_pt>&>(so);
+
+		nstencil = 3;
+
+		MPI_BMG2_SymStd_SETUP_lines_y(sod.data(), sor.data(), so.len(0), so.len(1), nstencil);
+	}
+
+
+	template<>
+	void mpi_setup_rbgs_y(const kernel_params & params,
+	                      const mpi::stencil_op<nine_pt> & so,
+	                      relax_stencil & sor)
+	{
+		int nstencil;
+
+		auto & sod = const_cast<mpi::stencil_op<nine_pt>&>(so);
+
+		nstencil = 5;
+
+		MPI_BMG2_SymStd_SETUP_lines_y(sod.data(), sor.data(), so.len(0), so.len(1), nstencil);
 	}
 }
 

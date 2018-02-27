@@ -135,3 +135,19 @@ void grid_topo::grow(int nlevels)
 	nlvl = nlevels;
 	lvl = nlevels - 1;
 }
+
+
+namespace cedar {
+	std::ostream & operator<<(std::ostream & os, const grid_topo & obj)
+	{
+		os << "===== grid_topo =====\n";
+
+		os << "nproc:   " << obj.nproc(0) << " " << obj.nproc(1) << " " << obj.nproc(2) << '\n';
+		os << "coord:   " << obj.coord(0) << " " << obj.coord(1) << " " << obj.coord(2) << '\n';
+		os << "nlocal:  " << obj.nlocal(0) << " " << obj.nlocal(1) << " " << obj.nlocal(2) << '\n';
+		os << "nglobal: " << obj.nglobal(0) << " " << obj.nglobal(1) << " " << obj.nglobal(2) << '\n';
+		os << "is:      " << obj.is(0) << " " << obj.is(1) << " " << obj.is(2) << '\n';
+
+		return os;
+	}
+}

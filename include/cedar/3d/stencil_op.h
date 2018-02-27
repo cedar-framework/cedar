@@ -4,32 +4,19 @@
 #include<iostream>
 
 #include <cedar/types.h>
-#include <cedar/3d/stencil_op_base.h>
-#include <cedar/3d/grid_func.h>
-#include <cedar/3d/kernel/registry.h>
+#include <cedar/stencil_op_nd.h>
+#include <cedar/3d/base_types.h>
 
 namespace cedar { namespace cdr3 {
 
+		enum class seven_pt {p=BMG3_P, pw=BMG3_PW, ps=BMG3_PS, b=BMG3_B, ndirs};
+		enum class xxvii_pt {p=BMG3_P, pw=BMG3_PW, ps=BMG3_PS, b=BMG3_B,
+				psw=BMG3_PSW, pnw=BMG3_PNW, bw=BMG3_BW, bnw=BMG3_BNW,
+				bn=BMG3_BN, bne=BMG3_BNE, be=BMG3_BE, bse=BMG3_BSE,
+				bs=BMG3_BS, bsw=BMG3_BSW,ndirs};
 
-class stencil_op : public stencil_op_base<grid_func, kernel::registry>
-{
-public:
-	stencil_op() {};
-    stencil_op(len_t nx, len_t ny, len_t nz, bool intergrid=false) : stencil_op_base(nx,ny,nz, intergrid) {}
-	friend std::ostream & operator<< (std::ostream &os, const stencil_op & op);
-	virtual void apply(const grid_func & x, grid_func &y) const
-	{
-		stencil_op_base::apply<stencil_op>(x, y);
-	}
-	virtual void residual(const grid_func &x, const grid_func & b, grid_func &r) const
-	{
-		stencil_op_base::residual<stencil_op>(x, b, r);
-	}
-	virtual grid_func residual(const grid_func &x, const grid_func &b) const
-	{
-		return stencil_op_base::residual<stencil_op>(x, b);
-	}
-};
+		template<class stype>
+			using stencil_op = stencil_op_nd<3, stype>;
 
 }}
 #endif

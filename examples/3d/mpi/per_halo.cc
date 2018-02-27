@@ -6,7 +6,6 @@
 #include <cedar/types.h>
 #include <cedar/3d/mpi/grid_func.h>
 #include <cedar/3d/mpi/stencil_op.h>
-#include <cedar/3d/kernel/mpi/factory.h>
 #include <cedar/3d/kernel/mpi/registry.h>
 #include <cedar/3d/util/topo.h>
 
@@ -34,10 +33,10 @@ static void draw(const cedar::cdr3::mpi::grid_func & b, std::string prefix)
 }
 
 
-static void draw_so(const cedar::cdr3::mpi::stencil_op & so, std::string prefix)
-{
+// static void draw_so(const cedar::cdr3::mpi::stencil_op<xx & so, std::string prefix)
+// {
 
-}
+// }
 
 
 static void fill_gfunc(cedar::cdr3::mpi::grid_func & b)
@@ -55,9 +54,9 @@ static void fill_gfunc(cedar::cdr3::mpi::grid_func & b)
 }
 
 
-static void fill_stencil(cedar::cdr3::mpi::stencil_op & so)
-{
-}
+// static void fill_stencil(cedar::cdr3::mpi::stencil_op & so)
+// {
+// }
 
 
 int main(int argc, char *argv[])
@@ -76,24 +75,20 @@ int main(int argc, char *argv[])
 
 
 	mpi::grid_func b(grid);
-	mpi::stencil_op so(grid);
-	auto kreg = std::make_shared<cedar::cdr3::kernel::mpi::registry>();
-	cedar::cdr3::kernel::mpi::factory::init(kreg, conf);
+	mpi::stencil_op<seven_pt> so(grid);
+	kernel::mpi::registry kreg(conf);
 
-	void *halo_ctx;
-	kreg->halo_setup(*grid, &halo_ctx);
-	b.halo_ctx = halo_ctx;
-	so.halo_ctx = halo_ctx;
+	kreg.halo_setup(*grid);
 
 	fill_gfunc(b);
 	draw(b, "before");
-	kreg->halo_exchange(b);
+	kreg.halo_exchange(b);
 	draw(b, "after");
 
-	fill_stencil(so);
-	draw_so(so, "before");
-	kreg->halo_stencil_exchange(so);
-	draw_so(so, "after");
+	// fill_stencil(so);
+	// draw_so(so, "before");
+	// kreg.halo_stencil_exchange(so);
+	// draw_so(so, "after");
 
 	log::status << "Finished Test" << std::endl;
 

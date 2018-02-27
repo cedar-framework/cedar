@@ -1,9 +1,7 @@
       SUBROUTINE BMG2_SymStd_restrict( &
      &                KF, KC, NOG,&
      &                Q, QC, CI,&
-     &                Nx, Ny, Nxc, Nyc, iGs, jGs,&
-     &                iWorkMSG, NMSGi, pMSG, &
-     &                MSG_Buffer, NMSGr, MPICOMM&
+     &                Nx, Ny, Nxc, Nyc, iGs, jGs&
      &                ) BIND(C, NAME='MPI_BMG2_SymStd_restrict')
 
 ! ======================================================================
@@ -59,14 +57,10 @@
 ! ----------------------------
 !     Argument Declarations
 !
-      INTEGER(len_t), VALUE :: NMSGi, NMSGr, Nx, Nxc,&
+      INTEGER(len_t), VALUE :: Nx, Nxc,&
            Ny, Nyc, iGs, jGs
       INTEGER(C_INT), VALUE :: NOG, KC, KF
-      INTEGER(len_t) :: iWorkMSG(NMSGi)
-      INTEGER(C_INT) :: pMSG(NBMG_pMSG,NOG)
-      INTEGER :: MPICOMM
-      REAL(real_t) :: CI(Nxc,Nyc,8), Q(Nx,Ny), QC(Nxc,Nyc),&
-           MSG_Buffer(NMSGr)
+      REAL(real_t) :: CI(Nxc,Nyc,8), Q(Nx,Ny), QC(Nxc,Nyc)
 
 ! ----------------------------
 !     Local Declarations

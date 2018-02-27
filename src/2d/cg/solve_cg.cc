@@ -1,6 +1,6 @@
 #include "cedar/2d/ftn/BMG_parameters_c.h"
 
-#include "cedar/2d/cg/solve_cg.h"
+#include <cedar/2d/cg/solve_cg.h>
 
 
 extern "C" {

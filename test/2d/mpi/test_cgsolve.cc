@@ -3,7 +3,6 @@
 
 #include <cedar/2d/mpi/gallery.h>
 #include <cedar/2d/util/topo.h>
-#include <cedar/2d/util/mpi_grid.h>
 #include <cedar/2d/mpi/solver.h>
 
 
@@ -73,11 +72,11 @@ TEST(MPICGSolver, BoxMG) {
 	auto conf1 = std::make_shared<config::reader>("test-cgsolve-1.json");
 
 	log::init_level(*conf0);
-	mpi::solver bmg0(std::move(so0), conf0);
+	mpi::solver<five_pt> bmg0(so0, conf0);
 	auto sol0 = bmg0.solve(b0);
 
 	log::init_level(*conf1);
-	mpi::solver bmg1(std::move(so1), conf1);
+	mpi::solver<five_pt> bmg1(so1, conf1);
 	auto sol1 = bmg1.solve(b1);
 
 	auto diff = sol0 - sol1;
