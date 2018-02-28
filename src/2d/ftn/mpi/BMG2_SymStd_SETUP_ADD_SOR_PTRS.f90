@@ -2,9 +2,10 @@
      &                             NProc, NLines,&
      &                             Min_GSz, NOL, &
      &                             pOFFSET,&
-     &                             pSOR_LEV)&
+     &                             pSOR_LEV,&
+     &                             shm_enabled, node_size, shm_size)&
      BIND(C, NAME='BMG2_SymStd_SETUP_ADD_SOR_PTRS')
-
+         use iso_c_binding, only: c_bool
          USE ModInterface
          IMPLICIT NONE
 
@@ -16,6 +17,8 @@
          integer(len_t), value :: NLines
          integer(c_int), value :: NOL
          integer(c_int) :: pOFFSET
+         logical(c_bool), value :: shm_enabled
+         integer(c_int), value :: node_size, shm_size
 
 ! ======================================================
 ! Intent Out Variables
@@ -35,6 +38,7 @@
      &           RUN
 
          INTEGER kl
+         logical fine_flag
 
 ! ======================================================
 ! Initialize Counters
@@ -42,6 +46,7 @@
 
          RUN = 0
          INSIZE = NProc
+         fine_flag = .true.
 
 ! ======================================================
 ! Step through levels and record pointers
@@ -91,6 +96,11 @@
             !
             INSIZE = NGPS
 
+            if (shm_enabled .and. fine_flag) then
+               INSIZE = node_size
+               GSIZE = shm_size
+               fine_flag = .false.
+            endif
             !
             ! Increment the running total
             !

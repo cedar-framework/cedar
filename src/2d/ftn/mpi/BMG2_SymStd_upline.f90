@@ -2,8 +2,9 @@
      &                JBEG, RWORK, NPts, NLines, &
      &                K, NOLX, XCOMM, NSOR, TDG, &
      &                NMSGr, NOG, TDSX_SOR_PTRS,&
-     &                SIZE)
+     &                SIZE, shm_enabled, puper)
 
+      use iso_c_binding, only: c_bool, c_int
       use ModInterface
       IMPLICIT NONE
 
@@ -23,7 +24,9 @@
 
       INTEGER SIZE, N, My_L1_Rank, My_L2_Rank, IERR, kl
 
-      INTEGER I, J, AT, FT, MULT, grank
+      INTEGER I, J, AT, FT, MULT, grank, idx, rnum
+      logical(c_bool) :: shm_enabled
+      type(c_ptr) :: puper
 
 ! =============================================================
 ! Loop over all lower levels
@@ -114,34 +117,41 @@
       ! system
       !
 
+
       call ftimer_begin(C_CHAR_"comm-inter"//C_NULL_CHAR)
-      if (My_L2_Rank .eq. 0) then
-         CALL MPI_SCATTER(RWORK(My_L2_Rank*NLINES*8+1),NLINES*8,&
-              &     MPI_DOUBLE_PRECISION,MPI_IN_PLACE, NLINES*8, &
-              &     MPI_DOUBLE_PRECISION,0,XCOMM(2,NOLX),IERR)
+      if (shm_enabled) then
+         call ml_relax_shm_up(puper, rwork, nlines)
       else
-         CALL MPI_SCATTER(0.0d0,NLINES*8,&
-              &     MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
-              &     MPI_DOUBLE_PRECISION,0,XCOMM(2,NOLX),IERR)
+         if (My_L2_Rank .eq. 0) then
+            CALL MPI_SCATTER(RWORK(My_L2_Rank*NLINES*8+1),NLINES*8,&
+                 &     MPI_DOUBLE_PRECISION,MPI_IN_PLACE, NLINES*8, &
+                 &     MPI_DOUBLE_PRECISION,0,XCOMM(2,NOLX),IERR)
+         else
+            CALL MPI_SCATTER(0.0d0,NLINES*8,&
+                 &     MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
+                 &     MPI_DOUBLE_PRECISION,0,XCOMM(2,NOLX),IERR)
+         endif
       endif
       call ftimer_end(C_CHAR_"comm-inter"//C_NULL_CHAR)
 
       !
       ! Pointers into RWORK
       !
+
       MULT = 0
       DO J=JBEG,JJ-1,2
-!MB      DO J=JBEG,JBEG  ! previous line was commented out
+         !MB      DO J=JBEG,JBEG  ! previous line was commented out
 
          CALL BMG2_SymStd_LineSolve_C_ml(SOR(2,J,1),&
-     &        SOR(2,J,2), Q(1,J),&
-     &        RWORK(MULT*8 + 1),&
-     &        Npts, SIZE,&
-     &        My_L1_Rank)
+              &        SOR(2,J,2), Q(1,J),&
+              &        RWORK(MULT*8 + 1),&
+              &        Npts, SIZE,&
+              &        My_L1_Rank)
 
          MULT = MULT+1
 
       END DO
+
 
       RETURN
       END

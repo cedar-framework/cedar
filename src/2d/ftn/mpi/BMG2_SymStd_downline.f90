@@ -2,9 +2,10 @@
      &                JBEG, RWORK, NPts, NLines, &
      &                K, NOLX, XCOMM, NSOR, TDG, &
      &                NMSGr, NOG, TDSX_SOR_PTRS,&
-     &                pgSIZE, fact_flags)
+     &                pgSIZE, fact_flags, shm_enabled,&
+     &                puper)
 
-      use iso_c_binding, only: c_bool
+      use iso_c_binding, only: c_bool, c_int, c_ptr
       use ModInterface
       IMPLICIT NONE
 
@@ -24,13 +25,15 @@
 
       INTEGER pgSIZE, N, MyRank, IERR, kl
 
-      INTEGER I, J, MULT, grank
+      INTEGER I, J, MULT, grank, idx, rnum
 
       REAL*8 D, OD
       integer :: flag_stride
       logical(c_bool) :: fact_flags(2 * NOG)
       ! Flag for the interface system
       logical(c_bool) :: inter_flag
+      logical(c_bool) :: shm_enabled
+      type(c_ptr) :: puper
 
       ! always factorize interface systems
       inter_flag = .true.
@@ -69,8 +72,6 @@
 
       END DO
 
-
-
       NLines = MULT
 
       !
@@ -78,18 +79,22 @@
       !
       IF (pgSIZE .GT. 1) THEN
          call ftimer_begin(C_CHAR_"comm-inter"//C_NULL_CHAR)
-         if (myrank .eq. 0) then
-            CALL MPI_GATHER(MPI_IN_PLACE, NLines*8, &
-                 &        MPI_DOUBLE_PRECISION,&
-                 &        RWORK, NLines*8, &
-                 &        MPI_DOUBLE_PRECISION,&
-                 &        0, XCOMM(2,NOLX), IERR)
+         if (shm_enabled) then
+            call ml_relax_shm_down(puper, rwork, nlines)
          else
-            CALL MPI_GATHER(RWORK, NLines*8, &
-                 &        MPI_DOUBLE_PRECISION,&
-                 &        0.0d0, NLines*8, &
-                 &        MPI_DOUBLE_PRECISION,&
-                 &        0, XCOMM(2,NOLX), IERR)
+            if (myrank .eq. 0) then
+               CALL MPI_GATHER(MPI_IN_PLACE, NLines*8, &
+                    &        MPI_DOUBLE_PRECISION,&
+                    &        RWORK, NLines*8, &
+                    &        MPI_DOUBLE_PRECISION,&
+                    &        0, XCOMM(2,NOLX), IERR)
+            else
+               CALL MPI_GATHER(RWORK, NLines*8, &
+                    &        MPI_DOUBLE_PRECISION,&
+                    &        0.0d0, NLines*8, &
+                    &        MPI_DOUBLE_PRECISION,&
+                    &        0, XCOMM(2,NOLX), IERR)
+            endif
          endif
          call ftimer_end(C_CHAR_"comm-inter"//C_NULL_CHAR)
       END IF
@@ -111,11 +116,10 @@
             ! If I'm the head node, copy inteface
             ! system into TDG data structure.
             !
-
             CALL BMG2_SymStd_RWork_2_TDG(&
-     &           TDG(TDSX_SOR_PTRS(kl)),&
-     &           RWORK, pgSIZE, NLines, N,&
-     &           K, kl)
+                 &           TDG(TDSX_SOR_PTRS(kl)),&
+                 &           RWORK, pgSIZE, NLines, N,&
+                 &           K, kl)
 
 !           write(*,*) ''
 !           CALL dump_TDG(

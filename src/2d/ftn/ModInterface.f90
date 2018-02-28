@@ -46,4 +46,23 @@ module ModInterface
        end interface
 
 
+       interface
+          subroutine ml_relax_shm_down(ml_obj, rwork, nlines) BIND(C, name="ml_relax_shm_down")
+            use iso_c_binding, only : c_ptr, c_double, c_int
+            real(c_double) :: rwork(*)
+            type(c_ptr) :: ml_obj
+            integer(c_int), value :: nlines
+          end subroutine ml_relax_shm_down
+       end interface
+
+
+       interface
+          subroutine ml_relax_shm_up(ml_obj, rwork, nlines) BIND(C, name="ml_relax_shm_up")
+            use iso_c_binding, only : c_ptr, c_double, c_int
+            real(c_double) :: rwork(*)
+            type(c_ptr) :: ml_obj
+            integer(c_int), value :: nlines
+          end subroutine ml_relax_shm_up
+       end interface
+
 end module ModInterface
