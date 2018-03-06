@@ -1,8 +1,8 @@
 Cedar: Copyright and License
 =============================
 
-The Cedar Framework (or simply Cedar), is being developed
-collaboratively with members of the Applied Mathematics and Plasma
+The Cedar Framework (or simply Cedar), is being developed through
+a collaboration of members of the Applied Mathematics and Plasma
 Physics Group at Los Alamos National Laboratory and members of the
 PSAAPII Center for Exascale Simulation of Plasma-Copuled
 Combustion. To recognize each institutions role, and provide more
@@ -34,11 +34,16 @@ Los Alamos National Laboratory:
   and/or modify it under the terms of the three-clause BSD license
   that is included at the end of this document.
 
+
 University of Illinois - Urbana Champagne:
 ------------------------------------------
 
   Copyright (c) 2018, The Cedar Development Team at
   All rights reserved.
+
+  You can redistribute this library, and/or modify it, under the terms
+  of the three-clause BSD license that is included at the end of this
+  document.
 
 
 Berkeley Software Distribution (BSD) License
@@ -55,10 +60,11 @@ are met:
     notice, this list of conditions and the following disclaimer in the
     documentation and/or other materials provided with the distribution.
 
-  * Neither the names of the national laboratories listed above, 
-    nor their operating companies, nor the names of its
-    contributors may be used to endorse or promote products derived
-    from this software without specific prior written permission.
+  * Neither the names of the Los Alamos National Laboratory, nor the
+    University of Illinois, nor their operating companies, nor the
+    names of its contributors may be used to endorse or promote
+    products derived from this software without specific prior written
+    permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
