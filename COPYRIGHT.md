@@ -45,10 +45,6 @@ University of Illinois - Urbana Champagne:
   of the three-clause BSD license that is included at the end of this
   document.
 
-  This work is based in part on work supported by the Department of
-  Energy, National Nuclear Security Administration, under Award Number
-  DE-NA0002374.
-
 
 Berkeley Software Distribution (BSD) License
 --------------------------------------------

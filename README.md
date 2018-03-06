@@ -10,8 +10,6 @@ Illinois at Urbana-Champaign and Los Alamos National Laboratory.  Work on this
 project is based in part upon work supported by the Department of Energy,
 National Nuclear Security Administration, under Award Number DE-NA0002374.
 
-TODO logo
-
 Cedar is release under the BSD-3-Clause (see LICENSE.txt).
 
 # Installation
