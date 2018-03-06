@@ -38,12 +38,16 @@ Los Alamos National Laboratory:
 University of Illinois - Urbana Champagne:
 ------------------------------------------
 
-  Copyright (c) 2018, The Cedar Development Team at
+  Copyright (c) 2018, The Cedar Development Team at University of Illinois at Urbana-Champaign
   All rights reserved.
 
   You can redistribute this library, and/or modify it, under the terms
   of the three-clause BSD license that is included at the end of this
   document.
+
+  This work is based in part on work supported by the Department of
+  Energy, National Nuclear Security Administration, under Award Number
+  DE-NA0002374.
 
 
 Berkeley Software Distribution (BSD) License
