@@ -67,8 +67,7 @@ The examples above are defined in `examples/2d/ser` and `examples/2d/mpi` of the
 
 # Usage
 
-- The `config.json` file lists the main configuration settings for the solver,
-while `halo-config.json` identifies custom settings for the halo library.
+- The `config.json` file lists the main configuration settings for the solver.
 - `src/config/schema.json` describes the full set of options.
 - Adding `"log": ["status","error","info","debug"]` to the `config.json` file will give verbose output.
 
