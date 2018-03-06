@@ -47,17 +47,17 @@ Following the installation instructions above, run the following from the build 
 This should give:
 
 <pre>
-Iteration 0 relative l2 norm: 0.335225
-Iteration 1 relative l2 norm: 0.0792311
-Iteration 2 relative l2 norm: 0.0171261
-Iteration 3 relative l2 norm: 0.00347607
-Iteration 4 relative l2 norm: 0.000678134
-Iteration 5 relative l2 norm: 0.000129261
-Iteration 6 relative l2 norm: 2.4409e-05
-Iteration 7 relative l2 norm: 4.6352e-06
-Iteration 8 relative l2 norm: 9.01919e-07
-Iteration 9 relative l2 norm: 1.83749e-07
-Solution norm: 4.32708e-05
+Iteration 0 relative l2 norm: 0.388629
+Iteration 1 relative l2 norm: 0.0443548
+Iteration 2 relative l2 norm: 0.00494131
+Iteration 3 relative l2 norm: 0.000513399
+Iteration 4 relative l2 norm: 5.44908e-05
+Iteration 5 relative l2 norm: 5.60612e-06
+Iteration 6 relative l2 norm: 5.86933e-07
+Iteration 7 relative l2 norm: 6.04942e-08
+Iteration 8 relative l2 norm: 6.30975e-09
+Iteration 9 relative l2 norm: 6.52713e-10
+Solution norm: 2.04592e-05
 Finished Test
 </pre>
 
