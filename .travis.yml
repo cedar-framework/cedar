@@ -5,7 +5,7 @@ before_install:
   - test -n $CXX && unset CXX
 install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install cmake mpich2 liblapack-dev boost ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install cmake mpich2 liblapack-dev libboost-dev ; fi
 before_script:
   - mkdir build
   - cd build
