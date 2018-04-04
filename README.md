@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/cedar-framework/cedar.svg?branch=master)](https://travis-ci.org/cedar-framework/cedar)
+
 ![](doc/logo/cedar-logo.png)
 
 # Cedar
