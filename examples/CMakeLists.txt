@@ -1,44 +1,37 @@
-add_executable(ser-poisson-2d 2d/ser/poisson.cc)
+add_executable(ser-poisson-2d basic-2d-ser/poisson.cc)
 target_link_libraries(ser-poisson-2d cedar ${cedar-deps})
 
-add_executable(ser-periodic-2d 2d/ser/periodic.cc)
+add_executable(ser-periodic-2d basic-2d-ser/periodic.cc)
 target_link_libraries(ser-periodic-2d cedar ${cedar-deps})
 
 if (ENABLE_MPI)
-  add_executable(mpi-poisson-2d 2d/mpi/poisson.cc)
+  add_executable(mpi-poisson-2d basic-2d-mpi/poisson.cc)
   target_link_libraries(mpi-poisson-2d cedar ${cedar-deps})
 
-  add_executable(mpi-periodic-2d 2d/mpi/periodic.cc)
+  add_executable(mpi-periodic-2d basic-2d-mpi/periodic.cc)
   target_link_libraries(mpi-periodic-2d cedar ${cedar-deps})
 
-  add_executable(periodic-halo-2d 2d/mpi/per_halo.cc)
+  add_executable(periodic-halo-2d halo-2d/per_halo.cc)
   target_link_libraries(periodic-halo-2d cedar ${cedar-deps})
 
-  add_executable(halo-2d 2d/mpi/halo.cc)
-  target_link_libraries(halo-2d cedar ${cedar-deps})
-
   if (ENABLE_3D)
-	add_executable(mpi-poisson-3d 3d/mpi/poisson.cc)
+	add_executable(mpi-poisson-3d basic-3d-mpi/poisson.cc)
 	target_link_libraries(mpi-poisson-3d cedar ${cedar-deps})
 
-	add_executable(mpi-periodic-3d 3d/mpi/periodic.cc)
+	add_executable(mpi-periodic-3d basic-3d-mpi/periodic.cc)
 	target_link_libraries(mpi-periodic-3d cedar ${cedar-deps})
 
-	add_executable(periodic-halo-3d 3d/mpi/per_halo.cc)
+	add_executable(periodic-halo-3d halo-3d/per_halo.cc)
 	target_link_libraries(periodic-halo-3d cedar ${cedar-deps})
   endif()
 endif()
 
 if (ENABLE_3D)
-  add_executable(ser-poisson-3d 3d/ser/poisson.cc)
+  add_executable(ser-poisson-3d basic-3d-ser/poisson.cc)
   target_link_libraries(ser-poisson-3d cedar ${cedar-deps})
 
-  add_executable(ser-periodic-3d 3d/ser/periodic.cc)
+  add_executable(ser-periodic-3d basic-3d-ser/periodic.cc)
   target_link_libraries(ser-periodic-3d cedar ${cedar-deps})
 endif()
 
-# add_executable(timer-test timer-test/timer_test.cc)
-# target_link_libraries(timer-test cedar ${cedar-deps})
-
-configure_file(2d/mpi/poisson-config.json ${CMAKE_BINARY_DIR}/config.json COPYONLY)
-configure_file(2d/mpi/halo-config.json ${CMAKE_BINARY_DIR}/halo-config.json COPYONLY)
+configure_file(basic-2d-mpi/poisson-config.json ${CMAKE_BINARY_DIR}/config.json COPYONLY)

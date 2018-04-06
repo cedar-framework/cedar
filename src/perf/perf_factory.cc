@@ -282,7 +282,7 @@ std::shared_ptr<vcycle_model> perf_factory::astar_vcycle(config::reader & conf, 
 	pprob.initial_state.model = perf_factory::produce_vcycle(conf,npx,npy,nx,ny);
 
 	using node_ptr = std::shared_ptr<perf_node>;
-	auto heuristic = [](node_ptr nd) {
+	std::function<float(node_ptr)> heuristic = [](node_ptr nd) {
 		auto model = nd->state.model;
 		auto nlevels = std::log2(model->grid(0).nproc());
 		return nlevels * model->tsmooth(-1);
