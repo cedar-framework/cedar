@@ -72,13 +72,14 @@ int main(int argc, char *argv[])
 	log::init(conf);
 	log::status << "Beginning test" << std::endl;
 	auto grid = util::create_topo(conf);
+	std::vector<topo_ptr> topos{{grid}};
 
 
 	mpi::grid_func b(grid);
 	mpi::stencil_op<seven_pt> so(grid);
 	kernel::mpi::registry kreg(conf);
 
-	kreg.halo_setup(*grid);
+	kreg.halo_setup(topos);
 
 	fill_gfunc(b);
 	draw(b, "before");

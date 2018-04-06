@@ -4,7 +4,6 @@ add_subdirectory(inter)
 add_subdirectory(kernel)
 add_subdirectory(cg)
 add_subdirectory(util)
-add_subdirectory(interface)
 
 set(sources
   ${ftn_SOURCES}
@@ -13,7 +12,6 @@ set(sources
   ${kernel_SOURCES}
   ${cg_SOURCES}
   ${util_SOURCES}
-  ${interface_SOURCES}
   grid_func.cc
   stencil_op.cc
   relax_stencil.cc
@@ -22,12 +20,14 @@ set(sources
   )
 
 if(ENABLE_MPI)
+  add_subdirectory(interface)
   list(APPEND sources
+	${interface_SOURCES}
+	redist/cholesky_solver.cc
 	mpi/grid_func.cc
 	mpi/stencil_op.cc
     mpi/msg_exchanger.cc
-	mpi/gallery.cc
-	mpi/redist_solver.cc)
+	mpi/gallery.cc)
 endif()
 
 set(3d_SOURCES ${sources} PARENT_SCOPE)

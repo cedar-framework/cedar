@@ -68,7 +68,8 @@ namespace mpi {
 	{
 		using MsgCtx = kernel::impls::MsgCtx;
 	public:
-		msg_exchanger(const kernel_params & params, grid_topo & topo);
+		msg_exchanger(const kernel_params & params,
+		              std::vector<topo_ptr> topos);
 		void init();
 		MsgCtx & context() { return ctx; }
 		void * context_ptr() { return &ctx;}
@@ -77,6 +78,14 @@ namespace mpi {
 		template<class sten>
 			void exchange(mpi::stencil_op<sten> & so);
 		void exchange(mpi::grid_func & f);
+		virtual aarray<int, len_t, 2> & leveldims(int k) {
+			if (k == 0)
+				return ctx.dimx;
+			else if (k == 1)
+				return ctx.dimy;
+			else
+				return ctx.dimz;
+		}
 
 	private:
 		MsgCtx ctx;

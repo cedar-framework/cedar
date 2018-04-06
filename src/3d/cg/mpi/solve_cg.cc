@@ -3,7 +3,6 @@
 #include <cedar/3d/mpi/msg_exchanger.h>
 
 #include <cedar/3d/cg/solve_cg.h>
-#include <cedar/3d/mpi/redist_solver.h>
 
 
 extern "C" {
@@ -52,21 +51,6 @@ namespace impls
 		                        &ctx->msg_geom.data()[local_arr_ptr],
 		                        ctx->msg_buffer.data(), ctx->msg_buffer.size(), fcomm);
 	}
-
-
-	void solve_cg_redist(const kernel_params & params,
-	                     const mpi::redist_solver & cg_solver,
-	                     mpi::grid_func &x,
-	                     const mpi::grid_func &b)
-	{
-		/*
-		  should move work vectors outside redist_solver
-		  to eliminate need for this const_cast
-		*/
-		auto & slv = const_cast<mpi::redist_solver&>(cg_solver);
-		slv.solve(b,x);
-	}
 }
 
 }}}
-

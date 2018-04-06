@@ -139,9 +139,11 @@ MsgCtx::MsgCtx(grid_topo & topo) :
 
 namespace cedar { namespace cdr3 { namespace mpi {
 
-msg_exchanger::msg_exchanger(const kernel_params & params, grid_topo & topo):
-	ctx(topo), dims(topo.nlevel(),3), coord(3)
+msg_exchanger::msg_exchanger(const kernel_params & params,
+                             std::vector<topo_ptr> topos):
+	ctx(*topos[0]), dims(topos[0]->nlevel(),3), coord(3)
 {
+	auto & topo = *topos[0];
 	for (auto i : range<int>(3)) {
 		coord(i) = topo.coord(i);
 	}

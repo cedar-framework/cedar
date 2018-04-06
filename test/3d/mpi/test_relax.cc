@@ -34,7 +34,7 @@ TEST(MPIRelax3, Point7) {
 
 	// setup halo
 	{
-		kreg_mpi.halo_setup(so_mpi.grid());
+		kreg_mpi.halo_setup({{so_mpi.grid_ptr()}});
 		kreg_mpi.halo_stencil_exchange(so_mpi);
 	}
 

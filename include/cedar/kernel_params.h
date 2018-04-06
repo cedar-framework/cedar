@@ -8,13 +8,22 @@
 
 namespace cedar
 {
+	struct ml_relax_params
+	{
+		ml_relax_params() : enabled(false), min_gsz(3) {}
+		void init(config::reader & conf);
+
+		bool enabled; /** Whether multilevel line relaxation is enabled */
+		int min_gsz;  /** Coarsening factor for multilevel line relaxation */
+	};
+
+
 	struct kernel_params
 	{
 		std::array<bool,3> periodic;
 		bool relax_symmetric;
 		bool definite;
-		bool ml_relax;
-		int min_gsz;
+		ml_relax_params ml_relax;
 
 		int per_mask() const {
 			int mask = 0;

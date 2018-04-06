@@ -12,6 +12,9 @@
 #include <cedar/3d/level_container.h>
 #include <cedar/3d/kernel/mpi/registry.h>
 #include <cedar/3d/mpi/msg_exchanger.h>
+#include <cedar/3d/redist/multilevel_wrapper.h>
+#include <cedar/3d/redist/cholesky_solver.h>
+#include <cedar/3d/redist/setup_redist.h>
 
 namespace cedar { namespace cdr3 { namespace mpi {
 
@@ -56,7 +59,7 @@ public:
 		this->kreg = std::make_shared<kernel::mpi::registry>(*(this->conf));
 		parent::setup(fop);
 	}
-	~solver() {if (cg_solver_lu) this->bbd = new real_t[1];}
+	~solver() {}
 
 	std::size_t compute_num_levels(cdr3::mpi::stencil_op<fsten> & fop)
 	{
@@ -173,24 +176,16 @@ public:
 
 	virtual void setup_cg_solve() override
 	{
+		auto params = build_kernel_params(*(this->conf));
+		auto kernels = this->kernel_registry();
 		auto & cop = this->levels.get(this->levels.size() - 1).A;
 		std::string cg_solver_str = this->conf->template get<std::string>("solver.cg-solver", "LU");
 
-		if (cg_solver_str == "LU" or cop.grid().nproc() == 1)
-			cg_solver_lu = true;
-		else
-			cg_solver_lu = false;
+		auto cg_conf = this->conf->getconf("cg-config");
+		if (!cg_conf)
+			cg_conf = this->conf;
 
-		if (cg_solver_lu) {
-			auto & coarse_topo = cop.grid();
-			auto nxc = coarse_topo.nglobal(0);
-			auto nyc = coarse_topo.nglobal(1);
-			auto nzc = coarse_topo.nglobal(2);
-			this->ABD = mpi::grid_func(nxc*(nyc+1)+2, nxc*nyc*nzc, 0);
-			this->bbd = new real_t[this->ABD.len(1)];
-			parent::setup_cg_solve();
-		} else {
-			auto kernels = this->kernel_registry();
+		if (cg_solver_str == "redist") {
 			auto & fgrid = cop.grid();
 
 			auto choice = choose_redist<3>(*this->conf,
@@ -198,18 +193,35 @@ public:
 			                               std::array<len_t, 3>({fgrid.nglobal(0), fgrid.nglobal(1), fgrid.nglobal(2)}));
 
 			MPI_Bcast(choice.data(), 3, MPI_INT, 0, fgrid.comm);
-			log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " x " << choice[2]
-			            << " cores" << std::endl;
+			if ((choice[0] != 1) and (choice[1] != 1) and (choice[2] != 1)) {
+				log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " x " << choice[2]
+				            << " cores" << std::endl;
+				using inner_solver = multilevel_wrapper<mpi::solver<xxvii_pt>>;
+				this->coarse_solver = create_redist_solver<inner_solver>(kernels,
+				                                                         *this->conf,
+				                                                         cop,
+				                                                         cg_conf,
+				                                                         choice);
+				return;
+			}
+		}
 
-			std::shared_ptr<mpi::redist_solver> cg_bmg;
-			auto cg_conf = this->conf->getconf("cg-config");
-			if (!cg_conf)
-				cg_conf = this->conf;
-			std::vector<int> nblocks(choice.begin(), choice.end());
-			kernels->setup_cg_redist(cop, cg_conf, &cg_bmg, nblocks);
-			this->coarse_solver = [&,cg_bmg,kernels](mpi::grid_func &x, const mpi::grid_func &b) {
-				kernels->solve_cg_redist(*cg_bmg, x, b);
-			};
+		std::array<int, 3> choice {{1,1,1}};
+		log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " x " << choice[2]
+		            << " cores" << std::endl;
+		if (cg_solver_str == "LU") {
+			this->coarse_solver = create_redist_solver<cholesky_solver>(kernels,
+			                                                            *this->conf,
+			                                                            cop,
+			                                                            cg_conf,
+			                                                            choice);
+		} else {
+			using inner_solver = multilevel_wrapper<cdr3::solver<xxvii_pt>>;
+			this->coarse_solver = create_redist_solver<inner_solver>(kernels,
+			                                                         *this->conf,
+			                                                         cop,
+			                                                         cg_conf,
+			                                                         choice);
 		}
 	}
 
@@ -218,14 +230,19 @@ public:
 	{
 		auto & sop = this->levels.template get<fsten>(0).A;
 
-		this->kreg->halo_setup(sop.grid());
+		std::vector<topo_ptr> topos;
+		topos.push_back(sop.grid_ptr());
+
+		for (std::size_t i = 1; i < this->nlevels(); i++)
+			topos.push_back(this->levels.get(i).A.grid_ptr());
+
+		this->kreg->halo_setup(topos);
 		this->kreg->halo_stencil_exchange(sop);
 	}
 
 	MPI_Comm comm;
 
 private:
-	bool cg_solver_lu;
 	void *halo_ctx;
 };
 

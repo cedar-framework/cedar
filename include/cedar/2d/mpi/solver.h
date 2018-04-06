@@ -68,8 +68,6 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 
 
 	~solver() {
-		// TODO: what??
-		if (cg_solver_lu) this->bbd = new real_t[1];
 	}
 
 
@@ -232,9 +230,6 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 	}
 
 	MPI_Comm comm;
-
-private:
-	bool cg_solver_lu;
 };
 
 }}}
