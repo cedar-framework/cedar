@@ -193,7 +193,7 @@ public:
 			                               std::array<len_t, 3>({fgrid.nglobal(0), fgrid.nglobal(1), fgrid.nglobal(2)}));
 
 			MPI_Bcast(choice.data(), 3, MPI_INT, 0, fgrid.comm);
-			if ((choice[0] != 1) and (choice[1] != 1) and (choice[2] != 1)) {
+			if ((choice[0] != 1) or (choice[1] != 1) or (choice[2] != 1)) {
 				log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " x " << choice[2]
 				            << " cores" << std::endl;
 				using inner_solver = multilevel_wrapper<mpi::solver<xxvii_pt>>;
