@@ -6,7 +6,6 @@ set(sources
 if (ENABLE_MPI)
   list(APPEND sources
 	cg/mpi/setup_cg_boxmg.cc
-	cg/mpi/setup_cg_lu.cc
 	cg/mpi/solve_cg.cc
 	cg/mpi/setup_cg_redist.cc)
 endif()

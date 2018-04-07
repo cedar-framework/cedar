@@ -3,7 +3,7 @@
      &                II, JJ, iGs, jGs,&
      &                NOG, NStncl, IRELAX_SYM, UPDOWN,&
      &                DATADIST, iWork, NMSGi, pMSG, RWORK, NMSGr,&
-     &                MPICOMM, XLINECOMM, YLINECOMM&
+     &                MPICOMM, XLINECOMM, YLINECOMM, halof&
      &                ) BIND(C,NAME='MPI_BMG2_SymStd_relax_lines_y')
 
 ! ======================================================================
@@ -70,6 +70,7 @@
       integer(len_t) :: DATADIST(2,*)
       real(real_t) ::   B(JJ,II), Q(II,JJ), QF(II,JJ), SO(II+1,JJ+1,NStncl),&
            SOR(JJ,II,2), RWORK(NMSGr)
+      type(c_ptr) :: halof
 
 ! ----------------------------
 !     Local Declarations
@@ -339,22 +340,7 @@
          ELSE IF (line_solve_comm_type .EQ.&
      &           BMG_LINE_SOLVE_COMM_TRADITIONAL)  THEN
 
-            ptrn = 1
-
-            call MSG_tbdx_send(Q, rwork, &
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,K)),&
-     &           iWork(pMSG(ipL_MSG_Proc,K)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,K)),&
-     &           iWork(pMSG(ipL_MSG_Index,K)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_receive(Q, rwork,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,K)),&
-     &           iWork(pMSG(ipL_MSG_Proc,K)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,K)),&
-     &           iWork(pMSG(ipL_MSG_Index,K)),&
-     &           ptrn, ierror)
-
+            call halo_exchange(K, Q, halof)
          ELSE
 
             WRITE(*,*) 'ERROR: invalid value for parameter'
@@ -366,19 +352,6 @@
 
 
          ENDDO
-
-      IF (line_solve_comm_type  .EQ.&
-     &     BMG_LINE_SOLVE_COMM_TRADITIONAL)  THEN
-
-         ptrn = 1
-
-         call MSG_tbdx_close(Q, rwork,&
-     &        iWork(pMSG(ipL_MSG_NumAdjProc,K)),&
-     &        iWork(pMSG(ipL_MSG_Proc,K)),&
-     &        iWork(pMSG(ipL_MSG_Ipr,K)),&
-     &        iWork(pMSG(ipL_MSG_Index,K)),&
-     &        ptrn, ierror)
-      ENDIF
 
 ! ======================================================================
 

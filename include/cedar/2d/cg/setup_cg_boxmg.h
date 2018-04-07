@@ -15,6 +15,7 @@ namespace impls
 	namespace mpi = cedar::cdr2::mpi;
 	template <class sten>
 	void setup_cg_boxmg(const kernel_params & params,
+	                    mpi::msg_exchanger *halof,
 	                    const mpi::stencil_op<sten> & so,
 	                    std::shared_ptr<config::reader> conf,
 	                    std::shared_ptr<solver<sten>> *slv);

@@ -7,12 +7,12 @@
 extern "C" {
 #endif
 
-struct cdr3_slv;
-typedef struct cdr3_slv* cdr3_solver;
+struct bmg3_slv;
+typedef struct bmg3_slv* bmg3_solver;
 
-cdr3_solver cdr3_solver_create(cdr3_operator *op);
-void cdr3_solver_run(cdr3_solver op, double *x, const double *b);
-void cdr3_solver_destroy(cdr3_solver);
+bmg3_solver bmg3_solver_create(bmg3_operator *op);
+void bmg3_solver_run(bmg3_solver op, double *x, const double *b);
+void bmg3_solver_destroy(bmg3_solver);
 
 
 #ifdef __cplusplus

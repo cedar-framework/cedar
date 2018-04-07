@@ -16,10 +16,10 @@ class prolong_op;
 
 namespace cedar { namespace cdr2 {
 
-	class grid_func : public array<len_t, real_t, 2>, public grid_quantity<len_t, 2>
+	class grid_func : public array<real_t, 2>, public grid_quantity<len_t, 2>
 	{
 	public:
-		using array<len_t, real_t, 2>::operator();
+		using array<real_t, 2>::operator();
 		grid_func(len_t nx, len_t ny, unsigned int nghosts=1);
 		grid_func() {}
 		grid_func & operator=(grid_func&& gf);

@@ -2,8 +2,7 @@
      &                KF, KC, SO, SOC, CI, &
      &                IIF, JJF, IIC, JJC, iGs, jGs, &
      &                NOG, IFD, NStncl,&
-     &                iWork, NMSGi, pMSGSO, &
-     &                BUFFER, NMSGr, MPICOMM&
+     &                halof&
      &                ) BIND(C, NAME='MPI_BMG2_SymStd_SETUP_ITLI_ex')
 
 ! ======================================================================
@@ -59,30 +58,25 @@
 ! ---------------------------
 !    Argument Declarations:
 !
-      INTEGER(len_t), VALUE :: iGs, IIC, IIF, jGs, JJC, JJF,&
-           NMSGi, NMSGr
+      INTEGER(len_t), VALUE :: iGs, IIC, IIF, jGs, JJC, JJF
       INTEGER(C_INT), VALUE :: IFD, KC, KF, NOG, NStncl
-      INTEGER, VALUE :: MPICOMM
 
-      INTEGER(len_t) :: iWork(NMSGi)
-      INTEGER(C_INT) :: pMSGSO(NBMG_pMSG,NOG)
       REAL(real_t) :: CI(IIC,JJC,8), SO(IIF+1,JJF+1,NStncl), &
-           SOC(IIC+1,JJC+1,5), &
-           BUFFER(NMSGr)
+           SOC(IIC+1,JJC+1,5)
+      TYPE(C_PTR) :: halof
 
 ! --------------------------
 !     Local Declarations:
 !
 
       INTEGER   IC, I, IIC1, IICF, IICF1, IICF2, IIF1, &
-     &          JC, J, JJC1, JJCF, JJCF1, JJCF2, JJF1,&
-     &          ptrn, ierror
+     &          JC, J, JJC1, JJCF, JJCF1, JJCF2, JJF1
       REAL*8    CE, CEA, CENW, CFNW, CN, CNE, CNW, CO, COA, CONW, &
      &          COSW, CS, CSA, CSE, CSEA, CSENW, CSNW, CSWA, CSSW, CSW,&
      &          CSWSW, CW, CWA, CWSW
 
 
-      INTEGER  MyProc, ISTART, JSTART
+      INTEGER  ISTART, JSTART
 
 ! ======================================================================
 
@@ -91,8 +85,6 @@
 ! ----------------------------------
 
 !      write(*,*) 'cg_ITLI ',iGs, jGs
-
-      MyProc = MSG_MyProc(MPICOMM)
 
 ! -----------------------------------
 !     Useful indexing bounds:
@@ -344,31 +336,7 @@
       ! note that the coarse stencil is always
       ! nine point
       !
-      DO I=1,5
-         ptrn = 6
-
-         call MSG_tbdx_send(SOC(1,1,I), buffer, &
-     &        iWork(pMSGSO(ipL_MSG_NumAdjProc,KC)),&
-     &        iWork(pMSGSO(ipL_MSG_Proc,KC)),&
-     &        iWork(pMSGSO(ipL_MSG_Ipr,KC)),&
-     &        iWork(pMSGSO(ipL_MSG_Index,KC)),&
-     &        ptrn, ierror)
-
-         call MSG_tbdx_receive(SOC(1,1,I), buffer,&
-     &        iWork(pMSGSO(ipL_MSG_NumAdjProc,KC)),&
-     &        iWork(pMSGSO(ipL_MSG_Proc,KC)),&
-     &        iWork(pMSGSO(ipL_MSG_Ipr,KC)),&
-     &        iWork(pMSGSO(ipL_MSG_Index,KC)),&
-     &        ptrn, ierror)
-
-         call MSG_tbdx_close(SOC(1,1,I), buffer,&
-     &        iWork(pMSGSO(ipL_MSG_NumAdjProc,KC)),&
-     &        iWork(pMSGSO(ipL_MSG_Proc,KC)),&
-     &        iWork(pMSGSO(ipL_MSG_Ipr,KC)),&
-     &        iWork(pMSGSO(ipL_MSG_Index,KC)),&
-     &        ptrn, ierror)
-
-      ENDDO
+      call halo_stencil_exchange(KC, SOC, halof)
 
 !   end of computation of grid kc difference operator, when kf
 !   difference operator is five point

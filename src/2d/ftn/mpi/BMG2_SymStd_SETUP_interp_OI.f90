@@ -1,8 +1,8 @@
 SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
      &                KF, KC, SO, CI, &
-     &                IIF, JJF, IIC, JJC, NOG, IFD, NStncl,&
-     &                NOGm, IBC, IGRD, iWork, NMSGi, pMSG,&
-     &                BUFFER, NMSGr, MPICOMM&
+     &                IIF, JJF, IIC, JJC, NOG, NOGm,&
+     &                IGRD, IFD, NStncl,&
+     &                IBC, halof&
      &                ) BIND(C, NAME='MPI_BMG2_SymStd_SETUP_interp_OI')
 
 ! ======================================================================
@@ -61,19 +61,18 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
 !    Argument Declarations:
 !
       INTEGER(C_INT), VALUE :: NOG, NOGm, NStncl, KC, KF,&
-           & IFD, MPICOMM, IBC
-      INTEGER(len_t), VALUE :: IIC, IIF, JJC, JJF, NMSGi, NMSGr
-      INTEGER(len_t) :: iWork(NMSGi), IGRD(NOGm,NBMG_pIGRD)
-      INTEGER(C_INT) :: pMSG(NBMG_pMSG,NOG)
-      REAL(real_t) :: CI(IIC,JJC,8), SO(IIF+1,JJF+1,NStncl), &
-           &          BUFFER(NMSGr)
+           & IFD, IBC
+      INTEGER(len_t), VALUE :: IIC, IIF, JJC, JJF
+      INTEGER(len_t) :: IGRD(NOGm,NBMG_pIGRD)
+      REAL(real_t) :: CI(IIC,JJC,8), SO(IIF+1,JJF+1,NStncl)
+      TYPE(C_PTR) :: halof
 
 ! --------------------------
 !     Local Declarations:
 !
       INTEGER   IC, I, IIC1, IICF, IICF1, IICF2, IIF1, &
      &          JC, J, JJC1, JJCF, JJCF1, JJCF2, JJF1,&
-     &          ptrn, ierror, ISTART, ISTARTO, ICSTART, ICSTARTO, ICEND,&
+     &          ISTART, ISTARTO, ICSTART, ICSTARTO, ICEND,&
      &          ICENDO, JSTART, JSTARTO, JCSTART, JCSTARTO, JCEND,&
      &          JCENDO
       integer :: IPN, PER_x, PER_y, PER_xy
@@ -245,28 +244,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
 
 
             DO I=LL, LR
-
-               ptrn = 1
-               call MSG_tbdx_send(CI(1,1,I), buffer, &
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
-
-               call MSG_tbdx_receive(CI(1,1,I), buffer,&
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
-
-               call MSG_tbdx_close(CI(1,1,I), buffer,&
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
+               call halo_exchange(kc, CI(1,1,I), halof)
             ENDDO
 
 
@@ -295,27 +273,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
 
 
             DO I=LA, LB
-               ptrn = 1
-               call MSG_tbdx_send(CI(1,1,I), buffer, &
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
-
-               call MSG_tbdx_receive(CI(1,1,I), buffer,&
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
-
-               call MSG_tbdx_close(CI(1,1,I), buffer,&
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
+               call halo_exchange(kc, CI(1,1,I), halof)
             ENDDO
 
 
@@ -361,27 +319,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
 
 
             DO I=LSW, LSE
-               ptrn = 1
-               call MSG_tbdx_send(CI(1,1,I), buffer, &
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
-
-               call MSG_tbdx_receive(CI(1,1,I), buffer,&
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
-
-               call MSG_tbdx_close(CI(1,1,I), buffer,&
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
+               call halo_exchange(kc, CI(1,1,I), halof)
             ENDDO
 
 
@@ -415,28 +353,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
 
 
             DO I=LL, LR
-
-               ptrn = 1
-               call MSG_tbdx_send(CI(1,1,I), buffer, &
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
-
-               call MSG_tbdx_receive(CI(1,1,I), buffer,&
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
-
-               call MSG_tbdx_close(CI(1,1,I), buffer,&
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
+               call halo_exchange(kc, CI(1,1,I), halof)
             ENDDO
 
 
@@ -465,27 +382,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
 
 
             DO I=LA, LB
-               ptrn = 1
-               call MSG_tbdx_send(CI(1,1,I), buffer, &
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
-
-               call MSG_tbdx_receive(CI(1,1,I), buffer,&
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
-
-               call MSG_tbdx_close(CI(1,1,I), buffer,&
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
+               call halo_exchange(kc, CI(1,1,I), halof)
             ENDDO
 
 ! ----------------------------------------------------------------------
@@ -520,27 +417,7 @@ SUBROUTINE BMG2_SymStd_SETUP_interp_OI( &
 
 
             DO I=LSW, LSE
-               ptrn = 1
-               call MSG_tbdx_send(CI(1,1,I), buffer, &
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
-
-               call MSG_tbdx_receive(CI(1,1,I), buffer,&
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
-
-               call MSG_tbdx_close(CI(1,1,I), buffer,&
-     &              iWork(pMSG(ipL_MSG_NumAdjProc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Proc,KC)),&
-     &              iWork(pMSG(ipL_MSG_Ipr,KC)),&
-     &              iWork(pMSG(ipL_MSG_Index,KC)),&
-     &              ptrn, ierror)
+               call halo_exchange(kc, CI(1,1,I), halof)
             ENDDO
 
 

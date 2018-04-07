@@ -40,7 +40,7 @@ template<std::size_t nd, class stype, class = make_index_sequence<nd>>
 
 template <std::size_t nd, typename stype, std::size_t... Is>
 	class stencil_op_nd<nd, stype, index_sequence<Is...>> :
-	array<len_t, real_t, nd+1>,
+	array<real_t, nd+1>,
 	public grid_quantity<len_t, nd>
 {
 public:
@@ -48,7 +48,7 @@ stencil_op_nd() {}
 stencil_op_nd(decltype(Is, len_t{})... args)
 	{
 		this->num_ghosts = 1;
-		array<len_t, real_t, nd+1>::reshape(std::forward<decltype(args)>(args+2*this->num_ghosts)...,
+		array<real_t, nd+1>::reshape(std::forward<decltype(args)>(args+2*this->num_ghosts)...,
 		                                    static_cast<len_t>(stype::ndirs));
 
 		for (std::size_t i = 0; i < nd; ++i) {
@@ -59,18 +59,18 @@ stencil_op_nd(decltype(Is, len_t{})... args)
 		}
 	}
 
-	using array<len_t, real_t, nd+1>::len;
-	using array<len_t, real_t, nd+1>::data;
-	using array<len_t, real_t, nd+1>::set;
+	using array<real_t, nd+1>::len;
+	using array<real_t, nd+1>::data;
+	using array<real_t, nd+1>::set;
 	real_t & operator()(decltype(Is, len_t{})... args, stype dir)
 	{
-		return array<len_t,real_t,nd+1>::operator()(std::forward<decltype(args)>(args)...,static_cast<len_t>(dir));
+		return array<real_t,nd+1>::operator()(std::forward<decltype(args)>(args)...,static_cast<len_t>(dir));
 	}
 
 
 	real_t operator()(decltype(Is, len_t{})... args, stype dir) const
 	{
-		return array<len_t,real_t,nd+1>::operator()(std::forward<decltype(args)>(args)...,static_cast<len_t>(dir));
+		return array<real_t,nd+1>::operator()(std::forward<decltype(args)>(args)...,static_cast<len_t>(dir));
 	}
 
 	int ndirs() { return static_cast<int>(stype::ndirs); }

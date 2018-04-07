@@ -6,7 +6,7 @@ using namespace cedar;
 using namespace cedar::cdr3;
 
 relax_stencil::relax_stencil(len_t nx, len_t ny, len_t nz, unsigned int nghosts):
-	array(nx+3*nghosts, ny + 3*nghosts, nz + 3*nghosts, 2)
+	array<real_t,4>(nx+3*nghosts, ny + 3*nghosts, nz + 3*nghosts, 2)
 {
 	num_ghosts = nghosts;
 	std::vector<len_t> lens = {nx, ny, nz};

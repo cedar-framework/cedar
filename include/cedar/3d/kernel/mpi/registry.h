@@ -8,12 +8,12 @@
 #include <cedar/3d/mpi/types.h>
 
 #include <cedar/3d/matvec.h>
-#include <cedar/3d/mpi/halo.h>
 #include <cedar/3d/relax_stencil.h>
 #include <cedar/3d/mpi/grid_func.h>
 #include <cedar/mpi/grid_topo.h>
 #include <cedar/3d/mpi/grid_func.h>
 #include <cedar/3d/solver.h>
+#include <cedar/3d/mpi/msg_exchanger.h>
 #include <cedar/3d/mpi/stencil_op.h>
 #include <cedar/3d/mpi/residual.h>
 #include <cedar/3d/matvec.h>
@@ -36,14 +36,16 @@ namespace cedar { namespace cdr3 { namespace mpi {
 namespace cedar { namespace cdr3 { namespace kernel { namespace mpi {
 namespace mpi = cedar::cdr3::mpi;
 
-class registry : public mpi_registry<registry, cdr3::mpi::stypes, cdr3::mpi::redist_solver, solver<xxvii_pt>>
+class registry : public mpi_registry<registry, cdr3::mpi::stypes, cdr3::mpi::redist_solver, solver<xxvii_pt>,
+	mpi::msg_exchanger>
 {
 public:
-	using parent = mpi_registry<registry, cdr3::mpi::stypes, cdr3::mpi::redist_solver, solver<xxvii_pt>>;
+	using parent = mpi_registry<registry, cdr3::mpi::stypes, cdr3::mpi::redist_solver, solver<xxvii_pt>, mpi::msg_exchanger>;
 registry(std::shared_ptr<kernel_params> params): parent::mpi_registry(params) {}
 registry(config::reader & conf) : parent::mpi_registry(conf) {}
 
-	using parent::halo_exchange;
+	using parent::halo_setup;
+	using parent::halo_stencil_exchange;
 
 	void setup_nog(grid_topo & topo,
 	               len_t min_coarse, int *nog)
@@ -57,7 +59,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		                  const mpi::stencil_op<xxvii_pt> & cop,
 		                  inter::mpi::prolong_op & P)
 	{
-		impls::mpi_setup_interp(*params, fop, cop, P);
+		impls::mpi_setup_interp(*params, halof.get(), fop, cop, P);
 	}
 
 
@@ -66,7 +68,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		                   const mpi::stencil_op<sten> & fop,
 		                   mpi::stencil_op<xxvii_pt> & cop)
 	{
-		impls::mpi_galerkin_prod(*params, P, fop, cop);
+		impls::mpi_galerkin_prod(*params, halof.get(), P, fop, cop);
 	}
 
 
@@ -85,7 +87,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		           const relax_stencil & sor,
 		           cycle::Dir cdir)
 	{
-		impls::mpi_relax_rbgs_point(*params, so, x, b, sor, cdir);
+		impls::mpi_relax_rbgs_point(*params, halof.get(), so, x, b, sor, cdir);
 	}
 
 
@@ -94,7 +96,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	                const mpi::grid_func & residual,
 	                mpi::grid_func & fine)
 	{
-		impls::mpi_fortran_interp(*params, P, coarse, residual, fine);
+		impls::mpi_fortran_interp(*params, halof.get(), P, coarse, residual, fine);
 	}
 
 
@@ -112,7 +114,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	              const mpi::grid_func & b,
 	              mpi::grid_func & r)
 	{
-		impls::mpi_residual_fortran(*params, so, x, b, r);
+		impls::mpi_residual_fortran(*params, halof.get(), so, x, b, r);
 	}
 
 
@@ -121,27 +123,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	            const mpi::grid_func & x,
 	            mpi::grid_func & y)
 	{
-		impls::matvec(so, x, y);
-	}
-
-
-	void halo_setup(grid_topo & topo,
-	                void **halo_ctx)
-	{
-		impls::setup_msg(*params, topo, halo_ctx);
-	}
-
-
-	void halo_exchange(mpi::grid_func & f)
-	{
-		impls::msg_exchange(*params, f);
-	}
-
-
-	template <class sten>
-		void halo_stencil_exchange(mpi::stencil_op<sten> & so)
-	{
-		impls::msg_stencil_exchange(*params, so);
+		impls::matvec(*params, halof.get(), so, x, y);
 	}
 
 
@@ -149,7 +131,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 		void setup_cg_lu(const mpi::stencil_op<sten> & so,
 		                 mpi::grid_func & ABD)
 	{
-		impls::mpi_setup_cg_lu(*params, so, ABD);
+		impls::mpi_setup_cg_lu(*params, halof.get(), so, ABD);
 	}
 
 
@@ -158,7 +140,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	              const mpi::grid_func &ABD,
 	              real_t *bbd)
 	{
-		impls::mpi_solve_cg_lu(*params, x, b, ABD, bbd);
+		impls::mpi_solve_cg_lu(*params, halof.get(), x, b, ABD, bbd);
 	}
 
 
@@ -168,7 +150,7 @@ registry(config::reader & conf) : parent::mpi_registry(conf) {}
 	                     std::shared_ptr<mpi::redist_solver> * bmg,
 	                     std::vector<int> & nblocks)
 	{
-		impls::setup_cg_redist(*params, so, conf, bmg, nblocks);
+		impls::setup_cg_redist(*params, halof.get(), so, conf, bmg, nblocks);
 	}
 
 

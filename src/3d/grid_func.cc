@@ -22,7 +22,7 @@ grid_func & grid_func::operator=(grid_func &&gf)
 
 
 grid_func::grid_func(len_t nx, len_t ny, len_t nz, unsigned int nghosts) :
-	array<len_t, real_t, 3>(nx+2*nghosts, ny+2*nghosts, nz+2*nghosts)
+	array<real_t, 3>(nx+2*nghosts, ny+2*nghosts, nz+2*nghosts)
 {
 	num_ghosts = nghosts;
 	range_[0] = ::cedar::range(static_cast<len_t>(nghosts), static_cast<len_t>(nx + nghosts));

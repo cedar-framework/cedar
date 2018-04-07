@@ -1,5 +1,5 @@
 #include <mpi.h>
-#include <cedar/2d/mpi/halo.h>
+#include <cedar/2d/mpi/msg_exchanger.h>
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 #include <cedar/2d/mpi/stencil_op.h>
 #include <cedar/types.h>
@@ -68,6 +68,7 @@ namespace impls
 
 	template<>
 	void setup_cg_boxmg(const kernel_params & params,
+	                    mpi::msg_exchanger * halof,
 	                    const mpi::stencil_op<five_pt> & so,
 	                    std::shared_ptr<config::reader> conf,
 	                    std::shared_ptr<solver<five_pt>> *bmg)
@@ -78,6 +79,7 @@ namespace impls
 
 	template<>
 	void setup_cg_boxmg(const kernel_params & params,
+	                    mpi::msg_exchanger * halof,
 	                    const mpi::stencil_op<nine_pt> & so,
 	                    std::shared_ptr<config::reader> conf,
 	                    std::shared_ptr<solver<nine_pt>> *bmg)
@@ -85,7 +87,7 @@ namespace impls
 		int nstencil, nog, rank;
 		auto & sod = const_cast<mpi::stencil_op<nine_pt>&>(so);
 		grid_topo & topo = sod.grid();
-		MsgCtx *ctx = (MsgCtx*) sod.halo_ctx;
+		MsgCtx *ctx = (MsgCtx*) halof->context_ptr();
 
 		auto so_ser = std::make_unique<cdr2::stencil_op<nine_pt>>(topo.nglobal(0)-2, topo.nglobal(1)-2);
 

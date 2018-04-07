@@ -1,8 +1,7 @@
       SUBROUTINE BMG3_SymStd_residual(&
      &                KG, NOG, IFD,&
      &                Q, QF, SO, RES, II, JJ, KK, NStncl,&
-     &                iWork, NMSGi, pMSG, &
-     &                MSG_Buffer, NMSGr, MPICOMM &
+     &                halof&
      &                ) BIND(C, NAME='MPI_BMG3_SymStd_residual')
 
 ! ======================================================================
@@ -56,19 +55,15 @@
 ! ----------------------------
 !     Argument Declarations
 !
-      integer(len_t), value :: II, JJ, KK, NMSGi, NMSGr
-      integer(c_int), value :: NOG, KG, IFD, NStncl, MPICOMM
-      integer(len_t) :: iWork(NMSGi)
-      integer(c_int) :: pMSG(NBMG_pMSG,NOG)
+      integer(len_t), value :: II, JJ, KK
+      integer(c_int), value :: NOG, KG, IFD, NStncl
       real(real_t) :: q(II,JJ,KK), qf(II,JJ,KK), RES(II,JJ,KK)
       real(real_t) :: so(II+1,JJ+1,KK+1,NStncl)
-      real(real_t) :: MSG_Buffer(NMSGr)
-
+      type(c_ptr) :: halof
 ! ----------------------------
 !     Local Declarations
 !
       INTEGER  i, i1, j, j1, k, k1
-      INTEGER  ierror, ptrn, MPI_IERROR
 
 ! ======================================================================
 
@@ -132,30 +127,7 @@
 
       ENDIF
 
-
-      ptrn = 1
-
-      CALL MSG_tbdx_send(RES, MSG_Buffer, &
-     &     iWork(pMSG(ipL_MSG_NumAdjProc,KG)),&
-     &     iWork(pMSG(ipL_MSG_Proc,KG)),&
-     &     iWork(pMSG(ipL_MSG_Ipr,KG)),&
-     &     iWork(pMSG(ipL_MSG_Index,KG)),&
-     &     ptrn, ierror)
-
-      CALL MSG_tbdx_receive(RES, MSG_Buffer,&
-     &     iWork(pMSG(ipL_MSG_NumAdjProc,KG)),&
-     &     iWork(pMSG(ipL_MSG_Proc,KG)),&
-     &     iWork(pMSG(ipL_MSG_Ipr,KG)),&
-     &     iWork(pMSG(ipL_MSG_Index,KG)),&
-     &     ptrn, ierror)
-
-      CALL MSG_tbdx_close(RES, MSG_Buffer,&
-     &     iWork(pMSG(ipL_MSG_NumAdjProc,KG)),&
-     &     iWork(pMSG(ipL_MSG_Proc,KG)),&
-     &     iWork(pMSG(ipL_MSG_Ipr,KG)),&
-     &     iWork(pMSG(ipL_MSG_Index,KG)),&
-     &     ptrn, ierror)
-
+      call halo_exchange(KG, RES, halof)
 
 ! ======================================================================
 

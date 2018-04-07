@@ -66,7 +66,7 @@ namespace impls
 			ifd = 0;
 
 		// TODO: preallocate this?
-		array<len_t, real_t, 4> yo(fop.len(0), fop.len(1), 2, 14);
+		array<real_t, 4> yo(fop.len(0), fop.len(1), 2, 14);
 		int jpn;
 		BMG_get_bc(params.per_mask(), &jpn);
 

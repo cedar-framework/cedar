@@ -1,8 +1,7 @@
       SUBROUTINE BMG2_SymStd_relax_GS ( &
      &                K, SO, QF, Q, SOR, II, JJ, &
      &                KF, IFD, NStncl, IRELAX_SYM, UPDOWN,&
-     &                iGs, jGs, iWork, NMSGi, pMSG, &
-     &                buffer, NMSGr, MPICOMM&
+     &                iGs, jGs, halof&
      &                ) BIND(C, NAME='MPI_BMG2_SymStd_relax_GS')
 
 
@@ -58,15 +57,13 @@
 ! ----------------------------
 !     Argument Declarations
 !
-      INTEGER(len_t), VALUE :: II, JJ, NMSGi, NMSGr, iGs, jGs
+      INTEGER(len_t), VALUE :: II, JJ, iGs, jGs
       INTEGER(C_INT), VALUE :: IFD, IRELAX_SYM, K, KF, UPDOWN
       INTEGER(C_INT), VALUE :: NStncl
-      INTEGER, VALUE :: MPICOMM
-      INTEGER(len_t) :: iWork(NMSGi)
-      INTEGER(C_INT) :: pMSG(NBMG_pMSG,KF)
 
       REAL(real_t) :: Q(II,JJ), QF(II,JJ), SO(II+1,JJ+1,NStncl), SOR(II,JJ,*)
-      REAL(real_t) :: buffer(NMSGr)
+
+      TYPE(C_PTR) :: halof
 
 ! ----------------------------
 !     Local Declarations
@@ -75,7 +72,7 @@
       INTEGER IB(4), JB(4), pts
 
       INTEGER ptstart, ptend, ptstride, ILSTART
-      INTEGER ptrn, ierror
+      INTEGER ierror
 
 ! ======================================================================
 
@@ -126,21 +123,7 @@
                ENDDO
             ENDDO
 
-            ptrn = 1
-
-            call MSG_tbdx_send(Q, buffer, &
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,K)),&
-     &           iWork(pMSG(ipL_MSG_Proc,K)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,K)),&
-     &           iWork(pMSG(ipL_MSG_Index,K)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_receive(Q, buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,K)),&
-     &           iWork(pMSG(ipL_MSG_Proc,K)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,K)),&
-     &           iWork(pMSG(ipL_MSG_Index,K)),&
-     &           ptrn, ierror)
+            call halo_exchange(K, Q, halof)
 
          ENDDO
 
@@ -185,35 +168,10 @@
                ENDDO
             ENDDO
 
-
-            ptrn = 1
-
-            call MSG_tbdx_send(Q, buffer, &
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,K)),&
-     &           iWork(pMSG(ipL_MSG_Proc,K)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,K)),&
-     &           iWork(pMSG(ipL_MSG_Index,K)),&
-     &           ptrn, ierror)
-
-            call MSG_tbdx_receive(Q, buffer,&
-     &           iWork(pMSG(ipL_MSG_NumAdjProc,K)),&
-     &           iWork(pMSG(ipL_MSG_Proc,K)),&
-     &           iWork(pMSG(ipL_MSG_Ipr,K)),&
-     &           iWork(pMSG(ipL_MSG_Index,K)),&
-     &           ptrn, ierror)
+            call halo_exchange(K, Q, halof)
 
          ENDDO
       ENDIF
-
-
-      ptrn = 1
-
-      call MSG_tbdx_close(Q, buffer,&
-     &     iWork(pMSG(ipL_MSG_NumAdjProc,K)),&
-     &     iWork(pMSG(ipL_MSG_Proc,K)),&
-     &     iWork(pMSG(ipL_MSG_Ipr,K)),&
-     &     iWork(pMSG(ipL_MSG_Index,K)),&
-     &     ptrn, ierror)
 
 ! ======================================================================
 

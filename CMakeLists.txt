@@ -10,7 +10,7 @@ include(testing)
 
 enable_language(C CXX Fortran)
 
-add_definitions(-DMSG_DOUBLE -DNO_SECOND_UNDERSCORE -fPIC -DBOUNDS_CHECK)
+add_definitions(-DMSG_DOUBLE -DNO_SECOND_UNDERSCORE -fPIC)
 include_directories(include)
 install(DIRECTORY include/ DESTINATION include)
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)

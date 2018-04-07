@@ -16,7 +16,6 @@ par_object(topo_ptr grd, MPI_Comm comm) : comm(comm), grid_(grd) {}
 	grid_topo & grid() { return *grid_; }
 	const grid_topo & grid() const { return *grid_; }
 	topo_ptr grid_ptr() const { return grid_; }
-	void *halo_ctx;
 
 protected:
 	topo_ptr grid_;

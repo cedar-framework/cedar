@@ -11,7 +11,6 @@ if(ENABLE_MPI)
 	inter/mpi/prolong_op.cc
 	inter/mpi/restrict_op.cc
 	inter/mpi/restrict.cc
-	inter/mpi/galerkin_prod.cc
 	inter/mpi/interp.cc)
 endif()
 

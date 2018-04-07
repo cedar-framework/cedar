@@ -11,5 +11,5 @@ endif()
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -Wall -g")
 
 if (NOT CMAKE_BUILD_TYPE MATCHES RELEASE)
-  add_definitions(-DDEBUG)
+  add_definitions(-DDEBUG  -DBOUNDS_CHECK)
 endif()

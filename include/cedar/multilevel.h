@@ -1,9 +1,11 @@
 #ifndef CEDAR_MULTILEVEL_H
 #define CEDAR_MULTILEVEL_H
 
-#include "cedar/types.h"
-#include "cedar/util/timer.h"
-#include "cedar/cycle/types.h"
+#include <cedar/types.h>
+#include <cedar/util/timer.h>
+#include <cedar/cycle/types.h>
+#include <cedar/cycle/vcycle.h>
+#include <cedar/cycle/fcycle.h>
 
 namespace cedar {
 
@@ -31,9 +33,41 @@ public:
 		using stencil_op = typename level_t<fsten>::template stencil_op<sten>;
 	using grid_func = typename level_t<fsten>::grid_func;
 	using conf_ptr = std::shared_ptr<config::reader>;
-multilevel(stencil_op<fsten> & fop) : levels(fop), conf(std::make_shared<config::reader>("config.json")) {}
-multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
+multilevel(stencil_op<fsten> & fop) : levels(fop), conf(std::make_shared<config::reader>("config.json")) {
+		setup_cycler();
+	}
+
+
+multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
+		setup_cycler();
+	}
+
+
 	~multilevel() {}
+
+
+	void setup_cycler()
+	{
+		auto cycle_type = conf->get<std::string>("solver.cycle.type", "v");
+		if (cycle_type == "v") {
+			this->cycle = std::make_unique<cycle::vcycle<level_container, registry, fsten>>(
+				levels, coarse_solver);
+		} else if (cycle_type == "f") {
+			this->cycle = std::make_unique<cycle::fcycle<level_container, registry, fsten>>(
+				levels, coarse_solver);
+		} else {
+			log::error << "Cycle type: " << cycle_type << " not recognized!" << std::endl;
+		}
+	}
+
+
+	void vcycle(grid_func & x, const grid_func & b)
+	{
+		auto cycle_type = conf->get<std::string>("solver.cycle.type", "v");
+		assert(cycle_type == "v");
+		this->cycle->run(x, b);
+	}
+
 
 	std::shared_ptr<registry> kernel_registry()
 	{
@@ -41,14 +75,6 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	}
 
 	std::size_t nlevels() { return levels.size(); }
-
-	void log_residual(std::size_t lvl, const grid_func & res)
-	{
-		if (log::info.active()) {
-			log::info << "Level " << (levels.size() - lvl - 1) << " residual norm: "
-			<< res.template lp_norm<2>() << std::endl;
-		}
-	}
 
 
 	virtual void setup_cg_solve()
@@ -184,6 +210,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 
 	void setup(stencil_op<fsten> & fop)
 	{
+		this->cycle->set_registry(this->kreg);
 		auto num_levels = compute_num_levels(fop);
 		auto nlevels_conf = conf->get<int>("solver.num-levels", -1);
 		if (nlevels_conf > 0) {
@@ -206,94 +233,11 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	}
 
 
-	template<class sten>
-		void ncycle_helper(level_t<sten> & level,
-		                   std::size_t lvl, grid_func & x, const grid_func & b, int n)
-	{
-		auto & A = level.A;
-
-		timer_begin("relaxation");
-		level.presmoother(A, x, b);
-		timer_end("relaxation");
-
-		grid_func & residual = level.res;
-		timer_begin("residual");
-		kreg->residual(A, x, b, residual);
-		timer_end("residual");
-
-		log_residual(lvl, residual);
-
-		auto & coarse_b = levels.get(lvl+1).b;
-		auto & coarse_x = levels.get(lvl+1).x;
-		timer_begin("restrict");
-		kreg->matvec(levels.get(lvl+1).R, residual, coarse_b);
-		timer_end("restrict");
-		coarse_x.set(0.0);
-
-		timer_down();
-
-		std::size_t coarse_lvl = levels.size() - 1;
-		if (lvl+1 == coarse_lvl) {
-			timer_begin("coarse-solve");
-			coarse_solver(coarse_x, coarse_b);
-			timer_end("coarse-solve");
-		} else {
-			for (auto i : range(n)) {
-				(void)i;
-				ncycle(lvl+1, coarse_x, coarse_b,n);
-			}
-		}
-
-		timer_up();
-
-		timer_begin("interp-add");
-		//x += levels[lvl].P * coarse_x;
-		kreg->interp_add(levels.get(lvl+1).P, coarse_x, level.res, x);
-		timer_end("interp-add");
-
-		timer_begin("relaxation");
-		level.postsmoother(A, x, b);
-		timer_end("relaxation");
-
-		if (log::info.active()) {
-			kreg->residual(A, x, b, residual);
-			log_residual(lvl, residual);
-		}
-	}
-
-	void ncycle(std::size_t lvl, grid_func & x, const grid_func & b,
-		int n=1)
-	{
-		if (lvl == 0) {
-			auto & level = levels.template get<fsten>(lvl);
-			ncycle_helper(level, lvl, x, b, n);
-		} else {
-			auto & level = levels.get(lvl);
-			ncycle_helper(level, lvl, x, b, n);
-		}
-	}
-
-
 	virtual grid_func solve(const grid_func & b)
 	{
-		auto & level = levels.template get<fsten>(0);
 		grid_func x = grid_func::zeros_like(b);
-		int maxiter = conf->get<int>("solver.max-iter", 10);
-		real_t tol = conf->get<real_t>("solver.tol", 1e-8);
-		kreg->residual(level.A, x,b,level.res);
-		real_t res0_l2 = level.res.template lp_norm<2>();
-		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
 
-		timer_begin("solve");
-		for (auto i: range(maxiter)) {
-			vcycle(x, b);
-			kreg->residual(level.A, x,b,level.res);
-			real_t res_l2 = level.res.template lp_norm<2>();
-			real_t rel_l2 = res_l2 / res0_l2;
-			log::status << "Iteration " << i << " relative l2 norm: " << rel_l2 << std::endl;
-			if (rel_l2 < tol) break;
-		}
-		timer_end("solve");
+		solve(b, x);
 
 		return x;
 	}
@@ -311,7 +255,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 		timer_begin("solve");
 
 		for (auto i: range(maxiter)) {
-			vcycle(x, b);
+			cycle->run(x, b);
 			kreg->residual(level.A,x,b,level.res);
 			real_t res_l2 = level.res.template lp_norm<2>();
 			real_t rel_l2 = res_l2 / res0_l2;
@@ -321,13 +265,6 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 		timer_end("solve");
 	}
 
-	void vcycle(grid_func & x, const grid_func & b)
-	{
-		if (levels.size() == 1)
-			coarse_solver(x, b);
-		else
-			ncycle(0, x, b);
-	}
 
 	std::size_t compute_num_levels(stencil_op<fsten> & fop)
 	{
@@ -349,6 +286,8 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {}
 	level_container levels;
 
 protected:
+	std::unique_ptr<cycle::cycle<level_container,
+		registry, fsten> > cycle;
 	std::function<void(grid_func &x, const grid_func &b)> coarse_solver;
 	std::shared_ptr<config::reader> conf;
 	std::shared_ptr<registry> kreg;

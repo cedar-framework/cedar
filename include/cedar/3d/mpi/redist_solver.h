@@ -9,7 +9,7 @@
 #include <cedar/3d/solver.h>
 #include <cedar/3d/mpi/solver.h>
 #include <cedar/3d/stencil_op.h>
-#include <cedar/3d/mpi/halo.h>
+#include <cedar/3d/mpi/msg_exchanger.h>
 
 namespace cedar { namespace cdr3 { namespace mpi {
 
@@ -35,7 +35,8 @@ public:
 	   @param[in] conf The config object to use for this solver
 	   @param[in] nblock The destination 3D distribution
 	*/
-	redist_solver(const stencil_op<xxvii_pt> & so, std::shared_ptr<config::reader> conf, std::array<int, 3> nblock);
+	redist_solver(const stencil_op<xxvii_pt> & so, mpi::msg_exchanger *halof,
+	              std::shared_ptr<config::reader> conf, std::array<int, 3> nblock);
 	/**
 	   Runs the redistributed solve phase
 	   @param[in] b rhs
@@ -54,9 +55,9 @@ protected:
 	bool active;
 	int recv_id;
 	std::vector<int> send_ids;
-	array<len_t, len_t, 1> nbx; /** number of d.o.f. for each processor in my block */
-	array<len_t, len_t, 1> nby; /** number of d.o.f. for each processor in my block */
-	array<len_t, len_t, 1> nbz; /** number of d.o.f. for each processor in my block */
+	array< len_t, 1> nbx; /** number of d.o.f. for each processor in my block */
+	array< len_t, 1> nby; /** number of d.o.f. for each processor in my block */
+	array< len_t, 1> nbz; /** number of d.o.f. for each processor in my block */
 	MPI_Fint msg_comm;
 	grid_func b_redist;
 	grid_func x_redist;
@@ -92,7 +93,7 @@ protected:
 	template <template<class> class target_operator> void gather_operator(const stencil_op<xxvii_pt> & src,
 		target_operator<xxvii_pt> & dest)
 	{
-		using buf_arr = array<len_t,real_t,1>;
+		using buf_arr = array<real_t,1>;
 
 		// Pack the operator
 		buf_arr sbuf(14*src.len(0)*src.len(1)*src.len(2));

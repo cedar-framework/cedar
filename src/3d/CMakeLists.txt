@@ -4,7 +4,7 @@ add_subdirectory(inter)
 add_subdirectory(kernel)
 add_subdirectory(cg)
 add_subdirectory(util)
-#add_subdirectory(interface)
+add_subdirectory(interface)
 
 set(sources
   ${ftn_SOURCES}
@@ -13,7 +13,7 @@ set(sources
   ${kernel_SOURCES}
   ${cg_SOURCES}
   ${util_SOURCES}
-  #${interface_SOURCES}
+  ${interface_SOURCES}
   grid_func.cc
   stencil_op.cc
   relax_stencil.cc
@@ -25,7 +25,7 @@ if(ENABLE_MPI)
   list(APPEND sources
 	mpi/grid_func.cc
 	mpi/stencil_op.cc
-	mpi/halo.cc
+    mpi/msg_exchanger.cc
 	mpi/gallery.cc
 	mpi/redist_solver.cc)
 endif()

@@ -1,6 +1,6 @@
       SUBROUTINE BMG3_SymStd_UTILS_update_ghosts(&
      &                       K, x, Nx, Ny, Nz, iWork, NMSGi, pMSG,&
-     &                       buffer, NMSGr, NOG, MPICOMM&
+     &                       buffer, NMSGr, NOG&
      &                       ) BIND(C, NAME='BMG3_SymStd_UTILS_update_ghosts')
 
 ! ======================================================================
@@ -53,7 +53,7 @@
 ! ----------------------------
 !     Argument Declarations
 !
-      integer(c_int), value :: K, NOG, MPICOMM
+      integer(c_int), value :: K, NOG
       integer(len_t), value :: NMSGi, NMSGr, Nx, Ny, Nz
       integer(c_int) :: pMSG(NBMG_pMSG, NOG)
       integer(len_t) :: iWork(NMSGi)

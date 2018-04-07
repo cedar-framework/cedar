@@ -1,7 +1,6 @@
       SUBROUTINE BMG2_SymStd_UTILS_matvec( &
      &                       K, SO, QF, Q, II, JJ,&
-     &                       KF, IFD, NStncl, &
-     &                       iWork, pMSG, BUFFER, MPICOMM&
+     &                       KF, IFD, NStncl&
      &                       ) BIND(C, NAME='BMG2_SymStd_UTILS_matvec')
 
 ! ======================================================================
@@ -71,16 +70,12 @@
 !
       INTEGER(len_t), VALUE :: II, JJ
       INTEGER(C_INT), VALUE :: NStncl, IFD, K, KF
-      INTEGER, VALUE :: MPICOMM
-      INTEGER(len_t) :: iWork(*)
-      INTEGER(C_INT) :: pMSG(NBMG_pMSG,*)
-
-      REAL(real_t) :: Q(II,JJ), QF(II,JJ), SO(II+1,JJ+1,NStncl), BUFFER(*)
+      REAL(real_t) :: Q(II,JJ), QF(II,JJ), SO(II+1,JJ+1,NStncl)
 
 ! ----------------------------
 !     Local Declarations
 !
-      INTEGER I, I1, J, J1, ptrn, ierror
+      INTEGER I, I1, J, J1
 
 ! ======================================================================
 

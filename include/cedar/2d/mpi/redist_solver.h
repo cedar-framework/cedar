@@ -8,7 +8,7 @@
 #include <cedar/mpi/redist_comms.h>
 #include <cedar/2d/mpi/solver.h>
 #include <cedar/2d/mpi/stencil_op.h>
-#include <cedar/2d/mpi/halo.h>
+#include <cedar/2d/mpi/msg_exchanger.h>
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
@@ -34,7 +34,10 @@ public:
 	   @param[in] conf The config object to use for this solver
 	   @param[in] nblock The destination 2D distribution
 	*/
-	redist_solver(const stencil_op<nine_pt> & so, std::shared_ptr<config::reader> conf, std::array<int, 2> nblock);
+	redist_solver(const stencil_op<nine_pt> & so,
+	              mpi::msg_exchanger *halof,
+	              std::shared_ptr<config::reader> conf,
+	              std::array<int, 2> nblock);
 	/**
 	   Runs the redistributed solve phase
 	   @param[in] b rhs
@@ -52,8 +55,8 @@ protected:
 	bool active; /** Flag for whether the current processor is active in the redistribution */
 	int recv_id; /** Where the current processor will be receiving data in the fixup phase */
 	std::vector<int> send_ids; /** Where the current processor will send data in the fixup phase */
-	array<len_t, len_t, 1> nbx; /** number of d.o.f. for each processor in my block */
-	array<len_t, len_t, 1> nby; /** number of d.o.f. for each processor in my block */
+	array<len_t, 1> nbx; /** number of d.o.f. for each processor in my block */
+	array<len_t, 1> nby; /** number of d.o.f. for each processor in my block */
 	MPI_Fint msg_comm;
 	grid_func b_redist; /** The redistributed rhs */
 	grid_func x_redist; /** The redistributed solution */
