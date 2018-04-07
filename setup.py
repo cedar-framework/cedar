@@ -1,4 +1,3 @@
-
 import os
 import re
 import sys
@@ -21,11 +20,13 @@ class CMakeBuild(build_ext):
         try:
             out = subprocess.check_output(['cmake', '--version'])
         except OSError:
-            raise RuntimeError("CMake must be installed to build the following extensions: " +
+            raise RuntimeError("CMake is required for the extensions: " +
                                ", ".join(e.name for e in self.extensions))
 
         if platform.system() == "Windows":
-            cmake_version = LooseVersion(re.search(r'version\s*([\d.]+)', out.decode()).group(1))
+            lversion = re.search(r'version\s*([\d.]+)', out.decode()).group(1)
+            cmake_version = LooseVersion(lversion)
+
             if cmake_version < '3.1.0':
                 raise RuntimeError("CMake >= 3.1.0 is required on Windows")
 
@@ -33,7 +34,8 @@ class CMakeBuild(build_ext):
             self.build_extension(ext)
 
     def build_extension(self, ext):
-        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
+        extname = self.get_ext_fullpath(ext.name)
+        extdir = os.path.abspath(os.path.dirname(extname))
         cmake_args = ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
                       '-DPYTHON_EXECUTABLE=' + sys.executable]
 
@@ -41,7 +43,8 @@ class CMakeBuild(build_ext):
         build_args = ['--config', cfg]
 
         if platform.system() == "Windows":
-            cmake_args += ['-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'.format(cfg.upper(), extdir)]
+            oarg = '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY_{}={}'
+            cmake_args += [oarg.format(cfg.upper(), extdir)]
             if sys.maxsize > 2**32:
                 cmake_args += ['-A', 'x64']
             build_args += ['--', '/m']
@@ -50,12 +53,19 @@ class CMakeBuild(build_ext):
             build_args += ['--', '-j2']
 
         env = os.environ.copy()
-        env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''),
-                                                              self.distribution.get_version())
+        env['CXXFLAGS'] = env.get('CXXFLAGS', '')
+
+        version = '-DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''))
+        env['CXXFLAGS'] += version.format(self.distribution.get_version())
+
         if not os.path.exists(self.build_temp):
             os.makedirs(self.build_temp)
-        subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
-        subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
+
+        subprocess.check_call(['cmake', ext.sourcedir] + cmake_args,
+                              cwd=self.build_temp, env=env)
+        subprocess.check_call(['cmake', '--build', '.'] + build_args,
+                              cwd=self.build_temp)
+
 
 setup(
     name='cedar',
@@ -64,7 +74,7 @@ setup(
     author_email='areisne2@illinois.edu',
     description='Prototype of Cedar Framework Interface',
     long_description='',
-    packages=['cedar','cedar.cdr2'],
+    packages=['cedar', 'cedar.cdr2'],
     ext_modules=[CMakeExtension('cedar.cdr2._cdr2'),
                  CMakeExtension('cedar.cdr2.gallery')],
     cmdclass=dict(build_ext=CMakeBuild),
