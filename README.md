@@ -31,6 +31,13 @@ ccmake ..
 4. `make` to compile (or `make -j4` to compile with 4 threads)
 5. `make install` 
 
+## Python Bindings
+
+[Pybind11]() is used to interface with Python.  To build:
+
+1. `git submodule update --init` to retreive pybind11
+2. `python setup.py build` to build Cedar
+
 ## CMAKE Options
 
 | CMAKE Option           | Description            |
