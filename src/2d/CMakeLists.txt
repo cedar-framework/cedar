@@ -1,20 +1,17 @@
-add_subdirectory(cg)
 add_subdirectory(ftn)
-add_subdirectory(inter)
-add_subdirectory(kernel)
-add_subdirectory(relax)
 
 set(sources
-  ${cg_SOURCES}
   ${ftn_SOURCES}
-  ${inter_SOURCES}
-  ${kernel_SOURCES}
-  ${relax_SOURCES}
+  restrict_op.cc
+  prolong_op.cc
+  restrict.cc
+  interp.cc
   grid_func.cc
   relax_stencil.cc
-  residual.cc
   stencil_op.cc
   gallery.cc
+  solve_cg.cc
+  kernel_manager.cc
   )
 
 if(ENABLE_MPI)

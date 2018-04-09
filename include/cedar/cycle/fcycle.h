@@ -7,26 +7,37 @@
 
 namespace cedar { namespace cycle {
 
-template<class level_container, class registry, class fsten>
-class fcycle : public cycle<level_container, registry, fsten>
+template<exec_mode emode, class level_container, class fsten>
+class fcycle : public cycle<emode, level_container, fsten>
 {
 	template<class sten>
 		using level_t = typename level_container::template level_t<sten>;
 	template<class sten>
 		using stencil_op = typename level_t<fsten>::template stencil_op<sten>;
 	using grid_func = typename level_t<fsten>::grid_func;
-	using parent = cycle<level_container, registry, fsten>;
-using parent::levels;
-using parent::coarse_solver;
-using parent::log_residual;
-using parent::kreg;
+	// extract kernel names for convenience
+	using stypes = typename level_t<fsten>::stypes;
+
+	using coarsen_op = kernels::coarsen_op<stypes>;
+	using interp_add = kernels::interp_add<stypes>;
+	using residual = kernels::residual<stypes>;
+	using restriction = kernels::restriction<stypes>;
+	using setup_interp = kernels::setup_interp<stypes>;
+	using solve_cg = kernels::solve_cg<stypes>;
+
+	using parent = cycle<emode, level_container, fsten>;
+	using parent::levels;
+	using parent::coarse_solver;
+	using parent::log_residual;
+	using parent::kman;
+
 public:
 fcycle(level_container & levels, std::function<void(grid_func&,const grid_func&)> & coarse_solver) :
 parent::cycle(levels, coarse_solver), vcycler(levels, coarse_solver) {
 }
 	virtual void run(grid_func & x, const grid_func & b) override
 	{
-		vcycler.set_registry(kreg);
+		vcycler.set_kernels(kman);
 
 		if (levels.size() == 1)
 			coarse_solver(x, b);
@@ -38,13 +49,13 @@ parent::cycle(levels, coarse_solver), vcycler(levels, coarse_solver) {
 	void fmg_cycle(std::size_t lvl, grid_func & x, const grid_func & b)
 	{
 		if (lvl == levels.size() - 1) {
-			/* x.set(0.0); */
+			// /\* x.set(0.0); *\/
 			coarse_solver(x, b);
 			if (log::info.active()) {
 				auto & A = levels.get(levels.size() - 1).A;
-				auto & residual = levels.get(levels.size()-1).res;
-				kreg->residual(A, x, b, residual);
-				log_residual(lvl, residual);
+				auto & res = levels.get(levels.size()-1).res;
+				kman->template run<residual>(A, x, b, res);
+				log_residual(lvl, res);
 			}
 		} else {
 			if (lvl == 0) {
@@ -63,16 +74,16 @@ parent::cycle(levels, coarse_solver), vcycler(levels, coarse_solver) {
 	{
 			auto & coarse_b = levels.get(lvl+1).b;
 			auto & coarse_x = levels.get(lvl+1).x;
-			kreg->matvec(levels.get(lvl+1).R, b, coarse_b);
+			kman->template run<restriction>(levels.get(lvl+1).R, b, coarse_b);
 			fmg_cycle(lvl+1, coarse_x, coarse_b);
 			x.set(0.0);
 			level.res.set(0.0);
-			kreg->interp_add(levels.get(lvl+1).P, coarse_x, level.res, x);
+			kman->template run<interp_add>(levels.get(lvl+1).P, coarse_x, level.res, x);
 			vcycler.ncycle(lvl, x, b);
 	}
 
 private:
-	vcycle<level_container, registry, fsten> vcycler;
+	vcycle<emode, level_container, fsten> vcycler;
 
 };
 

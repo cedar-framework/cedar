@@ -1,65 +1,67 @@
 #ifndef CEDAR_2D_KERNEL_RESIDUAL_H
 #define CEDAR_2D_KERNEL_RESIDUAL_H
 
-#include <cedar/kernel_params.h>
-#include <cedar/2d/mpi/msg_exchanger.h>
-#include <cedar/2d/grid_func.h>
-#include <cedar/2d/stencil_op.h>
-#include <cedar/2d/mpi/stencil_op.h>
-#include <cedar/2d/mpi/grid_func.h>
+#include <cedar/kernels/residual.h>
+#include <cedar/2d/types.h>
 
 extern "C" {
 	using namespace cedar;
-	void MPI_BMG2_SymStd_residual(int k, int kf, int nog,
-	                              real_t *SO, real_t *QF, real_t *Q, real_t *RES,
-	                              len_t ii, len_t jj, int ifd, int nstencil,
-	                              int irelax, int irelax_sym,
-	                              int mpicomm);
+	void BMG2_SymStd_residual(int*,real_t*,real_t*,real_t*,real_t*,len_t*,len_t*,
+	                          int*,int*,int*,int*,int*,int*,int*);
+	void BMG_get_bc(int, int*);
 }
 
+namespace cedar { namespace cdr2 {
 
-namespace cedar { namespace cdr2 { namespace kernel {
-namespace impls
+class residual_f90 : public kernels::residual<stypes>
 {
-	template<class sten>
-	void residual_fortran(const kernel_params & params, const stencil_op<sten> & A, const grid_func & x,
-						  const grid_func & b, grid_func &y);
-
-	namespace mpi = cedar::cdr2::mpi;
-	template <class sten>
-		void mpi_residual_fortran(const kernel_params & params,
-		                          halo_exchanger_base *halof,
-		                          const mpi::stencil_op<sten> & A,
-		                          const mpi::grid_func & x,
-		                          const mpi::grid_func & b, mpi::grid_func &r)
+	void run(const stencil_op<five_pt> & so,
+	         const grid_func & x,
+	         const grid_func & b,
+	         grid_func & r) override
 	{
-		int k, kf, nog, ifd, nstencil;
-		auto & Ad = const_cast<mpi::stencil_op<sten> &>(A);
-		auto & xd = const_cast<mpi::grid_func&>(x);
-		auto & bd = const_cast<mpi::grid_func&>(b);
-		grid_topo & topo = Ad.grid();
+		this->run_impl(so, x, b, r);
+	}
+	void run(const stencil_op<nine_pt> & so,
+	         const grid_func & x,
+	         const grid_func & b,
+	         grid_func & r) override
+	{
+		this->run_impl(so, x, b, r);
+	}
 
-		nstencil = stencil_ndirs<sten>::value;
-		if (std::is_same<five_pt, sten>::value)
+	template<class sten>
+	void run_impl(const stencil_op<sten> & so,
+	              const grid_func & x,
+	              const grid_func & b,
+	              grid_func & r)
+	{
+		int k = 0;
+		int kf = 0;
+		int ifd;
+		int ibc;
+		int nstncl = stencil_ndirs<sten>::value;
+		if (std::is_same<sten, five_pt>::value)
 			ifd = 1;
 		else
 			ifd = 0;
-
 		int irelax = 0;
 		int irelax_sym = 0;
+		int updown = 0;
+		len_t ii = r.len(0);
+		len_t jj = r.len(1);
 
-		nog = kf = topo.nlevel();
-		k = topo.level()+1;
+		auto & Ad = const_cast<stencil_op<sten>&>(so);
+		grid_func &xd = const_cast<grid_func&>(x);
+		grid_func &bd = const_cast<grid_func&>(b);
 
-		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
-		MPI_BMG2_SymStd_residual(k, kf, nog,
-		                         Ad.data(), bd.data(), xd.data(), r.data(),
-		                         r.len(0), r.len(1), ifd, nstencil,
-		                         irelax, irelax_sym, fcomm);
-		halof->exchange_func(k, r.data());
+		BMG_get_bc(params->per_mask(), &ibc);
+		BMG2_SymStd_residual(&k, Ad.data(), bd.data(), xd.data(), r.data(), &ii, &jj,
+							 &kf, &ifd, &nstncl, &ibc, &irelax, &irelax_sym, &updown);
 	}
-}
 
-}}}
+};
+
+}}
 
 #endif

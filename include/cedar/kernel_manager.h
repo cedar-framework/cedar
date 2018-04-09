@@ -2,84 +2,127 @@
 #define CEDAR_KERNEL_MANAGER_H
 
 #include <memory>
-#include <string>
 #include <map>
-#include <exception>
+#include <tuple>
 
-#include "kernel.h"
-#include "util/timer.h"
-#include "util/log.h"
+#include <cedar/type_list.h>
+#include <cedar/kernel_params.h>
+#include <cedar/config/reader.h>
+
 
 namespace cedar {
 
-class kernel_manager
+template<class T1, class T2>
+struct same_type
+{
+	static const bool value = false;
+};
+
+template<class T>
+struct same_type<T, T>
+{
+	static const bool value = true;
+};
+
+
+template<class U>
+class kernel_manager;
+
+template<typename... types>
+class kernel_manager<type_list<types...>>
 {
 public:
-	template <typename S, typename T>
-		void add(S&& kname, const T& cmd)
-	{
-		kmap.emplace(std::make_pair(std::forward<S>(kname), std::make_shared<T>(cmd)));
-	}
+    kernel_manager(std::shared_ptr<kernel_params> params) : params(params) {}
+	kernel_manager(config::reader & conf) { params = build_kernel_params(conf); }
 
-	template <typename T>
-		void set(const std::string & kname, const T & cmd)
-	{
-		kmap_t::const_iterator it = kmap.find(kname);
-		if (it != kmap.end()) {
-			T *c = dynamic_cast<T*>(it->second.get());
-			if (c) {
-				kmap[kname] = std::make_shared<T>(cmd);
-			} else {
-				throw std::invalid_argument("Argument does not match signature of kernel: " + kname);
-			}
-		} else {
-			throw std::invalid_argument("kernel not found: " + kname);
-		}
-	}
+	typedef std::tuple<std::map<std::string,
+	                            std::shared_ptr<types>>...> mtype;
+	mtype kerns;
+	std::array<std::string, std::tuple_size<mtype>::value> defaults;
 
-	template <typename... Args>
-		void run(const std::string & kname, Args&&... args)
-	{
-		kmap_t::const_iterator it = kmap.find(kname);
-		if (it != kmap.end()) {
-			kernel<Args...> *c = dynamic_cast<kernel<Args...>*>(it->second.get());
-			if (c) {
-				log::debug << "Running kernel: " << kname << std::endl;
-				timer kern_timer(kname);
-				if (log::debug.active())
-					kern_timer.begin();
-				(*c)(std::forward<decltype(args)>(args)...);
-				if (log::debug.active())
-					kern_timer.end();
-			} else {
-				std::string msg("Incorrect arguments for kernel: " + kname);
-				log::error << msg << std::endl;
-				//throw std::invalid_argument(msg);
-			}
-		} else {
-			log::error << "kernel not found: "  << kname << std::endl;
-			//throw std::invalid_argument("kernel not found: " + kname);
-		}
-	}
+	template<int n, class T>
+	struct map_of_type: same_type<std::shared_ptr<T>,
+	                              typename std::tuple_element<n, mtype>::type::mapped_type>
+	{};
 
-	std::shared_ptr<kernel_base> & operator[](const std::string & kname)
+
+	template<int n, class T, bool match = false>
+	struct matching_index
 	{
-		return kmap[kname];
+		static const std::size_t value = matching_index<n+1, T, map_of_type<n+1, T>::value>::value;
+	};
+
+	template<int n, class T>
+	struct matching_index<n, T, true>
+	{
+		static const std::size_t value = n;
+	};
+
+
+	template<class T>
+	T & get()
+	{
+		const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
+		return *std::get<i>(kerns)[defaults[i]];
 	}
 
 
-	std::shared_ptr<kernel_base> at(const std::string & kname)
+	template<class T>
+	T & get(const std::string & name)
 	{
-		try {
-			return kmap.at(kname);
-		} catch(const std::out_of_range  &ex) {
-			log::error << "Could not find kernel: " << kname << std::endl;
-			return kmap[kname];
-		}
+		const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
+		return *std::get<i>(kerns)[name];
 	}
-private:
-	using kmap_t = std::map<std::string, std::shared_ptr<kernel_base>>;
-	kmap_t kmap;
+
+
+	template<class T, class rclass>
+	void add(const std::string & name)
+	{
+		const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
+		std::get<i>(kerns)[name] = std::make_shared<rclass>();
+		this->init<T>(name);
+	}
+
+
+	template<class T, class rclass, class... Args>
+	void add(const std::string & name, Args&&... args)
+	{
+		const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
+		std::get<i>(kerns)[name] = std::make_shared<rclass>(std::forward<Args>(args)...);
+		this->init<T>(name);
+	}
+
+
+	template<class T>
+	void set(const std::string & name)
+	{
+		const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
+		defaults[i] = name;
+	}
+
+
+	template<class T, class... Args>
+	void setup(Args&&... args)
+	{
+		this->get<T>().setup(std::forward<Args>(args)...);
+	}
+
+	template<class T, class... Args>
+	void run(Args&&... args)
+	{
+		const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
+		std::get<i>(kerns)[defaults[i]]->run(std::forward<Args>(args)...);
+	}
+
+
+	template<class T>
+	void init(const std::string & name)
+	{
+		this->get<T>(name).add_params(params);
+	}
+
+protected:
+	std::shared_ptr<kernel_params> params;
 };
 
 }

@@ -2,6 +2,7 @@
 #define CEDAR_MULTILEVEL_H
 
 #include <cedar/types.h>
+#include <cedar/kernel_registry.h>
 #include <cedar/util/timer.h>
 #include <cedar/cycle/types.h>
 #include <cedar/cycle/vcycle.h>
@@ -18,12 +19,10 @@ namespace cedar {
 	   of types and kernel implementations (registry) as input.
 
 	   @tparam level_container Generic container for data that is stored on every level.
-	   @tparam registry Listing of implementations for multilevel operations, e.g., kernel_registry.
 	   @tparam fsten Stencil used for the fine-grid operator.
 	   @tparam child Class that inherits this.
 	*/
-	template <class level_container,
-		      class registry, class fsten, class child>
+template <exec_mode emode, class level_container, class fsten, class child>
 class multilevel
 {
 public:
@@ -32,6 +31,19 @@ public:
 	template<class sten>
 		using stencil_op = typename level_t<fsten>::template stencil_op<sten>;
 	using grid_func = typename level_t<fsten>::grid_func;
+	// extract kernel names for convenience
+	using stypes = typename level_t<fsten>::stypes;
+	template<relax_dir rdir>
+		using line_relax = kernels::line_relax<stypes, rdir>;
+	using point_relax = kernels::point_relax<stypes>;
+	using coarsen_op = kernels::coarsen_op<stypes>;
+	using interp_add = kernels::interp_add<stypes>;
+	using matvec = kernels::matvec<stypes>;
+	using residual = kernels::residual<stypes>;
+	using setup_prolong = kernels::setup_interp<stypes>;
+	using solve_cg = kernels::solve_cg<stypes>;
+	using kern_manager = kernel_manager<klist<stypes, emode>>;
+
 	using conf_ptr = std::shared_ptr<config::reader>;
 multilevel(stencil_op<fsten> & fop) : levels(fop), conf(std::make_shared<config::reader>("config.json")) {
 		setup_cycler();
@@ -50,10 +62,10 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 	{
 		auto cycle_type = conf->get<std::string>("solver.cycle.type", "v");
 		if (cycle_type == "v") {
-			this->cycle = std::make_unique<cycle::vcycle<level_container, registry, fsten>>(
+			this->cycle = std::make_unique<cycle::vcycle<emode, level_container, fsten>>(
 				levels, coarse_solver);
 		} else if (cycle_type == "f") {
-			this->cycle = std::make_unique<cycle::fcycle<level_container, registry, fsten>>(
+			this->cycle = std::make_unique<cycle::fcycle<emode, level_container, fsten>>(
 				levels, coarse_solver);
 		} else {
 			log::error << "Cycle type: " << cycle_type << " not recognized!" << std::endl;
@@ -69,9 +81,9 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 	}
 
 
-	std::shared_ptr<registry> kernel_registry()
+	std::shared_ptr<kern_manager> get_kernels()
 	{
-		return kreg;
+		return kman;
 	}
 
 	std::size_t nlevels() { return levels.size(); }
@@ -80,10 +92,10 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 	virtual void setup_cg_solve()
 	{
 		auto & cop = levels.get(levels.size() - 1).A;
-		kreg->setup_cg_lu(cop, ABD);
-		auto kernels = kernel_registry();
+		kman->template setup<solve_cg>(cop, ABD);
+		auto kernels = get_kernels();
 		coarse_solver = [&, kernels](grid_func &x, const grid_func & b) {
-			kernels->solve_cg(x, b, ABD, bbd);
+			kernels->template run<solve_cg>(x, b, ABD, bbd);
 		};
 	}
 
@@ -94,10 +106,10 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 		auto & cop = levels.get(lvl+1).A;
 		if (lvl == 0) {
 			auto & fop = levels.template get<fsten>(lvl).A;
-			kreg->setup_interp(fop, cop, P);
+			kman->template run<setup_prolong>(fop, cop, P);
 		} else {
 			auto & fop = levels.get(lvl).A;
-			kreg->setup_interp(fop, cop, P);
+			kman->template run<setup_prolong>(fop, cop, P);
 		}
 	}
 
@@ -109,10 +121,10 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 
 		if (lvl == 0) {
 			auto & fop = levels.template get<fsten>(lvl).A;
-			kreg->galerkin_prod(P, fop, cop);
+			kman->template run<coarsen_op>(P, fop, cop);
 		} else {
 			auto & fop = levels.get(lvl).A;
-			kreg->galerkin_prod(P, fop, cop);
+			kman->template run<coarsen_op>(P, fop, cop);
 		}
 	}
 
@@ -124,17 +136,16 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 		std::string relax_type = conf->get<std::string>("solver.relaxation", "point");
 		int nrelax_pre = conf->get<int>("solver.cycle.nrelax-pre", 2);
 		int nrelax_post = conf->get<int>("solver.cycle.nrelax-post", 1);
-		auto kernels = kernel_registry();
 
 		if (relax_type == "point")
-			kernels->setup_relax(sop, level.SOR[0]);
+			kman->template setup<point_relax>(sop, level.SOR[0]);
 		else if (relax_type == "line-x")
-			kernels->setup_relax_x(sop, level.SOR[0]);
+			kman->template setup<line_relax<relax_dir::x>>(sop, level.SOR[0]);
 		else if (relax_type == "line-y")
-			kernels->setup_relax_y(sop, level.SOR[0]);
+			kman->template setup<line_relax<relax_dir::y>>(sop, level.SOR[0]);
 		else if (relax_type == "line-xy") {
-			kernels->setup_relax_x(sop, level.SOR[0]);
-			kernels->setup_relax_y(sop, level.SOR[1]);
+			kman->template setup<line_relax<relax_dir::x>>(sop, level.SOR[0]);
+			kman->template setup<line_relax<relax_dir::y>>(sop, level.SOR[1]);
 		}
 		else if (relax_type == "plane") {
 			// TODO: fix this
@@ -144,19 +155,21 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 		else
 			log::error << "Invalid relaxation: " << relax_type << std::endl;
 
+		auto kernels = get_kernels();
+
 		level.presmoother = [&,lvl,nrelax_pre,kernels,relax_type](const stencil_op<sten> &A,
 		                                                          grid_func &x, const grid_func&b) {
 			for (auto i : range(nrelax_pre)) {
 				(void) i;
 				if (relax_type == "point")
-					kernels->relax(A, x, b, level.SOR[0], cycle::Dir::DOWN);
+					kernels->template run<point_relax>(A, x, b, level.SOR[0], cycle::Dir::DOWN);
 				else if (relax_type == "line-x")
-					kernels->relax_lines_x(A, x, b, level.SOR[0], level.res, cycle::Dir::DOWN);
+					kernels->template run<line_relax<relax_dir::x>>(A, x, b, level.SOR[0], level.res, cycle::Dir::DOWN);
 				else if (relax_type == "line-y")
-					kernels->relax_lines_y(A, x, b, level.SOR[0], level.res, cycle::Dir::DOWN);
+					kernels->template run<line_relax<relax_dir::y>>(A, x, b, level.SOR[0], level.res, cycle::Dir::DOWN);
 				else if (relax_type == "line-xy") {
-					kernels->relax_lines_x(A, x, b, level.SOR[0], level.res, cycle::Dir::DOWN);
-					kernels->relax_lines_y(A, x, b, level.SOR[1], level.res, cycle::Dir::DOWN);
+					kernels->template run<line_relax<relax_dir::x>>(A, x, b, level.SOR[0], level.res, cycle::Dir::DOWN);
+					kernels->template run<line_relax<relax_dir::y>>(A, x, b, level.SOR[1], level.res, cycle::Dir::DOWN);
 				}
 				else if (relax_type == "plane") {
 					// TODO: fix this
@@ -171,14 +184,14 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 			for (auto i: range(nrelax_post)) {
 				(void) i;
 				if (relax_type == "point")
-					kernels->relax(A, x, b, level.SOR[0], cycle::Dir::UP);
+					kernels->template run<point_relax>(A, x, b, level.SOR[0], cycle::Dir::UP);
 				else if (relax_type == "line-x")
-					kernels->relax_lines_x(A, x, b, level.SOR[0], level.res, cycle::Dir::UP);
+					kernels->template run<line_relax<relax_dir::x>>(A, x, b, level.SOR[0], level.res, cycle::Dir::UP);
 				else if (relax_type == "line-y")
-					kernels->relax_lines_y(A, x, b, level.SOR[0], level.res, cycle::Dir::UP);
+					kernels->template run<line_relax<relax_dir::y>>(A, x, b, level.SOR[0], level.res, cycle::Dir::UP);
 				else if (relax_type == "line-xy") {
-					kernels->relax_lines_y(A, x, b, level.SOR[1], level.res, cycle::Dir::UP);
-					kernels->relax_lines_x(A, x, b, level.SOR[0], level.res, cycle::Dir::UP);
+					kernels->template run<line_relax<relax_dir::x>>(A, x, b, level.SOR[1], level.res, cycle::Dir::UP);
+					kernels->template run<line_relax<relax_dir::y>>(A, x, b, level.SOR[0], level.res, cycle::Dir::UP);
 				}
 				else if (relax_type == "plane") {
 					// TODO: fix this
@@ -210,7 +223,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 
 	void setup(stencil_op<fsten> & fop)
 	{
-		this->cycle->set_registry(this->kreg);
+		this->cycle->set_kernels(this->kman);
 		auto num_levels = compute_num_levels(fop);
 		auto nlevels_conf = conf->get<int>("solver.num-levels", -1);
 		if (nlevels_conf > 0) {
@@ -248,7 +261,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 		auto & level = levels.template get<fsten>(0);
 		int maxiter = conf->get<int>("solver.max-iter", 10);
 		real_t tol = conf->get<real_t>("solver.tol", 1e-8);
-		kreg->residual(level.A,x,b,level.res);
+		kman->template run<residual>(level.A,x,b,level.res);
 		real_t res0_l2 = level.res.template lp_norm<2>();
 		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
 
@@ -256,7 +269,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 
 		for (auto i: range(maxiter)) {
 			cycle->run(x, b);
-			kreg->residual(level.A,x,b,level.res);
+			kman->template run<residual>(level.A,x,b,level.res);
 			real_t res_l2 = level.res.template lp_norm<2>();
 			real_t rel_l2 = res_l2 / res0_l2;
 			log::status << "Iteration " << i << " relative l2 norm: " << rel_l2 << std::endl;
@@ -286,11 +299,10 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 	level_container levels;
 
 protected:
-	std::unique_ptr<cycle::cycle<level_container,
-		registry, fsten> > cycle;
+	std::unique_ptr<cycle::cycle<emode, level_container, fsten>> cycle;
 	std::function<void(grid_func &x, const grid_func &b)> coarse_solver;
 	std::shared_ptr<config::reader> conf;
-	std::shared_ptr<registry> kreg;
+	std::shared_ptr<kern_manager> kman;
 	grid_func ABD;
 	real_t *bbd;
 };

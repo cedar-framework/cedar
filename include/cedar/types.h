@@ -21,6 +21,13 @@ namespace std {
 
 namespace cedar {
 
+enum class exec_mode { serial, mpi };
+enum class relax_dir {x, y};
+
+namespace cycle {
+enum class Dir {UP, DOWN};
+}
+
 using len_t = unsigned int;
 using real_t = double;
 

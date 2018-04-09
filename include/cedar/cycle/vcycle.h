@@ -6,22 +6,32 @@
 
 namespace cedar { namespace cycle {
 
-template<class level_container, class registry, class fsten>
-class vcycle : public cycle<level_container, registry, fsten>
+template<exec_mode emode, class level_container, class fsten>
+class vcycle : public cycle<emode, level_container, fsten>
 {
+public:
 	template<class sten>
 		using level_t = typename level_container::template level_t<sten>;
 	template<class sten>
 		using stencil_op = typename level_t<fsten>::template stencil_op<sten>;
 	using grid_func = typename level_t<fsten>::grid_func;
-	using parent = cycle<level_container, registry, fsten>;
-using parent::levels;
-using parent::coarse_solver;
-using parent::log_residual;
-using parent::kreg;
-public:
-vcycle(level_container & levels, std::function<void(grid_func&,const grid_func&)> & coarse_solver) :
-parent::cycle(levels, coarse_solver) {}
+	// extract kernel names for convenience
+	using stypes = typename level_t<fsten>::stypes;
+
+	using interp_add = kernels::interp_add<stypes>;
+	using restriction = kernels::restriction<stypes>;
+	using residual = kernels::residual<stypes>;
+	using setup_interp = kernels::setup_interp<stypes>;
+	using solve_cg = kernels::solve_cg<stypes>;
+
+	using parent = cycle<emode, level_container, fsten>;
+	using parent::levels;
+	using parent::coarse_solver;
+	using parent::log_residual;
+	using parent::kman;
+
+	vcycle(level_container & levels, std::function<void(grid_func&,const grid_func&)> & coarse_solver) :
+		parent::cycle(levels, coarse_solver) {}
 	virtual void run(grid_func & x, const grid_func & b) override
 	{
 		if (levels.size() == 1)
@@ -54,17 +64,17 @@ parent::cycle(levels, coarse_solver) {}
 		level.presmoother(A, x, b);
 		timer_end("relaxation");
 
-		grid_func & residual = level.res;
+		grid_func & res = level.res;
 		timer_begin("residual");
-		kreg->residual(A, x, b, residual);
+		kman->template run<residual>(A, x, b, res);
 		timer_end("residual");
 
-		log_residual(lvl, residual);
+		log_residual(lvl, res);
 
 		auto & coarse_b = levels.get(lvl+1).b;
 		auto & coarse_x = levels.get(lvl+1).x;
 		timer_begin("restrict");
-		kreg->matvec(levels.get(lvl+1).R, residual, coarse_b);
+		kman->template run<restriction>(levels.get(lvl+1).R, res, coarse_b);
 		timer_end("restrict");
 		coarse_x.set(0.0);
 
@@ -78,7 +88,7 @@ parent::cycle(levels, coarse_solver) {}
 			if (log::info.active()) {
 				auto & coarse_A = levels.get(levels.size() - 1).A;
 				auto & coarse_residual = levels.get(levels.size()-1).res;
-				kreg->residual(coarse_A, coarse_x, coarse_b, coarse_residual);
+				kman->template run<residual>(coarse_A, coarse_x, coarse_b, coarse_residual);
 				log_residual(lvl+1, coarse_residual);
 			}
 		} else {
@@ -91,8 +101,7 @@ parent::cycle(levels, coarse_solver) {}
 		timer_up();
 
 		timer_begin("interp-add");
-		//x += levels[lvl].P * coarse_x;
-		kreg->interp_add(levels.get(lvl+1).P, coarse_x, level.res, x);
+		kman->template run<interp_add>(levels.get(lvl+1).P, coarse_x, level.res, x);
 		timer_end("interp-add");
 
 		timer_begin("relaxation");
@@ -100,8 +109,8 @@ parent::cycle(levels, coarse_solver) {}
 		timer_end("relaxation");
 
 		if (log::info.active()) {
-			kreg->residual(A, x, b, residual);
-			log_residual(lvl, residual);
+			kman->template run<residual>(A, x, b, res);
+			log_residual(lvl, res);
 		}
 	}
 };

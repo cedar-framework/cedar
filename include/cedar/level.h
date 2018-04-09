@@ -20,6 +20,7 @@ struct level
 	using prolong_op = typename solver_types::prolong_op;
 	using restrict_op = typename solver_types::restrict_op;
 	using relax_stencil = typename solver_types::relax_stencil;
+	using stypes = solver_types;
 
 level(stencil_op<sten> & A) : A(A) {}
 	template<class... Args>

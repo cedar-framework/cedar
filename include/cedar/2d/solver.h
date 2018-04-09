@@ -12,9 +12,9 @@
 #include <cedar/2d/level_container.h>
 #include <cedar/2d/stencil_op.h>
 #include <cedar/2d/relax_stencil.h>
-#include <cedar/2d/inter/prolong_op.h>
-#include <cedar/2d/inter/restrict_op.h>
-#include <cedar/2d/kernel/registry.h>
+#include <cedar/2d/prolong_op.h>
+#include <cedar/2d/restrict_op.h>
+#include <cedar/2d/kernel_manager.h>
 
 namespace cedar { namespace cdr2 {
 
@@ -37,22 +37,20 @@ level2(stencil_op<sten> & A) : parent::level(A)
 };
 
 template<class fsten>
-class solver: public multilevel<level_container<level2,fsten>,
-	typename kernel::registry::parent, fsten, solver<fsten>>
+class solver: public multilevel<exec_mode::serial, level_container<level2,fsten>, fsten, solver<fsten>>
 {
 public:
-	using parent = multilevel<level_container<level2, fsten>,
-		typename kernel::registry::parent, fsten, solver<fsten>>;
+	using parent = multilevel<exec_mode::serial, level_container<level2, fsten>, fsten, solver<fsten>>;
 solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 	{
-		this->kreg = std::make_shared<kernel::registry>(*(this->conf));
+		this->kman = build_kernel_manager(*this->conf);
 		parent::setup(fop);
 	}
 	solver(stencil_op<fsten> & fop,
 	       std::shared_ptr<config::reader> conf) :
 	parent::multilevel(fop, conf)
 	{
-		this->kreg = std::make_shared<kernel::registry>(*(this->conf));
+		this->kman = build_kernel_manager(*this->conf);
 		parent::setup(fop);
 	}
 	~solver() { delete[] this->bbd; }

@@ -5,8 +5,8 @@
 #include <cedar/2d/base_types.h>
 #include <cedar/2d/stencil_op.h>
 #include <cedar/2d/grid_func.h>
-#include <cedar/2d/inter/restrict_op.h>
-#include <cedar/2d/inter/prolong_op.h>
+#include <cedar/2d/restrict_op.h>
+#include <cedar/2d/prolong_op.h>
 #include <cedar/2d/relax_stencil.h>
 
 namespace cedar
@@ -15,9 +15,11 @@ namespace cedar
 	{
 		using stypes = solver_types<
 			stencil_op,
+			five_pt,
+			nine_pt,
 			grid_func,
-			inter::prolong_op,
-			inter::restrict_op,
+			prolong_op,
+			restrict_op,
 			relax_stencil>;
 	}
 }
