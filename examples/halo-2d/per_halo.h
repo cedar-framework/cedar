@@ -5,10 +5,7 @@
 #include <cedar/2d/mpi/grid_func.h>
 #include <cedar/2d/mpi/stencil_op.h>
 #include <cedar/2d/mpi/solver.h>
-#include <cedar/2d/kernel/mpi/registry.h>
 #include <cedar/2d/util/topo.h>
-#include <cedar/2d/mpi/tausch_exchanger.h>
-#include <cedar/2d/mpi/msg_exchanger.h>
 #include <cedar/kernel_params.h>
 
 #include <cedar/util/time_log.h>
@@ -110,40 +107,6 @@ static void draw_so(const cedar::cdr2::mpi::stencil_op<sten> & so, std::string p
 	}
 
 	for (int i = 0; i < stencil_ndirs<sten>::value; ++i) osv[i]->close();
-}
-
-
-template<class halo_exchanger>
-void run_test(config::reader & conf, std::shared_ptr<grid_topo> grid,
-              mpi::stencil_op<five_pt> & so, mpi::grid_func & b)
-{
-	auto parms = build_kernel_params(conf);
-
-	mpi::solver<five_pt, halo_exchanger> slv(so);
-	auto kreg = slv.kernel_registry();
-
-	draw(b, "before-0");
-	draw_so(so, "before-0");
-	kreg->halo_exchange(b);
-	kreg->halo_stencil_exchange(so);
-	draw(b, "after-0");
-	draw_so(so, "after-0");
-
-
-	for (std::size_t lvl = 1; lvl < slv.nlevels(); lvl++) {
-		auto & level = slv.levels.get(lvl);
-		fill_gfunc(level.b);
-		fill_stencil(level.A);
-		draw(level.b, "before-" + std::to_string(lvl));
-		draw_so(level.A, "before-" + std::to_string(lvl));
-		kreg->halo_exchange(level.b);
-		kreg->halo_stencil_exchange(level.A);
-		draw(level.b, "after-" + std::to_string(lvl));
-		draw_so(level.A, "after-" + std::to_string(lvl));
-	}
-
-	log::status << "Finished Test" << std::endl;
-
 }
 
 #endif

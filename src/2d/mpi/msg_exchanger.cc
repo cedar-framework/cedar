@@ -1,7 +1,7 @@
 #include <cedar/util/timer.h>
 #include <cedar/types.h>
-#include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
-#include "cedar/2d/ftn/mpi/BMG_parameters_c.h"
+#include <cedar/2d/ftn/mpi/BMG_workspace_c.h>
+#include <cedar/2d/ftn/mpi/BMG_parameters_c.h>
 #include <cedar/2d/mpi/msg_exchanger.h>
 
 extern "C" {
@@ -28,7 +28,7 @@ extern "C" {
 
 using namespace cedar;
 using namespace cedar::cdr2;
-using namespace cedar::cdr2::kernel::impls;
+using namespace cedar::cdr2::impls;
 using namespace cedar::cdr2::mpi;
 
 MsgCtx::MsgCtx(grid_topo & topo) :
@@ -120,10 +120,12 @@ MsgCtx::MsgCtx(grid_topo & topo) :
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
-msg_exchanger::msg_exchanger(const kernel_params & params,
-                             std::vector<topo_ptr> topos) :
-	ctx(*topos[0]), dims(topos[0]->nlevel(), 2), coord(2)
+void msg_exchanger::setup(std::vector<topo_ptr> topos)
 {
+	ctx = std::make_unique<MsgCtx>(*topos[0]);
+	dims.init(topos[0]->nlevel(), 2);
+	coord.init(2);
+
 	auto & topo = *topos[0];
 	coord(0) = topo.coord(0);
 	coord(1) = topo.coord(1);
@@ -135,32 +137,31 @@ msg_exchanger::msg_exchanger(const kernel_params & params,
 	MPI_Comm_rank(topo.comm, &rank);
 	rank++; // Fortran likes to be difficult...
 
-	BMG_get_bc(params.per_mask(), &ibc);
+	BMG_get_bc(params->per_mask(), &ibc);
 
-	BMG2_SymStd_SETUP_MSG(ctx.pMSG.data(), ctx.pMSGSO.data(),
-	                      ctx.msg_geom.data(), ctx.msg_geom.size(),
-	                      &ctx.pSI_MSG, ibc, topo.IGRD(), topo.nlevel(),
+	BMG2_SymStd_SETUP_MSG(ctx->pMSG.data(), ctx->pMSGSO.data(),
+	                      ctx->msg_geom.data(), ctx->msg_geom.size(),
+	                      &ctx->pSI_MSG, ibc, topo.IGRD(), topo.nlevel(),
 	                      topo.nlevel(), topo.nproc(), rank,
-	                      ctx.dimx.data(), ctx.dimy.data(),
-	                      ctx.dimxfine.data(), ctx.dimyfine.data(),
-	                      ctx.proc_grid.data(), topo.nproc(0), topo.nproc(1),
+	                      ctx->dimx.data(), ctx->dimy.data(),
+	                      ctx->dimxfine.data(), ctx->dimyfine.data(),
+	                      ctx->proc_grid.data(), topo.nproc(0), topo.nproc(1),
 	                      fcomm);
 
-	BMG2_SymStd_SETUP_LS(ctx.msg_geom.data(), ctx.msg_geom.size(),
-	                     ctx.pMSG.data(), ctx.pLS.data(), &ctx.pSI_MSG,
-	                     ctx.proc_grid.data(), topo.nproc(0), topo.nproc(1),
+	BMG2_SymStd_SETUP_LS(ctx->msg_geom.data(), ctx->msg_geom.size(),
+	                     ctx->pMSG.data(), ctx->pLS.data(), &ctx->pSI_MSG,
+	                     ctx->proc_grid.data(), topo.nproc(0), topo.nproc(1),
 	                     topo.nlevel());
 
 
 	for (auto i : range<len_t>(dims.len(0))) {
-		dims(i, 0) = ctx.dimx(coord(0), i) + 2;
-		dims(i, 1) = ctx.dimy(coord(1), i) + 2;
+		dims(i, 0) = ctx->dimx(coord(0), i) + 2;
+		dims(i, 1) = ctx->dimy(coord(1), i) + 2;
 	}
 }
 
 
-template<>
-void msg_exchanger::exchange(mpi::stencil_op<five_pt> & sop)
+void msg_exchanger::run(mpi::stencil_op<five_pt> & sop)
 {
 	grid_topo &topo = sop.grid();
 	int nstencil;
@@ -172,15 +173,14 @@ void msg_exchanger::exchange(mpi::stencil_op<five_pt> & sop)
 	timer_begin("halo-stencil");
 	BMG2_SymStd_SETUP_fine_stencil(topo.level()+1, sop.data(),
 	                               sop.len(0), sop.len(1), nstencil,
-	                               ctx.msg_geom.data(), ctx.msg_geom.size(),
-	                               ctx.pMSGSO.data(), ctx.msg_buffer.data(),
-	                               ctx.msg_buffer.size(), fcomm);
+	                               ctx->msg_geom.data(), ctx->msg_geom.size(),
+	                               ctx->pMSGSO.data(), ctx->msg_buffer.data(),
+	                               ctx->msg_buffer.size(), fcomm);
 	timer_end("halo-stencil");
 }
 
 
-template<>
-void msg_exchanger::exchange(mpi::stencil_op<nine_pt> & sop)
+void msg_exchanger::run(mpi::stencil_op<nine_pt> & sop)
 {
 	grid_topo &topo = sop.grid();
 	int nstencil;
@@ -192,49 +192,49 @@ void msg_exchanger::exchange(mpi::stencil_op<nine_pt> & sop)
 	timer_begin("halo-stencil");
 	BMG2_SymStd_SETUP_fine_stencil(topo.level()+1, sop.data(),
 	                               sop.len(0), sop.len(1), nstencil,
-	                               ctx.msg_geom.data(), ctx.msg_geom.size(),
-	                               ctx.pMSGSO.data(), ctx.msg_buffer.data(),
-	                               ctx.msg_buffer.size(), fcomm);
+	                               ctx->msg_geom.data(), ctx->msg_geom.size(),
+	                               ctx->pMSGSO.data(), ctx->msg_buffer.data(),
+	                               ctx->msg_buffer.size(), fcomm);
 	timer_end("halo-stencil");
 }
 
 
-void msg_exchanger::exchange(mpi::grid_func & f)
+void msg_exchanger::run(mpi::grid_func & f)
 {
 	grid_topo &topo = f.grid();
 
 	MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
 	timer_begin("halo");
-	BMG2_SymStd_UTILS_update_ghosts(topo.level()+1, f.data(), f.len(0), f.len(1), ctx.msg_geom.data(),
-	                                ctx.msg_geom.size(), ctx.pMSG.data(), ctx.msg_buffer.data(),
-	                                ctx.msg_buffer.size(), topo.nlevel(), fcomm);
+	BMG2_SymStd_UTILS_update_ghosts(topo.level()+1, f.data(), f.len(0), f.len(1), ctx->msg_geom.data(),
+	                                ctx->msg_geom.size(), ctx->pMSG.data(), ctx->msg_buffer.data(),
+	                                ctx->msg_buffer.size(), topo.nlevel(), fcomm);
 	timer_end("halo");
 }
 
 
 void msg_exchanger::exchange_func(int k, real_t *gf)
 {
-		MPI_Fint fcomm = MPI_Comm_c2f(this->ctx.comm);
+		MPI_Fint fcomm = MPI_Comm_c2f(this->ctx->comm);
 
 		timer_begin("halo");
 		BMG2_SymStd_UTILS_update_ghosts(k, gf, dims(k-1, 0), dims(k-1, 1),
-		                                ctx.msg_geom.data(),
-		                                ctx.msg_geom.size(), ctx.pMSG.data(), ctx.msg_buffer.data(),
-		                                ctx.msg_buffer.size(), dims.len(0), fcomm);
+		                                ctx->msg_geom.data(),
+		                                ctx->msg_geom.size(), ctx->pMSG.data(), ctx->msg_buffer.data(),
+		                                ctx->msg_buffer.size(), dims.len(0), fcomm);
 		timer_end("halo");
 }
 
 
 void msg_exchanger::exchange_sten(int k, real_t * so)
 {
-	MPI_Fint fcomm = MPI_Comm_c2f(this->ctx.comm);
+	MPI_Fint fcomm = MPI_Comm_c2f(this->ctx->comm);
 
 	timer_begin("halo-stencil");
 	BMG2_SymStd_UTILS_update_stencil_ghosts(k, so, dims(k-1, 0), dims(k-1, 1),
-	                                        ctx.msg_geom.data(), ctx.msg_geom.size(),
-	                                        ctx.pMSGSO.data(), ctx.msg_buffer.data(),
-	                                        ctx.msg_buffer.size(), dims.len(0), fcomm);
+	                                        ctx->msg_geom.data(), ctx->msg_geom.size(),
+	                                        ctx->pMSGSO.data(), ctx->msg_buffer.data(),
+	                                        ctx->msg_buffer.size(), dims.len(0), fcomm);
 	timer_end("halo-stencil");
 }
 

@@ -1,15 +1,16 @@
 #ifndef CEDAR_2D_MSG_EXCHANGER_H
 #define CEDAR_2D_MSG_EXCHANGER_H
 
-#include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
+#include <cedar/2d/ftn/mpi/BMG_workspace_c.h>
+#include <cedar/2d/ftn/mpi/BMG_parameters_c.h>
 
-#include <cedar/kernel_params.h>
-#include <cedar/halo_exchanger_base.h>
+#include <cedar/kernels/halo_exchange.h>
 #include <cedar/mpi/grid_topo.h>
+#include <cedar/2d/mpi/types.h>
 #include <cedar/2d/mpi/stencil_op.h>
 #include <cedar/2d/mpi/grid_func.h>
 
-namespace cedar { namespace cdr2 { namespace kernel {
+namespace cedar { namespace cdr2 {
 
 namespace impls
 {
@@ -51,32 +52,46 @@ struct MsgCtx
 		return nlocal(0, dim, ijrank);
 	}
 };
-}}
+}
 
 namespace mpi {
 
-class msg_exchanger : public halo_exchanger_base
+class msg_exchanger : public kernels::halo_exchange<stypes>
 {
-	using MsgCtx = kernel::impls::MsgCtx;
+	using MsgCtx = impls::MsgCtx;
 public:
-	msg_exchanger(const kernel_params & params,
-	              std::vector<topo_ptr> topos);
-	MsgCtx & context() { return ctx; }
-	void *context_ptr() { return &ctx; }
-	virtual void exchange_func(int k, real_t *gf) override;
-	virtual void exchange_sten(int k, real_t *so) override;
-	template<class sten>
-		void exchange(mpi::stencil_op<sten> & so);
-	void exchange(mpi::grid_func & f);
-	virtual aarray<int, len_t, 2> & leveldims(int k) {
+	MsgCtx & context() { return *ctx; }
+	void *context_ptr() { return ctx.get(); }
+	void setup(std::vector<topo_ptr> topos) override;
+	void run(stencil_op<five_pt> & so) override;
+	void run(stencil_op<nine_pt> & so) override;
+	void run(grid_func & gf) override;
+	void exchange_func(int k, real_t *gf) override;
+	void exchange_sten(int k, real_t *so) override;
+	aarray<int, len_t, 2> & leveldims(int k) override {
 		if (k == 0)
-			return ctx.dimx;
+			return ctx->dimx;
 		else
-			return ctx.dimy;
+			return ctx->dimy;
+	}
+	len_t * datadist(int k, int grid) override {
+		if (k == 0)
+			return &ctx->msg_geom.data()[ctx->pLS(ipL_LS_XDataDist,grid-1)-1];
+		else
+			return &ctx->msg_geom.data()[ctx->pLS(ipL_LS_YDataDist,grid-1)-1];
+	}
+	MPI_Comm linecomm(int k) override {
+		if (k == 0)
+			return ctx->xlinecomm;
+		else
+			return ctx->ylinecomm;
+	}
+	std::vector<real_t> & linebuf() override {
+		return ctx->msg_buffer;
 	}
 
 private:
-	MsgCtx ctx;
+	std::unique_ptr<MsgCtx> ctx;
 	/**
 	   Local array extents by grid number needed for MSG ghost
 	   exchange calls.  The first dimension is the grid number,

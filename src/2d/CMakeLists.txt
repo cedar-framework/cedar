@@ -15,17 +15,23 @@ set(sources
   )
 
 if(ENABLE_MPI)
-  add_subdirectory(interface)
+  # add_subdirectory(interface)
   add_subdirectory(util)
 
   list(APPEND sources
-	${interface_SOURCES}
+	# ${interface_SOURCES}
 	${util_SOURCES}
 	mpi/grid_func.cc
 	mpi/stencil_op.cc
+	mpi/prolong_op.cc
+	mpi/restrict_op.cc
 	mpi/gallery.cc
 	mpi/msg_exchanger.cc
 	mpi/tausch_exchanger.cc
+	mpi/setup_nog.cc
+	mpi/restrict.cc
+	mpi/interp.cc
+	mpi/kernel_manager.cc
 	redist/cholesky_solver.cc
 	)
 endif()

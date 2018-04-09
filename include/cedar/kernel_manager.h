@@ -58,6 +58,20 @@ public:
 		static const std::size_t value = n;
 	};
 
+	template<class T>
+	std::shared_ptr<T> get_ptr()
+	{
+		const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
+		return std::get<i>(kerns)[defaults[i]];
+	}
+
+
+	template<class T>
+	std::shared_ptr<T> get_ptr(const std::string & name)
+	{
+		const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
+		return std::get<i>(kerns)[name];
+	}
 
 	template<class T>
 	T & get()

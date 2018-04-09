@@ -35,7 +35,7 @@ struct serial_type { static const bool value; };
 
 		template<class fsten> class solver;
 		namespace mpi {
-			template<class fsten, class halo_exchanger=mpi::msg_exchanger> class solver;
+			template<class fsten> class solver;
 		}
 template<>
 struct serial_type<cdr2::solver<nine_pt>> { static const bool value = true; };

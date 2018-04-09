@@ -6,11 +6,9 @@
 #include <cedar/types.h>
 #include <cedar/2d/mpi/grid_func.h>
 #include <cedar/2d/mpi/stencil_op.h>
-#include <cedar/2d/kernel/mpi/registry.h>
 #include <cedar/2d/util/topo.h>
-#include <cedar/2d/mpi/tausch_exchanger.h>
-#include <cedar/2d/mpi/msg_exchanger.h>
 #include <cedar/kernel_params.h>
+#include <cedar/2d/mpi/kernel_manager.h>
 
 #include <cedar/util/time_log.h>
 
@@ -37,14 +35,29 @@ int main(int argc, char *argv[])
 	fill_gfunc(b);
 	fill_stencil(so);
 
-	auto exchanger_str = conf.get<std::string>("halo-exchanger", "msg");
+	// auto exchanger_str = conf.get<std::string>("halo-exchanger", "msg");
 
-	if (exchanger_str == "msg") {
-		log::status << "Using MSG for halo exchange" << std::endl;
-		run_test<mpi::msg_exchanger>(conf, grid, so, b);
-	} else {
-		log::status << "Using Tausch for halo exchange" << std::endl;
-		run_test<mpi::tausch_exchanger>(conf, grid, so, b);
+	mpi::solver<five_pt> slv(so);
+	auto kman = slv.get_kernels();
+
+	draw(b, "before-0");
+	draw_so(so, "before-0");
+	kman->run<mpi::halo_exchange>(b);
+	kman->run<mpi::halo_exchange>(so);
+	draw(b, "after-0");
+	draw_so(so, "after-0");
+
+
+	for (std::size_t lvl = 1; lvl < slv.nlevels(); lvl++) {
+		auto & level = slv.levels.get(lvl);
+		fill_gfunc(level.b);
+		fill_stencil(level.A);
+		draw(level.b, "before-" + std::to_string(lvl));
+		draw_so(level.A, "before-" + std::to_string(lvl));
+		kman->run<mpi::halo_exchange>(level.b);
+		kman->run<mpi::halo_exchange>(level.A);
+		draw(level.b, "after-" + std::to_string(lvl));
+		draw_so(level.A, "after-" + std::to_string(lvl));
 	}
 
 	log::status << "Finished Test" << std::endl;

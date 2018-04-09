@@ -29,29 +29,29 @@ namespace cedar { namespace cdr2 {
 
 class rbgs : public kernels::point_relax<stypes>
 {
-	virtual void setup(const stencil_op<five_pt> & so,
-	                   relax_stencil & sor) override
+	void setup(const stencil_op<five_pt> & so,
+	           relax_stencil & sor) override
 	{
 		this->setup_impl(so, sor);
 	}
-	virtual void setup(const stencil_op<nine_pt> & so,
-	                   relax_stencil & sor) override
+	void setup(const stencil_op<nine_pt> & so,
+	           relax_stencil & sor) override
 	{
 		this->setup_impl(so, sor);
 	}
-	virtual void run(const stencil_op<five_pt> & so,
-	                 grid_func & x,
-	                 const grid_func & b,
-	                 const relax_stencil & sor,
-	                 cycle::Dir cdir) override
+	void run(const stencil_op<five_pt> & so,
+	         grid_func & x,
+	         const grid_func & b,
+	         const relax_stencil & sor,
+	         cycle::Dir cdir) override
 	{
 		this->run_impl(so, x, b, sor, cdir);
 	}
-	virtual void run(const stencil_op<nine_pt> & so,
-	                 grid_func & x,
-	                 const grid_func & b,
-	                 const relax_stencil & sor,
-	                 cycle::Dir cdir) override
+	void run(const stencil_op<nine_pt> & so,
+	         grid_func & x,
+	         const grid_func & b,
+	         const relax_stencil & sor,
+	         cycle::Dir cdir) override
 	{
 		this->run_impl(so, x, b, sor, cdir);
 	}

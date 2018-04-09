@@ -5,7 +5,7 @@
 
 #include <cedar/2d/types.h>
 #include <cedar/config/reader.h>
-#include <cedar/2d/kernel/registry.h>
+#include <cedar/2d/kernel_manager.h>
 
 namespace cedar { namespace cdr2 {
 
@@ -21,7 +21,7 @@ public:
 	config::reader & get_config() { return *conf; }
 
 protected:
-	kernel::registry kreg;
+	kman_ptr kman;
 	grid_func ABD;
 	real_t *bbd;
 	std::shared_ptr<config::reader> conf;

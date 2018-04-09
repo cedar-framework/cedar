@@ -7,11 +7,9 @@
 #include <cedar/types.h>
 #include <cedar/2d/mpi/grid_func.h>
 #include <cedar/2d/mpi/stencil_op.h>
-#include <cedar/2d/kernel/mpi/registry.h>
 #include <cedar/2d/mpi/solver.h>
+#include <cedar/2d/mpi/kernel_manager.h>
 #include <cedar/2d/util/topo.h>
-#include <cedar/2d/mpi/tausch_exchanger.h>
-#include <cedar/2d/mpi/msg_exchanger.h>
 #include <cedar/kernel_params.h>
 
 namespace cedar { namespace cdr2 {
@@ -131,8 +129,7 @@ static void set_conf(config::reader & conf, const std::array<int, 2> & proc, int
 }
 
 
-template<class halo_exchanger>
-void run_test(MPI_Comm comm, std::array<int, 2> & proc, int per_mask)
+void run_test(const std::string & halo_name, MPI_Comm comm, std::array<int, 2> & proc, int per_mask)
 {
 	auto conf = std::make_shared<config::reader>("config.json");
 	log::set_comm(comm);
@@ -146,10 +143,10 @@ void run_test(MPI_Comm comm, std::array<int, 2> & proc, int per_mask)
 
 	fill_gfunc(b);
 	fill_stencil(so);
-	mpi::solver<five_pt, halo_exchanger> slv(so, conf);
-	auto kreg = slv.kernel_registry();
-	kreg->halo_exchange(b);
-	kreg->halo_stencil_exchange(so);
+	mpi::solver<five_pt> slv(so, conf);
+	auto kman = slv.get_kernels();
+	kman->run<mpi::halo_exchange>(b);
+	kman->run<mpi::halo_exchange>(so);
 	test_gfunc(*params, b);
 	test_stencil(*params, so);
 
@@ -157,16 +154,15 @@ void run_test(MPI_Comm comm, std::array<int, 2> & proc, int per_mask)
 		auto & level = slv.levels.get(lvl);
 		fill_gfunc(level.b);
 		fill_stencil(level.A);
-		kreg->halo_exchange(level.b);
-		kreg->halo_stencil_exchange(level.A);
+		kman->run<mpi::halo_exchange>(level.b);
+		kman->run<mpi::halo_exchange>(level.A);
 		test_gfunc(*params, level.b);
 		test_stencil(*params, level.A);
 	}
 }
 
 
-template<class halo_exchanger>
-	void test_driver(std::vector<std::array<int,2>> & procs)
+void test_driver(const std::string & halo_name, std::vector<std::array<int,2>> & procs)
 {
 	for (auto & proc : procs) {
 		int np = proc[0]*proc[1];
@@ -176,7 +172,7 @@ template<class halo_exchanger>
 		MPI_Comm_split(MPI_COMM_WORLD, rank < np, rank, &comm);
 		if (rank < np) {
 			for (int per_mask = 0; per_mask < 4; per_mask++) {
-				run_test<halo_exchanger>(comm, proc, per_mask);
+				run_test(halo_name, comm, proc, per_mask);
 			}
 		}
 	}

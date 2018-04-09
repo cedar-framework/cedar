@@ -3,8 +3,9 @@
 namespace cedar { namespace cdr2 {
 
 cholesky_solver::cholesky_solver(stencil_op & sop,
-                                 std::shared_ptr<config::reader> conf) : kreg(*conf), conf(conf)
+                                 std::shared_ptr<config::reader> conf) : conf(conf)
 {
+	this->kman = build_kernel_manager(*conf);
 	auto params = build_kernel_params(*conf);
 	auto nxc = sop.shape(0);
 	auto nyc = sop.shape(1);
@@ -15,13 +16,13 @@ cholesky_solver::cholesky_solver(stencil_op & sop,
 	this->ABD = grid_func(abd_len_0, nxc*nyc, 0);
 	this->bbd = new real_t[this->ABD.len(1)];
 
-	kreg.setup_cg_lu(sop, ABD);
+	kman->setup<solve_cg>(sop, ABD);
 }
 
 
 void cholesky_solver::cycle(grid_func & x, const grid_func & b)
 {
-	kreg.solve_cg(x, b, ABD, bbd);
+	kman->run<solve_cg>(x, b, ABD, bbd);
 }
 
 }}

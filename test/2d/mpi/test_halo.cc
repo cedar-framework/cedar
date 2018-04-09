@@ -9,7 +9,7 @@ TEST(MPIHalo2, MSG)
 	using namespace cedar::cdr2;
 
 	std::vector<std::array<int, 2>> procs{{ {3,3}, {3,2}, {2,3} }};
-	test_driver<mpi::msg_exchanger>(procs);
+	test_driver("msg", procs);
 }
 
 
@@ -19,5 +19,5 @@ TEST(MPIHalo2, TAUSCH)
 	using namespace cedar::cdr2;
 
 	std::vector<std::array<int, 2>> procs{{ {3,3}, {3,2}, {2,3} }};
-	test_driver<mpi::tausch_exchanger>(procs);
+	test_driver("tausch", procs);
 }

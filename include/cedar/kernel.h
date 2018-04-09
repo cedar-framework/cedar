@@ -2,6 +2,7 @@
 #define CEDAR_KERNEL_H
 
 #include <memory>
+#include <cedar/halo_exchanger_base.h>
 #include <cedar/kernel_params.h>
 
 namespace cedar {
@@ -26,9 +27,14 @@ namespace cedar {
 			this->params = params;
 		}
 
+		void add_halo(halo_exchanger_base *halof)
+		{
+			this->halof = halof;
+		}
+
 	protected:
 		std::shared_ptr<kernel_params> params;
-
+		halo_exchanger_base *halof;
 	};
 }
 

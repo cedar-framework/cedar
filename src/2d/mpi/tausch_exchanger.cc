@@ -20,13 +20,16 @@ line_pkg::line_pkg(grid_topo & topo):
 }
 
 
-tausch_exchanger::tausch_exchanger(const kernel_params & params,
-                                   std::vector<topo_ptr> topos) : nlevels(topos.size()),
-                                                                  dims{{aarray<int, len_t, 2>(topos[0]->nproc(0), nlevels),
-			aarray<int, len_t, 2>(topos[0]->nproc(1), nlevels)}},
-                                                                  line_data(*topos[0]),
-                                                                  coord{{topos[0]->coord(0), topos[0]->coord(1)}}
+void tausch_exchanger::setup(std::vector<topo_ptr> topos)
 {
+	this->nlevels = topos.size();
+	dims[0] = aarray<int, len_t, 2>(topos[0]->nproc(0), nlevels);
+	dims[1] = aarray<int, len_t, 2>(topos[0]->nproc(1), nlevels);
+	line_data = std::make_unique<line_pkg>(*topos[0]);
+	coord[0] = topos[0]->coord(0);
+	coord[1] = topos[0]->coord(1);
+
+
 	init_gfunc(topos);
 	init_so(topos);
 
@@ -35,7 +38,7 @@ tausch_exchanger::tausch_exchanger(const kernel_params & params,
 			send_active[index(lvl,dir)] = true;
 			recv_active[index(lvl,dir)] = true;
 		}
-		if (not params.periodic[0]) {
+		if (not params->periodic[0]) {
 			if (topos[0]->coord(0) == 0) {
 				send_active[index(lvl, halo_dir::left)] = false;
 				recv_active[index(lvl, halo_dir::right)] = false;
@@ -45,7 +48,7 @@ tausch_exchanger::tausch_exchanger(const kernel_params & params,
 				recv_active[index(lvl, halo_dir::left)] = false;
 			}
 		}
-		if (not params.periodic[1]) {
+		if (not params->periodic[1]) {
 			if (topos[0]->coord(1) == 0) {
 				send_active[index(lvl, halo_dir::down)] = false;
 				recv_active[index(lvl, halo_dir::up)] = false;
@@ -96,8 +99,8 @@ void tausch_exchanger::init_datadist()
 {
 	auto & dimxfine = dimfine[0];
 	auto & dimyfine = dimfine[1];
-	auto & xdatadist = line_data.datadist[0];
-	auto & ydatadist = line_data.datadist[1];
+	auto & xdatadist = line_data->datadist[0];
+	auto & ydatadist = line_data->datadist[1];
 
 	xdatadist(0, 0) = 2;
 	xdatadist(1, 0) = xdatadist(0, 0) + dimxfine[0] - 1;
@@ -113,7 +116,7 @@ void tausch_exchanger::init_datadist()
 		ydatadist(1, j) = ydatadist(0, j) + dimyfine[j] - 1;
 	}
 
-	line_data.linebuf.reserve(std::max(dimxfine[0], dimyfine[0])*8*std::max(ydatadist.len(1), xdatadist.len(1)));
+	line_data->linebuf.reserve(std::max(dimxfine[0], dimyfine[0])*8*std::max(ydatadist.len(1), xdatadist.len(1)));
 }
 
 
@@ -386,7 +389,7 @@ void tausch_exchanger::exchange_sten(int k, real_t * so)
 	}
 }
 
-void tausch_exchanger::exchange(mpi::grid_func & f)
+void tausch_exchanger::run(mpi::grid_func & f)
 {
 	auto lvl = f.grid().level();
 	lvl = nlevels - lvl - 1;

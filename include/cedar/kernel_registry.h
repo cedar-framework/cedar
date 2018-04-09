@@ -16,6 +16,7 @@
 #include <cedar/kernels/solve_cg.h>
 
 #include <cedar/kernels/halo_exchange.h>
+#include <cedar/kernels/setup_nog.h>
 
 namespace cedar
 {
@@ -26,19 +27,20 @@ namespace cedar
 	                              kernels::coarsen_op<solver_types>,
 	                              kernels::restriction<solver_types>,
 	                              kernels::interp_add<solver_types>,
-	                              kernels::matvec<solver_types>,
 	                              kernels::residual<solver_types>,
 	                              kernels::setup_interp<solver_types>,
 	                              kernels::solve_cg<solver_types>>;
 
 	template<class solver_types>
-	using mpi_kernels = type_list<kernels::halo_exchange<solver_types>>;
-
+	using mpi_kernels = type_list<kernels::halo_exchange<solver_types>,
+	                              kernels::matvec<solver_types>,
+	                              kernels::setup_nog<solver_types>>;
 
 	template<class solver_types, exec_mode mode>
 	using klist = typename std::conditional<mode==exec_mode::serial,
 	                                        ser_kernels<solver_types>,
-	                                        type_cat<ser_kernels<solver_types>, mpi_kernels<solver_types>>
+	                                        typename type_cat<ser_kernels<solver_types>,
+	                                                          mpi_kernels<solver_types>>::type
 	                                        >::type;
 }
 
