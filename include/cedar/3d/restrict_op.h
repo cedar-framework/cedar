@@ -3,10 +3,10 @@
 
 #include <iostream>
 
-#include <cedar/3d/inter/prolong_op.h>
+#include <cedar/3d/prolong_op.h>
 
 
-namespace cedar { namespace cdr3 { namespace inter {
+namespace cedar { namespace cdr3 {
 
 class restrict_op
 {
@@ -23,7 +23,7 @@ private:
 
 };
 
-}}}
+}}
 
 #endif
 

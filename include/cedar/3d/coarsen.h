@@ -1,13 +1,11 @@
-#ifndef CEDAR_3D_GALERKIN_PROD_H
-#define CEDAR_3D_GALERKIN_PROD_H
+#ifndef CEDAR_3D_COARSEN_H
+#define CEDAR_3D_COARSEN_H
 
 #include <type_traits>
 
-#include <cedar/kernel_params.h>
-#include <cedar/3d/stencil_op.h>
-#include <cedar/3d/inter/prolong_op.h>
-#include <cedar/3d/grid_func.h>
 #include <cedar/2d/ftn/BMG_parameters_c.h>
+#include <cedar/kernels/coarsen_op.h>
+#include <cedar/3d/types.h>
 
 extern "C" {
 	using namespace cedar;
@@ -19,21 +17,35 @@ extern "C" {
 	void BMG_get_bc(int, int*);
 }
 
-namespace cedar { namespace cdr3 { namespace kernel {
 
-namespace impls
+namespace cedar { namespace cdr3 {
+
+class galerkin : public kernels::coarsen_op<stypes>
 {
+	void run(const prolong_op & P,
+	         const stencil_op<seven_pt> & fop,
+	         stencil_op<xxvii_pt> & cop) override
+	{
+		this->run_impl(P, fop, cop);
+	}
+	void run(const prolong_op & P,
+	         const stencil_op<xxvii_pt> & fop,
+	         stencil_op<xxvii_pt> & cop) override
+	{
+		this->run_impl(P, fop, cop);
+	}
+
+
 	template<class sten>
-	void galerkin_prod(const kernel_params & params,
-	                   const inter::prolong_op &P,
-	                   const stencil_op<sten> & fop,
-	                   stencil_op<xxvii_pt> & cop)
+	void run_impl(const prolong_op & P,
+	              const stencil_op<sten> & fop,
+	              stencil_op<xxvii_pt> & cop)
 	{
 		int ipn;
 		auto &fopd = const_cast<stencil_op<sten>&>(fop);
-		inter::prolong_op &Pd = const_cast<inter::prolong_op&>(P);
+		prolong_op &Pd = const_cast<prolong_op&>(P);
 
-		BMG_get_bc(params.per_mask(), &ipn);
+		BMG_get_bc(params->per_mask(), &ipn);
 
 		if (std::is_same<sten, seven_pt>::value) {
 			BMG3_SymStd_SETUP_ITLI07_ex(fopd.data(), cop.data(), Pd.data(),
@@ -47,8 +59,8 @@ namespace impls
 			                            ipn);
 		}
 	}
-}
+};
 
-}}}
+}}
 
 #endif

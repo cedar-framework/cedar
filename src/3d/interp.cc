@@ -1,6 +1,6 @@
 #include <cedar/2d/ftn/BMG_parameters_c.h>
 
-#include <cedar/3d/inter/interp.h>
+#include <cedar/3d/interp.h>
 
 extern "C" {
 	using namespace cedar;
@@ -12,21 +12,17 @@ extern "C" {
 	void BMG_get_bc(int, int*);
 }
 
-namespace cedar { namespace cdr3 { namespace kernel {
 
-namespace impls
+namespace cedar { namespace cdr3 {
+
+void interp_f90::run(const prolong_op & P,
+                     const grid_func & coarse,
+                     const grid_func & residual,
+                     grid_func & fine)
 {
-	void fortran_interp(const kernel_params & params,
-	                    const inter::prolong_op & P,
-	                    const grid_func & coarse,
-	                    const grid_func & residual,
-	                    grid_func & fine)
-	{
-		using namespace cedar::cdr3;
-
 		int nstencil, ibc;
 
-		inter::prolong_op & Pd = const_cast<inter::prolong_op&>(P);
+		prolong_op & Pd = const_cast<prolong_op&>(P);
 		grid_func & coarsed = const_cast<grid_func&>(coarse);
 		grid_func & res = const_cast<grid_func&>(residual);
 
@@ -40,13 +36,12 @@ namespace impls
 			fop_data = Pd.fine_op_xxvii->data();
 		}
 
-		BMG_get_bc(params.per_mask(), &ibc);
+		BMG_get_bc(params->per_mask(), &ibc);
 
 		BMG3_SymStd_interp_add(fine.data(), coarsed.data(), fop_data, res.data(), Pd.data(),
 		                       coarsed.len(0), coarsed.len(1), coarsed.len(2),
 		                       fine.len(0), fine.len(1), fine.len(2),
 		                       nstencil, ibc);
-	}
 }
 
-}}}
+}}
