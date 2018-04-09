@@ -1,14 +1,9 @@
-#ifndef CEDAR_3D_INTER_MPI_GALERKIN_PROD_H
-#define CEDAR_3D_INTER_MPI_GALERKIN_PROD_H
+#ifndef CEDAR_3D_MPI_COARSEN_H
+#define CEDAR_3D_MPI_COARSEN_H
 
-#include <type_traits>
-
-#include <cedar/kernel_params.h>
-#include <cedar/halo_exchanger.h>
-#include <cedar/3d/mpi/stencil_op.h>
-#include <cedar/halo_exchanger.h>
-#include <cedar/3d/inter/mpi/prolong_op.h>
 #include <cedar/2d/ftn/BMG_parameters_c.h>
+#include <cedar/kernels/coarsen_op.h>
+#include <cedar/3d/mpi/types.h>
 
 extern "C" {
 	using namespace cedar;
@@ -25,23 +20,32 @@ extern "C" {
 	                                     void *halof);
 }
 
+namespace cedar { namespace cdr3 { namespace mpi {
 
-namespace cedar { namespace cdr3 { namespace kernel {
-
-namespace impls
+class galerkin : public kernels::coarsen_op<stypes>
 {
-	namespace mpi = cedar::cdr3::mpi;
+	void run(const prolong_op & P,
+	         const stencil_op<seven_pt> & fop,
+	         stencil_op<xxvii_pt> & cop) override
+	{
+		this->run_impl(P, fop, cop);
+	}
+	void run(const prolong_op & P,
+	         const stencil_op<xxvii_pt> & fop,
+	         stencil_op<xxvii_pt> & cop) override
+	{
+		this->run_impl(P, fop, cop);
+	}
+
 
 	template<class sten>
-	void mpi_galerkin_prod(const kernel_params & params,
-	                       halo_exchanger_base * halof,
-	                       const inter::mpi::prolong_op & P,
-	                       const mpi::stencil_op<sten> & fop,
-	                       mpi::stencil_op<xxvii_pt> & cop)
+	void run_impl(const prolong_op & P,
+	              const stencil_op<sten> & fop,
+	              stencil_op<xxvii_pt> & cop)
 	{
 		int kf, kc, nog;
-		inter::mpi::prolong_op & Pd = const_cast<inter::mpi::prolong_op&>(P);
-		auto & fopd = const_cast<mpi::stencil_op<sten>&>(fop);
+		prolong_op & Pd = const_cast<prolong_op&>(P);
+		auto & fopd = const_cast<stencil_op<sten>&>(fop);
 		grid_topo & topo = fopd.grid();
 		kc = topo.level();
 		nog = topo.nlevel();
@@ -61,8 +65,7 @@ namespace impls
 			                                nog, topo.IGRD(), topo.nproc(), halof);
 		}
 	}
-
-}
+};
 
 }}}
 

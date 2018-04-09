@@ -35,7 +35,7 @@ template<class inner_solver>
 class redist_solver
 {
 public:
-	using msg_ctx = cedar::cdr3::kernel::impls::MsgCtx;
+	using msg_ctx = cedar::cdr3::impls::MsgCtx;
 	/**
 	   Performs redistribution of the grid topology and stencil
 	   operator given the destination 3D distribution.  This also

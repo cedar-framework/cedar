@@ -10,8 +10,8 @@
 #include <cedar/level.h>
 #include <cedar/perf/predict.h>
 #include <cedar/3d/level_container.h>
-#include <cedar/3d/kernel/mpi/registry.h>
-#include <cedar/3d/mpi/msg_exchanger.h>
+#include <cedar/3d/kernel_manager.h>
+#include <cedar/3d/mpi/types.h>
 #include <cedar/3d/redist/multilevel_wrapper.h>
 #include <cedar/3d/redist/cholesky_solver.h>
 #include <cedar/3d/redist/setup_redist.h>
@@ -39,16 +39,17 @@ level3mpi(stencil_op<sten> & A) : parent::level(A)
 };
 
 template<class fsten>
-	class solver: public multilevel<level_container<level3mpi, fsten>,
-	typename kernel::mpi::registry::parent, fsten, cdr3::mpi::solver<fsten>>
+class solver: public multilevel<exec_mode::mpi, level_container<level3mpi, fsten>,
+                                fsten, cdr3::mpi::solver<fsten>>
 {
 public:
-	using parent = multilevel<level_container<level3mpi, fsten>,
-		typename kernel::mpi::registry::parent, fsten, cdr3::mpi::solver<fsten>>;
+	using parent = multilevel<exec_mode::mpi, level_container<level3mpi, fsten>,
+	                          fsten, cdr3::mpi::solver<fsten>>;
+	using parent::kman;
 
     solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().comm)
 	{
-		this->kreg = std::make_shared<kernel::mpi::registry>(*(this->conf));
+		this->kman = build_kernel_manager(*this->conf);
 		parent::setup(fop);
 	}
 
@@ -56,7 +57,7 @@ public:
 	solver(mpi::stencil_op<fsten> & fop,
 	       std::shared_ptr<config::reader> conf) : parent::multilevel(fop, conf), comm(fop.grid().comm)
 	{
-		this->kreg = std::make_shared<kernel::mpi::registry>(*(this->conf));
+		this->kman = build_kernel_manager(*this->conf);
 		parent::setup(fop);
 	}
 	~solver() {}
@@ -66,9 +67,7 @@ public:
 		int ng;
 		auto min_coarse = this->conf->template get<len_t>("solver.min-coarse", 3);
 
-		auto kernels = this->kernel_registry();
-
-		kernels->setup_nog(fop.grid(), min_coarse, &ng);
+		kman->template run<setup_nog>(fop.grid(), min_coarse, &ng);
 
 		return ng;
 	}
@@ -76,18 +75,16 @@ public:
 
 	virtual cdr3::mpi::grid_func solve(const cdr3::mpi::grid_func &b) override
 	{
-		auto kernels = this->kernel_registry();
 		auto & bd = const_cast<grid_func&>(b);
-		kernels->halo_exchange(bd);
+		kman->template run<halo_exchange>(bd);
 		return parent::solve(b);
 	}
 
 
 	virtual void solve(const cdr3::mpi::grid_func &b, cdr3::mpi::grid_func &x) override
 	{
-		auto kernels = this->kernel_registry();
 		auto & bd = const_cast<grid_func&>(b);
-		kernels->halo_exchange(bd);
+		kman->template run<halo_exchange>(bd);
 		return parent::solve(b, x);
 	}
 
@@ -177,7 +174,6 @@ public:
 	virtual void setup_cg_solve() override
 	{
 		auto params = build_kernel_params(*(this->conf));
-		auto kernels = this->kernel_registry();
 		auto & cop = this->levels.get(this->levels.size() - 1).A;
 		std::string cg_solver_str = this->conf->template get<std::string>("solver.cg-solver", "LU");
 
@@ -197,7 +193,7 @@ public:
 				log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " x " << choice[2]
 				            << " cores" << std::endl;
 				using inner_solver = multilevel_wrapper<mpi::solver<xxvii_pt>>;
-				this->coarse_solver = create_redist_solver<inner_solver>(kernels,
+				this->coarse_solver = create_redist_solver<inner_solver>(kman,
 				                                                         *this->conf,
 				                                                         cop,
 				                                                         cg_conf,
@@ -210,14 +206,14 @@ public:
 		log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " x " << choice[2]
 		            << " cores" << std::endl;
 		if (cg_solver_str == "LU") {
-			this->coarse_solver = create_redist_solver<cholesky_solver>(kernels,
+			this->coarse_solver = create_redist_solver<cholesky_solver>(kman,
 			                                                            *this->conf,
 			                                                            cop,
 			                                                            cg_conf,
 			                                                            choice);
 		} else {
 			using inner_solver = multilevel_wrapper<cdr3::solver<xxvii_pt>>;
-			this->coarse_solver = create_redist_solver<inner_solver>(kernels,
+			this->coarse_solver = create_redist_solver<inner_solver>(kman,
 			                                                         *this->conf,
 			                                                         cop,
 			                                                         cg_conf,
@@ -236,8 +232,8 @@ public:
 		for (std::size_t i = 1; i < this->nlevels(); i++)
 			topos.push_back(this->levels.get(i).A.grid_ptr());
 
-		this->kreg->halo_setup(topos);
-		this->kreg->halo_stencil_exchange(sop);
+		this->kman->template setup<halo_exchange>(topos);
+		this->kman->template run<halo_exchange>(sop);
 	}
 
 	MPI_Comm comm;

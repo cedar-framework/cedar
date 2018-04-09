@@ -4,7 +4,8 @@
 
 using namespace cedar;
 using namespace cedar::cdr3;
-using namespace cedar::cdr3::kernel::impls;
+using namespace cedar::cdr3::mpi;
+using namespace cedar::cdr3::impls;
 
 #include <cedar/types.h>
 #include <cedar/2d/ftn/mpi/BMG_workspace_c.h>
@@ -139,10 +140,13 @@ MsgCtx::MsgCtx(grid_topo & topo) :
 
 namespace cedar { namespace cdr3 { namespace mpi {
 
-msg_exchanger::msg_exchanger(const kernel_params & params,
-                             std::vector<topo_ptr> topos):
-	ctx(*topos[0]), dims(topos[0]->nlevel(),3), coord(3)
+
+void msg_exchanger::setup(std::vector<topo_ptr> topos)
 {
+	ctx = std::make_unique<MsgCtx>(*topos[0]);
+	dims.init(topos[0]->nlevel(), 3);
+	coord.init(3);
+
 	auto & topo = *topos[0];
 	for (auto i : range<int>(3)) {
 		coord(i) = topo.coord(i);
@@ -156,15 +160,15 @@ msg_exchanger::msg_exchanger(const kernel_params & params,
 		MPI_Comm_rank(topo.comm, &rank);
 		rank++; // Fortran likes to be difficult...
 
-		BMG_get_bc(params.per_mask(), &ibc);
+		BMG_get_bc(params->per_mask(), &ibc);
 
-		BMG3_SymStd_SETUP_MSG(ctx.pMSG.data(), ctx.pMSGSO.data(),
-		                      ctx.msg_geom.data(), ctx.msg_geom.size(),
-		                      &ctx.pSI_MSG, ibc, topo.IGRD(), topo.nlevel(),
+		BMG3_SymStd_SETUP_MSG(ctx->pMSG.data(), ctx->pMSGSO.data(),
+		                      ctx->msg_geom.data(), ctx->msg_geom.size(),
+		                      &ctx->pSI_MSG, ibc, topo.IGRD(), topo.nlevel(),
 		                      topo.nlevel(), topo.nproc(), rank,
-		                      ctx.dimx.data(), ctx.dimy.data(), ctx.dimz.data(),
-		                      ctx.dimxfine.data(), ctx.dimyfine.data(), ctx.dimzfine.data(),
-		                      ctx.proc_grid.data(), topo.nproc(0), topo.nproc(1), topo.nproc(2),
+		                      ctx->dimx.data(), ctx->dimy.data(), ctx->dimz.data(),
+		                      ctx->dimxfine.data(), ctx->dimyfine.data(), ctx->dimzfine.data(),
+		                      ctx->proc_grid.data(), topo.nproc(0), topo.nproc(1), topo.nproc(2),
 		                      fcomm);
 		this->init();
 }
@@ -173,9 +177,9 @@ msg_exchanger::msg_exchanger(const kernel_params & params,
 void msg_exchanger::init()
 {
 	for (auto i : range<len_t>(dims.len(0))) {
-		dims(i, 0) = ctx.dimx(coord(0), i) + 2;
-		dims(i, 1) = ctx.dimy(coord(1), i) + 2;
-		dims(i, 2) = ctx.dimz(coord(2), i) + 2;
+		dims(i, 0) = ctx->dimx(coord(0), i) + 2;
+		dims(i, 1) = ctx->dimy(coord(1), i) + 2;
+		dims(i, 2) = ctx->dimz(coord(2), i) + 2;
 	}
 }
 
@@ -186,9 +190,9 @@ void msg_exchanger::exchange_func(int k, real_t *gf)
 	timer_begin("halo");
 	BMG3_SymStd_UTILS_update_ghosts(k, gf,
 	                                dims(k-1,0), dims(k-1,1), dims(k-1,2),
-	                                ctx.msg_geom.data(),
-	                                ctx.msg_geom.size(), ctx.pMSG.data(), ctx.msg_buffer.data(),
-	                                ctx.msg_buffer.size(), dims.len(0));
+	                                ctx->msg_geom.data(),
+	                                ctx->msg_geom.size(), ctx->pMSG.data(), ctx->msg_buffer.data(),
+	                                ctx->msg_buffer.size(), dims.len(0));
 	timer_end("halo");
 }
 
@@ -197,22 +201,22 @@ void msg_exchanger::exchange_sten(int k, real_t * so)
 {
 	timer_begin("halo-stencil");
 	BMG3_SymStd_UTILS_update_stencil_ghosts(k, so, dims(k-1, 0), dims(k-1, 1), dims(k-1, 2),
-	                                        ctx.msg_geom.data(), ctx.msg_geom.size(),
-	                                        ctx.pMSGSO.data(), ctx.msg_buffer.data(),
-	                                        ctx.msg_buffer.size(), dims.len(0));
+	                                        ctx->msg_geom.data(), ctx->msg_geom.size(),
+	                                        ctx->pMSGSO.data(), ctx->msg_buffer.data(),
+	                                        ctx->msg_buffer.size(), dims.len(0));
 	timer_end("halo-stencil");
 }
 
 
-void msg_exchanger::exchange(mpi::grid_func & f)
+void msg_exchanger::run(mpi::grid_func & f)
 {
 		grid_topo &topo = f.grid();
 
 		BMG3_SymStd_UTILS_update_ghosts(topo.level()+1, f.data(),
 		                                f.len(0), f.len(1), f.len(2),
-		                                ctx.msg_geom.data(), ctx.msg_geom.size(),
-		                                ctx.pMSG.data(), ctx.msg_buffer.data(),
-		                                ctx.msg_buffer.size(), topo.nlevel());
+		                                ctx->msg_geom.data(), ctx->msg_geom.size(),
+		                                ctx->pMSG.data(), ctx->msg_buffer.data(),
+		                                ctx->msg_buffer.size(), topo.nlevel());
 }
 
 

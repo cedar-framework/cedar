@@ -1,5 +1,4 @@
 #include <cedar/2d/mpi/grid_func.h>
-#include <cedar/2d/inter/mpi/prolong_op.h>
 
 using namespace cedar::cdr2::mpi;
 

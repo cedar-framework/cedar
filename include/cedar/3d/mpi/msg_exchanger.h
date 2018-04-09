@@ -1,13 +1,10 @@
 #ifndef CEDAR_3D_MSG_EXCHANGER
 #define CEDAR_3D_MSG_EXCHANGER
 
-#include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
-#include <cedar/array.h>
-#include <cedar/kernel_params.h>
+#include <cedar/2d/ftn/mpi/BMG_workspace_c.h>
 #include <cedar/mpi/grid_topo.h>
-#include <cedar/halo_exchanger_base.h>
-#include <cedar/3d/mpi/grid_func.h>
-#include <cedar/3d/mpi/stencil_op.h>
+#include <cedar/3d/mpi/types.h>
+#include <cedar/kernels/halo_exchange.h>
 
 extern "C" {
 	using namespace cedar;
@@ -19,7 +16,7 @@ extern "C" {
 	                                    int mpicomm);
 }
 
-namespace cedar { namespace cdr3 { namespace kernel {
+namespace cedar { namespace cdr3 {
 namespace impls
 {
 	namespace mpi = cedar::cdr3::mpi;
@@ -60,35 +57,61 @@ namespace impls
 			return nlocal(0, dim, ijkrank);
 		}
 	};
-}}
+}
 
 namespace mpi {
 
-	class msg_exchanger : public halo_exchanger_base
+	class msg_exchanger : public kernels::halo_exchange<stypes>
 	{
-		using MsgCtx = kernel::impls::MsgCtx;
+		using MsgCtx = impls::MsgCtx;
 	public:
-		msg_exchanger(const kernel_params & params,
-		              std::vector<topo_ptr> topos);
 		void init();
-		MsgCtx & context() { return ctx; }
-		void * context_ptr() { return &ctx;}
-		virtual void exchange_func(int k, real_t *gf);
-		virtual void exchange_sten(int k, real_t * so);
-		template<class sten>
-			void exchange(mpi::stencil_op<sten> & so);
-		void exchange(mpi::grid_func & f);
-		virtual aarray<int, len_t, 2> & leveldims(int k) {
+		MsgCtx & context() { return *ctx; }
+		void * context_ptr() { return ctx.get();}
+
+		void setup(std::vector<topo_ptr> topos) override;
+		void run(stencil_op<seven_pt> & so) override { this->run_impl(so); }
+		void run(stencil_op<xxvii_pt> & so) override { this->run_impl(so); }
+		void run(grid_func & gf) override;
+		void exchange_func(int k, real_t *gf) override;
+		void exchange_sten(int k, real_t * so) override;
+		aarray<int, len_t, 2> & leveldims(int k) override{
 			if (k == 0)
-				return ctx.dimx;
+				return ctx->dimx;
 			else if (k == 1)
-				return ctx.dimy;
+				return ctx->dimy;
 			else
-				return ctx.dimz;
+				return ctx->dimz;
+		}
+		len_t * datadist(int k, int grid) override {
+			// placeholder
+			return ctx->msg_geom.data();
+		}
+		MPI_Comm linecomm(int k) override {
+			return MPI_COMM_NULL;
+		}
+		std::vector<real_t> & linebuf() override {
+			return ctx->msg_buffer;
+		}
+
+		template<class sten>
+		void run_impl(stencil_op<sten> & sop)
+		{
+			grid_topo &topo = sop.grid();
+			int nstencil = stencil_ndirs<sten>::value;
+
+			MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+
+			BMG3_SymStd_SETUP_fine_stencil(topo.level()+1, sop.data(),
+			                               sop.len(0), sop.len(1), sop.len(2),
+			                               nstencil,
+			                               ctx->msg_geom.data(), ctx->msg_geom.size(),
+			                               ctx->pMSGSO.data(), ctx->msg_buffer.data(),
+			                               ctx->msg_buffer.size(), fcomm);
 		}
 
 	private:
-		MsgCtx ctx;
+		std::unique_ptr<MsgCtx> ctx;
 		/**
 		   Local array extents by grid number needed for MSG ghost
 		   exchange calls.  The first dimension is the grid number,
@@ -97,22 +120,6 @@ namespace mpi {
 		array<len_t, 2> dims;
 		array<len_t, 1> coord;
 	};
-
-	template<class sten>
-		void msg_exchanger::exchange(mpi::stencil_op<sten> & sop)
-	{
-		grid_topo &topo = sop.grid();
-		int nstencil = stencil_ndirs<sten>::value;
-
-		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
-
-		BMG3_SymStd_SETUP_fine_stencil(topo.level()+1, sop.data(),
-		                               sop.len(0), sop.len(1), sop.len(2),
-		                               nstencil,
-		                               ctx.msg_geom.data(), ctx.msg_geom.size(),
-		                               ctx.pMSGSO.data(), ctx.msg_buffer.data(),
-		                               ctx.msg_buffer.size(), fcomm);
-	}
 }}}
 
 #endif

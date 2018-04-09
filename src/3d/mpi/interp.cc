@@ -1,7 +1,7 @@
 #include <cedar/2d/ftn/BMG_parameters_c.h>
-#include <cedar/halo_exchanger.h>
 
-#include <cedar/3d/inter/mpi/interp.h>
+#include <cedar/3d/mpi/interp.h>
+
 
 extern "C" {
 	using namespace cedar;
@@ -13,24 +13,19 @@ extern "C" {
 	                                len_t igs, len_t jgs, len_t kgs, void *halof);
 }
 
-namespace cedar { namespace cdr3 { namespace kernel {
 
-namespace impls
+namespace cedar { namespace cdr3 { namespace mpi {
+
+void interp_f90::run(const prolong_op & P,
+                     const grid_func & coarse,
+                     const grid_func & residual,
+                     grid_func & fine)
 {
-	void mpi_fortran_interp(const kernel_params & params,
-	                        halo_exchanger_base *halof,
-	                        const inter::mpi::prolong_op & P,
-	                        const mpi::grid_func & coarse,
-	                        const mpi::grid_func & residual,
-	                        mpi::grid_func & fine)
-	{
-		using namespace cedar::cdr3;
-
 		int nstencil, kf, kc;
 
-		inter::mpi::prolong_op & Pd = const_cast<inter::mpi::prolong_op&>(P);
-		mpi::grid_func & coarsed = const_cast<mpi::grid_func&>(coarse);
-		mpi::grid_func & res = const_cast<mpi::grid_func&>(residual);
+		prolong_op & Pd = const_cast<prolong_op&>(P);
+		grid_func & coarsed = const_cast<grid_func&>(coarse);
+		grid_func & res = const_cast<grid_func&>(residual);
 		grid_topo & topo = Pd.grid();
 
 		real_t * fop_data;
@@ -55,6 +50,6 @@ namespace impls
 		                           fine.len(0), fine.len(1), fine.len(2),
 		                           topof->is(0), topof->is(1), topof->is(2),
 		                           halof);
-	}
+}
 
-}}}}
+}}}

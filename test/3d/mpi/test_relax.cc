@@ -3,8 +3,8 @@
 #include <cedar/3d/util/topo.h>
 #include <cedar/3d/mpi/gallery.h>
 #include <cedar/3d/gallery.h>
-#include <cedar/3d/kernel/registry.h>
-#include <cedar/3d/kernel/mpi/registry.h>
+#include <cedar/3d/kernel_manager.h>
+#include <cedar/3d/mpi/kernel_manager.h>
 #include <cedar/cycle/types.h>
 
 
@@ -14,8 +14,8 @@ TEST(MPIRelax3, Point7) {
 
 	config::reader conf("");
 	log::init(conf);
-	kernel::registry kreg_ser(conf);
-	kernel::mpi::registry kreg_mpi(conf);
+	auto kreg_ser = build_kernel_manager(conf);
+	auto kreg_mpi = mpi::build_kernel_manager(conf);
 
 	int nsweeps = 5;
 
@@ -34,22 +34,23 @@ TEST(MPIRelax3, Point7) {
 
 	// setup halo
 	{
-		kreg_mpi.halo_setup({{so_mpi.grid_ptr()}});
-		kreg_mpi.halo_stencil_exchange(so_mpi);
+		std::vector<topo_ptr> topos{{so_mpi.grid_ptr()}};
+		kreg_mpi->setup<mpi::halo_exchange>(topos);
+		kreg_mpi->run<mpi::halo_exchange>(so_mpi);
 	}
 
 	relax_stencil sor_mpi(nx, ny, nz);
 	relax_stencil sor_ser(nx, ny, nz);
 
-	kreg_ser.setup_relax(so_ser, sor_ser);
-	kreg_mpi.setup_relax(so_mpi, sor_mpi);
+	kreg_ser->setup<point_relax>(so_ser, sor_ser);
+	kreg_mpi->setup<mpi::point_relax>(so_mpi, sor_mpi);
 
 	for (auto i : range(nsweeps)) {
 		(void)i;
-		kreg_ser.relax(so_ser, x_ser, b_ser, sor_ser, cycle::Dir::DOWN);
-		kreg_ser.relax(so_ser, x_ser, b_ser, sor_ser, cycle::Dir::UP);
-		kreg_mpi.relax(so_mpi, x_mpi, b_mpi, sor_mpi, cycle::Dir::DOWN);
-		kreg_mpi.relax(so_mpi, x_mpi, b_mpi, sor_mpi, cycle::Dir::UP);
+		kreg_ser->run<point_relax>(so_ser, x_ser, b_ser, sor_ser, cycle::Dir::DOWN);
+		kreg_ser->run<point_relax>(so_ser, x_ser, b_ser, sor_ser, cycle::Dir::UP);
+		kreg_mpi->run<mpi::point_relax>(so_mpi, x_mpi, b_mpi, sor_mpi, cycle::Dir::DOWN);
+		kreg_mpi->run<mpi::point_relax>(so_mpi, x_mpi, b_mpi, sor_mpi, cycle::Dir::UP);
 	}
 
 	auto ndiff = x_mpi.lp_norm<2>() - x_ser.lp_norm<2>();

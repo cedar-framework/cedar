@@ -33,6 +33,7 @@ struct serial_type { static const bool value; };
 			inner_solver inner;
 		};
 
+		template<class fsten> class solver;
 		namespace mpi {
 		template<class sten>
 			class solver;

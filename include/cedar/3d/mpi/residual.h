@@ -2,11 +2,8 @@
 #define CEDAR_3D_KERNEL_MPI_RESIDUAL_H
 
 #include <type_traits>
-#include <cedar/kernel_params.h>
-#include <cedar/halo_exchanger.h>
-#include <cedar/3d/mpi/stencil_op.h>
-#include <cedar/3d/mpi/grid_func.h>
-#include <cedar/halo_exchanger.h>
+#include <cedar/3d/types.h>
+#include <cedar/kernels/residual.h>
 
 extern "C" {
 	using namespace cedar;
@@ -16,23 +13,34 @@ extern "C" {
 	                              int NStncl, void * halof);
 }
 
-namespace cedar { namespace cdr3 { namespace kernel {
-
-namespace impls
+namespace cedar { namespace cdr3 { namespace mpi {
+class residual_f90 : public kernels::residual<stypes>
 {
-	namespace mpi = cedar::cdr3::mpi;
+	void run(const stencil_op<seven_pt> & so,
+	         const grid_func & x,
+	         const grid_func & b,
+	         grid_func & r) override
+	{
+		this->run_impl(so, x, b, r);
+	}
+	void run(const stencil_op<xxvii_pt> & so,
+	         const grid_func & x,
+	         const grid_func & b,
+	         grid_func & r) override
+	{
+		this->run_impl(so, x, b, r);
+	}
+
 	template<class sten>
-	void mpi_residual_fortran(const kernel_params & params,
-	                          halo_exchanger_base * halof,
-	                          const mpi::stencil_op<sten> & A,
-	                          const mpi::grid_func & x,
-	                          const mpi::grid_func & b,
-	                          mpi::grid_func &r)
+	void run_impl(const stencil_op<sten> & so,
+	              const grid_func & x,
+	              const grid_func & b,
+	              grid_func & r)
 	{
 		int k, kf, nog, ifd, nstencil;
-		auto & Ad = const_cast<mpi::stencil_op<sten> &>(A);
-		auto & xd = const_cast<mpi::grid_func&>(x);
-		auto & bd = const_cast<mpi::grid_func&>(b);
+		auto & Ad = const_cast<stencil_op<sten> &>(so);
+		auto & xd = const_cast<grid_func&>(x);
+		auto & bd = const_cast<grid_func&>(b);
 		grid_topo & topo = Ad.grid();
 
 		nstencil = stencil_ndirs<sten>::value;
@@ -49,7 +57,7 @@ namespace impls
 		                         r.len(0), r.len(1), r.len(2),
 		                         nstencil, halof);
 	}
-}
+};
 
 }}}
 #endif

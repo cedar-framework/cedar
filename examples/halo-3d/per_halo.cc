@@ -6,7 +6,7 @@
 #include <cedar/types.h>
 #include <cedar/3d/mpi/grid_func.h>
 #include <cedar/3d/mpi/stencil_op.h>
-#include <cedar/3d/kernel/mpi/registry.h>
+#include <cedar/3d/mpi/kernel_manager.h>
 #include <cedar/3d/util/topo.h>
 
 
@@ -77,13 +77,13 @@ int main(int argc, char *argv[])
 
 	mpi::grid_func b(grid);
 	mpi::stencil_op<seven_pt> so(grid);
-	kernel::mpi::registry kreg(conf);
+	auto kman = mpi::build_kernel_manager(conf);
 
-	kreg.halo_setup(topos);
+	kman->setup<mpi::halo_exchange>(topos);
 
 	fill_gfunc(b);
 	draw(b, "before");
-	kreg.halo_exchange(b);
+	kman->run<mpi::halo_exchange>(b);
 	draw(b, "after");
 
 	// fill_stencil(so);
