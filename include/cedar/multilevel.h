@@ -55,7 +55,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 	}
 
 
-	~multilevel() {}
+	virtual ~multilevel() {}
 
 
 	void setup_cycler()

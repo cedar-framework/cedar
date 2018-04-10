@@ -11,6 +11,7 @@ extern "C"
 {
 	bmg2_operator bmg2_operator_create(bmg2_topo topo)
 	{
+		using namespace cedar;
 		using namespace cedar::cdr2;
 
 		auto grid = *(reinterpret_cast<std::shared_ptr<cedar::grid_topo>*>(topo));
@@ -69,7 +70,7 @@ extern "C"
 		auto *op_cont = reinterpret_cast<op_container*>(op);
 		auto & sop = op_cont->op;
 
-		auto & kreg = op_cont->kreg;
+		auto kman = op_cont->kman;
 
 		auto & xgf = op_cont->xgf;
 		auto & bgf = op_cont->bgf;
@@ -82,9 +83,9 @@ extern "C"
 			}
 		}
 
-		kreg.halo_exchange(xgf);
+		kman->run<mpi::halo_exchange>(xgf);
 
-		kreg.matvec(sop, xgf, bgf);
+		kman->run<mpi::matvec>(sop, xgf, bgf);
 
 		idx = 0;
 		for (auto j : bgf.range(1)) {

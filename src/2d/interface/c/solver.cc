@@ -55,7 +55,8 @@ extern "C"
 	{
 		using namespace cedar::cdr2;
 
-		delete reinterpret_cast<mpi::solver<nine_pt>*>(bmg);
+		auto * ptr =reinterpret_cast<mpi::solver<nine_pt>*>(bmg);
+		delete ptr;
 	}
 
 }

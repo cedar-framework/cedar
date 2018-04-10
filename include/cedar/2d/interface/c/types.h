@@ -2,9 +2,10 @@
 #define CEDAR_2D_INTERFACE_TYPES_H
 
 
-#include <cedar/2d/kernel/mpi/registry.h>
+#include <cedar/config/reader.h>
 #include <cedar/2d/mpi/stencil_op.h>
 #include <cedar/2d/util/topo.h>
+#include <cedar/2d/mpi/kernel_manager.h>
 
 
 namespace cedar { namespace cdr2 {
@@ -12,11 +13,14 @@ namespace cedar { namespace cdr2 {
 		struct op_container
 		{
 			op_container(std::shared_ptr<cedar::grid_topo> topo,
-			             config::reader & conf) : op(topo), xgf(topo), bgf(topo), kreg(conf) {}
+			             config::reader & conf) : op(topo), xgf(topo), bgf(topo)
+			{
+				kman = mpi::build_kernel_manager(conf);
+			}
 			mpi::stencil_op<nine_pt> op;
 			mpi::grid_func xgf;
 			mpi::grid_func bgf;
-			kernel::mpi::registry<> kreg;
+			mpi::kman_ptr kman;
 		};
 
 }}

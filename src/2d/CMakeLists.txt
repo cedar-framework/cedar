@@ -15,11 +15,11 @@ set(sources
   )
 
 if(ENABLE_MPI)
-  # add_subdirectory(interface)
+  add_subdirectory(interface)
   add_subdirectory(util)
 
   list(APPEND sources
-	# ${interface_SOURCES}
+	${interface_SOURCES}
 	${util_SOURCES}
 	mpi/grid_func.cc
 	mpi/stencil_op.cc
