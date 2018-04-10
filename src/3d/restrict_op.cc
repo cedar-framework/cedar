@@ -1,4 +1,3 @@
-#include <cedar/kernel_name.h>
 #include <cedar/3d/restrict_op.h>
 
 namespace cedar { namespace cdr3 {

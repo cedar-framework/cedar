@@ -1,6 +1,3 @@
-#include <cedar/kernel_name.h>
-#include <cedar/3d/prolong_op.h>
-
 #include <cedar/3d/grid_func.h>
 
 

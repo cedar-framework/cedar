@@ -1,4 +1,3 @@
-#include <cedar/kernel_name.h>
 #include <cedar/3d/mpi/prolong_op.h>
 #include <cedar/3d/mpi/restrict_op.h>
 #include <cedar/3d/mpi/grid_func.h>

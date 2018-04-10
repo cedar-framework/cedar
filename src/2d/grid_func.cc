@@ -1,9 +1,6 @@
 #include <algorithm>
 #include <random>
 
-#include <cedar/kernel_name.h>
-#include <cedar/2d/prolong_op.h>
-
 #include <cedar/2d/grid_func.h>
 
 using namespace cedar;
