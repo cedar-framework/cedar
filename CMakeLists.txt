@@ -48,7 +48,7 @@ endif()
 
 add_subdirectory(src)
 add_library(cedar ${cedar_src})
-target_link_libraries(cedar PUBLIC nlohmann_json)
+target_link_libraries(cedar PUBLIC ${cedar-deps})
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
