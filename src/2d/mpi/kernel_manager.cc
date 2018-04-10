@@ -1,4 +1,5 @@
 #include <cedar/2d/mpi/relax.h>
+#include <cedar/2d/mpi/ml_relax.h>
 #include <cedar/2d/mpi/coarsen.h>
 #include <cedar/2d/mpi/interp.h>
 #include <cedar/2d/mpi/residual.h>
@@ -22,8 +23,10 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 {
 	auto kman = std::make_unique<kernel_manager<klist<stypes, exec_mode::mpi>>>(params);
 	kman->add<point_relax, rbgs>("system");
-	kman->add<line_relax<relax_dir::x>, lines<relax_dir::x>>("system");
-	kman->add<line_relax<relax_dir::y>, lines<relax_dir::y>>("system");
+	kman->add<line_relax<relax_dir::x>, lines<relax_dir::x>>("two-level");
+	kman->add<line_relax<relax_dir::y>, lines<relax_dir::y>>("two-level");
+	kman->add<line_relax<relax_dir::x>, ml_line_relax<relax_dir::x>>("n-level");
+	kman->add<line_relax<relax_dir::y>, ml_line_relax<relax_dir::y>>("n-level");
 	kman->add<coarsen_op, galerkin>("system");
 	kman->add<interp_add, interp_f90>("system");
 	kman->add<restriction, restrict_f90>("system");
@@ -35,8 +38,11 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->add<matvec, matvec_f90>("system");
 
 	kman->set<point_relax>("system");
-	kman->set<line_relax<relax_dir::x>>("system");
-	kman->set<line_relax<relax_dir::y>>("system");
+	std::string line_relax_name("two-level");
+	if (params->ml_relax.enabled)
+		line_relax_name = "n-level";
+	kman->set<line_relax<relax_dir::x>>(line_relax_name);
+	kman->set<line_relax<relax_dir::y>>(line_relax_name);
 	kman->set<coarsen_op>("system");
 	kman->set<interp_add>("system");
 	kman->set<restriction>("system");
