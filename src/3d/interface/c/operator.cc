@@ -3,7 +3,6 @@
 #include <cedar/types.h>
 #include <cedar/3d/util/topo.h>
 #include <cedar/3d/mpi/stencil_op.h>
-#include <cedar/3d/kernel/mpi/registry.h>
 #include <cedar/config/reader.h>
 
 #include <cedar/3d/interface/c/operator.h>
@@ -13,6 +12,7 @@ extern "C"
 {
 	bmg3_operator bmg3_operator_create(bmg3_topo topo)
 	{
+		using namespace cedar;
 		using namespace cedar::cdr3;
 
 		auto grid = *(reinterpret_cast<std::shared_ptr<cedar::grid_topo>*>(topo));
@@ -57,7 +57,7 @@ extern "C"
 		auto & sop = op_cont->op;
 		auto & xgf = op_cont->xgf;
 		auto & bgf = op_cont->bgf;
-		auto & kreg = op_cont->kreg;
+		auto kman = op_cont->kman;
 
 		int idx = 0;
 		for (auto k : xgf.range(2)) {
@@ -69,9 +69,9 @@ extern "C"
 			}
 		}
 
-		kreg.halo_exchange(xgf);
+		kman->run<mpi::halo_exchange>(xgf);
 
-		kreg.matvec(sop, xgf, bgf);
+		kman->run<mpi::matvec>(sop, xgf, bgf);
 
 		idx = 0;
 		for (auto k : bgf.range(2)) {
