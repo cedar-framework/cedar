@@ -26,6 +26,14 @@ extern "C" {
 	                                      MPI_Fint mpicomm, MPI_Fint *xcomm, int nolx,
 	                                      int *tdsx_sor_ptrs, len_t nsor, real_t *tdg,
 	                                      bool *fact_flags, void *halof);
+	void MPI_BMG2_SymStd_relax_lines_y_ml(int k, real_t *so, real_t *qf, real_t *q,
+	                                      real_t *sor, real_t *B,
+	                                      len_t II, len_t JJ, len_t igs, len_t jgs,
+	                                      int nog, int nstencil, int irelax_sym, int updown,
+	                                      len_t *datadist, real_t *rwork, len_t nmsgr,
+	                                      MPI_Fint mpicomm, MPI_Fint *ycomm, int noly,
+	                                      int *tdsy_sor_ptrs, len_t nsor, real_t *tdg,
+	                                      bool *fact_flags, void *halof);
 }
 
 namespace cedar { namespace cdr2 { namespace mpi {
@@ -171,6 +179,8 @@ public:
 
 		if (dir == relax_dir::x)
 			relax_lines = MPI_BMG2_SymStd_relax_lines_x_ml;
+		else
+			relax_lines = MPI_BMG2_SymStd_relax_lines_y_ml;
 
 		relax_lines(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
 		            so.len(0), so.len(1), topo.is(0), topo.is(1),

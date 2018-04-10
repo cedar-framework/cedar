@@ -47,6 +47,7 @@ if (ENABLE_MPI)
 	ftn/mpi/BMG2_SymStd_relax_lines_x.f90
 	ftn/mpi/BMG2_SymStd_relax_lines_y.f90
 	ftn/mpi/BMG2_SymStd_relax_lines_x_ml.f90
+	ftn/mpi/BMG2_SymStd_relax_lines_y_ml.f90
 	ftn/mpi/BMG2_SymStd_LineSolve_A.f90
 	ftn/mpi/BMG2_SymStd_LineSolve_B.f90
 	ftn/mpi/BMG2_SymStd_LineSolve_C.f90

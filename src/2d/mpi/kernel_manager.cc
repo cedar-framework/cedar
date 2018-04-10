@@ -41,6 +41,7 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	std::string line_relax_name("two-level");
 	if (params->ml_relax.enabled)
 		line_relax_name = "n-level";
+	log::debug << "Using <" << line_relax_name << "> for line relaxation" << std::endl;
 	kman->set<line_relax<relax_dir::x>>(line_relax_name);
 	kman->set<line_relax<relax_dir::y>>(line_relax_name);
 	kman->set<coarsen_op>("system");
