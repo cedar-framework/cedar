@@ -23,9 +23,13 @@ include_directories(include)
 install(DIRECTORY include/ DESTINATION include)
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 
-find_package(tausch REQUIRED)
-include_directories(${TAUSCH_INCLUDE_DIR})
-find_package(nlohmann_json REQUIRED)
+find_package(tausch QUIET)
+if (tausch_FOUND)
+  include_directories(${TAUSCH_INCLUDE_DIR})
+  add_definitions(-DWITH_TAUSCH)
+endif()
+
+find_package(nlohmann_json CONFIG REQUIRED)
 
 FIND_PACKAGE(Boost 1.44 REQUIRED COMPONENTS system filesystem)
 include_directories(${Boost_INCLUDE_DIR})
@@ -37,10 +41,14 @@ find_package(MPI REQUIRED)
 include_directories(${MPI_C_INCLUDE_PATH})
 include_directories(${MPI_Fortran_INCLUDE_PATH})
 
-set(cedar-deps ${Boost_LIBRARIES} ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${MPI_CXX_LIBRARIES} ${MPI_C_LIBRARIES} ${MPI_Fortran_LIBRARIES} ${tausch_LIBRARIES} nlohmann_json tausch)
+set(cedar-deps ${Boost_LIBRARIES} ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${MPI_CXX_LIBRARIES} ${MPI_C_LIBRARIES} ${MPI_Fortran_LIBRARIES} ${tausch_LIBRARIES} nlohmann_json)
+if (tausch_FOUND)
+  list(APPEND cedar-deps tausch)
+endif()
 
 add_subdirectory(src)
 add_library(cedar ${cedar_src})
+target_link_libraries(cedar PUBLIC nlohmann_json)
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(

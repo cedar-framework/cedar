@@ -27,13 +27,17 @@ if(ENABLE_MPI)
 	mpi/restrict_op.cc
 	mpi/gallery.cc
 	mpi/msg_exchanger.cc
-	mpi/tausch_exchanger.cc
 	mpi/setup_nog.cc
 	mpi/restrict.cc
 	mpi/interp.cc
 	mpi/kernel_manager.cc
 	redist/cholesky_solver.cc
 	)
+
+  if (tausch_FOUND)
+	list(APPEND sources
+	  mpi/tausch_exchanger.cc)
+  endif()
 endif()
 
 set(2d_SOURCES ${sources} PARENT_SCOPE)

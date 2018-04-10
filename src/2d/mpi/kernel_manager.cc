@@ -7,7 +7,9 @@
 #include <cedar/2d/mpi/matvec.h>
 #include <cedar/2d/mpi/setup_nog.h>
 #include <cedar/2d/mpi/msg_exchanger.h>
+#ifdef WITH_TAUSCH
 #include <cedar/2d/mpi/tausch_exchanger.h>
+#endif
 
 #include <cedar/2d/mpi/kernel_manager.h>
 
@@ -33,7 +35,9 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->add<residual, residual_f90>("system");
 	kman->add<setup_interp, setup_interp_f90>("system");
 	kman->add<halo_exchange, msg_exchanger>("msg");
+	#ifdef WITH_TAUSCH
 	kman->add<halo_exchange, tausch_exchanger>("tausch");
+	#endif
 	kman->add<setup_nog, setup_nog_f90>("system");
 	kman->add<matvec, matvec_f90>("system");
 
