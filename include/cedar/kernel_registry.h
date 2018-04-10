@@ -7,6 +7,7 @@
 #include <cedar/type_list.h>
 #include <cedar/kernels/point_relax.h>
 #include <cedar/kernels/line_relax.h>
+#include <cedar/kernels/plane_relax.h>
 #include <cedar/kernels/coarsen_op.h>
 #include <cedar/kernels/interp_add.h>
 #include <cedar/kernels/matvec.h>
@@ -24,6 +25,9 @@ namespace cedar
 	using ser_kernels = type_list<kernels::point_relax<solver_types>,
 	                              kernels::line_relax<solver_types, relax_dir::x>,
 	                              kernels::line_relax<solver_types, relax_dir::y>,
+	                              kernels::plane_relax<solver_types, relax_dir::xy>,
+	                              kernels::plane_relax<solver_types, relax_dir::xz>,
+	                              kernels::plane_relax<solver_types, relax_dir::yz>,
 	                              kernels::coarsen_op<solver_types>,
 	                              kernels::restriction<solver_types>,
 	                              kernels::interp_add<solver_types>,

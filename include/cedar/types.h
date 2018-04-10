@@ -22,7 +22,7 @@ namespace std {
 namespace cedar {
 
 enum class exec_mode { serial, mpi };
-enum class relax_dir {x, y};
+enum class relax_dir {x, y, xy, xz, yz};
 
 namespace cycle {
 enum class Dir {UP, DOWN};
