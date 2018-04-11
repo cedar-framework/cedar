@@ -15,10 +15,11 @@ include(cxx11)
 include(cxx_config)
 include(options)
 include(testing)
+include(ExternalProject)
 
 enable_language(C CXX Fortran)
 
-add_definitions(-DMSG_DOUBLE -DNO_SECOND_UNDERSCORE -fPIC)
+add_definitions(-fPIC)
 include_directories(include)
 install(DIRECTORY include/ DESTINATION include)
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
@@ -29,26 +30,48 @@ if (tausch_FOUND)
   add_definitions(-DWITH_TAUSCH)
 endif()
 
-find_package(nlohmann_json CONFIG REQUIRED)
+ExternalProject_Add(
+  json
+  PREFIX ${CMAKE_BINARY_DIR}/json
+  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+  LOG_DOWNLOAD ON
+)
+ExternalProject_Get_Property(json source_dir)
+set(json_location ${source_dir}/include)
 
 FIND_PACKAGE(Boost 1.44 REQUIRED COMPONENTS system filesystem)
-include_directories(${Boost_INCLUDE_DIR})
 
 FIND_PACKAGE(BLAS REQUIRED)
 FIND_PACKAGE(LAPACK REQUIRED)
 
 find_package(MPI REQUIRED)
-include_directories(${MPI_C_INCLUDE_PATH})
-include_directories(${MPI_Fortran_INCLUDE_PATH})
-
-set(cedar-deps ${Boost_LIBRARIES} ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${MPI_CXX_LIBRARIES} ${MPI_C_LIBRARIES} ${MPI_Fortran_LIBRARIES} ${tausch_LIBRARIES} nlohmann_json)
-if (tausch_FOUND)
-  list(APPEND cedar-deps tausch)
-endif()
 
 add_subdirectory(src)
 add_library(cedar ${cedar_src})
-target_link_libraries(cedar PUBLIC ${cedar-deps})
+add_dependencies(cedar json)
+target_compile_definitions(cedar PUBLIC MSG_DOUBLE NO_SECOND_UNDERSCORE)
+
+get_property(tausch_location TARGET tausch PROPERTY LOCATION)
+target_link_libraries(cedar PUBLIC
+  ${Boost_LIBRARIES}
+  ${LAPACK_LIBRARIES}
+  ${BLAS_LIBRARIES}
+  ${MPI_C_LIBRARIES}
+  ${MPI_Fortran_LIBRARIES})
+include_directories(${json_location})
+if (tausch_FOUND)
+  target_link_libraries(cedar PUBLIC ${tausch_location})
+  target_include_directories(cedar PUBLIC ${TAUSCH_INCLUDE_DIR})
+  target_compile_definitions(cedar PUBLIC WITH_TAUSCH)
+endif()
+target_include_directories(cedar PUBLIC
+  $<INSTALL_INTERFACE:include/>
+  ${MPI_C_INCLUDE_PATH}
+  ${MPI_Fortran_INCLUDE_PATH}
+  ${Boost_INCLUDE_DIR})
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
@@ -65,7 +88,9 @@ configure_package_config_file(
 install(
   FILES ${CEDAR_CMAKE_PROJECT_CONFIG_FILE} ${CEDAR_CMAKE_VERSION_CONFIG_FILE}
   DESTINATION ${CEDAR_CONFIG_INSTALL_DIR}
-)
+  )
+
+install(DIRECTORY ${json_location}/nlohmann DESTINATION "include")
 
 install(TARGETS cedar DESTINATION "lib"
   EXPORT ${CEDAR_TARGETS_EXPORT_NAME}
