@@ -54,7 +54,6 @@ add_library(cedar ${cedar_src})
 add_dependencies(cedar json)
 target_compile_definitions(cedar PUBLIC MSG_DOUBLE NO_SECOND_UNDERSCORE)
 
-get_property(tausch_location TARGET tausch PROPERTY LOCATION)
 target_link_libraries(cedar PUBLIC
   ${Boost_LIBRARIES}
   ${LAPACK_LIBRARIES}
@@ -63,6 +62,7 @@ target_link_libraries(cedar PUBLIC
   ${MPI_Fortran_LIBRARIES})
 include_directories(${json_location})
 if (tausch_FOUND)
+  get_property(tausch_location TARGET tausch PROPERTY LOCATION)
   target_link_libraries(cedar PUBLIC ${tausch_location})
   target_include_directories(cedar PUBLIC ${TAUSCH_INCLUDE_DIR})
   target_compile_definitions(cedar PUBLIC WITH_TAUSCH)
