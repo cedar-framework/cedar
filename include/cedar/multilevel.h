@@ -190,8 +190,8 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 				else if (relax_type == "line-y")
 					kernels->template run<line_relax<relax_dir::y>>(A, x, b, level.SOR[0], level.res, cycle::Dir::UP);
 				else if (relax_type == "line-xy") {
-					kernels->template run<line_relax<relax_dir::x>>(A, x, b, level.SOR[1], level.res, cycle::Dir::UP);
-					kernels->template run<line_relax<relax_dir::y>>(A, x, b, level.SOR[0], level.res, cycle::Dir::UP);
+					kernels->template run<line_relax<relax_dir::y>>(A, x, b, level.SOR[1], level.res, cycle::Dir::UP);
+					kernels->template run<line_relax<relax_dir::x>>(A, x, b, level.SOR[0], level.res, cycle::Dir::UP);
 				}
 				else if (relax_type == "plane") {
 					// TODO: fix this
