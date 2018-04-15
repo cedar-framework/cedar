@@ -2,6 +2,26 @@
 
 namespace cedar { namespace cdr3 {
 
+int log_begin(bool log_planes, int ipl, const std::string & suff)
+{
+	auto tmp = log::lvl();
+	if (log_planes)
+		log::set_header_msg(" (plane-" + suff + " " + std::to_string(ipl) + ")");
+	else
+		log::lvl() = 0;
+	return tmp;
+}
+
+
+void log_end(bool log_planes, int ipl, int lvl)
+{
+	if (log_planes)
+		log::set_header_msg("");
+	else
+		log::lvl() = lvl;
+}
+
+
 template<>
 void copy_rhs<relax_dir::xy>(const stencil_op<seven_pt> & so,
                              const grid_func & x,

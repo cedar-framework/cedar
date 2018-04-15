@@ -16,6 +16,12 @@ std::shared_ptr<kernel_params> build_kernel_params(config::reader & conf)
 	params->relax_symmetric = true;
 	params->definite = true;
 	params->ml_relax.init(conf);
+	params->plane_config = conf.getconf("plane-config");
+	if (params->plane_config == nullptr) {
+		params->plane_config = std::make_shared<config::reader>("");
+		params->plane_config->set("solver.relaxation", "line-xy");
+		params->plane_config->set("solver.max-iter", 1);
+	}
 
 	return params;
 }

@@ -30,9 +30,6 @@ level3(stencil_op<sten> & A) : parent::level(A)
 		this->SOR = {{relax_stencil(A.shape(0), A.shape(1), A.shape(2)),
 		              relax_stencil(A.shape(0), A.shape(1), A.shape(2)),}};
 	}
-	/* std::vector<std::unique_ptr<::cedar::cdr2::solver>> planes_xy; */
-	/* std::vector<std::unique_ptr<::cedar::cdr2::solver>> planes_xz; */
-	/* std::vector<std::unique_ptr<::cedar::cdr2::solver>> planes_yz; */
 };
 
 template<class fsten>
@@ -124,10 +121,6 @@ solver(stencil_op<fsten> & fop,
 		this->ABD = grid_func(abd_len_0, nxc*nyc*nzc, 0);
 		this->bbd = new real_t[this->ABD.len(1)];
 	}
-	/* virtual void setup_relax_plane(stencil_op & sop, bmg_level & level) override; */
-	/* virtual void relax_plane(const stencil_op & so, grid_func & x, */
-	/*                          const grid_func & b, cycle::Dir cdir, */
-	/*                          bmg_level & level) override; */
 	void give_op(std::unique_ptr<stencil_op<fsten>> fop) {fop_ref = std::move(fop);}
 
 protected:

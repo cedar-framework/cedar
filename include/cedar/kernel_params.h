@@ -24,6 +24,7 @@ namespace cedar
 		bool relax_symmetric;
 		bool definite;
 		ml_relax_params ml_relax;
+		std::shared_ptr<config::reader> plane_config;
 
 		int per_mask() const {
 			int mask = 0;

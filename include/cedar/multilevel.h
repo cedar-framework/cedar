@@ -35,6 +35,8 @@ public:
 	using stypes = typename level_t<fsten>::stypes;
 	template<relax_dir rdir>
 		using line_relax = kernels::line_relax<stypes, rdir>;
+	template<relax_dir rdir>
+		using plane_relax = kernels::plane_relax<stypes, rdir>;
 	using point_relax = kernels::point_relax<stypes>;
 	using coarsen_op = kernels::coarsen_op<stypes>;
 	using interp_add = kernels::interp_add<stypes>;
@@ -148,10 +150,16 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 			kman->template setup<line_relax<relax_dir::y>>(sop, level.SOR[1]);
 		}
 		else if (relax_type == "plane") {
-			// TODO: fix this
-			//setup_relax_plane(sop, level(lvl));
-			// kernels->setup_relax_xy(sop, level(lvl).planes);
+			kman->template setup<plane_relax<relax_dir::xy>>(sop);
+			kman->template setup<plane_relax<relax_dir::xz>>(sop);
+			kman->template setup<plane_relax<relax_dir::yz>>(sop);
 		}
+		else if (relax_type == "plane-xy")
+			kman->template setup<plane_relax<relax_dir::xy>>(sop);
+		else if (relax_type == "plane-xz")
+			kman->template setup<plane_relax<relax_dir::xz>>(sop);
+		else if (relax_type == "plane-yz")
+			kman->template setup<plane_relax<relax_dir::yz>>(sop);
 		else
 			log::error << "Invalid relaxation: " << relax_type << std::endl;
 
@@ -172,9 +180,16 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 					kernels->template run<line_relax<relax_dir::y>>(A, x, b, level.SOR[1], level.res, cycle::Dir::DOWN);
 				}
 				else if (relax_type == "plane") {
-					// TODO: fix this
-					//relax_plane(A, x, b, cycle::Dir::DOWN, level(lvl));
+					kernels->template run<plane_relax<relax_dir::xy>>(A, x, b, cycle::Dir::DOWN);
+					kernels->template run<plane_relax<relax_dir::yz>>(A, x, b, cycle::Dir::DOWN);
+					kernels->template run<plane_relax<relax_dir::xz>>(A, x, b, cycle::Dir::DOWN);
 				}
+				else if (relax_type == "plane-xy")
+					kernels->template run<plane_relax<relax_dir::xy>>(A, x, b, cycle::Dir::DOWN);
+				else if (relax_type == "plane-xz")
+					kernels->template run<plane_relax<relax_dir::xz>>(A, x, b, cycle::Dir::DOWN);
+				else if (relax_type == "plane-yz")
+					kernels->template run<plane_relax<relax_dir::yz>>(A, x, b, cycle::Dir::DOWN);
 				else
 					log::error << "Invalid relaxation: " << relax_type << std::endl;
 			}
@@ -194,9 +209,16 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 					kernels->template run<line_relax<relax_dir::x>>(A, x, b, level.SOR[0], level.res, cycle::Dir::UP);
 				}
 				else if (relax_type == "plane") {
-					// TODO: fix this
-					//relax_plane(av, x, b, cycle::Dir::UP, level(lvl));
+					kernels->template run<plane_relax<relax_dir::xz>>(A, x, b, cycle::Dir::UP);
+					kernels->template run<plane_relax<relax_dir::yz>>(A, x, b, cycle::Dir::UP);
+					kernels->template run<plane_relax<relax_dir::xy>>(A, x, b, cycle::Dir::UP);
 				}
+				else if (relax_type == "plane-xy")
+					kernels->template run<plane_relax<relax_dir::xy>>(A, x, b, cycle::Dir::UP);
+				else if (relax_type == "plane-xz")
+					kernels->template run<plane_relax<relax_dir::xz>>(A, x, b, cycle::Dir::UP);
+				else if (relax_type == "plane-yz")
+					kernels->template run<plane_relax<relax_dir::yz>>(A, x, b, cycle::Dir::UP);
 				else
 					log::error << "Invalid relaxation: " << relax_type << std::endl;
 			}
@@ -283,16 +305,6 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 	{
 		return static_cast<child*>(this)->compute_num_levels(fop);
 	}
-
-
-	/* virtual void setup_relax_plane(stencil_op & sop, LevelType & level) {} */
-
-
-	/* virtual void relax_plane(const stencil_op & so, */
-	/*                          grid_func & x, */
-	/*                          const grid_func & b, */
-	/*                          cycle::Dir cdir, */
-	/*                          LevelType & level) {} */
 
 
 	config::reader & get_config() { return *conf; }
