@@ -118,14 +118,17 @@ public:
 	template<class T, class... Args>
 	void setup(Args&&... args)
 	{
-		this->get<T>().setup(std::forward<Args>(args)...);
+		auto & kern = this->get<T>();
+		log::debug << "setup kernel <" << kern.name << ">" << std::endl;
+		kern.setup(std::forward<Args>(args)...);
 	}
 
 	template<class T, class... Args>
 	void run(Args&&... args)
 	{
-		const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
-		std::get<i>(kerns)[defaults[i]]->run(std::forward<Args>(args)...);
+		auto & kern = this->get<T>();
+		log::debug << "running kernel <" << kern.name << ">" << std::endl;
+		kern.run(std::forward<Args>(args)...);
 	}
 
 

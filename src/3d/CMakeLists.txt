@@ -7,6 +7,7 @@ set(sources
   grid_func.cc
   stencil_op.cc
   relax_stencil.cc
+  relax_planes.cc
   gallery.cc
   prolong_op.cc
   restrict_op.cc

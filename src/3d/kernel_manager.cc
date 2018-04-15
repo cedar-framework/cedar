@@ -1,4 +1,5 @@
 #include <cedar/3d/relax.h>
+#include <cedar/3d/relax_planes.h>
 #include <cedar/3d/coarsen.h>
 #include <cedar/3d/interp.h>
 #include <cedar/3d/residual.h>
