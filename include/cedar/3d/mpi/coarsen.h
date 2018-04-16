@@ -1,7 +1,7 @@
 #ifndef CEDAR_3D_MPI_COARSEN_H
 #define CEDAR_3D_MPI_COARSEN_H
 
-#include <cedar/2d/ftn/BMG_parameters_c.h>
+#include <cedar/2d/ftn/mpi/BMG_parameters_c.h>
 #include <cedar/kernels/coarsen_op.h>
 #include <cedar/3d/mpi/types.h>
 

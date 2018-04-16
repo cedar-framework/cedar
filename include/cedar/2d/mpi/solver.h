@@ -223,7 +223,14 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 		kman->template run<halo_exchange>(sop);
 	}
 
+	void give_op(std::unique_ptr<stencil_op<fsten>> fop) {fop_ref = std::move(fop);}
+
+
 	MPI_Comm comm;
+
+
+protected:
+	std::unique_ptr<stencil_op<fsten>> fop_ref;
 };
 
 }}}

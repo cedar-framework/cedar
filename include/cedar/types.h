@@ -23,6 +23,18 @@ namespace cedar {
 
 enum class exec_mode { serial, mpi };
 enum class relax_dir {x, y, xy, xz, yz};
+template<relax_dir rdir>
+struct relax_dir_name {static constexpr const char* value = "";};
+
+template<>
+struct relax_dir_name<relax_dir::xy> {static constexpr const char* value = "xy";};
+
+template<>
+struct relax_dir_name<relax_dir::xz> {static constexpr const char* value = "xz";};
+
+template<>
+struct relax_dir_name<relax_dir::yz> {static constexpr const char* value = "yz";};
+
 
 namespace cycle {
 enum class Dir {UP, DOWN};

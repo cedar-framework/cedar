@@ -10,6 +10,8 @@ namespace cedar { namespace cdr3 { namespace mpi {
 using kman_ptr = std::shared_ptr<kernel_manager<klist<stypes, exec_mode::mpi>>>;
 
 using point_relax = kernels::point_relax<stypes>;
+template<relax_dir rdir>
+using plane_relax = kernels::plane_relax<stypes, rdir>;
 using coarsen_op = kernels::coarsen_op<stypes>;
 using interp_add = kernels::interp_add<stypes>;
 using restriction = kernels::restriction<stypes>;

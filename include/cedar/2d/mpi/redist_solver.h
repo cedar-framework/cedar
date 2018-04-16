@@ -12,6 +12,7 @@
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 #include <cedar/array.h>
 #include <cedar/mpi/block_partition.h>
+#include <cedar/util/timer.h>
 
 
 extern "C" {
@@ -161,18 +162,6 @@ void redist_solver<inner_solver>::solve(grid_func & x, const grid_func & b)
 
 template <class T>
 	std::unique_ptr<T> create_operator(topo_ptr topo);
-
-template<>
-	std::unique_ptr<cdr2::stencil_op<nine_pt>> create_operator(topo_ptr topo)
-{
-	return std::make_unique<cdr2::stencil_op<nine_pt>>(topo->nlocal(0)-2, topo->nlocal(1)-2);
-}
-
-template<>
-	std::unique_ptr<mpi::stencil_op<nine_pt>> create_operator(topo_ptr topo)
-{
-	return std::make_unique<mpi::stencil_op<nine_pt>>(topo);
-}
 
 template<class inner_solver>
 void redist_solver<inner_solver>::redist_operator(const stencil_op<nine_pt> & so, topo_ptr topo)

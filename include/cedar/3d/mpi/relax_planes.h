@@ -1,37 +1,33 @@
-#ifndef CEDAR_3D_RELAX_PLANES_H
-#define CEDAR_3D_RELAX_PLANES_H
+#ifndef CEDAR_3D_MPI_RELAX_PLANES_H
+#define CEDAR_3D_MPI_RELAX_PLANES_H
 
 #include <cedar/types.h>
-#include <cedar/3d/types.h>
 #include <cedar/kernels/plane_relax.h>
-#include <cedar/2d/solver.h>
+#include <cedar/3d/mpi/types.h>
+#include <cedar/2d/mpi/solver.h>
 
-
-namespace cedar { namespace cdr3 {
-
-template<class fsten>
-using slv2_ptr = std::unique_ptr<cdr2::solver<fsten>>;
+namespace cedar { namespace cdr3 { namespace mpi {
 
 int log_begin(bool log_planes, int ipl, const std::string & suff);
 void log_end(bool log_planes, int ipl, int lvl);
+
+template<class fsten>
+using slv2_ptr = std::unique_ptr<cdr2::mpi::solver<fsten>>;
 
 template<relax_dir rdir, class sten3>
 void copy_rhs(const stencil_op<sten3> & so,
               const grid_func & x,
               const grid_func & b,
-              cdr2::grid_func & b2,
+              cdr2::mpi::grid_func & b2,
               int ipl);
 
 template<relax_dir rdir>
-void copy32(const grid_func & x, cdr2::grid_func & x2, int ipl);
+void copy32(const grid_func & x, cdr2::mpi::grid_func & x2, int ipl);
 
 template<relax_dir rdir>
-void copy23(const cdr2::grid_func & x2, grid_func &x, int ipl);
+void copy23(const cdr2::mpi::grid_func & x2, grid_func &x, int ipl);
 
 
-template<class sten3>
-using sten3_to_sten2 = typename std::conditional<std::is_same<sten3, seven_pt>::value,
-                                                 cdr2::five_pt, cdr2::nine_pt>::type;
 template<relax_dir rdir, class sten3, class sten2>
 void relax_planes(const stencil_op<sten3> & so, grid_func & x,
                   const grid_func & b, cycle::Dir cdir,
@@ -65,6 +61,7 @@ void relax_planes(const stencil_op<sten3> & so, grid_func & x,
 			log_end(log_planes, ipl, tmp);
 
 			copy23<rdir>(x2, x, ipl);
+			MPI_Barrier(so.grid().comm);
 		}
 	}
 }
@@ -72,15 +69,14 @@ void relax_planes(const stencil_op<sten3> & so, grid_func & x,
 
 template<relax_dir rdir, class sten3, class sten2>
 void copy_coeff(const stencil_op<sten3> & so3,
-                cdr2::stencil_op<sten2> & so2);
+                cdr2::mpi::stencil_op<sten2> & so2);
 
 template<relax_dir rdir>
 void copy_coeff(const stencil_op<seven_pt> & so3,
-                cdr2::stencil_op<cdr2::five_pt> & so2)
+                cdr2::mpi::stencil_op<cdr2::five_pt> & so2)
 {
 	using namespace cdr2;
 
-	// TODO: reorder loops for performance
 	if (rdir == relax_dir::xy) {
 		for (auto k : so3.range(2)) {
 			for (auto j : so3.grange(1)) {
@@ -114,10 +110,9 @@ void copy_coeff(const stencil_op<seven_pt> & so3,
 	}
 }
 
-
 template<relax_dir rdir>
 void copy_coeff(const stencil_op<xxvii_pt> & so3,
-                cdr2::stencil_op<cdr2::nine_pt> & so2)
+                cdr2::mpi::stencil_op<cdr2::nine_pt> & so2)
 {
 	using namespace cdr2;
 
@@ -163,6 +158,7 @@ void copy_coeff(const stencil_op<xxvii_pt> & so3,
 template<relax_dir rdir>
 class planes : public kernels::plane_relax<stypes, rdir>
 {
+public:
 	void setup(const stencil_op<seven_pt> & so) override
 	{
 		this->setup_impl(so, fine_planes);
@@ -170,7 +166,8 @@ class planes : public kernels::plane_relax<stypes, rdir>
 	void setup(const stencil_op<xxvii_pt> & so) override
 	{
 		level_planes.emplace_back();
-		level_map[so.shape(0)] = level_planes.size() - 1;
+		auto & topo = so.grid();
+		level_map[topo.nlocal(0)] = level_planes.size() - 1;
 		this->setup_impl(so, level_planes.back());
 	}
 	void run(const stencil_op<seven_pt> & so, grid_func & x,
@@ -181,47 +178,25 @@ class planes : public kernels::plane_relax<stypes, rdir>
 	template<class sten3, class sten2>
 	void setup_impl(const stencil_op<sten3> & so, std::vector<slv2_ptr<sten2>> & planes)
 	{
-		if (rdir == relax_dir::xy) {
-			for (auto k : so.range(2)) {
-				auto so2_ptr = std::make_unique<cdr2::stencil_op<sten2>>(so.shape(0), so.shape(1));
-				auto & so2 = *so2_ptr;
-				copy_coeff<rdir>(so, so2);
-				auto conf2 = this->params->plane_config;
+		auto rng = so.range(2);
+		if (rdir == relax_dir::xz)
+			rng = so.range(1);
+		else if (rdir == relax_dir::yz)
+			rng = so.range(0);
+		auto topo2 = slice_topo(so.grid());
+		for (auto i : rng) {
+			(void)i;
+			auto so2_ptr = std::make_unique<cdr2::mpi::stencil_op<sten2>>(topo2);
+			auto & so2 = *so2_ptr;
+			copy_coeff<rdir>(so, so2);
+			auto conf2 = this->params->plane_config;
 
-				planes.emplace_back(std::make_unique<cdr2::solver<sten2>>(so2, conf2));
-				planes.back()->give_op(std::move(so2_ptr));
-				planes.back()->levels.template get<sten2>(0).x = cdr2::grid_func(so.shape(0), so.shape(1));
-				planes.back()->levels.template get<sten2>(0).b = cdr2::grid_func(so.shape(0), so.shape(1));
-			}
-		} else if (rdir == relax_dir::xz) {
-			for (auto j : so.range(1)) {
-				auto so2_ptr = std::make_unique<cdr2::stencil_op<sten2>>(so.shape(0), so.shape(2));
-				auto & so2 = *so2_ptr;
-				copy_coeff<rdir>(so, so2);
-				auto conf2 = this->params->plane_config;
-
-				planes.emplace_back(std::make_unique<cdr2::solver<sten2>>(so2, conf2));
-				planes.back()->give_op(std::move(so2_ptr));
-				planes.back()->levels.template get<sten2>(0).x = cdr2::grid_func(so.shape(0), so.shape(2));
-				planes.back()->levels.template get<sten2>(0).b = cdr2::grid_func(so.shape(0), so.shape(2));
-			}
-		} else if (rdir == relax_dir::yz) {
-			for (auto i : so.range(0)) {
-				auto so2_ptr = std::make_unique<cdr2::stencil_op<sten2>>(so.shape(1), so.shape(2));
-				auto & so2 = *so2_ptr;
-				copy_coeff<rdir>(so, so2);
-				auto conf2 = this->params->plane_config;
-
-				planes.emplace_back(std::make_unique<cdr2::solver<sten2>>(so2, conf2));
-				planes.back()->give_op(std::move(so2_ptr));
-				planes.back()->levels.template get<sten2>(0).x = cdr2::grid_func(so.shape(1), so.shape(2));
-				planes.back()->levels.template get<sten2>(0).b = cdr2::grid_func(so.shape(1), so.shape(2));
-			}
-		} else {
-			log::error << "invalid relax_dir for plane relaxation" << std::endl;
+			planes.emplace_back(std::make_unique<cdr2::mpi::solver<sten2>>(so2, conf2));
+			planes.back()->give_op(std::move(so2_ptr));
+			planes.back()->levels.template get<sten2>(0).x = cdr2::mpi::grid_func(topo2);
+			planes.back()->levels.template get<sten2>(0).b = cdr2::mpi::grid_func(topo2);
 		}
 	}
-
 
 	template<class sten>
 	void run_impl(const stencil_op<sten> & so, grid_func & x,
@@ -240,8 +215,89 @@ protected:
 	std::vector<std::vector<slv2_ptr<cdr2::nine_pt>>> level_planes;
 	std::vector<slv2_ptr<cdr2::five_pt>> fine_planes;
 	std::map<len_t, std::size_t> level_map;
+
+	std::shared_ptr<grid_topo> slice_topo(const grid_topo & topo3)
+	{
+		auto igrd = std::make_shared<std::vector<len_t>>(NBMG_pIGRD);
+		auto topo2 = std::make_shared<grid_topo>(igrd, 0, 1);
+
+		topo2->nproc(2) = 1;
+		if (rdir == relax_dir::xy) {
+			MPI_Comm_split(topo3.comm, topo3.coord(2),
+			               topo3.coord(1) * topo3.nproc(0) + topo3.coord(0), &topo2->comm);
+			for (auto i : range<std::size_t>(2)) {
+				topo2->nproc(i) = topo3.nproc(i);
+				topo2->coord(i) = topo3.coord(i);
+				topo2->is(i) = topo3.is(i);
+				topo2->nlocal(i) = topo3.nlocal(i);
+				topo2->nglobal(i) = topo3.nglobal(i);
+			}
+
+			auto & dimx = this->halof->leveldims(0);
+			auto & dimy = this->halof->leveldims(1);
+			topo2->dimxfine.resize(topo2->nproc(0));
+			topo2->dimyfine.resize(topo2->nproc(1));
+			for (auto i : range<len_t>(topo2->nproc(0))) {
+				topo2->dimxfine[i] = dimx(i, topo3.level());
+			}
+
+			for (auto j : range<len_t>(topo2->nproc(1))) {
+				topo2->dimyfine[j] = dimy(j, topo3.level());
+			}
+		} else if (rdir == relax_dir::xz) {
+			MPI_Comm_split(topo3.comm, topo3.coord(1),
+			               topo3.coord(2) * topo3.nproc(0) + topo3.coord(0), &topo2->comm);
+			for (auto i : range<std::size_t>(2)) {
+				auto i3 = (i == 0) ? 0 : 2;
+				topo2->nproc(i) = topo3.nproc(i3);
+				topo2->coord(i) = topo3.coord(i3);
+				topo2->is(i) = topo3.is(i3);
+				topo2->nlocal(i) = topo3.nlocal(i3);
+				topo2->nglobal(i) = topo3.nglobal(i3);
+			}
+
+			auto & dimx = this->halof->leveldims(0);
+			auto & dimy = this->halof->leveldims(2);
+			topo2->dimxfine.resize(topo2->nproc(0));
+			topo2->dimyfine.resize(topo2->nproc(2));
+			for (auto i : range<len_t>(topo2->nproc(0))) {
+				topo2->dimxfine[i] = dimx(i, topo3.level());
+			}
+
+			for (auto j : range<len_t>(topo2->nproc(1))) {
+				topo2->dimyfine[j] = dimy(j, topo3.level());
+			}
+		} else if (rdir == relax_dir::yz) {
+			MPI_Comm_split(topo3.comm, topo3.coord(0),
+			               topo3.coord(2) * topo3.nproc(1) + topo3.coord(1), &topo2->comm);
+			for (auto i : range<std::size_t>(2)) {
+				auto i3 = i + 1;
+				topo2->nproc(i) = topo3.nproc(i3);
+				topo2->coord(i) = topo3.coord(i3);
+				topo2->is(i) = topo3.is(i3);
+				topo2->nlocal(i) = topo3.nlocal(i3);
+				topo2->nglobal(i) = topo3.nglobal(i3);
+			}
+
+			auto & dimx = this->halof->leveldims(1);
+			auto & dimy = this->halof->leveldims(2);
+			topo2->dimxfine.resize(topo2->nproc(1));
+			topo2->dimyfine.resize(topo2->nproc(2));
+			for (auto i : range<len_t>(topo2->nproc(0))) {
+				topo2->dimxfine[i] = dimx(i, topo3.level());
+			}
+
+			for (auto j : range<len_t>(topo2->nproc(1))) {
+				topo2->dimyfine[j] = dimy(j, topo3.level());
+			}
+		} else {
+			log::error << "invalid relax_dir for planes" << std::endl;
+		}
+
+		return topo2;
+	}
 };
 
-}}
+}}}
 
 #endif

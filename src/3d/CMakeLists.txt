@@ -25,6 +25,7 @@ if(ENABLE_MPI)
 	mpi/prolong_op.cc
 	mpi/restrict_op.cc
 	mpi/restrict.cc
+	mpi/relax_planes.cc
 	mpi/interp.cc
 	mpi/grid_func.cc
 	mpi/stencil_op.cc

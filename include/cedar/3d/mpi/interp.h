@@ -1,7 +1,7 @@
 #ifndef CEDAR_3D_MPI_INTERP_H
 #define CEDAR_3D_MPI_INTERP_H
 
-#include <cedar/2d/ftn/BMG_parameters_c.h>
+#include <cedar/2d/ftn/mpi/BMG_parameters_c.h>
 #include <cedar/3d/mpi/types.h>
 #include <cedar/kernels/interp_add.h>
 #include <cedar/kernels/setup_interp.h>

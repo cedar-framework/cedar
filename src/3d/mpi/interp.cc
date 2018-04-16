@@ -1,4 +1,4 @@
-#include <cedar/2d/ftn/BMG_parameters_c.h>
+#include <cedar/2d/ftn/mpi/BMG_parameters_c.h>
 
 #include <cedar/3d/mpi/interp.h>
 
