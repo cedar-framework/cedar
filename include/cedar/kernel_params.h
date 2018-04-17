@@ -23,6 +23,7 @@ namespace cedar
 		std::array<bool,3> periodic;
 		bool relax_symmetric;
 		bool definite;
+		std::string halo_name;
 		ml_relax_params ml_relax;
 		std::shared_ptr<config::reader> plane_config;
 

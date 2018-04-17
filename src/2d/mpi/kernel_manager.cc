@@ -53,7 +53,11 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->set<restriction>("system");
 	kman->set<residual>("system");
 	kman->set<setup_interp>("system");
-	kman->set<halo_exchange>("msg");
+	std::string halo_name("msg");
+	if (params->halo_name == "tausch")
+		halo_name = "tausch";
+	log::debug << "Using <" << halo_name << "> for halo exchange" << std::endl;
+	kman->set<halo_exchange>(halo_name);
 	kman->set<setup_nog>("system");
 	kman->set<matvec>("system");
 

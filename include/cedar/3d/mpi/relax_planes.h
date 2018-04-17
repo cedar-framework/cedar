@@ -61,7 +61,6 @@ void relax_planes(const stencil_op<sten3> & so, grid_func & x,
 			log_end(log_planes, ipl, tmp);
 
 			copy23<rdir>(x2, x, ipl);
-			MPI_Barrier(so.grid().comm);
 		}
 	}
 }
@@ -166,8 +165,7 @@ public:
 	void setup(const stencil_op<xxvii_pt> & so) override
 	{
 		level_planes.emplace_back();
-		auto & topo = so.grid();
-		level_map[topo.nlocal(0)] = level_planes.size() - 1;
+		level_map[so.shape(0)] = level_planes.size() - 1;
 		this->setup_impl(so, level_planes.back());
 	}
 	void run(const stencil_op<seven_pt> & so, grid_func & x,

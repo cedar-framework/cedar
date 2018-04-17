@@ -21,7 +21,10 @@ std::shared_ptr<kernel_params> build_kernel_params(config::reader & conf)
 		params->plane_config = std::make_shared<config::reader>("");
 		params->plane_config->set("solver.relaxation", "line-xy");
 		params->plane_config->set("solver.max-iter", 1);
+		params->plane_config->set("halo-exchange", "tausch");
 	}
+
+	params->halo_name = conf.get<std::string>("halo-exchange", "msg");
 
 	return params;
 }
