@@ -107,4 +107,86 @@ stencil_op<seven_pt> diag_diffusion(len_t nx, len_t ny, len_t nz,
 	return so;
 }
 
+
+stencil_op<xxvii_pt> fe(len_t nx, len_t ny, len_t nz)
+{
+	stencil_op<xxvii_pt> so(nx, ny, nz);
+
+	len_t i1 = so.shape(0) + 1;
+	len_t j1 = so.shape(1) + 1;
+	len_t k1 = so.shape(2) + 1;
+
+	for (auto k : range<len_t>(1, k1)){
+		for (auto j : range<len_t>(1, j1)) {
+			for (auto i : range<len_t>(2, i1)) {
+				so(i,j,k,xxvii_pt::pw) = 1.0;
+			}
+		}
+	}
+
+	for (auto k : range<len_t>(1, k1)){
+		for (auto j : range<len_t>(2, j1)) {
+			for (auto i : range<len_t>(1, i1)) {
+				so(i,j,k,xxvii_pt::ps) = 1.0;
+			}
+		}
+	}
+
+	for (auto k : range<len_t>(2, k1)){
+		for (auto j : range<len_t>(1, j1)) {
+			for (auto i : range<len_t>(1, i1)) {
+				so(i,j,k,xxvii_pt::b) = 1.0;
+			}
+		}
+	}
+
+	for (auto k : range<len_t>(1, k1)){
+		for (auto j : range<len_t>(2, j1)) {
+			for (auto i : range<len_t>(2, i1)) {
+				so(i,j,k,xxvii_pt::pnw) = 1.0;
+				so(i,j,k,xxvii_pt::psw) = 1.0;
+			}
+		}
+	}
+
+	for (auto k : range<len_t>(2, k1)){
+		for (auto j : range<len_t>(1, j1)) {
+			for (auto i : range<len_t>(2, i1)) {
+				so(i,j,k,xxvii_pt::bw) = 1.0;
+				so(i,j,k,xxvii_pt::be) = 1.0;
+			}
+		}
+	}
+
+	for (auto k : range<len_t>(2, k1)){
+		for (auto j : range<len_t>(2, j1)) {
+			for (auto i : range<len_t>(1, i1)) {
+				so(i,j,k,xxvii_pt::bn) = 1.0;
+				so(i,j,k,xxvii_pt::bs) = 1.0;
+			}
+		}
+	}
+
+	for (auto k : range<len_t>(2, k1)){
+		for (auto j : range<len_t>(2, j1)) {
+			for (auto i : range<len_t>(2, i1)) {
+				so(i,j,k,xxvii_pt::bnw) = 1.0;
+				so(i,j,k,xxvii_pt::bne) = 1.0;
+				so(i,j,k,xxvii_pt::bse) = 1.0;
+				so(i,j,k,xxvii_pt::bsw) = 1.0;
+			}
+		}
+	}
+
+	for (auto k : so.range(2)) {
+		for (auto j : so.range(1)) {
+			for (auto i : so.range(0)) {
+				so(i,j,k,xxvii_pt::p) = 26;
+			}
+		}
+	}
+
+	return so;
+}
+
 }}}

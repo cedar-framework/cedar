@@ -1,0 +1,13 @@
+{
+	"log": ["status","error"],
+	"plane-config":
+	{
+		"log-planes": false,
+		"solver":
+		{
+			"relaxation": "point",
+			"max-iter": 50,
+			"tol": 1e-30
+		}
+	}
+}
