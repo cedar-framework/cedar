@@ -257,7 +257,7 @@ protected:
 			auto & dimx = this->halof->leveldims(0);
 			auto & dimy = this->halof->leveldims(2);
 			topo2->dimxfine.resize(topo2->nproc(0));
-			topo2->dimyfine.resize(topo2->nproc(2));
+			topo2->dimyfine.resize(topo2->nproc(1));
 			for (auto i : range<len_t>(topo2->nproc(0))) {
 				topo2->dimxfine[i] = dimx(i, topo3.level());
 			}
@@ -279,8 +279,8 @@ protected:
 
 			auto & dimx = this->halof->leveldims(1);
 			auto & dimy = this->halof->leveldims(2);
-			topo2->dimxfine.resize(topo2->nproc(1));
-			topo2->dimyfine.resize(topo2->nproc(2));
+			topo2->dimxfine.resize(topo2->nproc(0));
+			topo2->dimyfine.resize(topo2->nproc(1));
 			for (auto i : range<len_t>(topo2->nproc(0))) {
 				topo2->dimxfine[i] = dimx(i, topo3.level());
 			}
