@@ -195,18 +195,23 @@ namespace cedar {
 	extern time_log<machine_mode::MPI> tlog;
 	extern time_log<machine_mode::SERIAL> tlog_ser;
 	extern bool serial_timers;
+	extern bool active;
 
 	inline void timer_begin(std::string label) {
-		if (serial_timers)
-			tlog_ser.begin(label);
-		else
-			tlog.begin(label);
+		if (active) {
+			if (serial_timers)
+				tlog_ser.begin(label);
+			else
+				tlog.begin(label);
+		}
 	}
 	inline void timer_end(std::string label) {
-		if (serial_timers)
-			tlog_ser.end(label);
-		else
-			tlog.end(label);
+		if (active) {
+			if (serial_timers)
+				tlog_ser.end(label);
+			else
+				tlog.end(label);
+		}
 	}
 	inline void timer_up() {
 		if (serial_timers)
@@ -220,6 +225,8 @@ namespace cedar {
 		else
 			tlog.down();
 	}
+	inline void timer_pause() { active = false; }
+	inline void timer_play() { active = true; }
 	inline void timer_redist(redist_comms comm) { tlog.redist(comm); }
 	inline void timer_init(MPI_Comm comm){ tlog.init(comm); serial_timers = false; }
 	inline void timer_save(std::string fname){
