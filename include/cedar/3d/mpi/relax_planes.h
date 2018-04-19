@@ -182,14 +182,16 @@ public:
 		else if (rdir == relax_dir::yz)
 			rng = so.range(0);
 		auto topo2 = slice_topo(so.grid());
+		auto conf2 = this->params->plane_config;
+		auto log_planes = conf2->template get<bool>("log-planes", true);
 		for (auto i : rng) {
-			(void)i;
 			auto so2_ptr = std::make_unique<cdr2::mpi::stencil_op<sten2>>(topo2);
 			auto & so2 = *so2_ptr;
 			copy_coeff<rdir>(so, so2);
-			auto conf2 = this->params->plane_config;
 
+			auto tmp = log_begin(log_planes, i, relax_dir_name<rdir>::value);
 			planes.emplace_back(std::make_unique<cdr2::mpi::solver<sten2>>(so2, conf2));
+			log_end(log_planes, i, tmp);
 			planes.back()->give_op(std::move(so2_ptr));
 			planes.back()->levels.template get<sten2>(0).x = cdr2::mpi::grid_func(topo2);
 			planes.back()->levels.template get<sten2>(0).b = cdr2::mpi::grid_func(topo2);
