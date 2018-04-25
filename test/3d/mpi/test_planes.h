@@ -29,7 +29,7 @@ void plane_test(cedar::len_t nx, cedar::len_t ny, cedar::len_t nz)
 	using namespace cedar;
 	using namespace cedar::cdr3;
 
-	config::reader conf("test-planes-mpi.json");
+	config conf("test-planes-mpi.json");
 	log::init(conf);
 
 	int nsweeps = 3;

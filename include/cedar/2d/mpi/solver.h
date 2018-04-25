@@ -58,7 +58,7 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 
 
 	solver(mpi::stencil_op<fsten> & fop,
-	       std::shared_ptr<config::reader> conf) : parent::multilevel(fop, conf), comm(fop.grid().comm)
+	       std::shared_ptr<config> conf) : parent::multilevel(fop, conf), comm(fop.grid().comm)
 	{
 		this->kman = build_kernel_manager(*this->conf);
 		parent::setup(fop);

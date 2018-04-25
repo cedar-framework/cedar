@@ -46,8 +46,8 @@ public:
 	using solve_cg = kernels::solve_cg<stypes>;
 	using kern_manager = kernel_manager<klist<stypes, emode>>;
 
-	using conf_ptr = std::shared_ptr<config::reader>;
-multilevel(stencil_op<fsten> & fop) : levels(fop), conf(std::make_shared<config::reader>("config.json")) {
+	using conf_ptr = std::shared_ptr<config>;
+multilevel(stencil_op<fsten> & fop) : levels(fop), conf(std::make_shared<config>("config.json")) {
 		setup_cycler();
 	}
 
@@ -307,13 +307,13 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 	}
 
 
-	config::reader & get_config() { return *conf; }
+	config & get_config() { return *conf; }
 	level_container levels;
 
 protected:
 	std::unique_ptr<cycle::cycle<emode, level_container, fsten>> cycle;
 	std::function<void(grid_func &x, const grid_func &b)> coarse_solver;
-	std::shared_ptr<config::reader> conf;
+	std::shared_ptr<config> conf;
 	std::shared_ptr<kern_manager> kman;
 	grid_func ABD;
 	real_t *bbd;

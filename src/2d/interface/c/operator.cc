@@ -2,7 +2,7 @@
 
 #include <cedar/types.h>
 #include <cedar/2d/util/topo.h>
-#include <cedar/config/reader.h>
+#include <cedar/config.h>
 
 #include <cedar/2d/interface/c/operator.h>
 #include <cedar/2d/interface/c/types.h>
@@ -16,7 +16,7 @@ extern "C"
 
 		auto grid = *(reinterpret_cast<std::shared_ptr<cedar::grid_topo>*>(topo));
 
-		config::reader conf("config.json");
+		config conf("config.json");
 
 		auto * op_cont = new op_container(grid, conf);
 

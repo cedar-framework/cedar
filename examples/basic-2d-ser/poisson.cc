@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 	using namespace cedar;
 	using namespace cedar::cdr2;
 
-	config::reader conf;
+	config conf;
 	auto ndofs = conf.getvec<len_t>("grid.n");
 	auto nx = ndofs[0];
 	auto ny = ndofs[1];

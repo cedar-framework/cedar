@@ -9,7 +9,7 @@
 
 namespace cedar {
 	template <unsigned short ND>
-		std::array<int, ND> choose_redist(config::reader & conf,
+		std::array<int, ND> choose_redist(config & conf,
 		                                  std::array<int, ND> nproc,
 		                                  std::array<len_t, ND> nglobal)
 	{

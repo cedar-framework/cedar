@@ -22,7 +22,7 @@ using halo_exchange = kernels::halo_exchange<stypes>;
 using setup_nog = kernels::setup_nog<stypes>;
 
 
-kman_ptr build_kernel_manager(config::reader & conf);
+kman_ptr build_kernel_manager(config & conf);
 kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params);
 
 

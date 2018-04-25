@@ -111,7 +111,7 @@ TEST(MPIPoisson3, Isotropic) {
 	mpi::grid_func b(grid);
 
 	set_problem(b);
-	auto conf = std::make_shared<config::reader>("");
+	auto conf = std::make_shared<config>("");
 	log::init(*conf);
 	conf->set("solver.relaxation", "point");
 	conf->set("solver.cg-solver", "LU");

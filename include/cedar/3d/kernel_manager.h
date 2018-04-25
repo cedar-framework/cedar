@@ -20,7 +20,7 @@ using residual = kernels::residual<stypes>;
 using setup_interp = kernels::setup_interp<stypes>;
 using solve_cg = kernels::solve_cg<stypes>;
 
-kman_ptr build_kernel_manager(config::reader & conf);
+kman_ptr build_kernel_manager(config & conf);
 kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params);
 
 }}

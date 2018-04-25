@@ -65,12 +65,12 @@ TEST(MPILines, MLRelaxX)
 		            return 4*(pi*pi)*sin(2*pi*x)*sin(2*pi*y) + 4*(pi*pi)*eps*sin(2*pi*x)*sin(2*pi*y);
 	            });
 
-	auto conf2 = std::make_shared<config::reader>("");
+	auto conf2 = std::make_shared<config>("");
 	log::init(*conf2);
 	conf2->set("solver.relaxation", "line-x");
 	mpi::solver<five_pt> bmg2(so, conf2);
 
-	auto confn = std::make_shared<config::reader>("");
+	auto confn = std::make_shared<config>("");
 	confn->set("solver.relaxation", "line-x");
 	confn->set("solver.ml-relax.enabled", true);
 	mpi::solver<five_pt> bmgn(so, confn);
@@ -107,12 +107,12 @@ TEST(MPILines, MLRelaxY)
 		            return 4*(pi*pi)*eps*sin(2*pi*x)*sin(2*pi*y) + 4*(pi*pi)*sin(2*pi*x)*sin(2*pi*y);
 	            });
 
-	auto conf2 = std::make_shared<config::reader>("");
+	auto conf2 = std::make_shared<config>("");
 	log::init(*conf2);
 	conf2->set("solver.relaxation", "line-y");
 	mpi::solver<five_pt> bmg2(so, conf2);
 
-	auto confn = std::make_shared<config::reader>("");
+	auto confn = std::make_shared<config>("");
 	confn->set("solver.relaxation", "line-y");
 	confn->set("solver.ml-relax.enabled", true);
 	mpi::solver<five_pt> bmgn(so, confn);

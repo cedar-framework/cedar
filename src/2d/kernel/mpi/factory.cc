@@ -28,7 +28,7 @@ namespace mpi = cedar::cdr2::mpi;
 
 namespace factory
 {
-	void init(std::shared_ptr<registry> kreg, config::reader & conf)
+	void init(std::shared_ptr<registry> kreg, config & conf)
 	{
 		auto params = build_kernel_params(conf);
 
@@ -121,7 +121,7 @@ namespace factory
 
 		kreg->add(kernel_name::setup_cg_boxmg, "fortran-msg",
 		          cedar::kernel<const mpi::stencil_op &,
-		          std::shared_ptr<config::reader>,
+		          std::shared_ptr<config>,
 		          std::shared_ptr<solver>*>(impls::setup_cg_boxmg, params));
 
 		kreg->add(kernel_name::solve_cg_boxmg, "fortran-msg",
@@ -135,7 +135,7 @@ namespace factory
 
 		kreg->add(kernel_name::setup_cg_redist, "c++",
 		          cedar::kernel<const mpi::stencil_op &,
-		          std::shared_ptr<config::reader>,
+		          std::shared_ptr<config>,
 		          std::shared_ptr<mpi::redist_solver>*,
 		          std::vector<int>&>(impls::setup_cg_redist, params));
 
@@ -178,7 +178,7 @@ namespace factory
 	}
 
 
-	std::shared_ptr<registry> from_config(config::reader &conf)
+	std::shared_ptr<registry> from_config(config &conf)
 	{
 		auto kreg = std::make_shared<registry>();
 

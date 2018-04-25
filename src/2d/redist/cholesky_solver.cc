@@ -3,7 +3,7 @@
 namespace cedar { namespace cdr2 {
 
 cholesky_solver::cholesky_solver(stencil_op & sop,
-                                 std::shared_ptr<config::reader> conf) : conf(conf)
+                                 std::shared_ptr<config> conf) : conf(conf)
 {
 	this->kman = build_kernel_manager(*conf);
 	auto params = build_kernel_params(*conf);

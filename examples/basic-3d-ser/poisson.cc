@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
 	log::status << "Beginning test" << std::endl;
 
-	config::reader conf;
+	config conf;
 
 	auto ndofs = conf.getvec<len_t>("grid.n");
 	auto nx = ndofs[0];

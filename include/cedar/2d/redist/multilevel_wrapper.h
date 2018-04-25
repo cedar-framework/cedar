@@ -3,7 +3,7 @@
 
 #include <cedar/2d/types.h>
 #include <cedar/2d/mpi/types.h>
-#include <cedar/config/reader.h>
+#include <cedar/config.h>
 #include <cedar/2d/mpi/msg_exchanger.h>
 
 namespace cedar { namespace cdr2 {
@@ -21,13 +21,13 @@ struct serial_type { static const bool value; };
 			using stencil_op = typename stypes::template stencil_op<nine_pt>;
 			using grid_func = typename stypes::grid_func;
 		multilevel_wrapper(stencil_op & sop) : inner(sop) {}
-		multilevel_wrapper(stencil_op & sop, std::shared_ptr<config::reader> conf) : inner(sop, conf) {}
+		multilevel_wrapper(stencil_op & sop, std::shared_ptr<config> conf) : inner(sop, conf) {}
 			void cycle(grid_func & x, const grid_func & b)
 			{
 				inner.vcycle(x, b);
 			}
 
-			config::reader & get_config() { return inner.get_config(); }
+			config & get_config() { return inner.get_config(); }
 
 		protected:
 			inner_solver inner;

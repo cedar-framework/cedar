@@ -5,7 +5,7 @@
 #include <array>
 #include <cassert>
 
-#include <cedar/config/reader.h>
+#include <cedar/config.h>
 #include <cedar/mpi/redist_comms.h>
 #include <cedar/2d/mpi/stencil_op.h>
 #include <cedar/2d/mpi/msg_exchanger.h>
@@ -47,7 +47,7 @@ public:
 	*/
 	redist_solver(const stencil_op<nine_pt> & so,
 	              halo_exchanger_base *halof,
-	              std::shared_ptr<config::reader> conf,
+	              std::shared_ptr<config> conf,
 	              std::array<int, 2> nblock);
 	/**
 	   Runs the redistributed solve phase
@@ -105,7 +105,7 @@ protected:
 template<class inner_solver>
 redist_solver<inner_solver>::redist_solver(const stencil_op<nine_pt> & so,
                                            halo_exchanger_base *halof,
-                                           std::shared_ptr<config::reader> conf,
+                                           std::shared_ptr<config> conf,
                                            std::array<int, 2> nblock) :
 	redundant(false), nblock(nblock), active(true), recv_id(-1)
 {

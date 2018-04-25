@@ -36,12 +36,12 @@ void set_header_msg(std::string msg)
 
 void init()
 {
-	config::reader conf;
+	config conf;
 	init(conf);
 }
 
 
-void init(config::reader & conf)
+void init(config & conf)
 {
 	log_level = std::make_unique<lmap_t>();
 	std::vector<std::string> levels{"status", "info", "error", "memory", "debug", "timer"};
@@ -54,7 +54,7 @@ void init(config::reader & conf)
 	init_level(conf);
 }
 
-void init_level(config::reader & conf)
+void init_level(config & conf)
 {
 	level = 0;
 
@@ -63,7 +63,7 @@ void init_level(config::reader & conf)
 	for (auto clvl : clevels) level |= (*log_level)[clvl];
 }
 
-void push_level(std::string header, config::reader & conf)
+void push_level(std::string header, config & conf)
 {
 	saved_levels.emplace(level, header_msg);
 	init_level(conf);

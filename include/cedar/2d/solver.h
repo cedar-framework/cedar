@@ -8,7 +8,7 @@
 
 #include <cedar/level.h>
 #include <cedar/multilevel.h>
-#include <cedar/config/reader.h>
+#include <cedar/config.h>
 #include <cedar/2d/level_container.h>
 #include <cedar/2d/stencil_op.h>
 #include <cedar/2d/relax_stencil.h>
@@ -47,7 +47,7 @@ solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 		parent::setup(fop);
 	}
 	solver(stencil_op<fsten> & fop,
-	       std::shared_ptr<config::reader> conf) :
+	       std::shared_ptr<config> conf) :
 	parent::multilevel(fop, conf)
 	{
 		this->kman = build_kernel_manager(*this->conf);

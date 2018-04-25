@@ -12,7 +12,7 @@ TEST(MPIRelax3, Point7) {
 	using namespace cedar;
 	using namespace cedar::cdr3;
 
-	config::reader conf("");
+	config conf("");
 	log::init(conf);
 	auto kreg_ser = build_kernel_manager(conf);
 	auto kreg_mpi = mpi::build_kernel_manager(conf);

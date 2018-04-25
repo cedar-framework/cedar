@@ -94,7 +94,7 @@ TEST(MPIPoisson2, Isotropic) {
 		            return 8*(pi*pi)*sin(2*pi*x)*sin(2*pi*y);
 	            });
 
-	auto conf = std::make_shared<config::reader>("");
+	auto conf = std::make_shared<config>("");
 	log::init(*conf);
 	mpi::solver<five_pt> bmg(so, conf);
 
@@ -134,7 +134,7 @@ TEST(MPIPoisson2, StrongX) {
 		            return 4*(pi*pi)*eps*sin(2*pi*x)*sin(2*pi*y) + 4*(pi*pi)*sin(2*pi*x)*sin(2*pi*y);
 	            });
 
-	auto conf = std::make_shared<config::reader>("");
+	auto conf = std::make_shared<config>("");
 	log::init(*conf);
 	conf->set("solver.relaxation", "line-x");
 	mpi::solver<five_pt> bmg(so, conf);
@@ -175,7 +175,7 @@ TEST(MPIPoisson2, StrongY) {
 		            return 4*(pi*pi)*eps*sin(2*pi*x)*sin(2*pi*y) + 4*(pi*pi)*sin(2*pi*x)*sin(2*pi*y);
 	            });
 
-	auto conf = std::make_shared<config::reader>("");
+	auto conf = std::make_shared<config>("");
 	log::init(*conf);
 	conf->set("solver.relaxation", "line-y");
 	mpi::solver<five_pt> bmg(so, conf);

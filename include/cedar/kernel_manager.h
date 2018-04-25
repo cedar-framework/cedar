@@ -3,7 +3,7 @@
 
 #include <cedar/type_list.h>
 #include <cedar/kernel_params.h>
-#include <cedar/config/reader.h>
+#include <cedar/config.h>
 
 
 namespace cedar {
@@ -15,7 +15,7 @@ public:
 	using parent = type_map<tlist>;
 
     kernel_manager(std::shared_ptr<kernel_params> params) : params(params) {}
-	kernel_manager(config::reader & conf) { params = build_kernel_params(conf); }
+	kernel_manager(config & conf) { params = build_kernel_params(conf); }
 
 	template<class T, class rclass>
 	void add(const std::string & name)

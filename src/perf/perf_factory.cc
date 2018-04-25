@@ -6,7 +6,7 @@
 #include <cedar/perf/full_iterator.h>
 #include <cedar/2d/util/topo.h>
 #include <cedar/3d/util/topo.h>
-#include <cedar/config/reader.h>
+#include <cedar/config.h>
 #include <cedar/perf/cholesky_model.h>
 #include <cedar/perf/const_model.h>
 #include <cedar/perf/params.h>
@@ -20,7 +20,7 @@
 
 using namespace cedar;
 
-std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny)
+std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(config & conf, int npx, int npy, len_t nx, len_t ny)
 {
 	using namespace cedar::cdr2;
 
@@ -58,7 +58,7 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(config::reader & conf
 }
 
 
-std::vector<std::vector<int>> get_choices(config::reader & conf, int npx, int npy, len_t nx, len_t ny)
+std::vector<std::vector<int>> get_choices(config & conf, int npx, int npy, len_t nx, len_t ny)
 {
 	using namespace cedar::cdr2;
 
@@ -104,7 +104,7 @@ std::vector<std::vector<int>> get_choices(config::reader & conf, int npx, int np
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::random_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny, std::vector<int> path)
+std::shared_ptr<vcycle_model> perf_factory::random_vcycle(config & conf, int npx, int npy, len_t nx, len_t ny, std::vector<int> path)
 {
 	using namespace cedar::cdr2;
 
@@ -171,7 +171,7 @@ std::shared_ptr<vcycle_model> perf_factory::random_vcycle(config::reader & conf,
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::manual_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny)
+std::shared_ptr<vcycle_model> perf_factory::manual_vcycle(config & conf, int npx, int npy, len_t nx, len_t ny)
 {
 	using namespace cedar::cdr2;
 
@@ -201,7 +201,7 @@ std::shared_ptr<vcycle_model> perf_factory::manual_vcycle(config::reader & conf,
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny, bool terminate, int rlevel)
+std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(config & conf, int npx, int npy, len_t nx, len_t ny, bool terminate, int rlevel)
 {
 	using namespace cedar::cdr2;
 
@@ -273,7 +273,7 @@ std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(config::reader & conf, in
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::astar_vcycle(config::reader & conf, int npx, int npy, len_t nx, len_t ny)
+std::shared_ptr<vcycle_model> perf_factory::astar_vcycle(config & conf, int npx, int npy, len_t nx, len_t ny)
 {
 	using namespace cedar;
 	perf_problem pprob(conf);
@@ -316,7 +316,7 @@ std::array<len_t,2> perf_factory::graph_vcycle(std::ostream & os, int npx, int n
 
 	auto np = npx*npy;
 
-	config::reader conf("config.json");
+	config conf("config.json");
 
 	int min_coarse = conf.get<int>("solver.min-coarse");
 	float tw = (1.0/conf.get<float>("machine.bandwidth")) * sizeof(real_t);
@@ -380,7 +380,7 @@ std::array<len_t,2> perf_factory::graph_vcycle(std::ostream & os, int npx, int n
 // {
 // 	using namespace cedar::cdr3;
 
-// 	config::reader conf("perf.json");
+// 	config conf("perf.json");
 // 	int min_coarse = conf.get<int>("solver.min-coarse", 3);
 // 	auto model = std::make_shared<vcycle_model>(3);
 // 	auto topo = util::model_topo(npx, npy, npz, nx, ny, nz);

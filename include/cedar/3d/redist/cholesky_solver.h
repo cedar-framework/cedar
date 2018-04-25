@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include <cedar/config/reader.h>
+#include <cedar/config.h>
 #include <cedar/3d/types.h>
 #include <cedar/3d/kernel_manager.h>
 
@@ -16,15 +16,15 @@ public:
 	using stypes = cdr3::stypes;
 	using stencil_op = typename stypes::template stencil_op<xxvii_pt>;
 	using grid_func = typename stypes::grid_func;
-	cholesky_solver(stencil_op & sop, std::shared_ptr<config::reader> conf);
+	cholesky_solver(stencil_op & sop, std::shared_ptr<config> conf);
 	void cycle(grid_func & x, const grid_func & b);
-	config::reader & get_config() { return *conf; }
+	config & get_config() { return *conf; }
 
 protected:
 	kman_ptr kman;
 	grid_func ABD;
 	real_t *bbd;
-	std::shared_ptr<config::reader> conf;
+	std::shared_ptr<config> conf;
 };
 
 }}

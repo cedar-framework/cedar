@@ -15,7 +15,7 @@ static void fill_random(real_t * arr, len_t size)
 }
 
 
-float params::compute_tc(int nd, config::reader & conf)
+float params::compute_tc(int nd, config & conf)
 {
 	// float tc;
 	// int nsamples = 100;

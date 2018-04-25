@@ -18,7 +18,7 @@ namespace cedar { namespace cdr2 { namespace kernel {
 namespace factory
 {
 	namespace name = cedar::kernel_name;
-	std::shared_ptr<registry> from_config(config::reader &conf)
+	std::shared_ptr<registry> from_config(config &conf)
 	{
 		auto kreg = std::make_shared<registry>();
 

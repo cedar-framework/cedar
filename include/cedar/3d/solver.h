@@ -44,7 +44,7 @@ solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 		parent::setup(fop);
 	}
 solver(stencil_op<fsten> & fop,
-       std::shared_ptr<config::reader> conf) :
+       std::shared_ptr<config> conf) :
 	parent::multilevel(fop, conf)
 	{
 		this->kman = build_kernel_manager(*this->conf);

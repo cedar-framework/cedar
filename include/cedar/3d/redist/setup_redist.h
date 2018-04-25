@@ -11,9 +11,9 @@ namespace cedar { namespace cdr3 {
 template<class inner_solver>
 std::function<void(mpi::grid_func &, const mpi::grid_func &)>
 	create_redist_solver(mpi::kman_ptr kman,
-                     config::reader & conf,
+                     config & conf,
                      mpi::stencil_op<xxvii_pt> & cop,
-                     std::shared_ptr<config::reader> cg_conf,
+                     std::shared_ptr<config> cg_conf,
                      std::array<int, 3> & choice)
 {
 	auto params = build_kernel_params(conf);

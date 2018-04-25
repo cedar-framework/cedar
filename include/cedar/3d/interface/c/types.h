@@ -10,7 +10,7 @@ namespace cedar { namespace cdr3 {
 		struct op_container
 		{
 			op_container(std::shared_ptr<cedar::grid_topo> topo,
-			             config::reader & conf) : op(topo), xgf(topo), bgf(topo)
+			             config & conf) : op(topo), xgf(topo), bgf(topo)
 			{
 				kman = mpi::build_kernel_manager(conf);
 			}

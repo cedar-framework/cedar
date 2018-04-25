@@ -1,7 +1,7 @@
 #ifndef CEDAR_3D_REDIST_MULTILEVEL_WRAPPER_H
 #define CEDAR_3D_REDIST_MULTILEVEL_WRAPPER_H
 
-#include <cedar/config/reader.h>
+#include <cedar/config.h>
 #include <cedar/3d/types.h>
 #include <cedar/3d/mpi/types.h>
 #include <cedar/3d/mpi/msg_exchanger.h>
@@ -21,13 +21,13 @@ struct serial_type { static const bool value; };
 			using stencil_op = typename stypes::template stencil_op<xxvii_pt>;
 			using grid_func = typename stypes::grid_func;
 		multilevel_wrapper(stencil_op & sop) : inner(sop) {}
-		multilevel_wrapper(stencil_op & sop, std::shared_ptr<config::reader> conf) : inner(sop, conf) {}
+		multilevel_wrapper(stencil_op & sop, std::shared_ptr<config> conf) : inner(sop, conf) {}
 			void cycle(grid_func & x, const grid_func & b)
 			{
 				inner.vcycle(x, b);
 			}
 
-			config::reader & get_config() { return inner.get_config(); }
+			config & get_config() { return inner.get_config(); }
 
 		protected:
 			inner_solver inner;

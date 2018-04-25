@@ -23,14 +23,14 @@ using perf_node = ss::node<perf_state, std::array<int, 2>, float>;
 
 struct perf_problem : ss::problem<perf_state, std::array<int,2>, float>
 {
-    perf_problem(config::reader & conf): conf(conf) {}
+    perf_problem(config & conf): conf(conf) {}
 	bool goal_test(perf_state & model);
 	perf_state result(perf_state & model, std::array<int,2> action);
 	float step_cost(perf_state & state, std::array<int,2> act);
 	std::vector<std::array<int,2>> actions(perf_state & state);
 
 private:
-	config::reader & conf;
+	config & conf;
 };
 
 

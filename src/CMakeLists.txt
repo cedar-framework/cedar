@@ -1,4 +1,4 @@
-set(dirs 2d config perf util interface)
+set(dirs 2d perf util interface)
 
 if (ENABLE_3D)
   list(APPEND dirs 3d)
@@ -15,4 +15,4 @@ foreach(dir ${dirs})
   endforeach(dsrc)
 endforeach(dir)
 
-set(cedar_src ${sources} src/kernel_params.cc PARENT_SCOPE)
+set(cedar_src ${sources} src/kernel_params.cc src/config.cc PARENT_SCOPE)

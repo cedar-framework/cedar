@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
 	using namespace cedar;
 	using namespace cedar::cdr3;
 
-	auto conf = std::make_shared<config::reader>();
+	auto conf = std::make_shared<config>();
 	auto params = build_kernel_params(*conf);
 
 	auto ndofs = conf->getvec<len_t>("grid.n");

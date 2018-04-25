@@ -7,7 +7,7 @@
 #include <cedar/2d/kernel_manager.h>
 
 namespace cedar { namespace cdr2 {
-kman_ptr build_kernel_manager(config::reader & conf)
+kman_ptr build_kernel_manager(config & conf)
 {
 	return build_kernel_manager(build_kernel_params(conf));
 }

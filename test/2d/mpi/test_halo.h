@@ -114,7 +114,7 @@ static void test_stencil(kernel_params & params, mpi::stencil_op<sten> & so)
 }
 
 
-static void set_conf(config::reader & conf, const std::array<int, 2> & proc, int per_mask)
+static void set_conf(config & conf, const std::array<int, 2> & proc, int per_mask)
 {
 	conf.set("grid.local", true);
 	std::vector<int> gsize{{20, 30}};
@@ -131,7 +131,7 @@ static void set_conf(config::reader & conf, const std::array<int, 2> & proc, int
 
 void run_test(const std::string & halo_name, MPI_Comm comm, std::array<int, 2> & proc, int per_mask)
 {
-	auto conf = std::make_shared<config::reader>("config.json");
+	auto conf = std::make_shared<config>("config.json");
 	log::set_comm(comm);
 	set_conf(*conf, proc, per_mask);
 	auto params = build_kernel_params(*conf);

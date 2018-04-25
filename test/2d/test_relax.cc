@@ -19,7 +19,7 @@ TEST(SerialRelax2, Point5) {
 	len_t nx = 31;
 	len_t ny = nx;
 
-	config::reader conf("");
+	config conf("");
 	log::init(conf);
 
 	auto kman = build_kernel_manager(conf);
@@ -68,7 +68,7 @@ TEST(SerialRelax2, Point9) {
 
 	relax_stencil sor(nx, ny);
 
-	config::reader conf("");
+	config conf("");
 	log::init(conf);
 	auto kman = build_kernel_manager(conf);
 
@@ -105,7 +105,7 @@ TEST(SerialRelax2, LineX5) {
 	len_t nx = 132;
 	len_t ny = 132;
 
-	config::reader conf("");
+	config conf("");
 	log::init(conf);
 	auto kman = build_kernel_manager(conf);
 
@@ -139,7 +139,7 @@ TEST(SerialRelax2, LineY5) {
 	len_t nx = 132;
 	len_t ny = 132;
 
-	config::reader conf("");
+	config conf("");
 	log::init(conf);
 	auto kman = build_kernel_manager(conf);
 

@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
 
 	timer_init(MPI_COMM_WORLD);
 
-	auto conf = std::make_shared<config::reader>();
+	auto conf = std::make_shared<config>();
 	auto params = build_kernel_params(*conf);
 	log::init(*conf);
 	log::status << "Beginning test" << std::endl;

@@ -68,8 +68,8 @@ TEST(MPICGSolver, Redist) {
 	set_problem(b0, rhsf);
 	set_problem(b1, rhsf);
 
-	auto conf0 = std::make_shared<config::reader>("test-cgredist-0.json");
-	auto conf1 = std::make_shared<config::reader>("test-cgredist-1.json");
+	auto conf0 = std::make_shared<config>("test-cgredist-0.json");
+	auto conf1 = std::make_shared<config>("test-cgredist-1.json");
 
 	log::init_level(*conf0);
 	mpi::solver<five_pt> bmg0(so0, conf0);

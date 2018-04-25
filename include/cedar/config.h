@@ -8,16 +8,14 @@
 #include <nlohmann/json.hpp>
 
 namespace cedar {
-namespace config
-{
 	using json = nlohmann::json;
-    class reader
+    class config
     {
         public:
-	    reader();
-    reader(json && stree) : root(std::move(stree)), fname("") {}
+	    config();
+    config(json && stree) : root(std::move(stree)), fname("") {}
             template <typename T>
-	            reader(T&& fname);
+	            config(T&& fname);
             template <typename OptionType>
                 void set(std::string path, OptionType val);
             template <typename OptionType>
@@ -43,7 +41,7 @@ namespace config
 	            std::vector<OptionType> getvec(std::string path);
             template <typename OptionType>
 	            std::vector<std::vector<OptionType>> getnvec(std::string path);
-            std::shared_ptr<reader> getconf(std::string path);
+            std::shared_ptr<config> getconf(std::string path);
             /**
              * Sets a new config file for future Config::get calls.
              *
@@ -59,10 +57,10 @@ namespace config
     };
 
     template <typename T>
-	    reader::reader(T&& fname): fname(std::forward<T>(fname)) { read(); }
+	    config::config(T&& fname): fname(std::forward<T>(fname)) { read(); }
 
     template <typename OptionType>
-        void reader::set(std::string path, OptionType val)
+        void config::set(std::string path, OptionType val)
         {
 	        std::replace(path.begin(), path.end(), '.', '/');
 	        std::string rpath("/" + path);
@@ -70,20 +68,20 @@ namespace config
         }
 
     template <typename OptionType>
-        void reader::setvec(std::string path, std::vector<OptionType> vec)
+        void config::setvec(std::string path, std::vector<OptionType> vec)
         {
 	        set<std::vector<OptionType>>(path, vec);
         }
 
     template <class otype>
-        otype reader::get(std::string path)
+        otype config::get(std::string path)
         {
 	        std::replace(path.begin(), path.end(), '.', '/');
 	        std::string rpath("/" + path);
 	        return root[json::json_pointer(rpath)].get<otype>();
         }
     template <class otype>
-        otype reader::get(std::string path, otype default_value)
+        otype config::get(std::string path, otype default_value)
         {
 	        std::replace(path.begin(), path.end(), '.', '/');
 	        std::string rpath("/" + path);
@@ -95,7 +93,7 @@ namespace config
         }
 
     template <class otype>
-        std::vector<otype> reader::getvec(std::string path)
+        std::vector<otype> config::getvec(std::string path)
         {
 	        try {
 		        return get<std::vector<otype>>(path);
@@ -105,10 +103,9 @@ namespace config
         }
 
     template <typename otype>
-	    std::vector<std::vector<otype>> reader::getnvec(std::string path)
+	    std::vector<std::vector<otype>> config::getnvec(std::string path)
     {
 	    return get<std::vector<std::vector<otype>>>(path);
     }
-}
 }
 #endif

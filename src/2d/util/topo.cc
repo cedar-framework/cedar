@@ -93,7 +93,7 @@ topo_ptr create_topo(MPI_Comm comm, int npx, int npy, len_t nx, len_t ny)
 }
 
 
-topo_ptr create_topo(config::reader & conf, MPI_Comm comm)
+topo_ptr create_topo(config & conf, MPI_Comm comm)
 {
 	auto islocal = conf.get<bool>("grid.local", true);
 	auto ndofs = conf.getvec<len_t>("grid.n");

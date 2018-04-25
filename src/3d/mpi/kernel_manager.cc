@@ -12,7 +12,7 @@
 
 namespace cedar { namespace cdr3 { namespace mpi {
 
-kman_ptr build_kernel_manager(config::reader & conf)
+kman_ptr build_kernel_manager(config & conf)
 {
 	return build_kernel_manager(build_kernel_params(conf));
 }

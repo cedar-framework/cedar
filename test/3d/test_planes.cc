@@ -18,7 +18,7 @@ TEST(SerialPlanes, XY7) {
 	len_t ny = 35;
 	len_t nz = 5;
 
-	config::reader conf("test-planes-ser.json");
+	config conf("test-planes-ser.json");
 	log::init(conf);
 
 	auto kman = build_kernel_manager(conf);
@@ -60,7 +60,7 @@ TEST(SerialPlanes, XY27) {
 	len_t ny = 35;
 	len_t nz = 5;
 
-	config::reader conf("test-planes-ser.json");
+	config conf("test-planes-ser.json");
 	log::init(conf);
 
 	auto kman = build_kernel_manager(conf);
@@ -102,7 +102,7 @@ TEST(SerialPlanes, XZ7) {
 	len_t ny = 5;
 	len_t nz = 35;
 
-	config::reader conf("test-planes-ser.json");
+	config conf("test-planes-ser.json");
 	log::init(conf);
 
 	auto kman = build_kernel_manager(conf);
@@ -144,7 +144,7 @@ TEST(SerialPlanes, XZ27) {
 	len_t ny = 5;
 	len_t nz = 35;
 
-	config::reader conf("test-planes-ser.json");
+	config conf("test-planes-ser.json");
 	log::init(conf);
 
 	auto kman = build_kernel_manager(conf);
@@ -186,7 +186,7 @@ TEST(SerialPlanes, YZ7) {
 	len_t ny = 31;
 	len_t nz = 35;
 
-	config::reader conf("test-planes-ser.json");
+	config conf("test-planes-ser.json");
 	log::init(conf);
 
 	auto kman = build_kernel_manager(conf);
@@ -228,7 +228,7 @@ TEST(SerialPlanes, YZ27) {
 	len_t ny = 31;
 	len_t nz = 35;
 
-	config::reader conf("test-planes-ser.json");
+	config conf("test-planes-ser.json");
 	log::init(conf);
 
 	auto kman = build_kernel_manager(conf);

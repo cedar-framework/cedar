@@ -4,7 +4,7 @@
 #include <mpi.h>
 #include <array>
 
-#include <cedar/config/reader.h>
+#include <cedar/config.h>
 #include <cedar/mpi/redist_comms.h>
 #include <cedar/mpi/block_partition.h>
 #include <cedar/3d/solver.h>
@@ -46,7 +46,7 @@ public:
 	   @param[in] nblock The destination 3D distribution
 	*/
 	redist_solver(const stencil_op<xxvii_pt> & so, mpi::msg_exchanger *halof,
-	              std::shared_ptr<config::reader> conf, std::array<int, 3> nblock);
+	              std::shared_ptr<config> conf, std::array<int, 3> nblock);
 	/**
 	   Runs the redistributed solve phase
 	   @param[in] b rhs
@@ -94,7 +94,7 @@ protected:
 template<class inner_solver>
 	redist_solver<inner_solver>::redist_solver(const stencil_op<xxvii_pt> & so,
 	                                           mpi::msg_exchanger *halof,
-	                                           std::shared_ptr<config::reader> conf,
+	                                           std::shared_ptr<config> conf,
 	                                           std::array<int, 3> nblock) :
 nblock(nblock), active(true), recv_id(-1)
 {

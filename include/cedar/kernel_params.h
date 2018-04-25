@@ -4,14 +4,14 @@
 #include <array>
 #include <memory>
 
-#include <cedar/config/reader.h>
+#include <cedar/config.h>
 
 namespace cedar
 {
 	struct ml_relax_params
 	{
 		ml_relax_params() : enabled(false), min_gsz(3) {}
-		void init(config::reader & conf);
+		void init(config & conf);
 
 		bool enabled; /** Whether multilevel line relaxation is enabled */
 		int min_gsz;  /** Coarsening factor for multilevel line relaxation */
@@ -25,7 +25,7 @@ namespace cedar
 		bool definite;
 		std::string halo_name;
 		ml_relax_params ml_relax;
-		std::shared_ptr<config::reader> plane_config;
+		std::shared_ptr<config> plane_config;
 
 		int per_mask() const {
 			int mask = 0;
@@ -38,7 +38,7 @@ namespace cedar
 	};
 
 
-	std::shared_ptr<kernel_params> build_kernel_params(config::reader & conf);
+	std::shared_ptr<kernel_params> build_kernel_params(config & conf);
 }
 
 #endif
