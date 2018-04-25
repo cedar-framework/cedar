@@ -7,6 +7,7 @@
 #include <cedar/cycle/types.h>
 #include <cedar/cycle/vcycle.h>
 #include <cedar/cycle/fcycle.h>
+#include <cedar/multilevel_settings.h>
 
 namespace cedar {
 
@@ -48,11 +49,15 @@ public:
 
 	using conf_ptr = std::shared_ptr<config>;
 multilevel(stencil_op<fsten> & fop) : levels(fop), conf(std::make_shared<config>("config.json")) {
+		settings.init(*conf);
+		log::status << settings << std::endl;
 		setup_cycler();
 	}
 
 
 multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
+		settings.init(*conf);
+		log::status << settings << std::endl;
 		setup_cycler();
 	}
 
@@ -62,23 +67,19 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 
 	void setup_cycler()
 	{
-		auto cycle_type = conf->get<std::string>("solver.cycle.type", "v");
-		if (cycle_type == "v") {
+		if (settings.cycle == ml_settings::cycle_type::v) {
 			this->cycle = std::make_unique<cycle::vcycle<emode, level_container, fsten>>(
 				levels, coarse_solver);
-		} else if (cycle_type == "f") {
+		} else {
 			this->cycle = std::make_unique<cycle::fcycle<emode, level_container, fsten>>(
 				levels, coarse_solver);
-		} else {
-			log::error << "Cycle type: " << cycle_type << " not recognized!" << std::endl;
 		}
 	}
 
 
 	void vcycle(grid_func & x, const grid_func & b)
 	{
-		auto cycle_type = conf->get<std::string>("solver.cycle.type", "v");
-		assert(cycle_type == "v");
+		assert(settings.cycle == ml_settings::cycle_type::v);
 		this->cycle->run(x, b);
 	}
 
@@ -135,92 +136,88 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 	{
 		auto & sop = level.A;
 
-		std::string relax_type = conf->get<std::string>("solver.relaxation", "point");
-		int nrelax_pre = conf->get<int>("solver.cycle.nrelax-pre", 2);
-		int nrelax_post = conf->get<int>("solver.cycle.nrelax-post", 1);
-
-		if (relax_type == "point")
+		if (settings.relaxation == ml_settings::relax_type::point)
 			kman->template setup<point_relax>(sop, level.SOR[0]);
-		else if (relax_type == "line-x")
+		else if (settings.relaxation == ml_settings::relax_type::line_x)
 			kman->template setup<line_relax<relax_dir::x>>(sop, level.SOR[0]);
-		else if (relax_type == "line-y")
+		else if (settings.relaxation == ml_settings::relax_type::line_y)
 			kman->template setup<line_relax<relax_dir::y>>(sop, level.SOR[0]);
-		else if (relax_type == "line-xy") {
+		else if (settings.relaxation == ml_settings::relax_type::line_xy) {
 			kman->template setup<line_relax<relax_dir::x>>(sop, level.SOR[0]);
 			kman->template setup<line_relax<relax_dir::y>>(sop, level.SOR[1]);
 		}
-		else if (relax_type == "plane") {
+		else if (settings.relaxation == ml_settings::relax_type::plane_xyz) {
 			kman->template setup<plane_relax<relax_dir::xy>>(sop);
 			kman->template setup<plane_relax<relax_dir::xz>>(sop);
 			kman->template setup<plane_relax<relax_dir::yz>>(sop);
 		}
-		else if (relax_type == "plane-xy")
+		else if (settings.relaxation == ml_settings::relax_type::plane_xy)
 			kman->template setup<plane_relax<relax_dir::xy>>(sop);
-		else if (relax_type == "plane-xz")
+		else if (settings.relaxation == ml_settings::relax_type::plane_xz)
 			kman->template setup<plane_relax<relax_dir::xz>>(sop);
-		else if (relax_type == "plane-yz")
+		else if (settings.relaxation == ml_settings::relax_type::plane_yz)
 			kman->template setup<plane_relax<relax_dir::yz>>(sop);
 		else
-			log::error << "Invalid relaxation: " << relax_type << std::endl;
+			log::error << "Invalid relaxation" << std::endl;
 
 		auto kernels = get_kernels();
 
-		level.presmoother = [&,lvl,nrelax_pre,kernels,relax_type](const stencil_op<sten> &A,
+		level.presmoother = [&,lvl,kernels](const stencil_op<sten> &A,
 		                                                          grid_func &x, const grid_func&b) {
-			for (auto i : range(nrelax_pre)) {
+			for (auto i : range(settings.nrelax_pre)) {
 				(void) i;
-				if (relax_type == "point")
+				if (settings.relaxation == ml_settings::relax_type::point)
 					kernels->template run<point_relax>(A, x, b, level.SOR[0], cycle::Dir::DOWN);
-				else if (relax_type == "line-x")
+				else if (settings.relaxation == ml_settings::relax_type::line_x)
 					kernels->template run<line_relax<relax_dir::x>>(A, x, b, level.SOR[0], level.res, cycle::Dir::DOWN);
-				else if (relax_type == "line-y")
+				else if (settings.relaxation == ml_settings::relax_type::line_y)
 					kernels->template run<line_relax<relax_dir::y>>(A, x, b, level.SOR[0], level.res, cycle::Dir::DOWN);
-				else if (relax_type == "line-xy") {
+				else if (settings.relaxation == ml_settings::relax_type::line_xy) {
 					kernels->template run<line_relax<relax_dir::x>>(A, x, b, level.SOR[0], level.res, cycle::Dir::DOWN);
 					kernels->template run<line_relax<relax_dir::y>>(A, x, b, level.SOR[1], level.res, cycle::Dir::DOWN);
 				}
-				else if (relax_type == "plane") {
+				else if (settings.relaxation == ml_settings::relax_type::plane_xyz) {
 					kernels->template run<plane_relax<relax_dir::xy>>(A, x, b, cycle::Dir::DOWN);
 					kernels->template run<plane_relax<relax_dir::yz>>(A, x, b, cycle::Dir::DOWN);
 					kernels->template run<plane_relax<relax_dir::xz>>(A, x, b, cycle::Dir::DOWN);
 				}
-				else if (relax_type == "plane-xy")
+				else if (settings.relaxation == ml_settings::relax_type::plane_xy)
 					kernels->template run<plane_relax<relax_dir::xy>>(A, x, b, cycle::Dir::DOWN);
-				else if (relax_type == "plane-xz")
+				else if (settings.relaxation == ml_settings::relax_type::plane_xz)
 					kernels->template run<plane_relax<relax_dir::xz>>(A, x, b, cycle::Dir::DOWN);
-				else if (relax_type == "plane-yz")
+				else if (settings.relaxation == ml_settings::relax_type::plane_yz)
 					kernels->template run<plane_relax<relax_dir::yz>>(A, x, b, cycle::Dir::DOWN);
 				else
-					log::error << "Invalid relaxation: " << relax_type << std::endl;
+					log::error << "Invalid relaxation: " << std::endl;
 			}
 		};
-		level.postsmoother = [&,lvl,nrelax_post,kernels,relax_type](const stencil_op<sten> &A,
-		                                                            grid_func &x, const grid_func&b) {
-			for (auto i: range(nrelax_post)) {
+		level.postsmoother = [&,lvl,kernels](const stencil_op<sten> &A,
+		                                     grid_func &x, const grid_func&b) {
+			for (auto i: range(settings.nrelax_post)) {
 				(void) i;
-				if (relax_type == "point")
+				if (settings.relaxation == ml_settings::relax_type::point)
 					kernels->template run<point_relax>(A, x, b, level.SOR[0], cycle::Dir::UP);
-				else if (relax_type == "line-x")
+				else if (settings.relaxation == ml_settings::relax_type::line_x)
 					kernels->template run<line_relax<relax_dir::x>>(A, x, b, level.SOR[0], level.res, cycle::Dir::UP);
-				else if (relax_type == "line-y")
+				else if (settings.relaxation == ml_settings::relax_type::line_y)
 					kernels->template run<line_relax<relax_dir::y>>(A, x, b, level.SOR[0], level.res, cycle::Dir::UP);
-				else if (relax_type == "line-xy") {
+				else if (settings.relaxation == ml_settings::relax_type::line_xy) {
 					kernels->template run<line_relax<relax_dir::y>>(A, x, b, level.SOR[1], level.res, cycle::Dir::UP);
 					kernels->template run<line_relax<relax_dir::x>>(A, x, b, level.SOR[0], level.res, cycle::Dir::UP);
 				}
-				else if (relax_type == "plane") {
+				else if (settings.relaxation == ml_settings::relax_type::plane_xyz) {
 					kernels->template run<plane_relax<relax_dir::xz>>(A, x, b, cycle::Dir::UP);
 					kernels->template run<plane_relax<relax_dir::yz>>(A, x, b, cycle::Dir::UP);
 					kernels->template run<plane_relax<relax_dir::xy>>(A, x, b, cycle::Dir::UP);
 				}
-				else if (relax_type == "plane-xy")
+				else if (settings.relaxation == ml_settings::relax_type::plane_xy)
 					kernels->template run<plane_relax<relax_dir::xy>>(A, x, b, cycle::Dir::UP);
-				else if (relax_type == "plane-xz")
+				else if (settings.relaxation == ml_settings::relax_type::plane_xz)
 					kernels->template run<plane_relax<relax_dir::xz>>(A, x, b, cycle::Dir::UP);
-				else if (relax_type == "plane-yz")
+				else if (settings.relaxation == ml_settings::relax_type::plane_yz)
 					kernels->template run<plane_relax<relax_dir::yz>>(A, x, b, cycle::Dir::UP);
 				else
-					log::error << "Invalid relaxation: " << relax_type << std::endl;
+					log::error << "Invalid relaxation: " << std::endl;
 			}
 		};
 	}
@@ -247,7 +244,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 	{
 		this->cycle->set_kernels(this->kman);
 		auto num_levels = compute_num_levels(fop);
-		auto nlevels_conf = conf->get<int>("solver.num-levels", -1);
+		auto nlevels_conf = settings.num_levels;
 		if (nlevels_conf > 0) {
 			if (static_cast<std::size_t>(nlevels_conf) > num_levels) {
 				log::error << "too many levels specified" << std::endl;
@@ -281,8 +278,8 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 	virtual void solve(const grid_func & b, grid_func & x)
 	{
 		auto & level = levels.template get<fsten>(0);
-		int maxiter = conf->get<int>("solver.max-iter", 10);
-		real_t tol = conf->get<real_t>("solver.tol", 1e-8);
+		int maxiter = settings.maxiter;
+		real_t tol = settings.tol;
 		kman->template run<residual>(level.A,x,b,level.res);
 		real_t res0_l2 = level.res.template lp_norm<2>();
 		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
@@ -315,6 +312,7 @@ protected:
 	std::function<void(grid_func &x, const grid_func &b)> coarse_solver;
 	std::shared_ptr<config> conf;
 	std::shared_ptr<kern_manager> kman;
+	ml_settings settings;
 	grid_func ABD;
 	real_t *bbd;
 };
