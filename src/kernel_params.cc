@@ -1,10 +1,58 @@
 #include <cedar/kernel_params.h>
+#include <cedar/util/log.h>
 #include <iostream>
 
 using namespace cedar;
 
 namespace cedar
 {
+
+std::ostream & operator<<(std::ostream & os, const kernel_params & obj)
+{
+	os << '\n';
+	os << "---------------\n";
+	os << "Kernel Settings\n";
+	os << "---------------\n";
+	os << "symmetric relaxation: ";
+	if (obj.relax_symmetric)
+		os << "yes\n";
+	else
+		os << "no\n";
+
+	os << "periodic x:           ";
+	if (obj.periodic[0])
+		os << "yes\n";
+	else
+		os << "no\n";
+	os << "periodic y:           ";
+	if (obj.periodic[1])
+		os << "yes\n";
+	else
+		os << "no\n";
+	os << "periodic z:           ";
+	if (obj.periodic[2])
+		os << "yes\n";
+	else
+		os << "no\n";
+
+	os << "multilevel lines:     ";
+	if (obj.ml_relax.enabled) {
+		os << "yes\n";
+		os << "ml-relax group size:  ";
+		os << obj.ml_relax.min_gsz << '\n';
+	} else
+		os << "no\n";
+
+	os << "halo exchange:        ";
+	if (obj.halo == kernel_params::halo_lib::msg)
+		os << "msg";
+	else
+		os << "tausch";
+
+	return os;
+}
+
+
 std::shared_ptr<kernel_params> build_kernel_params(config & conf)
 {
 
@@ -24,7 +72,13 @@ std::shared_ptr<kernel_params> build_kernel_params(config & conf)
 		params->plane_config->set("halo-exchange", "tausch");
 	}
 
-	params->halo_name = conf.get<std::string>("halo-exchange", "msg");
+	auto halo_exchange_name = conf.get<std::string>("halo-exchange", "msg");
+	if (halo_exchange_name == "msg")
+		params->halo = kernel_params::halo_lib::msg;
+	else if (halo_exchange_name == "tausch")
+		params->halo = kernel_params::halo_lib::tausch;
+	else
+		log::error << "invalid halo-exchange: " << halo_exchange_name << std::endl;
 
 	return params;
 }

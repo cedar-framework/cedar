@@ -58,7 +58,7 @@ solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 	{
 		float nxc, nyc;
 		int ng = 0;
-		auto min_coarse = this->conf->template get<std::size_t>("solver.min-coarse", 3);
+		auto min_coarse = this->settings.min_coarse;
 
 		auto nx = fop.shape(0);
 		auto ny = fop.shape(1);

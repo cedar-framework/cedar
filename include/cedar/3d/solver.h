@@ -55,7 +55,7 @@ solver(stencil_op<fsten> & fop,
 	{
 		float nxc, nyc, nzc;
 		int ng = 0;
-		int min_coarse = this->conf->template get<int>("solver.min-coarse", 3);
+		int min_coarse = this->settings.min_coarse;
 
 		auto nx = fop.shape(0);
 		auto ny = fop.shape(1);

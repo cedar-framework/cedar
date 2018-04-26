@@ -65,7 +65,7 @@ public:
 	std::size_t compute_num_levels(cdr3::mpi::stencil_op<fsten> & fop)
 	{
 		int ng;
-		auto min_coarse = this->conf->template get<len_t>("solver.min-coarse", 3);
+		auto min_coarse = this->settings.min_coarse;
 
 		kman->template run<setup_nog>(fop.grid(), min_coarse, &ng);
 
@@ -175,13 +175,10 @@ public:
 	{
 		auto params = build_kernel_params(*(this->conf));
 		auto & cop = this->levels.get(this->levels.size() - 1).A;
-		std::string cg_solver_str = this->conf->template get<std::string>("solver.cg-solver", "LU");
 
-		auto cg_conf = this->conf->getconf("cg-config");
-		if (!cg_conf)
-			cg_conf = this->conf;
+		auto cg_conf = this->settings.coarse_config;
 
-		if (cg_solver_str == "redist") {
+		if (this->settings.coarse_solver == ml_settings::cg_type::redist) {
 			auto & fgrid = cop.grid();
 
 			auto choice = choose_redist<3>(*this->conf,
@@ -205,7 +202,7 @@ public:
 		std::array<int, 3> choice {{1,1,1}};
 		log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " x " << choice[2]
 		            << " cores" << std::endl;
-		if (cg_solver_str == "LU") {
+		if (this->settings.coarse_solver == ml_settings::cg_type::lu) {
 			this->coarse_solver = create_redist_solver<cholesky_solver>(kman,
 			                                                            *this->conf,
 			                                                            cop,

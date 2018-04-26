@@ -20,10 +20,13 @@ namespace cedar
 
 	struct kernel_params
 	{
+		enum class halo_lib {tausch, msg};
+		friend std::ostream & operator<<(std::ostream & os, const kernel_params & obj);
+
 		std::array<bool,3> periodic;
 		bool relax_symmetric;
 		bool definite;
-		std::string halo_name;
+		halo_lib halo;
 		ml_relax_params ml_relax;
 		std::shared_ptr<config> plane_config;
 

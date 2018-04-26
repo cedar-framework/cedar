@@ -20,6 +20,8 @@ kman_ptr build_kernel_manager(config & conf)
 
 kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 {
+	log::status << *params << std::endl;
+
 	auto kman = std::make_unique<kernel_manager<klist<stypes, exec_mode::mpi>>>(params);
 	kman->add<point_relax, rbgs>("system");
 	kman->add<plane_relax<relax_dir::xy>, planes<relax_dir::xy>>("system");
@@ -43,6 +45,8 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->set<restriction>("system");
 	kman->set<residual>("system");
 	kman->set<setup_interp>("system");
+	if (params->halo == kernel_params::halo_lib::tausch)
+		log::error << "Tausch not yet integrated in 3D" << std::endl;
 	kman->set<halo_exchange>("msg");
 	kman->set<setup_nog>("system");
 	kman->set<matvec>("system");
