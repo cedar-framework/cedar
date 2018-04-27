@@ -25,11 +25,11 @@ namespace cedar {
 	{
 	    std::replace(path.begin(), path.end(), '.', '/');
 	    std::string rpath("/" + path);
-	    try {
-		    json stree = root[json::json_pointer(rpath)];
-		    return std::make_shared<config>(std::move(stree));
-	    } catch(...) {
+
+	    json stree = root[json::json_pointer(rpath)];
+	    if (stree.size() == 0)
 		    return nullptr;
-	    }
+	    else
+		    return std::make_shared<config>(std::move(stree));
 	}
 }
