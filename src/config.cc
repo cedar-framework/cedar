@@ -27,7 +27,7 @@ namespace cedar {
 	    std::string rpath("/" + path);
 
 	    json stree = root[json::json_pointer(rpath)];
-	    if (stree.size() == 0)
+	    if ((stree.size() == 0) and (path != ""))
 		    return nullptr;
 	    else
 		    return std::make_shared<config>(std::move(stree));
