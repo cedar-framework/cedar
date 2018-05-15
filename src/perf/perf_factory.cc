@@ -9,7 +9,6 @@
 #include <cedar/config.h>
 #include <cedar/perf/cholesky_model.h>
 #include <cedar/perf/const_model.h>
-#include <cedar/perf/params.h>
 #include <cedar/perf/util.h>
 
 #include <cedar/ss/astar.h>
@@ -20,31 +19,31 @@
 
 using namespace cedar;
 
-std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(config & conf, int npx, int npy, len_t nx, len_t ny)
+std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(redist_settings & settings, int npx, int npy, len_t nx, len_t ny)
 {
 	using namespace cedar::cdr2;
 
 	auto np = npx*npy;
 
-	int min_coarse = conf.get<int>("solver.min-coarse");
-	float tw = (1.0/conf.get<float>("machine.bandwidth")) * sizeof(real_t);
-	float ts = conf.get<float>("machine.latency");
-	float tc = conf.get<float>("machine.fp_perf");
+	int min_coarse = settings.min_coarse;
+	float tw = (1.0/(settings.machine_bandwidth)) * sizeof(real_t);
+	float ts = settings.machine_latency;
+	float tc = settings.machine_fprate;
 	auto model = std::make_shared<vcycle_model>(2);
-	model->set_comp_param(params::compute_tc(2, conf));
+	model->set_comp_param(tc);
 	model->set_comm_param(ts, tw);
 	auto topo = util::model_topo(npx, npy, nx, ny);
 
-	auto nlx = topo->nlocal(0);
-	auto nly = topo->nlocal(1);
+	// auto nlx = topo->nlocal(0);
+	// auto nly = topo->nlocal(1);
 
 	int nlevels = compute_nlevels<2>(*topo, min_coarse);
 
 	for (auto i = 0; i < nlevels; i++) {
 		model->add_level(topo);
 		topo = util::coarsen_topo(model->grid_ptr(0));
-		nlx = topo->nlocal(0);
-		nly = topo->nlocal(1);
+		// nlx = topo->nlocal(0);
+		// nly = topo->nlocal(1);
 	}
 
 	if (np == 1) {
@@ -58,27 +57,27 @@ std::shared_ptr<vcycle_model> perf_factory::produce_vcycle(config & conf, int np
 }
 
 
-std::vector<std::vector<int>> get_choices(config & conf, int npx, int npy, len_t nx, len_t ny)
+std::vector<std::vector<int>> get_choices(redist_settings & settings, int npx, int npy, len_t nx, len_t ny)
 {
 	using namespace cedar::cdr2;
 
 	auto np = npx*npy;
 
-	int min_coarse = conf.get<int>("solver.min-coarse");
+	int min_coarse = settings.min_coarse;
 	auto model = std::make_shared<vcycle_model>(2);
 
 	auto topo = util::model_topo(npx, npy, nx, ny);
 
-	auto nlx = topo->nlocal(0);
-	auto nly = topo->nlocal(1);
+	// auto nlx = topo->nlocal(0);
+	// auto nly = topo->nlocal(1);
 
 	int nlevels = compute_nlevels<2>(*topo, min_coarse);
 
 	for (auto i = 0; i < nlevels; i++) {
 		model->add_level(topo);
 		topo = util::coarsen_topo(model->grid_ptr(0));
-		nlx = topo->nlocal(0);
-		nly = topo->nlocal(1);
+		// nlx = topo->nlocal(0);
+		// nly = topo->nlocal(1);
 	}
 
 	auto & topoc = model->grid(0);
@@ -91,7 +90,7 @@ std::vector<std::vector<int>> get_choices(config & conf, int npx, int npy, len_t
 		for (auto nblocks : redist_generator<full_iterator>({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse)) {
 			for (auto i : range(2))
 				model->nblocks(i) = nblocks[i];
-			auto paths = get_choices(conf, model->nblocks(0), model->nblocks(1),
+			auto paths = get_choices(settings, model->nblocks(0), model->nblocks(1),
 			                         topoc.nglobal(0), topoc.nglobal(1));
 			for (auto path : paths) {
 				path.push_back(choice_num);
@@ -104,12 +103,12 @@ std::vector<std::vector<int>> get_choices(config & conf, int npx, int npy, len_t
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::random_vcycle(config & conf, int npx, int npy, len_t nx, len_t ny, std::vector<int> path)
+std::shared_ptr<vcycle_model> perf_factory::random_vcycle(redist_settings & settings, int npx, int npy, len_t nx, len_t ny, std::vector<int> path)
 {
 	using namespace cedar::cdr2;
 
 	if (path.size() == 0) {
-		auto choices = get_choices(conf, npx, npy, nx, ny);
+		auto choices = get_choices(settings, npx, npy, nx, ny);
 		std::random_device rd;
 		std::mt19937 rng(rd());
 		std::uniform_int_distribution<int> uni(0, choices.size()-1);
@@ -119,25 +118,25 @@ std::shared_ptr<vcycle_model> perf_factory::random_vcycle(config & conf, int npx
 
 	auto np = npx*npy;
 
-	int min_coarse = conf.get<int>("solver.min-coarse");
-	float tw = (1.0/conf.get<float>("machine.bandwidth")) * sizeof(real_t);
-	float ts = conf.get<float>("machine.latency");
-	float tc = conf.get<float>("machine.fp_perf");
+	int min_coarse = settings.min_coarse;
+	float tw = (1.0/(settings.machine_bandwidth)) * sizeof(real_t);
+	float ts = settings.machine_latency;
+	float tc = settings.machine_fprate;
 	auto model = std::make_shared<vcycle_model>(2);
-	model->set_comp_param(params::compute_tc(2, conf));
+	model->set_comp_param(tc);
 	model->set_comm_param(ts, tw);
 	auto topo = util::model_topo(npx, npy, nx, ny);
 
-	auto nlx = topo->nlocal(0);
-	auto nly = topo->nlocal(1);
+	// auto nlx = topo->nlocal(0);
+	// auto nly = topo->nlocal(1);
 
 	int nlevels = compute_nlevels<2>(*topo, min_coarse);
 
 	for (auto i = 0; i < nlevels; i++) {
 		model->add_level(topo);
 		topo = util::coarsen_topo(model->grid_ptr(0));
-		nlx = topo->nlocal(0);
-		nly = topo->nlocal(1);
+		// nlx = topo->nlocal(0);
+		// nly = topo->nlocal(1);
 	}
 
 	auto & topoc = model->grid(0);
@@ -162,7 +161,7 @@ std::shared_ptr<vcycle_model> perf_factory::random_vcycle(config & conf, int npx
 		model->nblocks(0) = choices[rand_choice][0];
 		model->nblocks(1) = choices[rand_choice][1];
 
-		auto cg_model = perf_factory::random_vcycle(conf, model->nblocks(0), model->nblocks(1),
+		auto cg_model = perf_factory::random_vcycle(settings, model->nblocks(0), model->nblocks(1),
 		                                            topoc.nglobal(0), topoc.nglobal(1), path);
 		model->set_cgperf(cg_model);
 	}
@@ -171,16 +170,16 @@ std::shared_ptr<vcycle_model> perf_factory::random_vcycle(config & conf, int npx
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::manual_vcycle(config & conf, int npx, int npy, len_t nx, len_t ny)
+std::shared_ptr<vcycle_model> perf_factory::manual_vcycle(redist_settings & settings, int npx, int npy, len_t nx, len_t ny)
 {
 	using namespace cedar::cdr2;
 
 	auto np = npx*npy;
 
-	auto model = perf_factory::produce_vcycle(conf, npx, npy, nx, ny);
+	auto model = perf_factory::produce_vcycle(settings, npx, npy, nx, ny);
 
 	if (np > 1) {
-		auto path = conf.getnvec<int>("redist.search.path");
+		auto & path = settings.path;
 		bool found = false;
 		for (auto & proc : path) {
 			if (found) {
@@ -192,7 +191,7 @@ std::shared_ptr<vcycle_model> perf_factory::manual_vcycle(config & conf, int npx
 			}
 		}
 
-		auto cg_model = perf_factory::manual_vcycle(conf, model->nblocks(0), model->nblocks(1),
+		auto cg_model = perf_factory::manual_vcycle(settings, model->nblocks(0), model->nblocks(1),
 		                                            model->grid(0).nglobal(0), model->grid(0).nglobal(1));
 		model->set_cgperf(cg_model);
 	}
@@ -201,36 +200,36 @@ std::shared_ptr<vcycle_model> perf_factory::manual_vcycle(config & conf, int npx
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(config & conf, int npx, int npy, len_t nx, len_t ny, bool terminate, int rlevel)
+std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(redist_settings & settings, int npx, int npy, len_t nx, len_t ny, bool terminate, int rlevel)
 {
 	using namespace cedar::cdr2;
 
 	auto np = npx*npy;
 
-	int min_coarse = conf.get<int>("solver.min-coarse");
-	float tw = (1.0/conf.get<float>("machine.bandwidth")) * sizeof(real_t);
-	float ts = conf.get<float>("machine.latency");
-	float tc = conf.get<float>("machine.fp_perf");
+	int min_coarse = settings.min_coarse;
+	float tw = (1.0/(settings.machine_bandwidth)) * sizeof(real_t);
+	float ts = settings.machine_latency;
+	float tc = settings.machine_fprate;
 	auto model = std::make_shared<vcycle_model>(2);
-	model->set_comp_param(params::compute_tc(2, conf));
+	model->set_comp_param(tc);
 	model->set_comm_param(ts, tw);
 	auto topo = util::model_topo(npx, npy, nx, ny);
 
-	auto nlx = topo->nlocal(0);
-	auto nly = topo->nlocal(1);
+	// auto nlx = topo->nlocal(0);
+	// auto nly = topo->nlocal(1);
 
 	int nlevels = compute_nlevels<2>(*topo, min_coarse);
 
 	for (auto i = 0; i < nlevels; i++) {
 		model->add_level(topo);
 		topo = util::coarsen_topo(model->grid_ptr(0));
-		nlx = topo->nlocal(0);
-		nly = topo->nlocal(1);
+		// nlx = topo->nlocal(0);
+		// nly = topo->nlocal(1);
 	}
 
 	auto & topoc = model->grid(0);
 	if (terminate and np != 1) {
-		auto cg_model = perf_factory::dfs_vcycle(conf, 1,1, topoc.nglobal(0), topoc.nglobal(1), true);
+		auto cg_model = perf_factory::dfs_vcycle(settings, 1,1, topoc.nglobal(0), topoc.nglobal(1), true);
 		cg_model->set_comm_param(0, 0); // Since this is serial
 		model->nblocks(0) = 1;
 		model->nblocks(1) = 1;
@@ -249,7 +248,7 @@ std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(config & conf, int npx, i
 		{
 			model->nblocks(0) = nblocks[0];
 			model->nblocks(1) = nblocks[1];
-			auto cg_model = perf_factory::dfs_vcycle(conf, model->nblocks(0), model->nblocks(1),
+			auto cg_model = perf_factory::dfs_vcycle(settings, model->nblocks(0), model->nblocks(1),
 			                                         topoc.nglobal(0), topoc.nglobal(1),false,rlevel+1);
 			// set coarse solve to 0
 			// cg_model->set_cgperf(std::make_shared<const_model>(0));
@@ -273,13 +272,13 @@ std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(config & conf, int npx, i
 }
 
 
-std::shared_ptr<vcycle_model> perf_factory::astar_vcycle(config & conf, int npx, int npy, len_t nx, len_t ny)
+std::shared_ptr<vcycle_model> perf_factory::astar_vcycle(redist_settings & settings, int npx, int npy, len_t nx, len_t ny)
 {
 	using namespace cedar;
-	perf_problem pprob(conf);
+	perf_problem pprob(settings);
 	pprob.initial_state = perf_state();
 
-	pprob.initial_state.model = perf_factory::produce_vcycle(conf,npx,npy,nx,ny);
+	pprob.initial_state.model = perf_factory::produce_vcycle(settings,npx,npy,nx,ny);
 
 	using node_ptr = std::shared_ptr<perf_node>;
 	std::function<float(node_ptr)> heuristic = [](node_ptr nd) {
@@ -323,20 +322,20 @@ std::array<len_t,2> perf_factory::graph_vcycle(std::ostream & os, int npx, int n
 	float ts = conf.get<float>("machine.latency");
 	float tc = conf.get<float>("machine.fp_perf");
 	auto model = std::make_shared<vcycle_model>(2);
-	model->set_comp_param(params::compute_tc(2, conf));
+	model->set_comp_param(tc);
 	model->set_comm_param(ts, tw);
 	auto topo = util::model_topo(npx, npy, nx, ny);
 
-	auto nlx = topo->nlocal(0);
-	auto nly = topo->nlocal(1);
+	// auto nlx = topo->nlocal(0);
+	// auto nly = topo->nlocal(1);
 
 	int nlevels = compute_nlevels<2>(*topo, min_coarse);
 
 	for (auto i = 0; i < nlevels; i++) {
 		model->add_level(topo);
 		topo = util::coarsen_topo(model->grid_ptr(0));
-		nlx = topo->nlocal(0);
-		nly = topo->nlocal(1);
+		// nlx = topo->nlocal(0);
+		// nly = topo->nlocal(1);
 	}
 
 	auto & topoc = model->grid(0);

@@ -2,11 +2,28 @@
 #define CEDAR_MULTILEVEL_SETTINGS_H
 
 #include <iostream>
+#include <vector>
 
 #include <cedar/types.h>
 #include <cedar/config.h>
 
 namespace cedar {
+
+	struct redist_settings
+	{
+		enum class search {astar, coarsen, manual};
+
+		search search_strat;
+		std::vector<std::vector<int>> path;
+		int min_coarse;
+		float machine_latency;
+		float machine_bandwidth;
+		float machine_fprate;
+
+		friend std::ostream & operator<<(std::ostream & os, const redist_settings & obj);
+		void init(config & conf);
+	};
+
 
 	struct ml_settings
 	{
@@ -28,6 +45,8 @@ namespace cedar {
 		int maxiter;
 		real_t tol;
 		int min_coarse;
+
+		redist_settings rsettings;
 	};
 
 }

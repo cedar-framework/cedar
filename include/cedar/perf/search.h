@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 
+#include <cedar/multilevel_settings.h>
 #include <cedar/ss/node.h>
 #include <cedar/ss/problem.h>
 #include <cedar/ss/solution.h>
@@ -23,14 +24,14 @@ using perf_node = ss::node<perf_state, std::array<int, 2>, float>;
 
 struct perf_problem : ss::problem<perf_state, std::array<int,2>, float>
 {
-    perf_problem(config & conf): conf(conf) {}
+    perf_problem(redist_settings & settings): settings(settings) {}
 	bool goal_test(perf_state & model);
 	perf_state result(perf_state & model, std::array<int,2> action);
 	float step_cost(perf_state & state, std::array<int,2> act);
 	std::vector<std::array<int,2>> actions(perf_state & state);
 
 private:
-	config & conf;
+	redist_settings & settings;
 };
 
 

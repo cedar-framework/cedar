@@ -181,7 +181,7 @@ public:
 		if (this->settings.coarse_solver == ml_settings::cg_type::redist) {
 			auto & fgrid = cop.grid();
 
-			auto choice = choose_redist<3>(*this->conf,
+			auto choice = choose_redist<3>(this->settings.rsettings,
 			                               std::array<int, 3>({fgrid.nproc(0), fgrid.nproc(1), fgrid.nproc(2)}),
 			                               std::array<len_t, 3>({fgrid.nglobal(0), fgrid.nglobal(1), fgrid.nglobal(2)}));
 

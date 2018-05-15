@@ -55,6 +55,9 @@ namespace cedar {
 		this->coarse_config = conf.getconf("cg-config");
 		if (!this->coarse_config)
 			this->coarse_config = conf.getconf("");
+
+		if (this->coarse_solver == cg_type::redist)
+			this->rsettings.init(conf);
 	}
 
 
@@ -65,7 +68,7 @@ namespace cedar {
 		os << "Multilevel Settings\n";
 		os << "-------------------\n";
 
-		os << "coarse solver: ";
+		os << "coarse solver:   ";
 		if (obj.coarse_solver == ml_settings::cg_type::lu)
 			os << "cholesky\n";
 		else if (obj.coarse_solver == ml_settings::cg_type::redist)
@@ -73,21 +76,65 @@ namespace cedar {
 		else
 			os << "serial cedar\n";
 
-		os << "relaxation:    " << ml_settings::relax_name[obj.relaxation] << '\n';
-		os << "cycle:         ";
+		os << "relaxation:      " << ml_settings::relax_name[obj.relaxation] << '\n';
+		os << "cycle:           ";
 		if (obj.cycle == ml_settings::cycle_type::v)
 			os << "V";
 		else
 			os << "F";
 		os << '\n';
 
-		os << "min coarse:    " << obj.min_coarse << '\n';
+		os << "min coarse:      " << obj.min_coarse << '\n';
 		if (obj.num_levels > 0)
-			os << "num levels:   " << obj.num_levels << '\n';
-		os << "nrelax pre:    " << obj.nrelax_pre << '\n';
-		os << "nrelax post:   " << obj.nrelax_post << '\n';
-		os << "maxiter:       " << obj.maxiter << '\n';
-		os << "tol:           " << obj.tol;
+			os << "num levels:     " << obj.num_levels << '\n';
+		os << "nrelax pre:      " << obj.nrelax_pre << '\n';
+		os << "nrelax post:     " << obj.nrelax_post << '\n';
+		os << "maxiter:         " << obj.maxiter << '\n';
+		os << "tol:             " << obj.tol;
+
+		if (obj.coarse_solver == ml_settings::cg_type::redist)
+			os << obj.rsettings;
+
+		return os;
+	}
+
+
+	void redist_settings::init(config & conf)
+	{
+		auto search_strat_str = conf.get<std::string>("redist.search.strategy", "coarsen");
+		if (search_strat_str == "manual")
+			this->search_strat = search::manual;
+		else if (search_strat_str == "coarsen")
+			this->search_strat = search::coarsen;
+		else if (search_strat_str == "astar")
+			this->search_strat = search::astar;
+		else
+			log::error << "Search strategy not recognized: " << search_strat_str << std::endl;
+
+
+		if (search_strat == search::manual) {
+			this->path = conf.getnvec<int>("redist.search.path");
+		}
+
+		if (search_strat == search::astar) {
+			this->min_coarse = conf.get<int>("solver.min-coarse");
+			this->machine_bandwidth = conf.get<float>("machine.bandwidth");
+			this->machine_latency = conf.get<float>("machine.latency");
+			this->machine_fprate = conf.get<float>("machine.fp_perf");
+		}
+	}
+
+
+	std::ostream & operator<<(std::ostream & os, const redist_settings & obj)
+	{
+		os << '\n';
+		os << "redist strategy: ";
+		if (obj.search_strat == redist_settings::search::manual)
+			os << "manual\n";
+		else if (obj.search_strat == redist_settings::search::coarsen)
+			os << "coarsen\n";
+		else if (obj.search_strat == redist_settings::search::astar)
+			os << "optimized\n";
 
 		return os;
 	}

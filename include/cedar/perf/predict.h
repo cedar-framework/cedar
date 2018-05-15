@@ -9,17 +9,15 @@
 
 namespace cedar {
 	template <unsigned short ND>
-		std::array<int, ND> choose_redist(config & conf,
+		std::array<int, ND> choose_redist(redist_settings & settings,
 		                                  std::array<int, ND> nproc,
 		                                  std::array<len_t, ND> nglobal)
 	{
 		std::array<int, ND> nblocks;
 		for (unsigned short i = 0; i < ND; ++i) nblocks[i] = 1;
 
-		auto search_strat = conf.get<std::string>("redist.search.strategy", "astar");
-
-		if (search_strat == "manual") {
-			auto path = conf.getnvec<int>("redist.search.path");
+		if (settings.search_strat == redist_settings::search::manual) {
+			auto & path = settings.path;
 			bool found = false;
 			for (auto & proc : path) {
 				if (found) {
@@ -34,20 +32,20 @@ namespace cedar {
 						found = true;
 				}
 			}
-		} else if (search_strat == "coarsen") {
+		} else if (settings.search_strat == redist_settings::search::coarsen) {
 			for (unsigned short i = 0; i < ND; ++i) {
 				nblocks[i] = nproc[i] / 2;
 				if (nblocks[i] < 1) nblocks[i] = 1;
 			}
-		} else if (search_strat == "astar") {
+		} else if (settings.search_strat == redist_settings::search::astar) {
 			if (ND == 2) {
-				auto model = perf_factory::astar_vcycle(conf, nproc[0], nproc[1], nglobal[0], nglobal[1]);
+				auto model = perf_factory::astar_vcycle(settings, nproc[0], nproc[1], nglobal[0], nglobal[1]);
 				nblocks[0] = model->nblocks(0);
 				nblocks[1] = model->nblocks(1);
 			} else
-				log::error << search_strat << " search strategy not implemented for dimension: " << ND << std::endl;
+				log::error << "astar search strategy not implemented for dimension: " << ND << std::endl;
 		} else {
-			log::error << "Search strategy not implemented: " << search_strat << std::endl;
+			log::error << "Search strategy not implemented" << std::endl;
 		}
 
 		return nblocks;

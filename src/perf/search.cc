@@ -23,7 +23,7 @@ perf_state perf_problem::result(perf_state & state, std::array<int,2> action)
 	model->nblocks(1) = action[1];
 	auto & topoc = model->grid(0);
 
-	auto cg_model = perf_factory::produce_vcycle(conf, action[0], action[1],
+	auto cg_model = perf_factory::produce_vcycle(settings, action[0], action[1],
 	                                             topoc.nglobal(0), topoc.nglobal(1));
 
 	model->set_cgperf(cg_model);
@@ -50,7 +50,7 @@ std::vector<std::array<int,2>> perf_problem::actions(perf_state & state)
 	auto npx = topoc.nproc(0);
 	auto npy = topoc.nproc(1);
 
-	int min_coarse = conf.get<int>("solver.min-coarse");
+	int min_coarse = settings.min_coarse;
 
 	auto redist_subsets = redist_generator<greedy_iterator>({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse);
 	for (auto nblocks : redist_subsets) {

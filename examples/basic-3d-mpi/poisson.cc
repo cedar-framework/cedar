@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 	using namespace cedar;
 	using namespace cedar::cdr3;
 
-	int provided, rank;
+	int provided;
 
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
 
