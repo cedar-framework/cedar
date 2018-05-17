@@ -7,13 +7,12 @@
 #include <cedar/3d/gallery.h>
 #include <cedar/3d/solver.h>
 
+using namespace cedar;
+using namespace cedar::cdr3;
 
-static cedar::cdr3::stencil_op<cedar::cdr3::seven_pt> create_op(cedar::len_t nx, cedar::len_t ny, cedar::len_t nz,
-                                                                std::array<bool, 3> periodic)
+static stencil_op<seven_pt> create_op(len_t nx, len_t ny, len_t nz,
+                                      std::array<bool, 3> periodic)
 {
-	using namespace cedar;
-	using namespace cedar::cdr3;
-
 	stencil_op<seven_pt> so(nx, ny, nz);
 
 	so.set(0);
@@ -125,11 +124,8 @@ static cedar::cdr3::stencil_op<cedar::cdr3::seven_pt> create_op(cedar::len_t nx,
 }
 
 
-static void set_problem(cedar::cdr3::grid_func & b, std::array<bool, 3> periodic)
+static void set_problem(grid_func & b, std::array<bool, 3> periodic)
 {
-	using namespace cedar;
-	using namespace cedar::cdr3;
-
 	const double pi = M_PI;
 
 	auto rhs = [pi](real_t x, real_t y, real_t z) {
@@ -193,10 +189,8 @@ static void set_problem(cedar::cdr3::grid_func & b, std::array<bool, 3> periodic
 }
 
 
-static void set_solution(cedar::cdr3::grid_func & q, std::array<bool, 3> periodic)
+static void set_solution(grid_func & q, std::array<bool, 3> periodic)
 {
-	using namespace cedar;
-
 	const double pi = M_PI;
 
 	auto sol = [pi](real_t x, real_t y, real_t z) {
@@ -230,9 +224,6 @@ static void set_solution(cedar::cdr3::grid_func & q, std::array<bool, 3> periodi
 
 int main(int argc, char *argv[])
 {
-	using namespace cedar;
-	using namespace cedar::cdr3;
-
 	auto conf = std::make_shared<config>();
 	auto params = build_kernel_params(*conf);
 

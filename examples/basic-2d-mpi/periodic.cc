@@ -11,12 +11,11 @@
 
 #include <cedar/util/time_log.h>
 
+using namespace cedar;
+using namespace cedar::cdr2;
 
-static cedar::cdr2::mpi::stencil_op<cedar::cdr2::five_pt> create_op(cedar::topo_ptr grid, std::array<bool, 3> periodic)
+static mpi::stencil_op<five_pt> create_op(topo_ptr grid, std::array<bool, 3> periodic)
 {
-	using namespace cedar;
-	using namespace cedar::cdr2;
-
 	auto so = mpi::stencil_op<five_pt>(grid);
 	auto & topo = so.grid();
 
@@ -91,11 +90,8 @@ static cedar::cdr2::mpi::stencil_op<cedar::cdr2::five_pt> create_op(cedar::topo_
 }
 
 
-static void set_problem(cedar::cdr2::mpi::grid_func & b, std::array<bool, 3> periodic)
+static void set_problem(mpi::grid_func & b, std::array<bool, 3> periodic)
 {
-	using namespace cedar;
-	using namespace cedar::cdr2;
-
 	const double pi = M_PI;
 
 	auto rhs = [pi](real_t x, real_t y) {
@@ -141,10 +137,8 @@ static void set_problem(cedar::cdr2::mpi::grid_func & b, std::array<bool, 3> per
 }
 
 
-static void set_solution(cedar::cdr2::mpi::grid_func & q, std::array<bool, 3> periodic)
+static void set_solution(mpi::grid_func & q, std::array<bool, 3> periodic)
 {
-	using namespace cedar;
-
 	const double pi = M_PI;
 
 	auto sol = [pi](real_t x, real_t y) {
@@ -181,9 +175,6 @@ static void set_solution(cedar::cdr2::mpi::grid_func & q, std::array<bool, 3> pe
 
 int main(int argc, char *argv[])
 {
-	using namespace cedar;
-	using namespace cedar::cdr2;
-
 	int provided;
 
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);

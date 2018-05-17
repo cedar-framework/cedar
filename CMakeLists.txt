@@ -34,6 +34,8 @@ ExternalProject_Add(
   json
   PREFIX ${CMAKE_BINARY_DIR}/json
   GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_TAG v3.1.2
+  UPDATE_DISCONNECTED 1
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
   INSTALL_COMMAND ""

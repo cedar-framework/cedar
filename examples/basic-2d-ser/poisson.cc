@@ -9,13 +9,11 @@
 #include <cedar/2d/solver.h>
 #include <cedar/2d/gallery.h>
 
+using namespace cedar;
+using namespace cedar::cdr2;
 
-
-static void set_problem(cedar::cdr2::grid_func & b)
+static void set_problem(grid_func & b)
 {
-	using namespace cedar;
-	using namespace cedar::cdr2;
-
 	const double pi = M_PI;
 
 	auto rhs = [pi](real_t x, real_t y) {
@@ -39,10 +37,8 @@ static void set_problem(cedar::cdr2::grid_func & b)
 }
 
 
-static void set_solution(cedar::cdr2::grid_func & q)
+static void set_solution(grid_func & q)
 {
-	using namespace cedar;
-
 	const double pi = M_PI;
 
 	auto sol = [pi](real_t x, real_t y) {
@@ -64,9 +60,6 @@ static void set_solution(cedar::cdr2::grid_func & q)
 
 int main(int argc, char *argv[])
 {
-	using namespace cedar;
-	using namespace cedar::cdr2;
-
 	config conf;
 	auto ndofs = conf.getvec<len_t>("grid.n");
 	auto nx = ndofs[0];

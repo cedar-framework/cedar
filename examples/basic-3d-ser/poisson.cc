@@ -6,12 +6,11 @@
 #include <cedar/3d/gallery.h>
 #include <cedar/3d/solver.h>
 
+using namespace cedar;
+using namespace cedar::cdr3;
 
-static void set_problem(cedar::cdr3::grid_func & b)
+static void set_problem(grid_func & b)
 {
-	using namespace cedar;
-	using namespace cedar::cdr3;
-
 	const double pi = M_PI;
 
 	auto rhs = [pi](real_t x, real_t y, real_t z) {
@@ -40,10 +39,8 @@ static void set_problem(cedar::cdr3::grid_func & b)
 }
 
 
-static void set_solution(cedar::cdr3::grid_func & q)
+static void set_solution(grid_func & q)
 {
-	using namespace cedar;
-
 	const double pi = M_PI;
 
 	auto sol = [pi](real_t x, real_t y, real_t z) {
@@ -70,9 +67,6 @@ static void set_solution(cedar::cdr3::grid_func & q)
 
 int main(int argc, char *argv[])
 {
-	using namespace cedar;
-	using namespace cedar::cdr3;
-
 	log::status << "Beginning test" << std::endl;
 
 	config conf;
@@ -97,13 +91,6 @@ int main(int argc, char *argv[])
 	auto diff = exact_sol - sol;
 
 	log::status << "Solution norm: " << diff.inf_norm() << std::endl;
-
-	// {
-	// 	std::ofstream sten_file;
-	// 	sten_file.open("stencil", std::ios::out | std::ios::trunc | std::ios::binary);
-	// 	sten_file << bmg.level(-1).A;
-	// 	sten_file.close();
-	// }
 
 	log::status << "Finished test" << std::endl;
 
