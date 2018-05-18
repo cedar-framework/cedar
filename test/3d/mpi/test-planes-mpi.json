@@ -9,7 +9,7 @@
 			"max-iter": 10,
 			"tol": 1e-10,
 			"min-coarse": 3,
-			"cg-solver": "boxmg"
+			"cg-solver": "cedar"
 		},
 		"halo-exchange": "tausch"
 	}

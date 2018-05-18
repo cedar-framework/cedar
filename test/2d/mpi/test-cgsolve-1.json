@@ -26,7 +26,7 @@
 		"max-iter": 1,
 		"min-coarse": 3,
 		"num-levels": 3,
-		"cg-solver": "boxmg"
+		"cg-solver": "cedar"
 	},
 	"grid":
 	{
