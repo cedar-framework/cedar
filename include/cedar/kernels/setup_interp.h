@@ -16,7 +16,7 @@ namespace cedar { namespace kernels {
 		using full_sten = typename kernel<solver_types>::full_sten;
 		using prolong_op = typename kernel<solver_types>::prolong_op;
 
-		const std::string name = "setup interpolation";
+		const static std::string name() { return "setup interpolation"; }
 
 		setup_interp() {}
 		setup_interp(std::function<void(const stencil_op<comp_sten> &,
@@ -34,7 +34,7 @@ namespace cedar { namespace kernels {
 			if (run_comp)
 				run_comp(fop, cop, P);
 			else
-				log::error << name << ": routine not provided" << std::endl;
+				log::error << name() << ": routine not provided" << std::endl;
 		}
 		virtual void run(const stencil_op<full_sten> & fop,
 		                 const stencil_op<full_sten> & cop,
@@ -43,7 +43,7 @@ namespace cedar { namespace kernels {
 			if (run_full)
 				run_full(fop, cop, P);
 			else
-				log::error << name << ": routine not provided" << std::endl;
+				log::error << name() << ": routine not provided" << std::endl;
 		}
 
 	protected:

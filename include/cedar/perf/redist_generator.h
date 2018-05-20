@@ -24,8 +24,8 @@ public:
 
 redist_iterator(std::array<int, 2> np, std::array<len_t,2> nglobal,
                 len_t min_coarse):
-	nblocks({1,1}), nglobal(nglobal), nlocal(nglobal), np(np), min_coarse(min_coarse) {}
-redist_iterator() : nblocks({0,0}) {}
+	nblocks({{1,1}}), nglobal(nglobal), nlocal(nglobal), np(np), min_coarse(min_coarse) {}
+redist_iterator() : nblocks({{0,0}}) {}
 
 	value_type operator*() {
 		return nblocks;

@@ -104,8 +104,8 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 		if (this->settings.coarse_solver == ml_settings::cg_type::redist) {
 			auto & fgrid = this->levels.template get<fsten>(0).A.grid();
 			auto choice = choose_redist<2>(this->settings.rsettings,
-			                               std::array<int,2>({fgrid.nproc(0), fgrid.nproc(1)}),
-			                               std::array<len_t,2>({fgrid.nglobal(0), fgrid.nglobal(1)}));
+			                               std::array<int,2>({{fgrid.nproc(0), fgrid.nproc(1)}}),
+			                               std::array<len_t,2>({{fgrid.nglobal(0), fgrid.nglobal(1)}}));
 			MPI_Bcast(choice.data(), 2, MPI_INT, 0, fgrid.comm);
 			if ((choice[0] != 1) and (choice[1] != 1)) {
 				log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " cores" << std::endl;

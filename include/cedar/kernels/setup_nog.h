@@ -10,7 +10,7 @@ template<class solver_types>
 class setup_nog : public kernel<solver_types>
 {
 public:
-	const std::string name = "setup nog";
+	const static std::string name() { return "setup nog"; }
 
 	virtual void run(grid_topo & topo,
 	                 len_t min_coarse, int *nog) = 0;

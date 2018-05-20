@@ -176,7 +176,7 @@ topo_ptr create_topo_global(MPI_Comm comm, len_t ngx, len_t ngy)
 
 	grid->comm = comm;
 
-	auto decomp = grid_decomp<2>(std::array<len_t,2>({ngx,ngy}), size);
+	auto decomp = grid_decomp<2>(std::array<len_t,2>({{ngx,ngy}}), size);
 
 	grid->nproc(0) = decomp[0];
 	grid->nproc(1) = decomp[1];

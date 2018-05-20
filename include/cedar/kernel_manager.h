@@ -36,17 +36,21 @@ public:
 	template<class T, class... Args>
 	void setup(Args&&... args)
 	{
-		auto & kern = parent::template get<T>();
-		log::debug << "setup kernel <" << kern.name << ">" << std::endl;
-		kern.setup(std::forward<Args>(args)...);
+		auto kern = parent::template get_ptr<T>();
+		log::debug << "setup kernel <" << T::name() << ">" << std::endl;
+		if (!kern)
+			log::error << "kernel not found: " << T::name() << std::endl;
+		kern->setup(std::forward<Args>(args)...);
 	}
 
 	template<class T, class... Args>
 	void run(Args&&... args)
 	{
-		auto & kern = parent::template get<T>();
-		log::debug << "running kernel <" << kern.name << ">" << std::endl;
-		kern.run(std::forward<Args>(args)...);
+		auto kern = parent::template get_ptr<T>();
+		log::debug << "running kernel <" << T::name() << ">" << std::endl;
+		if (!kern)
+			log::error << "kernel not found: " << T::name() << std::endl;
+		kern->run(std::forward<Args>(args)...);
 	}
 
 

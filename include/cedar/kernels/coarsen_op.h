@@ -18,7 +18,7 @@ namespace cedar { namespace kernels {
 		           std::function<void(const prolong_op &, const stencil_op<full_sten>, stencil_op<full_sten>)> rfull):
 			run_comp(rcomp), run_full(rfull) {}
 
-		const std::string name = "coarsen operator";
+		const static std::string name() { return "coarsen operator"; }
 
 		virtual void run(const prolong_op & P,
 		                  const stencil_op<comp_sten> & fop,
@@ -27,7 +27,7 @@ namespace cedar { namespace kernels {
 			if (run_comp)
 				run_comp(P, fop, cop);
 			else
-				log::error << name << ": routine not provided" << std::endl;
+				log::error << name() << ": routine not provided" << std::endl;
 		}
 		virtual void run(const prolong_op & P,
 		                  const stencil_op<full_sten> & fop,
@@ -36,7 +36,7 @@ namespace cedar { namespace kernels {
 			if (run_full)
 				run_full(P, fop, cop);
 			else
-				log::error << name << ": routine not provided" << std::endl;
+				log::error << name() << ": routine not provided" << std::endl;
 		}
 
 	protected:

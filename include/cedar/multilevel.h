@@ -162,8 +162,8 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 
 		auto kernels = get_kernels();
 
-		level.presmoother = [&,lvl,kernels](const stencil_op<sten> &A,
-		                                                          grid_func &x, const grid_func&b) {
+		level.presmoother = [&,kernels](const stencil_op<sten> &A,
+		                                grid_func &x, const grid_func&b) {
 			for (auto i : range(settings.nrelax_pre)) {
 				(void) i;
 				if (settings.relaxation == ml_settings::relax_type::point)
@@ -191,8 +191,8 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 					log::error << "Invalid relaxation: " << std::endl;
 			}
 		};
-		level.postsmoother = [&,lvl,kernels](const stencil_op<sten> &A,
-		                                     grid_func &x, const grid_func&b) {
+		level.postsmoother = [&,kernels](const stencil_op<sten> &A,
+		                                 grid_func &x, const grid_func&b) {
 			for (auto i: range(settings.nrelax_post)) {
 				(void) i;
 				if (settings.relaxation == ml_settings::relax_type::point)

@@ -183,6 +183,7 @@ class planes : public kernels::plane_relax<stypes, rdir>
 	{
 		if (rdir == relax_dir::xy) {
 			for (auto k : so.range(2)) {
+				(void)k;
 				auto so2_ptr = std::make_unique<cdr2::stencil_op<sten2>>(so.shape(0), so.shape(1));
 				auto & so2 = *so2_ptr;
 				copy_coeff<rdir>(so, so2);
@@ -195,6 +196,7 @@ class planes : public kernels::plane_relax<stypes, rdir>
 			}
 		} else if (rdir == relax_dir::xz) {
 			for (auto j : so.range(1)) {
+				(void)j;
 				auto so2_ptr = std::make_unique<cdr2::stencil_op<sten2>>(so.shape(0), so.shape(2));
 				auto & so2 = *so2_ptr;
 				copy_coeff<rdir>(so, so2);
@@ -207,6 +209,7 @@ class planes : public kernels::plane_relax<stypes, rdir>
 			}
 		} else if (rdir == relax_dir::yz) {
 			for (auto i : so.range(0)) {
+				(void)i;
 				auto so2_ptr = std::make_unique<cdr2::stencil_op<sten2>>(so.shape(1), so.shape(2));
 				auto & so2 = *so2_ptr;
 				copy_coeff<rdir>(so, so2);

@@ -87,7 +87,7 @@ std::vector<std::vector<int>> get_choices(redist_settings & settings, int npx, i
 		// predict the best number of processor blocks
 		std::vector<std::vector<int>> choices;
 		int choice_num = 0;
-		for (auto nblocks : redist_generator<full_iterator>({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse)) {
+		for (auto nblocks : redist_generator<full_iterator>({{npx, npy}}, {{topoc.nglobal(0), topoc.nglobal(1)}}, min_coarse)) {
 			for (auto i : range(2))
 				model->nblocks(i) = nblocks[i];
 			auto paths = get_choices(settings, model->nblocks(0), model->nblocks(1),
@@ -147,12 +147,12 @@ std::shared_ptr<vcycle_model> perf_factory::random_vcycle(redist_settings & sett
 	} else {
 		// predict the best number of processor blocks
 		std::vector<std::array<int,2>> choices;
-		auto redist_subsets = redist_generator<full_iterator>({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse);
+		auto redist_subsets = redist_generator<full_iterator>({{npx, npy}}, {{topoc.nglobal(0), topoc.nglobal(1)}}, min_coarse);
 		for (auto nblocks : redist_subsets) {
 			for (auto i : range(2))
 				model->nblocks(i) = nblocks[i];
 
-			choices.push_back(std::array<int,2>({model->nblocks(0), model->nblocks(1)}));
+			choices.push_back(std::array<int,2>({{model->nblocks(0), model->nblocks(1)}}));
 		}
 
 		auto rand_choice = path.back();
@@ -243,7 +243,7 @@ std::shared_ptr<vcycle_model> perf_factory::dfs_vcycle(redist_settings & setting
 		std::array<int,2> best_blocks;
 		float best_time = std::numeric_limits<float>::max();
 		std::shared_ptr<vcycle_model> best_cg;
-		for (auto nblocks : redist_generator<greedy_iterator>({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)},
+		for (auto nblocks : redist_generator<greedy_iterator>({{npx, npy}}, {{topoc.nglobal(0), topoc.nglobal(1)}},
 		                                                      min_coarse))
 		{
 			model->nblocks(0) = nblocks[0];
@@ -354,7 +354,7 @@ std::array<len_t,2> perf_factory::graph_vcycle(std::ostream & os, int npx, int n
 		model->set_cgperf(cg_model);
 	} else {
 		// predict the best number of processor blocks
-		for (auto nblocks : redist_generator<greedy_iterator>({npx, npy}, {topoc.nglobal(0), topoc.nglobal(1)}, min_coarse)) {
+		for (auto nblocks : redist_generator<greedy_iterator>({{npx, npy}}, {{topoc.nglobal(0), topoc.nglobal(1)}}, min_coarse)) {
 			for (auto i : range(2))
 				model->nblocks(i) = nblocks[i];
 
@@ -369,7 +369,7 @@ std::array<len_t,2> perf_factory::graph_vcycle(std::ostream & os, int npx, int n
 		os << "}";
 	}
 
-	std::array<len_t, 2> ret({topoc.nglobal(0), topoc.nglobal(1)});
+	std::array<len_t, 2> ret({{topoc.nglobal(0), topoc.nglobal(1)}});
 
 	return ret;
 }

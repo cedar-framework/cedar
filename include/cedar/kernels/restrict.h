@@ -12,7 +12,7 @@ namespace cedar { namespace kernels {
 		using grid_func = typename kernel<solver_types>::grid_func;
 		using restrict_op = typename kernel<solver_types>::restrict_op;
 
-		const std::string name = "restriction";
+		const static std::string name() { return "restriction"; }
 
 		virtual void run(const restrict_op & R,
 		                 const grid_func & x,

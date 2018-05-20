@@ -14,7 +14,7 @@ namespace cedar { namespace kernels {
 		using full_sten = typename kernel<solver_types>::full_sten;
 		using grid_func = typename kernel<solver_types>::grid_func;
 
-		const std::string name = "residual";
+		const static std::string name() { return "residual"; }
 
 		virtual void run(const stencil_op<comp_sten> & so,
 		                 const grid_func & x,

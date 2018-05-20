@@ -12,7 +12,7 @@ namespace cedar { namespace kernels {
 		using grid_func = typename kernel<solver_types>::grid_func;
 		using prolong_op = typename kernel<solver_types>::prolong_op;
 
-		const std::string name = "interpolation and add";
+		const static std::string name() { return "interpolation and add"; }
 
 		virtual void run(const prolong_op & P,
 		                 const grid_func & coarse,

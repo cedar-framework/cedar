@@ -182,8 +182,8 @@ public:
 			auto & fgrid = cop.grid();
 
 			auto choice = choose_redist<3>(this->settings.rsettings,
-			                               std::array<int, 3>({fgrid.nproc(0), fgrid.nproc(1), fgrid.nproc(2)}),
-			                               std::array<len_t, 3>({fgrid.nglobal(0), fgrid.nglobal(1), fgrid.nglobal(2)}));
+			                               std::array<int, 3>({{fgrid.nproc(0), fgrid.nproc(1), fgrid.nproc(2)}}),
+			                               std::array<len_t, 3>({{fgrid.nglobal(0), fgrid.nglobal(1), fgrid.nglobal(2)}}));
 
 			MPI_Bcast(choice.data(), 3, MPI_INT, 0, fgrid.comm);
 			if ((choice[0] != 1) or (choice[1] != 1) or (choice[2] != 1)) {

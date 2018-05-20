@@ -17,7 +17,7 @@ public:
 	using full_sten = typename kernel<solver_types>::full_sten;
 	using grid_func = typename kernel<solver_types>::grid_func;
 
-	const std::string name = "halo exchange";
+	const static std::string name() { return "halo exchange"; }
 
 	virtual void setup(std::vector<topo_ptr> topos) = 0;
 	virtual void run(stencil_op<comp_sten> & so) = 0;

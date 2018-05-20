@@ -17,7 +17,7 @@ namespace cedar { namespace kernels {
 		using relax_stencil = typename kernel<solver_types>::relax_stencil;
 		using grid_func = typename kernel<solver_types>::grid_func;
 
-		const std::string name = "point relaxation";
+		const static std::string name() { return "point relaxation"; }
 
 		point_relax() {}
 		point_relax(std::function<void(const stencil_op<comp_sten>&, relax_stencil &)> scomp,
@@ -34,7 +34,7 @@ namespace cedar { namespace kernels {
 			if (setup_comp)
 				setup_comp(so, sor);
 			else
-				log::error << name << ": setup routine not provided" << std::endl;
+				log::error << name() << ": setup routine not provided" << std::endl;
 
 		}
 		virtual void setup(const stencil_op<full_sten> & so,
@@ -43,7 +43,7 @@ namespace cedar { namespace kernels {
 			if (setup_full)
 				setup_full(so, sor);
 			else
-				log::error << name << ": setup routine not provided" << std::endl;
+				log::error << name() << ": setup routine not provided" << std::endl;
 		}
 
 
@@ -56,7 +56,7 @@ namespace cedar { namespace kernels {
 			if (run_comp)
 				run_comp(so, x, b, sor, cdir);
 			else
-				log::error << name << ": run routine not provided" << std::endl;
+				log::error << name() << ": run routine not provided" << std::endl;
 		}
 		virtual void run(const stencil_op<full_sten> & so,
 		                 grid_func & x,
@@ -67,7 +67,7 @@ namespace cedar { namespace kernels {
 			if (run_full)
 				run_full(so, x, b, sor, cdir);
 			else
-				log::error << name << ": run routine not provided" << std::endl;
+				log::error << name() << ": run routine not provided" << std::endl;
 		}
 
 	protected:

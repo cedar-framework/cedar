@@ -15,7 +15,7 @@ namespace cedar { namespace kernels {
 		using full_sten = typename kernel<solver_types>::full_sten;
 		using grid_func = typename kernel<solver_types>::grid_func;
 
-		const std::string name = "matvec";
+		const static std::string name() { return "matvec"; }
 
 		virtual void run(const stencil_op<comp_sten> & so,
 		                 const grid_func & x,
@@ -24,7 +24,7 @@ namespace cedar { namespace kernels {
 			if (run_comp)
 				run_comp(so, x, y);
 			else
-				log::error << name << ": routine not provided" << std::endl;
+				log::error << name() << ": routine not provided" << std::endl;
 		}
 		virtual void run(const stencil_op<full_sten> & so,
 		                 const grid_func & x,
@@ -33,7 +33,7 @@ namespace cedar { namespace kernels {
 			if (run_full)
 				run_full(so, x, y);
 			else
-				log::error << name << ": routine not provided" << std::endl;
+				log::error << name() << ": routine not provided" << std::endl;
 		}
 
 	protected:

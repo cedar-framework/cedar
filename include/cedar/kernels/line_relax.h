@@ -17,7 +17,7 @@ namespace cedar { namespace kernels {
 		using grid_func = typename kernel<solver_types>::grid_func;
 		using relax_stencil = typename kernel<solver_types>::relax_stencil;
 
-		const std::string name = "line relaxation";
+		const static std::string name() { return "line relaxation"; }
 
 		virtual void setup(const stencil_op<comp_sten> & so,
 		                   relax_stencil & sor) = 0;
