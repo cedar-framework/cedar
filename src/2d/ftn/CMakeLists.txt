@@ -54,6 +54,8 @@ if (ENABLE_MPI)
 	ftn/mpi/BMG2_SymStd_LineSolve_A_ml.f90
 	ftn/mpi/BMG2_SymStd_LineSolve_B_ml.f90
 	ftn/mpi/BMG2_SymStd_LineSolve_C_ml.f90
+	ftn/mpi/BMG2_SymStd_LineSolve_A_ml_eff.f90
+	ftn/mpi/BMG2_SymStd_LineSolve_C_ml_eff.f90
 	ftn/mpi/BMG2_SymStd_downline.f90
 	ftn/mpi/BMG2_SymStd_upline.f90
 	ftn/mpi/BMG2_SymStd_SETUP_ADD_SOR_PTRS.f90

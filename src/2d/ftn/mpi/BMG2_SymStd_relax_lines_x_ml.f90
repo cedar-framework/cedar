@@ -6,7 +6,7 @@
      &                MPICOMM, &
      &                XCOMM, NOLX,&
      &                TDSX_SOR_PTRS, &
-     &                NSOR, TDG, fact_flags, halof)&
+     &                NSOR, TDG, fact_flags, factorize, halof)&
      BIND(C, NAME='MPI_BMG2_SymStd_relax_lines_x_ml')
 
 ! ======================================================================
@@ -75,6 +75,7 @@
       real(real_t) :: SOR(II,JJ,2), RWORK(NMSGr), TDG(NSOR)
 
       logical(c_bool) :: fact_flags(2 * NOG)
+      logical(c_bool), value :: factorize
       type(c_ptr) :: halof
 
 ! ----------------------------
@@ -178,7 +179,7 @@
      &            JBEG, RWORK, Npts, NLines, &
      &            K, NOLX, XCOMM, NSOR, TDG, &
      &            NMSGr, NOG, TDSX_SOR_PTRS,&
-     &            CP, fact_flags)
+     &            CP, fact_flags, factorize)
 
 
          ! Pointers into RWORK
@@ -220,7 +221,7 @@
      &            JBEG, RWORK, Npts, NLines, &
      &            K, NOLX, XCOMM, NSOR, TDG, &
      &            NMSGr, NOG, TDSX_SOR_PTRS,&
-     &            CP)
+     &            CP, factorize)
 
 
 

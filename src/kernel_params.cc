@@ -40,6 +40,11 @@ std::ostream & operator<<(std::ostream & os, const kernel_params & obj)
 		os << "yes\n";
 		os << "ml-relax group size:  ";
 		os << obj.ml_relax.min_gsz << '\n';
+		os << "ml-relax factorize :  ";
+		if (obj.ml_relax.factorize)
+			os << "yes\n";
+		else
+			os << "no\n";
 	} else
 		os << "no\n";
 
@@ -88,6 +93,7 @@ void ml_relax_params::init(config & conf)
 {
 	this->enabled = conf.get<bool>("solver.ml-relax.enabled", false);
 	this->min_gsz = conf.get<int>("solver.ml-relax.min-gsz", 3);
+	this->factorize = conf.get<bool>("solver.ml-relax.factorize", true);
 }
 
 }

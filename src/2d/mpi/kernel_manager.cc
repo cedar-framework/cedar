@@ -31,6 +31,8 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->add<line_relax<relax_dir::y>, lines<relax_dir::y>>("two-level");
 	kman->add<line_relax<relax_dir::x>, ml_line_relax<relax_dir::x>>("n-level");
 	kman->add<line_relax<relax_dir::y>, ml_line_relax<relax_dir::y>>("n-level");
+	kman->add<line_relax<relax_dir::x>, ml_line_relax<relax_dir::x>>("n-level-elim", false);
+	kman->add<line_relax<relax_dir::y>, ml_line_relax<relax_dir::y>>("n-level-elim", false);
 	kman->add<coarsen_op, galerkin>("system");
 	kman->add<interp_add, interp_f90>("system");
 	kman->add<restriction, restrict_f90>("system");
@@ -45,8 +47,12 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 
 	kman->set<point_relax>("system");
 	std::string line_relax_name("two-level");
-	if (params->ml_relax.enabled)
-		line_relax_name = "n-level";
+	if (params->ml_relax.enabled) {
+		if (params->ml_relax.factorize)
+			line_relax_name = "n-level";
+		else
+			line_relax_name = "n-level-elim";
+	}
 	log::debug << "Using <" << line_relax_name << "> for line relaxation" << std::endl;
 	kman->set<line_relax<relax_dir::x>>(line_relax_name);
 	kman->set<line_relax<relax_dir::y>>(line_relax_name);
@@ -62,18 +68,8 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->set<setup_nog>("system");
 	kman->set<matvec>("system");
 
-	// run this manually for now
 	auto hex = kman->get_ptr<halo_exchange>();
-	kman->get<point_relax>().add_halo(hex.get());
-	kman->get<line_relax<relax_dir::x>>().add_halo(hex.get());
-	kman->get<line_relax<relax_dir::y>>().add_halo(hex.get());
-	kman->get<coarsen_op>().add_halo(hex.get());
-	kman->get<interp_add>().add_halo(hex.get());
-	kman->get<restriction>().add_halo(hex.get());
-	kman->get<residual>().add_halo(hex.get());
-	kman->get<setup_interp>().add_halo(hex.get());
-	kman->get<matvec>().add_halo(hex.get());
-	kman->get<setup_nog>().add_halo(hex.get());
+	kman->add_halo(hex.get());
 
 	return kman;
 }

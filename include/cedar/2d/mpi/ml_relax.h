@@ -25,7 +25,7 @@ extern "C" {
 	                                      len_t *datadist, real_t *rwork, len_t nmsgr,
 	                                      MPI_Fint mpicomm, MPI_Fint *xcomm, int nolx,
 	                                      int *tdsx_sor_ptrs, len_t nsor, real_t *tdg,
-	                                      bool *fact_flags, void *halof);
+	                                      bool *fact_flags, bool factorize, void *halof);
 	void MPI_BMG2_SymStd_relax_lines_y_ml(int k, real_t *so, real_t *qf, real_t *q,
 	                                      real_t *sor, real_t *B,
 	                                      len_t II, len_t JJ, len_t igs, len_t jgs,
@@ -33,7 +33,7 @@ extern "C" {
 	                                      len_t *datadist, real_t *rwork, len_t nmsgr,
 	                                      MPI_Fint mpicomm, MPI_Fint *ycomm, int noly,
 	                                      int *tdsy_sor_ptrs, len_t nsor, real_t *tdg,
-	                                      bool *fact_flags, void *halof);
+	                                      bool *fact_flags, bool factorize, void *halof);
 }
 
 namespace cedar { namespace cdr2 { namespace mpi {
@@ -42,7 +42,7 @@ template<relax_dir dir>
 class ml_line_relax : public kernels::line_relax<stypes, dir>
 {
 public:
-	ml_line_relax() : initialized(false) {}
+	ml_line_relax(bool fact=true) : factorize(fact), initialized(false) {}
 	~ml_line_relax()
 	{
 		if (initialized) {
@@ -50,6 +50,8 @@ public:
 				delete[] fact_flags[i];
 		}
 	}
+
+	void set_factorize(bool fact) { this->factorize = fact; }
 
 	void init_ndim(int nproc, int nproc_other, int coord, int coord_other, len_t nlines, len_t nlines_other,
 	               int min_gsz, int nog, MPI_Comm comm)
@@ -175,7 +177,7 @@ public:
 		                   len_t *datadist, real_t *rwork, len_t nmsgr,
 		                   MPI_Fint mpicomm, MPI_Fint *xcomm, int nolx,
 		                   int *tdsx_sor_ptrs, len_t nsor, real_t *tdg,
-		                   bool *fact_flags, void *halof)> relax_lines;
+		                   bool *fact_flags, bool factorize, void *halof)> relax_lines;
 
 		if (dir == relax_dir::x)
 			relax_lines = MPI_BMG2_SymStd_relax_lines_x_ml;
@@ -188,7 +190,7 @@ public:
 		            datadist, rwork[kf-k].data(), rwork[kf-k].len(0),
 		            fcomm, this->comms.data(), this->nlevels,
 		            sor_ptrs[kf-k].data(), tdg[kf-k].len(0), tdg[kf-k].data(),
-		            fact_flags[kf-k], this->halof);
+		            fact_flags[kf-k], this->factorize, this->halof);
 	}
 
 protected:
@@ -198,6 +200,7 @@ protected:
 	std::vector<array<real_t, 1>> tdg;      /** Tridiagonal solver workspace array */
 	std::vector<array<real_t, 1>> rwork;    /** Buffer workspace for tridiagonal solver */
 	array<MPI_Fint, 2> comms;               /** Communicators for ml lines */
+	bool factorize;                         /** Flag for local factorization (contrast to elimination) */
 	bool initialized;
 };
 

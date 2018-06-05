@@ -51,19 +51,8 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->set<setup_nog>("system");
 	kman->set<matvec>("system");
 
-	// run this manually for now
 	auto hex = kman->get_ptr<halo_exchange>();
-	kman->get<point_relax>().add_halo(hex.get());
-	kman->get<plane_relax<relax_dir::xy>>().add_halo(hex.get());
-	kman->get<plane_relax<relax_dir::xz>>().add_halo(hex.get());
-	kman->get<plane_relax<relax_dir::yz>>().add_halo(hex.get());
-	kman->get<coarsen_op>().add_halo(hex.get());
-	kman->get<interp_add>().add_halo(hex.get());
-	kman->get<restriction>().add_halo(hex.get());
-	kman->get<residual>().add_halo(hex.get());
-	kman->get<setup_interp>().add_halo(hex.get());
-	kman->get<matvec>().add_halo(hex.get());
-	kman->get<setup_nog>().add_halo(hex.get());
+	kman->add_halo(hex.get());
 
 	return kman;
 }

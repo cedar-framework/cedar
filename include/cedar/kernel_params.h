@@ -15,6 +15,7 @@ namespace cedar
 
 		bool enabled; /** Whether multilevel line relaxation is enabled */
 		int min_gsz;  /** Coarsening factor for multilevel line relaxation */
+		bool factorize; /** Factorize local blocks (compared to elimintation */
 	};
 
 

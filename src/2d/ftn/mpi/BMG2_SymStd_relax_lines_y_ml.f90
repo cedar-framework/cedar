@@ -6,7 +6,7 @@
      &                MPICOMM, &
      &                YCOMM, NOLY,&
      &                TDSY_SOR_PTRS,&
-     &                NSOR, TDG, fact_flags, halof)&
+     &                NSOR, TDG, fact_flags, factorize, halof)&
      BIND(C,NAME='MPI_BMG2_SymStd_relax_lines_y_ml')
 
 ! ======================================================================
@@ -75,6 +75,7 @@
       integer(c_int) :: TDSY_SOR_PTRS(NOLY)
 
       logical(c_bool) :: fact_flags(2 * NOG)
+      logical(c_bool), value :: factorize
       type(c_ptr) :: halof
 
 ! ----------------------------
@@ -159,7 +160,7 @@
               IBEG, RWORK, NPts, NLINES, &
               K, NOLY, YCOMM, NSOR, TDG, &
               NMSGr, NOG, TDSY_SOR_PTRS,&
-              CP, fact_flags)
+              CP, fact_flags, factorize)
 
          !
          ! Pointers into RWORK
@@ -188,11 +189,10 @@
 
          ENDDO
 
-
          call BMG2_SymStd_upline(SOR, B, JJ, II,&
               IBEG, RWORK, NPts, NLINES, &
               K, NOLY, YCOMM, NSOR, TDG, &
-              NMSGr, NOG, TDSY_SOR_PTRS, CP)
+              NMSGr, NOG, TDSY_SOR_PTRS, CP, factorize)
 
          DO I=IBEG,I1,2
             DO J=1,JJ

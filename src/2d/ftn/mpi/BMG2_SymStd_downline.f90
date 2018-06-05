@@ -2,7 +2,7 @@
      &                JBEG, RWORK, NPts, NLines, &
      &                K, NOLX, XCOMM, NSOR, TDG, &
      &                NMSGr, NOG, TDSX_SOR_PTRS,&
-     &                pgSIZE, fact_flags)
+     &                pgSIZE, fact_flags, factorize)
 
       use iso_c_binding, only: c_bool
       IMPLICIT NONE
@@ -30,6 +30,7 @@
       logical(c_bool) :: fact_flags(2 * NOG)
       ! Flag for the interface system
       logical(c_bool) :: inter_flag
+      logical(c_bool) :: factorize
 
       ! always factorize interface systems
       inter_flag = .true.
@@ -57,17 +58,24 @@
       !
       MULT = 0
       NLines = 0
-      DO J=JBEG, JJ-1, 2
 
-         CALL BMG2_SymStd_LineSolve_A_ml(SOR(2,J,1),&
-     &             SOR(2,J,2), Q(2,J),&
-     &             RWORK(MULT*8+1),&
-     &             NPts, fact_flags(K+flag_stride))
+      if (factorize) then
+         DO J=JBEG, JJ-1, 2
+            CALL BMG2_SymStd_LineSolve_A_ml(SOR(2,J,1),&
+                 &             SOR(2,J,2), Q(2,J),&
+                 &             RWORK(MULT*8+1),&
+                 &             NPts, fact_flags(K+flag_stride))
 
-         MULT = MULT + 1
-
-      END DO
-
+            MULT = MULT + 1
+         END DO
+      else
+         DO J=JBEG, JJ-1, 2
+            CALL BMG2_SymStd_LineSolve_A_ml_eff(SOR(2,J,1),&
+                 &             SOR(2,J,2), Q(2,J),&
+                 &             RWORK(MULT*8+1), NPts)
+            MULT = MULT + 1
+         END DO
+      endif
 
 
       NLines = MULT
@@ -125,7 +133,7 @@
             CALL A_Wrapper(&
      &           TDG(TDSX_SOR_PTRS(kl)),&
      &           RWORK, N, pgSIZE, &
-     &           JBEG, JJ, NLines, inter_flag)
+     &           JBEG, JJ, NLines, inter_flag, factorize)
 
 
             !
@@ -174,7 +182,7 @@
 ! ============================================================
 
       SUBROUTINE A_Wrapper(TDG, RWORK, Npts, &
-     &                     pgSIZE, JBEG, JJ, NLines, FLG)
+     &                     pgSIZE, JBEG, JJ, NLines, FLG, factorize)
 
          use iso_c_binding, only: c_bool
          IMPLICIT NONE
@@ -184,18 +192,28 @@
          REAL*8 TDG(2*pgSIZE+2,NLines,4)
          REAL*8 RWORK(8*NLines)
          logical(c_bool) :: FLG
+         logical(c_bool) :: factorize
 
          INTEGER MULT, J
 
          MULT = 0
-         DO J=1, NLines
-            CALL BMG2_SymStd_LineSolve_A_ml(TDG(2,J,1),&
-     &                TDG(2,J,2), TDG(2,J,4),&
-     &                RWORK(MULT*8+1),&
-     &                NPts, FLG)
-
-            MULT = MULT + 1
-         END DO
+         if (factorize) then
+            DO J=1, NLines
+               CALL BMG2_SymStd_LineSolve_A_ml(TDG(2,J,1),&
+                    TDG(2,J,2), TDG(2,J,4),&
+                    RWORK(MULT*8+1),&
+                    NPts, FLG)
+               MULT = MULT + 1
+            END DO
+         else
+            DO J=1, NLines
+               CALL BMG2_SymStd_LineSolve_A_ml_eff(TDG(2,J,1),&
+                    TDG(2,J,2), TDG(2,J,4),&
+                    RWORK(MULT*8+1),&
+                    NPts)
+               MULT = MULT + 1
+            END DO
+         endif
 
       RETURN
       END

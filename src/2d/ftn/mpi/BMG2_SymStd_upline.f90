@@ -2,8 +2,9 @@
      &                JBEG, RWORK, NPts, NLines, &
      &                K, NOLX, XCOMM, NSOR, TDG, &
      &                NMSGr, NOG, TDSX_SOR_PTRS,&
-     &                SIZE)
+     &                SIZE, factorize)
 
+      use iso_c_binding, only: c_bool
       IMPLICIT NONE
 
       INCLUDE 'mpif.h'
@@ -23,6 +24,8 @@
       INTEGER SIZE, N, My_L1_Rank, My_L2_Rank, IERR, kl
 
       INTEGER I, J, AT, FT, MULT, grank
+
+      logical(c_bool) :: factorize
 
 ! =============================================================
 ! Loop over all lower levels
@@ -71,7 +74,7 @@
      &              TDG(TDSX_SOR_PTRS(kl)),&
      &              RWORK, SIZE,&
      &              NLines, NMSGr,&
-     &              My_L1_Rank)
+     &              My_L1_Rank, factorize)
 
             END IF
 
@@ -125,18 +128,28 @@
       ! Pointers into RWORK
       !
       MULT = 0
-      DO J=JBEG,JJ-1,2
-!MB      DO J=JBEG,JBEG  ! previous line was commented out
+      if (factorize) then
+         DO J=JBEG,JJ-1,2
+            CALL BMG2_SymStd_LineSolve_C_ml(SOR(2,J,1),&
+                 &        SOR(2,J,2), Q(1,J),&
+                 &        RWORK(MULT*8 + 1),&
+                 &        Npts, SIZE,&
+                 &        My_L1_Rank)
 
-         CALL BMG2_SymStd_LineSolve_C_ml(SOR(2,J,1),&
-     &        SOR(2,J,2), Q(1,J),&
-     &        RWORK(MULT*8 + 1),&
-     &        Npts, SIZE,&
-     &        My_L1_Rank)
+            MULT = MULT+1
+         END DO
+      else
+         DO J=JBEG,JJ-1,2
+            CALL BMG2_SymStd_LineSolve_C_ml_eff(&
+                 SOR(2,J,1), SOR(3,J,2), SOR(2,J,2),&
+                 Q(1,J), RWORK(MULT*8 + 1),&
+                 RWORK(SIZE*NLINES*8 + 1),&
+                 Npts, SIZE,&
+                 My_L1_Rank)
 
-         MULT = MULT+1
-
-      END DO
+            MULT = MULT+1
+         END DO
+      endif
 
       RETURN
       END
@@ -144,29 +157,39 @@
 ! =================================================================
 
       SUBROUTINE C_Wrapper(TDG, RWORK, SIZE, &
-     &                     NLines, NMSGr, MyRank)
-
+     &                     NLines, NMSGr, MyRank, factorize)
+      use iso_c_binding, only: c_bool
       IMPLICIT NONE
 
       INTEGER JBEG, JJ, SIZE, NLines, NMSGr, MyRank
 
       REAL*8 TDG(2*SIZE+2,NLines,4)
       REAL*8 RWORK(NMSGr)
+      logical(c_bool) :: factorize
 
       INTEGER MULT, J, I
 
       MULT = 0
-      DO J=1,NLines
-!MB      DO J=1,1  ! previous line was commented out
-         CALL BMG2_SymStd_LineSolve_C_ml(TDG(2,J,1),&
-     &                    TDG(2,J,2), TDG(1,J,4), &
-     &                    RWORK(MULT*8 + 1), &
-     &                    2*SIZE, SIZE,&
-     &                    MyRank)
+      if (factorize) then
+         DO J=1,NLines
+            CALL BMG2_SymStd_LineSolve_C_ml(TDG(2,J,1),&
+                 &                    TDG(2,J,2), TDG(1,J,4), &
+                 &                    RWORK(MULT*8 + 1), &
+                 &                    2*SIZE, SIZE,&
+                 &                    MyRank)
 
-         MULT = MULT + 1
-
-      END DO
+            MULT = MULT + 1
+         END DO
+      else
+         DO J=1,NLines
+            CALL BMG2_SymStd_LineSolve_C_ml_eff(&
+                 TDG(2,J,1), TDG(3,J,2), TDG(2,J,2), TDG(1,J,4), &
+                 RWORK(MULT*8 + 1), &
+                 RWORK(SIZE*NLINES*8 + 1), &
+                 2*SIZE, SIZE, MyRank)
+            MULT = MULT + 1
+         END DO
+      endif
 
       RETURN
       END

@@ -1,6 +1,6 @@
-      SUBROUTINE BMG2_SymStd_LineSolve_C( &
+      SUBROUTINE BMG2_SymStd_LineSolve_C_ml_eff( &
      &                A, B, C, F, RBUFF, RWORK, &
-     &                NP, P, DATADIST, MY_ID&
+     &                NP, P, MY_ID&
      &                )
 
 ! ======================================================================
@@ -47,7 +47,6 @@
 !
       INTEGER MY_ID, NP, P
       REAL*8 A(NP), B(NP), C(NP), F(0:NP+1)
-      INTEGER DATADIST( 1:2 , 0:(P-1) )
       REAL*8 RBUFF(*), RWORK(*), L
 
 ! ----------------------------

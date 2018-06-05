@@ -4,7 +4,7 @@
 #include <cedar/type_list.h>
 #include <cedar/kernel_params.h>
 #include <cedar/config.h>
-
+#include <cedar/halo_exchanger_base.h>
 
 namespace cedar {
 
@@ -13,6 +13,8 @@ class kernel_manager : public type_map<tlist>
 {
 public:
 	using parent = type_map<tlist>;
+	using mtype = typename parent::mtype;
+	using parent::kerns;
 
     kernel_manager(std::shared_ptr<kernel_params> params) : params(params) {}
 	kernel_manager(config & conf) { params = build_kernel_params(conf); }
@@ -60,8 +62,34 @@ public:
 		parent::template get<T>(name).add_params(params);
 	}
 
+	void add_halo(halo_exchanger_base * halof)
+	{
+		static const std::size_t n = std::tuple_size<mtype>::value;
+		add_halo_impl<n, mtype>::call(kerns, halof);
+	}
+
 protected:
 	std::shared_ptr<kernel_params> params;
+
+	template<std::size_t I, class mtype>
+	struct add_halo_impl
+	{
+		static void call(mtype & kerns, halo_exchanger_base *halof)
+			{
+				auto & impls = std::get<I-1>(kerns);
+				for (auto & impl : impls)
+					impl.second->add_halo(halof);
+
+				add_halo_impl<I-1, mtype>::call(kerns, halof);
+			}
+	};
+
+
+	template<class mtype>
+	struct add_halo_impl<0, mtype>
+	{
+		static void call(mtype & kerns, halo_exchanger_base *halof){}
+	};
 };
 
 }
