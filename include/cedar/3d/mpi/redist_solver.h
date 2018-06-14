@@ -55,6 +55,7 @@ public:
 	void solve(grid_func & x, const grid_func & b);
 
 protected:
+	bool redundant; /** Flag for whether redistribution is performed redundantly */
 	std::unique_ptr<inner_solver> slv;
 	redist_comms rcomms;
 	int block_id; /** id within a block */
@@ -96,7 +97,7 @@ template<class inner_solver>
 	                                           mpi::msg_exchanger *halof,
 	                                           std::shared_ptr<config> conf,
 	                                           std::array<int, 3> nblock) :
-nblock(nblock), active(true), recv_id(-1)
+		redundant(false), nblock(nblock), active(true), recv_id(-1)
 {
 	auto & topo = so.grid();
 	msg_ctx * ctx = (msg_ctx*) halof->context_ptr();
@@ -111,7 +112,7 @@ nblock(nblock), active(true), recv_id(-1)
 		x_redist = grid_func(ctopo);
 	}
 
-	if (active) {
+	if ((redundant and active) or (not redundant and block_id == 0)) {
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
 		log::push_level("redist", *conf);
@@ -132,7 +133,7 @@ template<class inner_solver>
 	timer_end("agglomerate");
 
 
-	if (active) {
+	if ((redundant and active) or (not redundant and block_id == 0)) {
 		timer_down();
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
@@ -216,50 +217,57 @@ void redist_solver<inner_solver>::redist_operator(const stencil_op<xxvii_pt> & s
 	}
 
 	buf_arr rbuf(rbuf_len);
-	MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
-	               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
+	if (redundant) {
+		MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
+		               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
+	} else {
+		MPI_Gatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
+		            displs.data(), MPI_DOUBLE, 0, rcomms.pblock_comm);
+	}
 
-	// Loop through all my blocks
-	// TODO: this is unreadable, reduce the number of nestings
-	len_t igs, jgs, kgs;
-	idx = 0;
-	kgs = 1;
-	for (auto k : range(nbz.len(0))) {
-		auto nz = 0;
-		jgs = 1;
-		for (auto j : range(nby.len(0))) {
-			auto ny = 0;
-			igs = 1;
-			for (auto i : range(nbx.len(0))) {
-				auto nx = nbx(i);
-				ny = nby(j);
-				nz = nbz(k);
-				for (auto kk : range(nz+2)) {
-					for (auto jj : range(ny+2)) {
-						for (auto ii : range(nx+2)) {
-							dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::p  ) = rbuf(idx);
-							dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::pw ) = rbuf(idx+1);
-							dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::pnw) = rbuf(idx+2);
-							dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::ps ) = rbuf(idx+3);
-							dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::psw) = rbuf(idx+4);
-							dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::bne) = rbuf(idx+5);
-							dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::bn ) = rbuf(idx+6);
-							dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::bnw) = rbuf(idx+7);
-							dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::be ) = rbuf(idx+8);
-							dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::b  ) = rbuf(idx+9);
-							dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::bw ) = rbuf(idx+10);
-							dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::bse) = rbuf(idx+11);
-							dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::bs ) = rbuf(idx+12);
-							dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::bsw) = rbuf(idx+13);
-							idx += 14;
+	if (redundant or (block_id == 0)) {
+		// Loop through all my blocks
+		// TODO: this is unreadable, reduce the number of nestings
+		len_t igs, jgs, kgs;
+		idx = 0;
+		kgs = 1;
+		for (auto k : range(nbz.len(0))) {
+			auto nz = 0;
+			jgs = 1;
+			for (auto j : range(nby.len(0))) {
+				auto ny = 0;
+				igs = 1;
+				for (auto i : range(nbx.len(0))) {
+					auto nx = nbx(i);
+					ny = nby(j);
+					nz = nbz(k);
+					for (auto kk : range(nz+2)) {
+						for (auto jj : range(ny+2)) {
+							for (auto ii : range(nx+2)) {
+								dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::p  ) = rbuf(idx);
+								dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::pw ) = rbuf(idx+1);
+								dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::pnw) = rbuf(idx+2);
+								dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::ps ) = rbuf(idx+3);
+								dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::psw) = rbuf(idx+4);
+								dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::bne) = rbuf(idx+5);
+								dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::bn ) = rbuf(idx+6);
+								dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::bnw) = rbuf(idx+7);
+								dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::be ) = rbuf(idx+8);
+								dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::b  ) = rbuf(idx+9);
+								dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::bw ) = rbuf(idx+10);
+								dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::bse) = rbuf(idx+11);
+								dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::bs ) = rbuf(idx+12);
+								dest(igs+ii-1,jgs+jj-1,kgs+kk-1,xxvii_pt::bsw) = rbuf(idx+13);
+								idx += 14;
+							}
 						}
 					}
+					igs += nx;
 				}
-				igs += nx;
+				jgs += ny;
 			}
-			jgs += ny;
+			kgs += nz;
 		}
-		kgs += nz;
 	}
 }
 
@@ -422,37 +430,44 @@ void redist_solver<inner_solver>::gather_rhs(const grid_func & b)
 	}
 
 	buf_arr rbuf(rbuf_len);
-	MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
-	               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
+	if (redundant) {
+		MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
+		               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
+	} else {
+		MPI_Gatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
+		            displs.data(), MPI_DOUBLE, 0, rcomms.pblock_comm);
+	}
 
-	// Loop through all my blocks
-	// TODO: this is unreadable, reduce the number of nestings
-	len_t igs, jgs, kgs;
-	idx = 0;
-	kgs = 1;
-	for (auto k : range(nbz.len(0))) {
-		auto nz = 0;
-		jgs = 1;
-		for (auto j : range(nby.len(0))) {
-			auto ny = 0;
-			igs = 1;
-			for (auto i : range(nbx.len(0))) {
-				auto nx = nbx(i);
-				ny = nby(j);
-				nz = nbz(k);
-				for (auto kk : range(nz)) {
-					for (auto jj : range(ny)) {
-						for (auto ii : range(nx)) {
-							b_redist(igs+ii,jgs+jj,kgs+kk) = rbuf(idx);
-							idx++;
+	if (redundant or (block_id == 0)) {
+		// Loop through all my blocks
+		// TODO: this is unreadable, reduce the number of nestings
+		len_t igs, jgs, kgs;
+		idx = 0;
+		kgs = 1;
+		for (auto k : range(nbz.len(0))) {
+			auto nz = 0;
+			jgs = 1;
+			for (auto j : range(nby.len(0))) {
+				auto ny = 0;
+				igs = 1;
+				for (auto i : range(nbx.len(0))) {
+					auto nx = nbx(i);
+					ny = nby(j);
+					nz = nbz(k);
+					for (auto kk : range(nz)) {
+						for (auto jj : range(ny)) {
+							for (auto ii : range(nx)) {
+								b_redist(igs+ii,jgs+jj,kgs+kk) = rbuf(idx);
+								idx++;
+							}
 						}
 					}
+					igs += nx;
 				}
-				igs += nx;
+				jgs += ny;
 			}
-			jgs += ny;
+			kgs += nz;
 		}
-		kgs += nz;
 	}
 }
 
@@ -460,7 +475,60 @@ void redist_solver<inner_solver>::gather_rhs(const grid_func & b)
 template<class inner_solver>
 void redist_solver<inner_solver>::scatter_sol(grid_func & x)
 {
-	if (active) {
+	if (not redundant) {
+		len_t sbuf_len = 0;
+		for (auto k : range(nbz.len(0))) {
+			for (auto j : range(nby.len(0))) {
+				for (auto i : range(nbx.len(0))) {
+					sbuf_len += (nbx(i)+2)*(nby(j)+2)*(nbz(k)+2);
+				}
+			}
+		}
+
+		array<real_t, 1> sbuf(sbuf_len);
+		std::vector<int> scounts(nbx.len(0)*nby.len(0)*nbz.len(0));
+		std::vector<int> displs(nbx.len(0)*nby.len(0)*nbz.len(0));
+
+		{
+			len_t igs, jgs, kgs;
+			len_t idx = 0;
+			kgs = 1;
+			for (auto k : range(nbz.len(0))) {
+				auto nz = 0;
+				jgs = 1;
+				for (auto j : range(nby.len(0))) {
+					auto ny = 0;
+					igs = 1;
+					for (auto i : range(nbx.len(0))) {
+						auto nx = nbx(i);
+						ny = nby(j);
+						nz = nbz(k);
+
+						int block_ind = i+j*nbx.len(0)+k*nbx.len(0)*nby.len(0);
+						displs[block_ind] = idx;
+						scounts[block_ind] = (nx+2)*(ny+2)*(nz+2);
+
+						for (auto kk : range(nz+2)) {
+							for (auto jj : range(ny+2)) {
+								for (auto ii : range(nx+2)) {
+									sbuf(idx) = x_redist(igs+ii-1,jgs+jj-1,kgs+kk-1);
+									idx++;
+								}
+							}
+						}
+						igs += nx;
+					}
+					jgs += ny;
+				}
+				kgs += nz;
+			}
+		}
+		MPI_Scatterv(sbuf.data(), scounts.data(), displs.data(),
+		             MPI_DOUBLE, x.data(), x.len(0)*x.len(1)*x.len(2),
+		             MPI_DOUBLE, 0, rcomms.pblock_comm);
+	}
+
+	if (redundant and active) {
 		// copy local part from redistributed solution
 		int ci = (block_id % (nbx.len(0)*nby.len(0))) % nbx.len(0);
 		int cj = (block_id % (nbx.len(0)*nby.len(0))) / nbx.len(0);
@@ -523,7 +591,7 @@ void redist_solver<inner_solver>::scatter_sol(grid_func & x)
 
 			MPI_Send(sbuf.data(), sbuf.len(0)*sbuf.len(1)*sbuf.len(2), MPI_DOUBLE, send_id, 0, rcomms.pblock_comm);
 		}
-	} else if (recv_id > -1) {
+	} else if (redundant and (recv_id > -1)) {
 		MPI_Recv(x.data(), x.len(0)*x.len(1)*x.len(2), MPI_DOUBLE, recv_id, 0, rcomms.pblock_comm, MPI_STATUS_IGNORE);
 	}
 }
