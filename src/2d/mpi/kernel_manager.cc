@@ -25,7 +25,7 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 {
 	log::status << *params << std::endl;
 
-	auto kman = std::make_unique<kernel_manager<klist<stypes, exec_mode::mpi>>>(params);
+	auto kman = std::make_shared<kernel_manager<klist<stypes, exec_mode::mpi>>>(params);
 	kman->add<point_relax, rbgs>("system");
 	kman->add<line_relax<relax_dir::x>, lines<relax_dir::x>>("two-level");
 	kman->add<line_relax<relax_dir::y>, lines<relax_dir::y>>("two-level");
