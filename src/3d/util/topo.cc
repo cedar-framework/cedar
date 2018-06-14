@@ -134,7 +134,16 @@ topo_ptr create_topo(config & conf)
 
 		log::status << "Running local solve" << std::endl;
 	} else {
-		grid = cdr3::util::create_topo_global(MPI_COMM_WORLD, nx, ny, nz);
+		auto np = conf.getvec<int>("grid.np");
+		if (np.size() >= 3) {
+			int size;
+			MPI_Comm_size(MPI_COMM_WORLD, &size);
+			// assert(size == np[0]*np[1]*np[2]);
+			grid = cdr3::util::create_topo_global(MPI_COMM_WORLD, np[0], np[1], np[2],
+			                                      nx, ny,nz);
+		} else {
+			grid = cdr3::util::create_topo_global(MPI_COMM_WORLD, nx, ny, nz);
+		}
 		log::status << "Running global solve" << std::endl;
 	}
 
@@ -188,6 +197,52 @@ topo_ptr create_topo_global(MPI_Comm comm, len_t ngx, len_t ngy, len_t ngz)
 	}
 
 	assert(static_cast<unsigned>(size) == grid->nproc());
+
+	grid->coord(0) = (rank % (grid->nproc(0)*grid->nproc(1))) % grid->nproc(0);
+	grid->coord(1) = (rank % (grid->nproc(0)*grid->nproc(1))) / grid->nproc(0);
+	grid->coord(2) = rank / (grid->nproc(0)*grid->nproc(1));
+
+	for (auto dim : range(3)) {
+		auto part = block_partition(ng[dim], grid->nproc(dim));
+		grid->nglobal(dim) = ng[dim] + 2;
+		grid->is(dim) = part.low(grid->coord(dim)) + 1;
+		grid->nlocal(dim) = part.size(grid->coord(dim)) + 2;
+
+		std::vector<len_t> *dimfine;
+		if (dim == 0)
+			dimfine = &grid->dimxfine;
+		else if (dim == 1)
+			dimfine = &grid->dimyfine;
+		else
+			dimfine = &grid->dimzfine;
+
+		dimfine->resize(grid->nproc(dim));
+		for (auto i : range(grid->nproc(dim))) {
+			(*dimfine)[i] = part.size(i);
+		}
+	}
+
+	return grid;
+}
+
+
+topo_ptr create_topo_global(MPI_Comm comm, len_t npx, len_t npy, len_t npz, len_t ngx, len_t ngy, len_t ngz)
+{
+	int rank, size;
+
+	std::array<len_t,3> ng({ngx,ngy,ngz});
+
+	auto igrd = std::make_shared<std::vector<len_t>>(NBMG_pIGRD);
+	auto grid = std::make_shared<grid_topo>(igrd, 0, 1);
+
+	grid->comm = comm;
+
+	MPI_Comm_rank(grid->comm, &rank);
+	MPI_Comm_size(grid->comm, &size);
+
+	grid->nproc(0) = npx;
+	grid->nproc(1) = npy;
+	grid->nproc(2) = npz;
 
 	grid->coord(0) = (rank % (grid->nproc(0)*grid->nproc(1))) % grid->nproc(0);
 	grid->coord(1) = (rank % (grid->nproc(0)*grid->nproc(1))) / grid->nproc(0);
