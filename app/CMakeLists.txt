@@ -1,0 +1,5 @@
+add_executable(test-thread test.cc)
+target_compile_options(test-thread PUBLIC -I/home/andrew/local/include -L/home/andrew/local/lib -lomp -Wl,-rpath=/home/andrew/local/lib)
+target_link_libraries(test-thread cedar -I/home/andrew/local/include -L/home/andrew/local/lib -lomp -Wl,-rpath=/home/andrew/local/lib)
+# target_compile_options(test-thread PUBLIC -fopenmp)
+# target_link_libraries(test-thread cedar -fopenmp)

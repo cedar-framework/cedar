@@ -22,8 +22,8 @@ struct line_pkg
 
 class tausch_exchanger : public kernels::halo_exchange<stypes>
 {
-	enum halo_dir { left=0, right=1, down=2, up=3, count };
 public:
+	enum halo_dir { left=0, right=1, down=2, up=3, count };
 	void setup(std::vector<topo_ptr> topos) override;
 	void run(stencil_op<five_pt> & so) override { this->run_impl(so); }
 	void run(stencil_op<nine_pt> & so) override { this->run_impl(so); }
@@ -76,7 +76,6 @@ protected:
 	std::vector<bool> send_active;
 	std::vector<bool> recv_active;
 
-private:
 	void set_level_spec(int lvl, int rank,
 	                    grid_topo & topo,
 	                    std::vector<TauschHaloSpec> & remote_spec,

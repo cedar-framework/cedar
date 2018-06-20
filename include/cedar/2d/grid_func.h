@@ -20,6 +20,7 @@ namespace cedar { namespace cdr2 {
 	{
 	public:
 		using array<real_t, 2>::operator();
+		grid_func(real_t *ext_data, len_t nx, len_t ny, unsigned int nghosts=1);
 		grid_func(len_t nx, len_t ny, unsigned int nghosts=1);
 		grid_func() {}
 		grid_func & operator=(grid_func&& gf);

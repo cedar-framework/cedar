@@ -25,6 +25,8 @@ class aarray : public virtual array_base<len_type>
 {
 protected:
 	AlignedVector<data_type> vec;     /** Vector where the data is stored. */
+	data_type *base_ptr;
+	len_type flat_len;
 	std::array<len_type, ND> strides; /** Strides of each dimension, e.g., first index is stride 1. */
 	std::array<len_type, ND> extents; /** Lengths of each dimension. */
 
@@ -46,6 +48,11 @@ public:
 	}
 
 	aarray() {};
+	template <typename... T> aarray(data_type *ext, T... args)
+	{
+		reshape(ext, std::forward<decltype(args)>(args)...);
+	}
+
 	template <typename... T> aarray(T... args)
 	{
 		reshape(std::forward<decltype(args)>(args)...);
@@ -63,7 +70,29 @@ public:
 		for (unsigned short i = 0; i < ND; i++)
 			len *= extents[i];
 		vec.resize(len);
+		flat_len = len;
+		base_ptr = vec.data();
 
+		strides[0] = 1;
+		for (unsigned short i = 1; i < ND; i++) {
+			strides[i] = 1;
+			for (unsigned short j = 0; j < i; j++) {
+				strides[i] *= extents[j];
+			}
+
+		}
+	}
+
+
+	template <typename... T> void reshape(data_type *ext, T... args)
+	{
+		base_ptr = ext;
+		unpack_extents(std::forward<decltype(args)>(args)...);
+		len_type len = 1;
+		for (unsigned short i = 0; i < ND; i++)
+			len *= extents[i];
+
+		flat_len = len;
 		strides[0] = 1;
 		for (unsigned short i = 1; i < ND; i++) {
 			strides[i] = 1;
@@ -103,9 +132,9 @@ public:
 		std::tie(pos, offset) = get_offset(std::forward<decltype(args)>(args)...);
 		#ifdef BOUNDS_CHECK
 		assert(pos == -1);
-		return vec.at(offset);
+		return base_ptr[offset];
 		#else
-		return vec[offset];
+		return base_ptr[offset];
 		#endif
 	}
 
@@ -116,9 +145,9 @@ public:
 		std::tie(pos, offset) = get_offset(std::forward<decltype(args)>(args)...);
 		#ifdef BOUNDS_CHECK
 		assert(pos == -1);
-		return vec.at(offset);
+		return base_ptr[offset];
 		#else
-		return vec[offset];
+		return base_ptr[offset];
 		#endif
 	}
 
@@ -169,18 +198,18 @@ public:
 
 	void set(data_type v)
 	{
-		for (auto&& val: vec)
-			val = v;
+		for (len_type i = 0; i < flat_len; i++)
+			base_ptr[i] = v;
 	}
 
 
 	void scale(data_type scalar)
 	{
-		for (auto&& val: vec)
-			val *= scalar;
+		for (len_type i = 0; i < flat_len; i++)
+			base_ptr[i] *= scalar;
 	}
 
-	data_type * data() { return vec.data(); }
+	data_type * data() { return base_ptr; }
 };
 
 template<typename data_type, unsigned short ND>

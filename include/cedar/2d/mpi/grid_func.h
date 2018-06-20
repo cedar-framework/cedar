@@ -25,6 +25,7 @@ public:
 	using iadd_t = std::tuple<const cedar::cdr2::inter::mpi::prolong_op&, const grid_func&, const grid_func&>;
 	grid_func(){};
 	grid_func(topo_ptr grid);
+	grid_func(real_t *ext_data, topo_ptr grid);
 	grid_func(len_t nx, len_t ny);
 	using ::cedar::cdr2::grid_func::operator();
 	static grid_func like(const grid_func &likeable);
