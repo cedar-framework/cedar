@@ -16,7 +16,6 @@ struct line_pkg
 {
 	line_pkg(grid_topo & topo);
 	std::vector<real_t> linebuf;
-	std::array<MPI_Comm, 2> linecomm;
 	std::array<array<len_t, 2>, 2> datadist;
 };
 
@@ -35,9 +34,6 @@ public:
 	}
 	len_t * datadist(int k, int grid) override {
 		return line_data->datadist[k].data();
-	}
-	MPI_Comm linecomm(int k) override {
-		return line_data->linecomm[k];
 	}
 	std::vector<real_t> & linebuf() override {
 		return line_data->linebuf;

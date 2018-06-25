@@ -111,6 +111,7 @@ class rbgs : public kernels::point_relax<mpi::stypes>
 template<relax_dir rdir>
 class lines : public kernels::line_relax<mpi::stypes, rdir>
 {
+public:
 	virtual void setup(const stencil_op<five_pt> & so,
 	                   relax_stencil & sor) override
 	{
@@ -147,6 +148,10 @@ class lines : public kernels::line_relax<mpi::stypes, rdir>
 		int nstencil = stencil_ndirs<sten>::value;
 		auto & sod = const_cast<stencil_op<sten>&>(so);
 
+		auto & topo = so.grid();
+		MPI_Comm_split(topo.comm, topo.coord(1), topo.coord(0), &xlinecomm);
+		MPI_Comm_split(topo.comm, topo.coord(0), topo.coord(1), &ylinecomm);
+
 		if (rdir == relax_dir::x)
 			MPI_BMG2_SymStd_SETUP_lines_x(sod.data(), sor.data(), so.len(0), so.len(1), nstencil);
 		else
@@ -180,8 +185,8 @@ class lines : public kernels::line_relax<mpi::stypes, rdir>
 
 		// ibc = BMG_BCs_definite;
 		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
-		MPI_Fint xlinecomm = MPI_Comm_c2f(this->halof->linecomm(0));
-		MPI_Fint ylinecomm = MPI_Comm_c2f(this->halof->linecomm(1));
+		MPI_Fint fxlinecomm = MPI_Comm_c2f(this->xlinecomm);
+		MPI_Fint fylinecomm = MPI_Comm_c2f(this->ylinecomm);
 
 		cedar::len_t * xdatadist = this->halof->datadist(0,k);
 		cedar::len_t * ydatadist = this->halof->datadist(1,k);
@@ -193,7 +198,7 @@ class lines : public kernels::line_relax<mpi::stypes, rdir>
 			                              xdatadist,
 			                              this->halof->linebuf().data(),
 			                              this->halof->linebuf().size(), fcomm,
-			                              xlinecomm, ylinecomm, this->halof);
+			                              fxlinecomm, fylinecomm, this->halof);
 		} else {
 			MPI_BMG2_SymStd_relax_lines_y(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
 			                              so.len(0), so.len(1), topo.is(0), topo.is(1),
@@ -201,9 +206,14 @@ class lines : public kernels::line_relax<mpi::stypes, rdir>
 			                              ydatadist,
 			                              this->halof->linebuf().data(),
 			                              this->halof->linebuf().size(), fcomm,
-			                              xlinecomm, ylinecomm, this->halof);
+			                              fxlinecomm, fylinecomm, this->halof);
 		}
 	}
+
+
+protected:
+	MPI_Comm xlinecomm;
+	MPI_Comm ylinecomm;
 };
 
 }}}

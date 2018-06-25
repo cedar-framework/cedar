@@ -87,9 +87,6 @@ namespace mpi {
 			// placeholder
 			return ctx->msg_geom.data();
 		}
-		MPI_Comm linecomm(int k) override {
-			return MPI_COMM_NULL;
-		}
 		std::vector<real_t> & linebuf() override {
 			return ctx->msg_buffer;
 		}

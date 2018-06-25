@@ -43,10 +43,6 @@ MsgCtx::MsgCtx(grid_topo & topo) :
 	dimy(topo.nproc(1), topo.nlevel()),
 	comm(topo.comm)
 {
-	MPI_Comm_split(topo.comm, topo.coord(1), topo.coord(0),
-	               &xlinecomm);
-	MPI_Comm_split(topo.comm, topo.coord(0), topo.coord(1),
-	               &ylinecomm);
 	len_t NLx = topo.nlocal(0) - 2;
 	len_t NLy = topo.nlocal(1) - 2;
 	// !

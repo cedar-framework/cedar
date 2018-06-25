@@ -13,7 +13,6 @@ namespace cedar {
 		virtual void exchange_sten(int k, real_t *so) = 0;
 		virtual aarray<int, len_t, 2> & leveldims(int k) = 0;
 		virtual len_t * datadist(int k, int grid) = 0;
-		virtual MPI_Comm linecomm(int k) = 0;
 		virtual std::vector<real_t> & linebuf() = 0;
 	};
 }

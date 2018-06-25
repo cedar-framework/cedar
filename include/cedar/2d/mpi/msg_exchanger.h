@@ -30,8 +30,6 @@ struct MsgCtx
 	std::vector<real_t> msg_buffer;
 	int pSI_MSG;
 	int p_NLx_kg, p_NLy_kg;
-	MPI_Comm xlinecomm;
-	MPI_Comm ylinecomm;
 	MPI_Comm comm;
 	/* std::vector<len_t> iworkmsg; */
 	/* int *iworkmsg[nmsgi]; */
@@ -79,12 +77,6 @@ public:
 			return &ctx->msg_geom.data()[ctx->pLS(ipL_LS_XDataDist,grid-1)-1];
 		else
 			return &ctx->msg_geom.data()[ctx->pLS(ipL_LS_YDataDist,grid-1)-1];
-	}
-	MPI_Comm linecomm(int k) override {
-		if (k == 0)
-			return ctx->xlinecomm;
-		else
-			return ctx->ylinecomm;
 	}
 	std::vector<real_t> & linebuf() override {
 		return ctx->msg_buffer;

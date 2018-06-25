@@ -13,10 +13,6 @@ line_pkg::line_pkg(grid_topo & topo):
 	datadist{{array<len_t, 2>(2, topo.nproc(0)),
 			array<len_t, 2>(2, topo.nproc(1))}}
 {
-	MPI_Comm_split(topo.comm, topo.coord(1), topo.coord(0),
-	               &linecomm[0]);
-	MPI_Comm_split(topo.comm, topo.coord(0), topo.coord(1),
-	               &linecomm[1]);
 }
 
 
