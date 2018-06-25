@@ -11,6 +11,8 @@ grid_func & grid_func::operator=(grid_func &&gf)
 	strides = std::move(gf.strides);
 	extents = std::move(gf.extents);
 	num_ghosts = gf.num_ghosts;
+	flat_len = gf.flat_len;
+	base_ptr = gf.base_ptr;
 	range_ = std::move(gf.range_);
 	grange_ = std::move(gf.grange_);
 
