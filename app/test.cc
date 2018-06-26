@@ -1,5 +1,5 @@
 #include <mpi.h>
-#include <omp.h>
+#include <abt.h>
 
 #include <iostream>
 
@@ -14,6 +14,36 @@
 
 #include "exchangers.h"
 
+using namespace cedar;
+using namespace cedar::cdr2;
+
+struct ult_params
+{
+	int tid;
+	int nsweeps;
+	std::vector<mpi::kman_ptr> *kmans;
+	mpi::stencil_op<nine_pt> *so;
+	std::vector<mpi::grid_func> *xs;
+	mpi::grid_func *b;
+	relax_stencil *sor;
+};
+
+
+static void compute(void *args)
+{
+	ult_params *params = (ult_params*) args;
+	int tid = params->tid;
+	int nsweeps = params->nsweeps;
+	auto & kmans = *params->kmans;
+	auto & so = *params->so;
+	auto & xs = *params->xs;
+	auto & b = *params->b;
+	auto & sor = *params->sor;
+
+	for (auto sweep : range(nsweeps)) {
+		kmans[tid]->run<mpi::point_relax>(so, xs[tid], b, sor, cycle::Dir::DOWN);
+	}
+}
 
 static void draw(const cedar::cdr2::mpi::grid_func & b, std::string prefix)
 {
@@ -52,11 +82,14 @@ static void fill_solution(std::vector<cedar::cdr2::mpi::grid_func> & xs)
 
 int main(int argc, char *argv[])
 {
-	using namespace cedar;
-	using namespace cedar::cdr2;
-
 	int provided;
+
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SERIALIZED, &provided);
+	ABT_init(argc, argv);
+	ABT_xstream xstream;
+	ABT_pool pool;
+	ABT_xstream_self(&xstream);
+	ABT_xstream_get_main_pools(xstream, 1, &pool);
 
 	timer_init(MPI_COMM_WORLD);
 
@@ -115,21 +148,43 @@ int main(int argc, char *argv[])
 	if (aggregate) {
 		kmans.back()->setup<mpi::point_relax>(so, sor);
 
-		timer_begin("relax");
-		#pragma omp parallel num_threads(nplanes)
-		{
-			int tid = omp_get_thread_num();
-			for (auto sweep : range(nsweeps)) {
-				kmans[tid]->run<mpi::point_relax>(so, xs[tid], b, sor, cycle::Dir::DOWN);
-			}
-			// kmans[tid]->run<mpi::halo_exchange>(xs[tid]);
+		ABT_thread *threads = new ABT_thread[nplanes];
+		ult_params *args = new ult_params[nplanes];
+		for (auto i : range<int>(nplanes)) {
+			args[i].kmans = &kmans;
+			args[i].so = &so;
+			args[i].xs = &xs;
+			args[i].b = &b;
+			args[i].sor = &sor;
+			args[i].nsweeps = nsweeps;
 		}
+
+		MPI_Barrier(MPI_COMM_WORLD);
+		timer_begin("relax");
+		for (auto i : range<int>(nplanes)) {
+			args[i].tid = i;
+			ABT_thread_create(pool, compute, (void*) &args[i],
+			                  ABT_THREAD_ATTR_NULL, &threads[i]);
+		}
+
+		for (auto i : range<int>(nplanes)) {
+			ABT_thread_join(threads[i]);
+		}
+
 		timer_end("relax");
+
+		for (auto i : range<int>(nplanes)) {
+			ABT_thread_free(&threads[i]);
+		}
+
+		delete[] threads;
+		delete[] args;
 	} else {
 		for (auto i : range(nplanes)) {
 			kmans[i]->setup<mpi::point_relax>(so, sor);
 		}
 
+		MPI_Barrier(MPI_COMM_WORLD);
 		timer_begin("relax");
 		for (auto sweep : range(nsweeps)) {
 			for (auto i : range(nplanes)) {
@@ -143,6 +198,7 @@ int main(int argc, char *argv[])
 
 	delete[] x_data;
 
+	ABT_finalize();
 	MPI_Finalize();
 	return 0;
 }
