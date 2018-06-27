@@ -44,6 +44,7 @@ if (ENABLE_MPI)
 	ftn/mpi/BMG2_SymStd_COPY_cg_rV_G_L.f
 	ftn/mpi/BMG2_SymStd_SETUP_ITLI_ex.f90
 	ftn/mpi/BMG2_SymStd_relax_GS.f90
+	ftn/mpi/BMG2_SymStd_relax_GS_plane.f90
 	ftn/mpi/BMG2_SymStd_relax_lines_x.f90
 	ftn/mpi/BMG2_SymStd_relax_lines_y.f90
 	ftn/mpi/BMG2_SymStd_relax_lines_x_ml.f90

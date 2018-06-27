@@ -1,0 +1,14 @@
+{
+	"log": ["status","error"],
+	"aggregate": true,
+	"reimplement": true,
+	"nplanes": 100,
+	"nsweeps": 10,
+	"halo-exchange": "tausch",
+	"grid":
+	{
+		"local": true,
+		"n": [100,100],
+		"np": [4,4]
+	}
+}

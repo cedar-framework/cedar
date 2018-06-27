@@ -13,6 +13,7 @@
 #include <cedar/util/time_log.h>
 
 #include "exchangers.h"
+#include "relax.h"
 
 using namespace cedar;
 using namespace cedar::cdr2;
@@ -99,6 +100,12 @@ int main(int argc, char *argv[])
 	auto nplanes = conf->get<int>("nplanes");
 	auto nsweeps = conf->get<int>("nsweeps");
 	auto aggregate = conf->get<bool>("aggregate");
+	auto reimpl = conf->get<bool>("reimplement");
+
+	if (reimpl and not aggregate) {
+		log::error << "aggregate must be enabled if reimpl is enabled" << std::endl;
+		std::terminate();
+	}
 
 	auto grid = util::create_topo(*conf);
 	auto so = mpi::gallery::fe(grid);
@@ -121,7 +128,10 @@ int main(int argc, char *argv[])
 
 		auto kman = kmans.back();
 		kman->add<mpi::halo_exchange, mpi::noop_exchange>("noop");
-		kman->add<mpi::halo_exchange, mpi::master_exchange>("master", nplanes);
+		kman->add<mpi::halo_exchange, mpi::master_exchange>("master", nplanes, reimpl);
+		kman->add<mpi::point_relax, mpi::rbgs_plane>("reimpl", nplanes);
+		if (reimpl)
+			kman->set<mpi::point_relax>("reimpl");
 	}
 
 	if (aggregate) {
@@ -148,50 +158,59 @@ int main(int argc, char *argv[])
 	if (aggregate) {
 		kmans.back()->setup<mpi::point_relax>(so, sor);
 
-		threads = new ABT_thread[nplanes];
-		ult_params *args = new ult_params[nplanes];
-		for (auto i : range<int>(nplanes)) {
-			args[i].kmans = &kmans;
-			args[i].so = &so;
-			args[i].xs = &xs;
-			args[i].b = &b;
-			args[i].sor = &sor;
-			args[i].nsweeps = nsweeps;
+		if (reimpl) {
+			MPI_Barrier(MPI_COMM_WORLD);
+			timer_begin("relax-reimpl");
+			for (auto sweep : range(nsweeps)) {
+				kmans[0]->run<mpi::point_relax>(so, xs[0], b, sor, cycle::Dir::DOWN);
+			}
+			timer_end("relax-reimpl");
+		} else {
+			threads = new ABT_thread[nplanes];
+			ult_params *args = new ult_params[nplanes];
+			for (auto i : range<int>(nplanes)) {
+				args[i].kmans = &kmans;
+				args[i].so = &so;
+				args[i].xs = &xs;
+				args[i].b = &b;
+				args[i].sor = &sor;
+				args[i].nsweeps = nsweeps;
+			}
+
+			MPI_Barrier(MPI_COMM_WORLD);
+			timer_begin("relax-abt");
+			for (auto i : range<int>(nplanes)) {
+				args[i].tid = nplanes - i - 1;
+				ABT_thread_create(pool, compute, (void*) &args[i],
+				                  ABT_THREAD_ATTR_NULL, &threads[i]);
+			}
+
+			for (auto i : range<int>(nplanes)) {
+				ABT_thread_join(threads[i]);
+			}
+
+			timer_end("relax-abt");
+
+			for (auto i : range<int>(nplanes)) {
+				ABT_thread_free(&threads[i]);
+			}
+
+			delete[] threads;
+			delete[] args;
 		}
-
-		MPI_Barrier(MPI_COMM_WORLD);
-		timer_begin("relax");
-		for (auto i : range<int>(nplanes)) {
-			args[i].tid = nplanes - i - 1;
-			ABT_thread_create(pool, compute, (void*) &args[i],
-			                  ABT_THREAD_ATTR_NULL, &threads[i]);
-		}
-
-		for (auto i : range<int>(nplanes)) {
-			ABT_thread_join(threads[i]);
-		}
-
-		timer_end("relax");
-
-		for (auto i : range<int>(nplanes)) {
-			ABT_thread_free(&threads[i]);
-		}
-
-		delete[] threads;
-		delete[] args;
 	} else {
 		for (auto i : range(nplanes)) {
 			kmans[i]->setup<mpi::point_relax>(so, sor);
 		}
 
 		MPI_Barrier(MPI_COMM_WORLD);
-		timer_begin("relax");
+		timer_begin("relax-seq");
 		for (auto sweep : range(nsweeps)) {
 			for (auto i : range(nplanes)) {
 				kmans[i]->run<mpi::point_relax>(so, xs[i], b, sor, cycle::Dir::DOWN);
 			}
 		}
-		timer_end("relax");
+		timer_end("relax-seq");
 	}
 
 	timer_save("thread-times.json");

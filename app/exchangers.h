@@ -33,7 +33,7 @@ class master_exchange : public tausch_exchanger
 {
 public:
 	using parent = tausch_exchanger;
-	master_exchange(int nplanes): nplanes(nplanes) {}
+	master_exchange(int nplanes, bool reimpl): nplanes(nplanes), reimpl(reimpl) {}
 	void setup(std::vector<topo_ptr> topos) override
 	{
 		ABT_barrier_create((std::size_t) nplanes, &comm_barrier);
@@ -60,17 +60,20 @@ public:
 
 	void run(grid_func & gf) override {
 		parent::run(gf);
-		ABT_thread_yield_to(threads[0]);
+		if (not reimpl)
+			ABT_thread_yield_to(threads[0]);
 	}
 
 
 	void exchange_func(int k, real_t *gf) override {
 		parent::exchange_func(k, gf);
-		ABT_thread_yield_to(threads[0]);
+		if (not reimpl)
+			ABT_thread_yield_to(threads[0]);
 	}
 
 private:
 	int nplanes;
+	bool reimpl;
 };
 
 }}}
