@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 	if (aggregate) {
 		kmans.back()->setup<mpi::point_relax>(so, sor);
 
-		ABT_thread *threads = new ABT_thread[nplanes];
+		threads = new ABT_thread[nplanes];
 		ult_params *args = new ult_params[nplanes];
 		for (auto i : range<int>(nplanes)) {
 			args[i].kmans = &kmans;
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 		MPI_Barrier(MPI_COMM_WORLD);
 		timer_begin("relax");
 		for (auto i : range<int>(nplanes)) {
-			args[i].tid = i;
+			args[i].tid = nplanes - i - 1;
 			ABT_thread_create(pool, compute, (void*) &args[i],
 			                  ABT_THREAD_ATTR_NULL, &threads[i]);
 		}

@@ -6,6 +6,7 @@
 #include <cedar/2d/mpi/tausch_exchanger.h>
 
 ABT_barrier comm_barrier;
+ABT_thread *threads;
 
 namespace cedar { namespace cdr2 { namespace mpi {
 class noop_exchange : public msg_exchanger
@@ -15,12 +16,14 @@ public:
 	void run(stencil_op<five_pt> & so) override {}
 	void run(stencil_op<nine_pt> & so) override {}
 	void run(grid_func & gf) override {
-		ABT_barrier_wait(comm_barrier);
-		ABT_barrier_wait(comm_barrier);
+		ABT_thread_id tid;
+		ABT_thread_self_id(&tid);
+		ABT_thread_yield_to(threads[tid+1]);
 	}
 	void exchange_func(int k, real_t *gf) override {
-		ABT_barrier_wait(comm_barrier);
-		ABT_barrier_wait(comm_barrier);
+		ABT_thread_id tid;
+		ABT_thread_self_id(&tid);
+		ABT_thread_yield_to(threads[tid+1]);
 	}
 	void exchange_sten(int k, real_t * so) override {}
 };
@@ -56,16 +59,14 @@ public:
 
 
 	void run(grid_func & gf) override {
-		ABT_barrier_wait(comm_barrier);
 		parent::run(gf);
-		ABT_barrier_wait(comm_barrier);
+		ABT_thread_yield_to(threads[0]);
 	}
 
 
 	void exchange_func(int k, real_t *gf) override {
-		ABT_barrier_wait(comm_barrier);
 		parent::exchange_func(k, gf);
-		ABT_barrier_wait(comm_barrier);
+		ABT_thread_yield_to(threads[0]);
 	}
 
 private:
