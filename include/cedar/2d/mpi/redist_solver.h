@@ -13,6 +13,7 @@
 #include <cedar/array.h>
 #include <cedar/mpi/block_partition.h>
 #include <cedar/util/timer.h>
+#include <cedar/2d/mpi/kernel_manager.h>
 
 
 extern "C" {
@@ -46,7 +47,7 @@ public:
 	   @param[in] nblock The destination 2D distribution
 	*/
 	redist_solver(const stencil_op<nine_pt> & so,
-	              halo_exchanger_base *halof,
+	              halo_exchange *halof,
 	              std::shared_ptr<config> conf,
 	              std::array<int, 2> nblock);
 	/**
@@ -104,7 +105,7 @@ protected:
 
 template<class inner_solver>
 redist_solver<inner_solver>::redist_solver(const stencil_op<nine_pt> & so,
-                                           halo_exchanger_base *halof,
+                                           halo_exchange *halof,
                                            std::shared_ptr<config> conf,
                                            std::array<int, 2> nblock) :
 	redundant(false), nblock(nblock), active(true), recv_id(-1)

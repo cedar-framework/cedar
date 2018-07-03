@@ -56,7 +56,7 @@ class galerkin : public kernels::coarsen_op<stypes>
 		                              fop.len(0), fop.len(1), cop.len(0), cop.len(1),
 		                              topo.is(0), topo.is(1),
 		                              nog, ifd, nstencil,
-		                              halof);
+		                              services->fortran_handle<halo_exchange>());
 	}
 
 };

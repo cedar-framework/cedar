@@ -82,7 +82,8 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 	virtual cdr2::mpi::grid_func solve(const cdr2::mpi::grid_func & b) override
 	{
 		auto & bd = const_cast<cdr2::mpi::grid_func&>(b);
-		kman->template run<halo_exchange>(bd);
+		auto & halo_service = kman->services().template get<halo_exchange>();
+		halo_service.run(bd);
 		return parent::solve(b);
 	}
 
@@ -90,7 +91,8 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 	virtual void solve(const cdr2::mpi::grid_func & b, cdr2::mpi::grid_func & x) override
 	{
 		auto & bd = const_cast<cdr2::mpi::grid_func&>(b);
-		kman->template run<halo_exchange>(bd);
+		auto & halo_service = kman->services().template get<halo_exchange>();
+		halo_service.run(bd);
 		return parent::solve(b, x);
 	}
 
@@ -215,8 +217,9 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 		for (std::size_t i = 1; i < this->nlevels(); i++)
 			topos.push_back(this->levels.get(i).A.grid_ptr());
 
-		kman->template setup<halo_exchange>(topos);
-		kman->template run<halo_exchange>(sop);
+		auto & halo_service = kman->services().template get<halo_exchange>();
+		halo_service.setup(topos);
+		halo_service.run(sop);
 	}
 
 	void give_op(std::unique_ptr<stencil_op<fsten>> fop) {fop_ref = std::move(fop);}

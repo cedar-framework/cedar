@@ -18,15 +18,17 @@ std::function<void(mpi::grid_func &, const mpi::grid_func &)>
 	auto params = build_kernel_params(conf);
 	using rsolver = mpi::redist_solver<inner_solver>;
 	auto cg_bmg = std::make_shared<rsolver>(cop,
-	                                        kman->get_ptr<halo_exchange>().get(),
+	                                        kman->services().fortran_handle<halo_exchange>(),
 	                                        cg_conf,
 	                                        choice);
 
 	auto coarse_solver = [=](mpi::grid_func & x, const mpi::grid_func & b)
 	{
 		cg_bmg->solve(x, b);
-		if (params->per_mask())
-			kman->run<halo_exchange>(x);
+		if (params->per_mask()) {
+			auto & halo_service = kman->services().get<halo_exchange>();
+			halo_service.run(x);
+		}
 	};
 
 	return coarse_solver;

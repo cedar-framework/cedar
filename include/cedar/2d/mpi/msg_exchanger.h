@@ -4,7 +4,7 @@
 #include <cedar/2d/ftn/mpi/BMG_workspace_c.h>
 #include <cedar/2d/ftn/mpi/BMG_parameters_c.h>
 
-#include <cedar/kernels/halo_exchange.h>
+#include <cedar/services/halo_exchange.h>
 #include <cedar/mpi/grid_topo.h>
 #include <cedar/2d/mpi/types.h>
 #include <cedar/2d/mpi/stencil_op.h>
@@ -54,10 +54,11 @@ struct MsgCtx
 
 namespace mpi {
 
-class msg_exchanger : public kernels::halo_exchange<stypes>
+class msg_exchanger : public services::halo_exchange<stypes>
 {
 	using MsgCtx = impls::MsgCtx;
 public:
+	using parent = services::halo_exchange<stypes>;
 	MsgCtx & context() { return *ctx; }
 	void *context_ptr() { return ctx.get(); }
 	void setup(std::vector<topo_ptr> topos) override;

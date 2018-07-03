@@ -5,6 +5,8 @@
 #include <map>
 #include <tuple>
 
+#include <cedar/util/log.h>
+
 namespace cedar
 {
 	template<class... T> struct type_list {};

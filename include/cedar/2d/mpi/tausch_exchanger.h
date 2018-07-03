@@ -3,7 +3,7 @@
 
 #include <tausch/tausch.h>
 
-#include <cedar/kernels/halo_exchange.h>
+#include <cedar/services/halo_exchange.h>
 #include <cedar/2d/mpi/stencil_op.h>
 #include <cedar/2d/mpi/grid_func.h>
 #include <cedar/2d/mpi/types.h>
@@ -19,9 +19,10 @@ struct line_pkg
 	std::array<array<len_t, 2>, 2> datadist;
 };
 
-class tausch_exchanger : public kernels::halo_exchange<stypes>
+class tausch_exchanger : public services::halo_exchange<stypes>
 {
 public:
+	using parent = services::halo_exchange<stypes>;
 	enum halo_dir { left=0, right=1, down=2, up=3, count };
 	void setup(std::vector<topo_ptr> topos) override;
 	void run(stencil_op<five_pt> & so) override { this->run_impl(so); }

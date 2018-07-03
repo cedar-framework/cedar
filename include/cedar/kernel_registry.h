@@ -36,8 +36,7 @@ namespace cedar
 	                              kernels::solve_cg<solver_types>>;
 
 	template<class solver_types>
-	using mpi_kernels = type_list<kernels::halo_exchange<solver_types>,
-	                              kernels::matvec<solver_types>,
+	using mpi_kernels = type_list<kernels::matvec<solver_types>,
 	                              kernels::setup_nog<solver_types>>;
 
 	template<class solver_types, exec_mode mode>

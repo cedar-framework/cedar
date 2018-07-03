@@ -45,7 +45,7 @@ public:
 	using residual = kernels::residual<stypes>;
 	using setup_prolong = kernels::setup_interp<stypes>;
 	using solve_cg = kernels::solve_cg<stypes>;
-	using kern_manager = kernel_manager<klist<stypes, emode>>;
+	using kern_manager = kernel_manager<klist<stypes, emode>, stypes>;
 
 	using conf_ptr = std::shared_ptr<config>;
 multilevel(stencil_op<fsten> & fop) : levels(fop), conf(std::make_shared<config>("config.json")) {

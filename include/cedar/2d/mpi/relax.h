@@ -7,6 +7,7 @@
 #include <cedar/2d/mpi/types.h>
 #include <cedar/kernels/point_relax.h>
 #include <cedar/kernels/line_relax.h>
+#include <cedar/2d/mpi/kernel_manager.h>
 
 extern "C" {
 	using namespace cedar;
@@ -103,7 +104,8 @@ class rbgs : public kernels::point_relax<mpi::stypes>
 
 		MPI_BMG2_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
 		                         so.len(0), so.len(1), kf, ifd, nstencil, BMG_RELAX_SYM,
-		                         updown, topo.is(0), topo.is(1), halof);
+		                         updown, topo.is(0), topo.is(1),
+		                         this->services->fortran_handle<halo_exchange>());
 	}
 };
 
@@ -188,25 +190,28 @@ public:
 		MPI_Fint fxlinecomm = MPI_Comm_c2f(this->xlinecomm);
 		MPI_Fint fylinecomm = MPI_Comm_c2f(this->ylinecomm);
 
-		cedar::len_t * xdatadist = this->halof->datadist(0,k);
-		cedar::len_t * ydatadist = this->halof->datadist(1,k);
+		auto & halo_service = this->services->template get<halo_exchange>();
+		cedar::len_t * xdatadist = halo_service.datadist(0,k);
+		cedar::len_t * ydatadist = halo_service.datadist(1,k);
 
 		if (rdir == relax_dir::x) {
 			MPI_BMG2_SymStd_relax_lines_x(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
 			                              so.len(0), so.len(1), topo.is(0), topo.is(1),
 			                              kf, nstencil, BMG_RELAX_SYM, updown,
 			                              xdatadist,
-			                              this->halof->linebuf().data(),
-			                              this->halof->linebuf().size(), fcomm,
-			                              fxlinecomm, fylinecomm, this->halof);
+			                              halo_service.linebuf().data(),
+			                              halo_service.linebuf().size(), fcomm,
+			                              fxlinecomm, fylinecomm,
+			                              this->services->template fortran_handle<halo_exchange>());
 		} else {
 			MPI_BMG2_SymStd_relax_lines_y(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
 			                              so.len(0), so.len(1), topo.is(0), topo.is(1),
 			                              kf, nstencil, BMG_RELAX_SYM, updown,
 			                              ydatadist,
-			                              this->halof->linebuf().data(),
-			                              this->halof->linebuf().size(), fcomm,
-			                              fxlinecomm, fylinecomm, this->halof);
+			                              halo_service.linebuf().data(),
+			                              halo_service.linebuf().size(), fcomm,
+			                              fxlinecomm, fylinecomm,
+			                              this->services->template fortran_handle<halo_exchange>());
 		}
 	}
 

@@ -15,7 +15,7 @@ public:
 		using level_t = typename level_container::template level_t<sten>;
 	using grid_func = typename level_t<fsten>::grid_func;
 	using stypes = typename level_t<fsten>::stypes;
-	using manager = kernel_manager<klist<stypes, emode>>;
+	using manager = kernel_manager<klist<stypes, emode>, stypes>;
 
 	cycle(level_container & levels,
 	      std::function<void(grid_func & x, const grid_func & b)> & coarse_solver) :

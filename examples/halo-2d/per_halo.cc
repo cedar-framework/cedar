@@ -39,11 +39,12 @@ int main(int argc, char *argv[])
 
 	mpi::solver<five_pt> slv(so);
 	auto kman = slv.get_kernels();
+	auto & halo_service = kman->services().get<mpi::halo_exchange>();
 
 	draw(b, "before-0");
 	draw_so(so, "before-0");
-	kman->run<mpi::halo_exchange>(b);
-	kman->run<mpi::halo_exchange>(so);
+	halo_service.run(b);
+	halo_service.run(so);
 	draw(b, "after-0");
 	draw_so(so, "after-0");
 
@@ -54,8 +55,8 @@ int main(int argc, char *argv[])
 		fill_stencil(level.A);
 		draw(level.b, "before-" + std::to_string(lvl));
 		draw_so(level.A, "before-" + std::to_string(lvl));
-		kman->run<mpi::halo_exchange>(level.b);
-		kman->run<mpi::halo_exchange>(level.A);
+		halo_service.run(level.b);
+		halo_service.run(level.A);
 		draw(level.b, "after-" + std::to_string(lvl));
 		draw_so(level.A, "after-" + std::to_string(lvl));
 	}

@@ -127,8 +127,9 @@ int main(int argc, char *argv[])
 		kmans.push_back(mpi::build_kernel_manager(*conf));
 
 		auto kman = kmans.back();
-		kman->add<mpi::halo_exchange, mpi::noop_exchange>("noop");
-		kman->add<mpi::halo_exchange, mpi::master_exchange>("master", nplanes, reimpl);
+		auto & sman = kman->services();
+		sman.add<mpi::halo_exchange, mpi::noop_exchange>("noop");
+		sman.add<mpi::halo_exchange, mpi::master_exchange>("master", nplanes, reimpl);
 		kman->add<mpi::point_relax, mpi::rbgs_plane>("reimpl", nplanes);
 		if (reimpl)
 			kman->set<mpi::point_relax>("reimpl");
@@ -136,22 +137,21 @@ int main(int argc, char *argv[])
 
 	if (aggregate) {
 		for (auto i : range(1, nplanes)) {
-			kmans[i]->set<mpi::halo_exchange>("noop");
+			auto & sman = kmans[i]->services();
+			sman.set<mpi::halo_exchange>("noop");
 		}
-		kmans[0]->set<mpi::halo_exchange>("master");
-
-		for (auto kman : kmans) {
-			auto hex = kman->get_ptr<mpi::halo_exchange>();
-			kman->add_halo(hex.get());
-		}
+		kmans[0]->services().set<mpi::halo_exchange>("master");
 	}
 
 	{ // setup halo
 		std::vector<topo_ptr> topos{{grid}};
-		kmans[0]->setup<mpi::halo_exchange>(topos);
+		auto & halo = kmans[0]->services().get<mpi::halo_exchange>();
+		halo.setup(topos);
 		if (not aggregate) {
-			for (auto i : range(1, nplanes))
-				kmans[i]->setup<mpi::halo_exchange>(topos);
+			for (auto i : range(1, nplanes)) {
+				auto & halo = kmans[i]->services().get<mpi::halo_exchange>();
+				halo.setup(topos);
+			}
 		}
 	}
 

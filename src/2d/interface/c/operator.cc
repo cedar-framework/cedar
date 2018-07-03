@@ -66,11 +66,11 @@ extern "C"
 	{
 		using namespace cedar::cdr2;
 
-
 		auto *op_cont = reinterpret_cast<op_container*>(op);
 		auto & sop = op_cont->op;
 
 		auto kman = op_cont->kman;
+		auto & halo_service = kman->services().get<mpi::halo_exchange>();
 
 		auto & xgf = op_cont->xgf;
 		auto & bgf = op_cont->bgf;
@@ -83,8 +83,7 @@ extern "C"
 			}
 		}
 
-		kman->run<mpi::halo_exchange>(xgf);
-
+		halo_service.run(xgf);
 		kman->run<mpi::matvec>(sop, xgf, bgf);
 
 		idx = 0;

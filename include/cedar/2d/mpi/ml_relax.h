@@ -7,6 +7,7 @@
 #include <cedar/2d/ftn/mpi/BMG_workspace_c.h>
 #include <cedar/kernels/line_relax.h>
 #include <cedar/2d/mpi/types.h>
+#include <cedar/2d/mpi/kernel_manager.h>
 
 
 extern "C" {
@@ -168,7 +169,9 @@ public:
 			dim = 0;
 		else
 			dim = 1;
-		len_t * datadist = this->halof->datadist(dim, k);
+
+		auto & halo_service = this->services->template get<halo_exchange>();
+		len_t * datadist = halo_service.datadist(dim, k);
 
 		std::function<void(int k, real_t *so, real_t *qf, real_t *q,
 		                   real_t *sor, real_t *res,
@@ -190,7 +193,8 @@ public:
 		            datadist, rwork[kf-k].data(), rwork[kf-k].len(0),
 		            fcomm, this->comms.data(), this->nlevels,
 		            sor_ptrs[kf-k].data(), tdg[kf-k].len(0), tdg[kf-k].data(),
-		            fact_flags[kf-k], this->factorize, this->halof);
+		            fact_flags[kf-k], this->factorize,
+		            this->services->template fortran_handle<halo_exchange>());
 	}
 
 protected:

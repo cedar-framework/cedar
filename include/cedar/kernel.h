@@ -2,8 +2,8 @@
 #define CEDAR_KERNEL_H
 
 #include <memory>
-#include <cedar/halo_exchanger_base.h>
 #include <cedar/kernel_params.h>
+#include <cedar/service_manager.h>
 
 namespace cedar {
 
@@ -27,14 +27,14 @@ namespace cedar {
 			this->params = params;
 		}
 
-		void add_halo(halo_exchanger_base *halof)
+		void add_services(service_manager<solver_types> *services)
 		{
-			this->halof = halof;
+			this->services = services;
 		}
 
 	protected:
 		std::shared_ptr<kernel_params> params;
-		halo_exchanger_base *halof;
+		service_manager<solver_types> *services;
 	};
 }
 

@@ -90,7 +90,8 @@ public:
 
 		MPI_BMG2_SymStd_relax_GS_plane(k, sod.data(), bd.data(), x.data(), sord.data(),
 		                               so.len(0), so.len(1), this->nplanes, kf, ifd, nstencil, BMG_RELAX_SYM,
-		                               updown, topo.is(0), topo.is(1), halof);
+		                               updown, topo.is(0), topo.is(1),
+		                               services->fortran_handle<halo_exchange>());
 	}
 protected:
 	int nplanes;

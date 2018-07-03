@@ -61,7 +61,7 @@ class residual_f90 : public kernels::residual<stypes>
 		                         Ad.data(), bd.data(), xd.data(), r.data(),
 		                         r.len(0), r.len(1), ifd, nstencil,
 		                         irelax, irelax_sym, fcomm);
-		halof->exchange_func(k, r.data());
+		services->get<halo_exchange>().run(r);
 	}
 };
 
