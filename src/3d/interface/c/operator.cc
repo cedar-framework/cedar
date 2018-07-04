@@ -69,8 +69,7 @@ extern "C"
 			}
 		}
 
-		kman->run<mpi::halo_exchange>(xgf);
-
+		kman->services().get<mpi::halo_exchange>().run(xgf);
 		kman->run<mpi::matvec>(sop, xgf, bgf);
 
 		idx = 0;

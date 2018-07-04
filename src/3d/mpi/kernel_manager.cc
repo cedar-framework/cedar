@@ -22,7 +22,7 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 {
 	log::status << *params << std::endl;
 
-	auto kman = std::make_shared<kernel_manager<klist<stypes, exec_mode::mpi>>>(params);
+	auto kman = std::make_shared<kernel_manager<klist<stypes, exec_mode::mpi>, stypes>>(params);
 	kman->add<point_relax, rbgs>("system");
 	kman->add<plane_relax<relax_dir::xy>, planes<relax_dir::xy>>("system");
 	kman->add<plane_relax<relax_dir::xz>, planes<relax_dir::xz>>("system");
@@ -32,7 +32,6 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->add<restriction, restrict_f90>("system");
 	kman->add<residual, residual_f90>("system");
 	kman->add<setup_interp, setup_interp_f90>("system");
-	kman->add<halo_exchange, msg_exchanger>("msg");
 	kman->add<setup_nog, setup_nog_f90>("system");
 	kman->add<matvec, matvec_f90>("system");
 
@@ -45,14 +44,15 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->set<restriction>("system");
 	kman->set<residual>("system");
 	kman->set<setup_interp>("system");
-	if (params->halo == kernel_params::halo_lib::tausch)
-		log::error << "Tausch not yet integrated in 3D" << std::endl;
-	kman->set<halo_exchange>("msg");
 	kman->set<setup_nog>("system");
 	kman->set<matvec>("system");
 
-	auto hex = kman->get_ptr<halo_exchange>();
-	kman->add_halo(hex.get());
+	// register services
+	auto & services = kman->services();
+	services.add<halo_exchange, msg_exchanger>("msg");
+	if (params->halo == kernel_params::halo_lib::tausch)
+		log::error << "Tausch not yet integrated in 3D" << std::endl;
+	services.set<halo_exchange>("msg");
 
 	return kman;
 }

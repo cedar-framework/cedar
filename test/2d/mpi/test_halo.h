@@ -145,8 +145,9 @@ void run_test(const std::string & halo_name, MPI_Comm comm, std::array<int, 2> &
 	fill_stencil(so);
 	mpi::solver<five_pt> slv(so, conf);
 	auto kman = slv.get_kernels();
-	kman->run<mpi::halo_exchange>(b);
-	kman->run<mpi::halo_exchange>(so);
+	auto & halo_service = kman->services().get<mpi::halo_exchange>();
+	halo_service.run(b);
+	halo_service.run(so);
 	test_gfunc(*params, b);
 	test_stencil(*params, so);
 
@@ -154,8 +155,8 @@ void run_test(const std::string & halo_name, MPI_Comm comm, std::array<int, 2> &
 		auto & level = slv.levels.get(lvl);
 		fill_gfunc(level.b);
 		fill_stencil(level.A);
-		kman->run<mpi::halo_exchange>(level.b);
-		kman->run<mpi::halo_exchange>(level.A);
+		halo_service.run(level.b);
+		halo_service.run(level.A);
 		test_gfunc(*params, level.b);
 		test_stencil(*params, level.A);
 	}

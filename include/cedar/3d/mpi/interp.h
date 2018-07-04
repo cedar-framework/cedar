@@ -5,6 +5,7 @@
 #include <cedar/3d/mpi/types.h>
 #include <cedar/kernels/interp_add.h>
 #include <cedar/kernels/setup_interp.h>
+#include <cedar/3d/mpi/kernel_manager.h>
 
 extern "C" {
 	using namespace cedar;
@@ -74,7 +75,7 @@ class setup_interp_f90 : public kernels::setup_interp<stypes>
 		                                cop.len(0), cop.len(1), cop.len(2),
 		                                nog, ifd, nstencil, BMG_RELAX_SYM,
 		                                yo.data(), nog, topo.IGRD(),
-		                                jpn, halof);
+		                                jpn, services->fortran_handle<halo_exchange>());
 	}
 
 	inline void store_fine_op(stencil_op<seven_pt> & fop,

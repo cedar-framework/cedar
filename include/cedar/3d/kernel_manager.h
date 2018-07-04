@@ -8,7 +8,7 @@
 namespace cedar { namespace cdr3 {
 
 using kernels3 = ser_kernels<stypes>;
-using kman_ptr = std::shared_ptr<kernel_manager<kernels3>>;
+using kman_ptr = std::shared_ptr<kernel_manager<kernels3, stypes>>;
 
 using point_relax = kernels::point_relax<stypes>;
 template<relax_dir rdir>

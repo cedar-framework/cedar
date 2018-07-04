@@ -34,9 +34,10 @@ TEST(MPIRelax3, Point7) {
 
 	// setup halo
 	{
+		auto & halo_service = kreg_mpi->services().get<mpi::halo_exchange>();
 		std::vector<topo_ptr> topos{{so_mpi.grid_ptr()}};
-		kreg_mpi->setup<mpi::halo_exchange>(topos);
-		kreg_mpi->run<mpi::halo_exchange>(so_mpi);
+		halo_service.setup(topos);
+		halo_service.run(so_mpi);
 	}
 
 	relax_stencil sor_mpi(nx, ny, nz);

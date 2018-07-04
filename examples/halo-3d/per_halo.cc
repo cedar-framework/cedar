@@ -78,12 +78,13 @@ int main(int argc, char *argv[])
 	mpi::grid_func b(grid);
 	mpi::stencil_op<seven_pt> so(grid);
 	auto kman = mpi::build_kernel_manager(conf);
+	auto & halo_service = kman->services().get<mpi::halo_exchange>();
 
-	kman->setup<mpi::halo_exchange>(topos);
+	halo_service.setup(topos);
 
 	fill_gfunc(b);
 	draw(b, "before");
-	kman->run<mpi::halo_exchange>(b);
+	halo_service.run(b);
 	draw(b, "after");
 
 	// fill_stencil(so);

@@ -45,7 +45,8 @@ class matvec_f90 : public kernels::matvec<stypes>
 
 		MPI_BMG3_SymStd_UTILS_matvec(kg, sod.data(), y.data(), xd.data(),
 		                             so.len(0), so.len(1), so.len(2),
-		                             nog, ifd, nstencil, halof);
+		                             nog, ifd, nstencil,
+		                             services->fortran_handle<halo_exchange>());
 	}
 };
 

@@ -4,7 +4,7 @@
 #include <cedar/2d/ftn/mpi/BMG_workspace_c.h>
 #include <cedar/mpi/grid_topo.h>
 #include <cedar/3d/mpi/types.h>
-#include <cedar/kernels/halo_exchange.h>
+#include <cedar/services/halo_exchange.h>
 
 extern "C" {
 	using namespace cedar;
@@ -61,7 +61,7 @@ namespace impls
 
 namespace mpi {
 
-	class msg_exchanger : public kernels::halo_exchange<stypes>
+	class msg_exchanger : public services::halo_exchange<stypes>
 	{
 		using MsgCtx = impls::MsgCtx;
 	public:

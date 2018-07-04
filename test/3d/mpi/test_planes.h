@@ -50,11 +50,12 @@ void plane_test(cedar::len_t nx, cedar::len_t ny, cedar::len_t nz)
 
 	// setup halo
 	{
+		auto & halo_service = kman_mpi->services().get<mpi::halo_exchange>();
 		std::vector<topo_ptr> topos{{so_mpi.grid_ptr()}};
-		kman_mpi->setup<mpi::halo_exchange>(topos);
-		kman_mpi->run<mpi::halo_exchange>(so_mpi);
-		kman_mpi->run<mpi::halo_exchange>(x_mpi);
-		kman_mpi->run<mpi::halo_exchange>(b_mpi);
+		halo_service.setup(topos);
+		halo_service.run(so_mpi);
+		halo_service.run(x_mpi);
+		halo_service.run(b_mpi);
 	}
 
 	kman_ser->setup<plane_relax<rdir>>(so_ser);

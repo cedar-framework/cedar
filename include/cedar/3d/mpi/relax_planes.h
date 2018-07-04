@@ -5,6 +5,7 @@
 #include <cedar/kernels/plane_relax.h>
 #include <cedar/3d/mpi/types.h>
 #include <cedar/2d/mpi/solver.h>
+#include <cedar/3d/mpi/kernel_manager.h>
 
 namespace cedar { namespace cdr3 { namespace mpi {
 
@@ -233,8 +234,9 @@ protected:
 				topo2->nglobal(i) = topo3.nglobal(i);
 			}
 
-			auto & dimx = this->halof->leveldims(0);
-			auto & dimy = this->halof->leveldims(1);
+			auto & halo_service = this->services->template get<halo_exchange>();
+			auto & dimx = halo_service.leveldims(0);
+			auto & dimy = halo_service.leveldims(1);
 			topo2->dimxfine.resize(topo2->nproc(0));
 			topo2->dimyfine.resize(topo2->nproc(1));
 			for (auto i : range<len_t>(topo2->nproc(0))) {
@@ -256,8 +258,9 @@ protected:
 				topo2->nglobal(i) = topo3.nglobal(i3);
 			}
 
-			auto & dimx = this->halof->leveldims(0);
-			auto & dimy = this->halof->leveldims(2);
+			auto & halo_service = this->services->template get<halo_exchange>();
+			auto & dimx = halo_service.leveldims(0);
+			auto & dimy = halo_service.leveldims(2);
 			topo2->dimxfine.resize(topo2->nproc(0));
 			topo2->dimyfine.resize(topo2->nproc(1));
 			for (auto i : range<len_t>(topo2->nproc(0))) {
@@ -279,8 +282,9 @@ protected:
 				topo2->nglobal(i) = topo3.nglobal(i3);
 			}
 
-			auto & dimx = this->halof->leveldims(1);
-			auto & dimy = this->halof->leveldims(2);
+			auto & halo_service = this->services->template get<halo_exchange>();
+			auto & dimx = halo_service.leveldims(1);
+			auto & dimy = halo_service.leveldims(2);
 			topo2->dimxfine.resize(topo2->nproc(0));
 			topo2->dimyfine.resize(topo2->nproc(1));
 			for (auto i : range<len_t>(topo2->nproc(0))) {

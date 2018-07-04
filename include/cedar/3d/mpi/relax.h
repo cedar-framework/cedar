@@ -4,6 +4,7 @@
 #include <cedar/2d/ftn/mpi/BMG_parameters_c.h>
 #include <cedar/3d/mpi/types.h>
 #include <cedar/kernels/point_relax.h>
+#include <cedar/3d/mpi/kernel_manager.h>
 
 extern "C" {
 	using namespace cedar;
@@ -103,7 +104,7 @@ class rbgs : public kernels::point_relax<stypes>
 		                         topo.nlevel(), ifd, nstencil, nsorv,
 		                         BMG_RELAX_SYM, updown,
 		                         topo.is(0), topo.is(1), topo.is(2),
-		                         halof);
+		                         services->fortran_handle<halo_exchange>());
 	}
 };
 }}}

@@ -76,7 +76,8 @@ public:
 	virtual cdr3::mpi::grid_func solve(const cdr3::mpi::grid_func &b) override
 	{
 		auto & bd = const_cast<grid_func&>(b);
-		kman->template run<halo_exchange>(bd);
+		auto & halo_service = kman->services().template get<halo_exchange>();
+		halo_service.run(bd);
 		return parent::solve(b);
 	}
 
@@ -84,7 +85,8 @@ public:
 	virtual void solve(const cdr3::mpi::grid_func &b, cdr3::mpi::grid_func &x) override
 	{
 		auto & bd = const_cast<grid_func&>(b);
-		kman->template run<halo_exchange>(bd);
+		auto & halo_service = kman->services().template get<halo_exchange>();
+		halo_service.run(bd);
 		return parent::solve(b, x);
 	}
 
@@ -229,8 +231,9 @@ public:
 		for (std::size_t i = 1; i < this->nlevels(); i++)
 			topos.push_back(this->levels.get(i).A.grid_ptr());
 
-		this->kman->template setup<halo_exchange>(topos);
-		this->kman->template run<halo_exchange>(sop);
+		auto & halo_service = kman->services().template get<halo_exchange>();
+		halo_service.setup(topos);
+		halo_service.run(sop);
 	}
 
 	MPI_Comm comm;

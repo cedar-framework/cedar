@@ -18,7 +18,7 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 {
 	log::status << *params << std::endl;
 
-	auto kman = std::make_shared<kernel_manager<kernels3>>(params);
+	auto kman = std::make_shared<kernel_manager<kernels3, stypes>>(params);
 	kman->add<point_relax, rbgs>("system");
 	kman->add<plane_relax<relax_dir::xy>, planes<relax_dir::xy>>("system");
 	kman->add<plane_relax<relax_dir::xz>, planes<relax_dir::xz>>("system");

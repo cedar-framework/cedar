@@ -55,7 +55,8 @@ class residual_f90 : public kernels::residual<stypes>
 		MPI_BMG3_SymStd_residual(k, nog, ifd,
 		                         xd.data(), bd.data(), Ad.data(), r.data(),
 		                         r.len(0), r.len(1), r.len(2),
-		                         nstencil, halof);
+		                         nstencil,
+		                         services->fortran_handle<halo_exchange>());
 	}
 };
 

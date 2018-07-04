@@ -4,6 +4,7 @@
 #include <cedar/2d/ftn/mpi/BMG_parameters_c.h>
 #include <cedar/kernels/coarsen_op.h>
 #include <cedar/3d/mpi/types.h>
+#include <cedar/3d/mpi/kernel_manager.h>
 
 extern "C" {
 	using namespace cedar;
@@ -56,13 +57,14 @@ class galerkin : public kernels::coarsen_op<stypes>
 			                                fop.len(0), fop.len(1), fop.len(2),
 			                                cop.len(0), cop.len(1), cop.len(2),
 			                                topo.is(0), topo.is(1), topo.is(2),
-			                                halof);
+			                                services->fortran_handle<halo_exchange>());
 		} else {
 			MPI_BMG3_SymStd_SETUP_ITLI27_ex(kf, kc, fopd.data(), cop.data(), Pd.data(),
 			                                fop.len(0), fop.len(1), fop.len(2),
 			                                cop.len(0), cop.len(1), cop.len(2),
 			                                topo.is(0), topo.is(1), topo.is(2),
-			                                nog, topo.IGRD(), topo.nproc(), halof);
+			                                nog, topo.IGRD(), topo.nproc(),
+			                                services->fortran_handle<halo_exchange>());
 		}
 	}
 };

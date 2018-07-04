@@ -49,7 +49,7 @@ void interp_f90::run(const prolong_op & P,
 		                           coarsed.len(0), coarsed.len(1), coarsed.len(2),
 		                           fine.len(0), fine.len(1), fine.len(2),
 		                           topof->is(0), topof->is(1), topof->is(2),
-		                           halof);
+		                           services->fortran_handle<halo_exchange>());
 }
 
 }}}
