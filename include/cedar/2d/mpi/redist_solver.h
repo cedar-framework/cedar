@@ -48,6 +48,7 @@ public:
 	*/
 	redist_solver(const stencil_op<nine_pt> & so,
 	              halo_exchange *halof,
+	              message_passing *mp_service,
 	              std::shared_ptr<config> conf,
 	              std::array<int, 2> nblock);
 	/**
@@ -73,6 +74,7 @@ protected:
 	typename inner_solver::grid_func b_redist; /** The redistributed rhs */
 	typename inner_solver::grid_func x_redist; /** The redistributed solution */
 	std::unique_ptr<typename inner_solver::stencil_op> so_redist; /** The redistributed operator */
+	message_passing *mp_service; /** Message passing service */
 
 	/** Redistributes the processor grid.
 
@@ -106,9 +108,10 @@ protected:
 template<class inner_solver>
 redist_solver<inner_solver>::redist_solver(const stencil_op<nine_pt> & so,
                                            halo_exchange *halof,
+                                           message_passing *mp,
                                            std::shared_ptr<config> conf,
                                            std::array<int, 2> nblock) :
-	redundant(false), nblock(nblock), active(true), recv_id(-1)
+	redundant(false), nblock(nblock), active(true), recv_id(-1), mp_service(mp)
 {
 	// Split communicator into collective processor blocks
 	auto & topo = so.grid();
@@ -318,9 +321,9 @@ template<class inner_solver>
 
 	int color = grid->coord(0) + grid->nproc(0)*grid->coord(1);
 	int key = (fine_topo.coord(0) - lowi) + (fine_topo.coord(1) - lowj)*parti.size(grid->coord(0));
-	MPI_Comm_split(fine_topo.comm, color, key, &this->rcomms.pblock_comm);
+	mp_service->comm_split(fine_topo.comm, color, key, &this->rcomms.pblock_comm);
 
-	MPI_Comm_split(fine_topo.comm, key, color, &grid->comm);
+	mp_service->comm_split(fine_topo.comm, key, color, &grid->comm);
 
 	rcomms.redist_comm = grid->comm;
 	rcomms.parent_comm = fine_topo.comm;
@@ -347,7 +350,7 @@ template<class inner_solver>
 		}
 	}
 
-	MPI_Comm_split(fine_topo.comm, color, key, &this->rcomms.active_pblock_comm);
+	mp_service->comm_split(fine_topo.comm, color, key, &this->rcomms.active_pblock_comm);
 
 	timer_redist(rcomms);
 

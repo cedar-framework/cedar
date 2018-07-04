@@ -19,6 +19,7 @@ std::function<void(mpi::grid_func &, const mpi::grid_func &)>
 	using rsolver = mpi::redist_solver<inner_solver>;
 	auto cg_bmg = std::make_shared<rsolver>(cop,
 	                                        kman->services().fortran_handle<halo_exchange>(),
+	                                        kman->services().fortran_handle<message_passing>(),
 	                                        cg_conf,
 	                                        choice);
 
