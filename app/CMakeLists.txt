@@ -3,3 +3,7 @@ add_executable(test-thread test.cc)
 # target_link_libraries(test-thread cedar -fopenmp -I/home/andrew/local/include -L/home/andrew/local/lib -lomp -Wl,-rpath=/home/andrew/local/lib)
 target_compile_options(test-thread PUBLIC -I/home/andrew/local/include)
 target_link_libraries(test-thread cedar -L/home/andrew/local/lib -labt)
+
+
+add_executable(test-coll coll.cc)
+target_link_libraries(test-coll cedar)
