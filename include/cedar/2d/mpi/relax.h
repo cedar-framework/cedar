@@ -151,8 +151,9 @@ public:
 		auto & sod = const_cast<stencil_op<sten>&>(so);
 
 		auto & topo = so.grid();
-		MPI_Comm_split(topo.comm, topo.coord(1), topo.coord(0), &xlinecomm);
-		MPI_Comm_split(topo.comm, topo.coord(0), topo.coord(1), &ylinecomm);
+		auto & mp = this->services->template get<message_passing>();
+		mp.comm_split(topo.comm, topo.coord(1), topo.coord(0), &xlinecomm);
+		mp.comm_split(topo.comm, topo.coord(0), topo.coord(1), &ylinecomm);
 
 		if (rdir == relax_dir::x)
 			MPI_BMG2_SymStd_SETUP_lines_x(sod.data(), sor.data(), so.len(0), so.len(1), nstencil);

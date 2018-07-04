@@ -1,8 +1,9 @@
       subroutine BMG2_SymStd_SETUP_comm(COMM, NOL, MyProc, &
-           &                                  Min_GSz)&
+           Min_GSz, mp)&
            BIND(C, NAME='MPI_BMG2_SymStd_SETUP_comm')
 
       USE ModInterface
+      use message_passing
       IMPLICIT NONE
 
 ! ==============================================================
@@ -20,6 +21,7 @@
       integer(c_int), VALUE :: NOL, MyProc, Min_GSz
 
       integer :: COMM(2,2:NOL)
+      type(c_ptr) :: mp
 
 
 ! ==============================================================
@@ -62,7 +64,7 @@
             call comm_coarsen(COMM(1,N), INSIZE, &
      &                        COMM(2,N), COMM(1,N-1),&
      &                        HSIZE, Min_GSz,&
-     &                        TempProc, ACTIVE)
+     &                        TempProc, ACTIVE, mp)
 
             INSIZE = HSIZE
             N = N - 1
@@ -96,8 +98,9 @@
       SUBROUTINE comm_coarsen(INCOMM, INSIZE, &
      &                        GCOMM, HCOMM,&
      &                        NGPS, Min_GSz, &
-     &                        MyProc, ACTIVE)
+     &                        MyProc, ACTIVE, mp)
 
+      use message_passing
       IMPLICIT NONE
 
       INCLUDE 'mpif.h'
@@ -115,6 +118,8 @@
       INTEGER LBRK, RBRK, REM, CLUMP
 
       INTEGER EXITFLAG, K, IERR
+
+      type(c_ptr) :: mp
 
 
       !
@@ -189,8 +194,8 @@
       !
       ! Form group communicators
       !
-      CALL MPI_COMM_SPLIT(INCOMM, MyGroup, MyGroupRank,&
-     &                    GCOMM, IERR)
+      call cedar_comm_split(mp, INCOMM, MyGroup, MyGroupRank,&
+           GCOMM, IERR)
 
       !
       ! If I'm the first process in my group designate
@@ -227,8 +232,8 @@
       ! in it.  Non-head nodes get assigned to a
       ! communicator with type MPI_PROC_NULL
       !
-      CALL MPI_COMM_SPLIT(INCOMM, HFLAG, HRANK, &
-     &                    HCOMM, IERR)
+      call cedar_comm_split(mp, INCOMM, HFLAG, HRANK, &
+           HCOMM, IERR)
 
       !
       ! Update the rank that this process will have

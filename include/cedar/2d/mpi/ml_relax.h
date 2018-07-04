@@ -16,7 +16,7 @@ extern "C" {
 	                               int *nol);
 	void BMG2_SymStd_SETUP_ADD_SOR_PTRS(int nproc, len_t nlines, int min_gsz, int nol, int *poffset,
 	                                    int *psor_lev);
-	void MPI_BMG2_SymStd_SETUP_comm(MPI_Fint *comm, int nol, int rank, int min_gsz);
+	void MPI_BMG2_SymStd_SETUP_comm(MPI_Fint *comm, int nol, int rank, int min_gsz, void *mp);
 	void MPI_BMG2_SymStd_SETUP_lines_x(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl);
 	void MPI_BMG2_SymStd_SETUP_lines_y(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl);
 	void MPI_BMG2_SymStd_relax_lines_x_ml(int k, real_t *so, real_t *qf, real_t *q,
@@ -63,9 +63,11 @@ public:
 			comms.init(2, this->nlevels - 1);
 			comms.set(MPI_COMM_NULL);
 			MPI_Comm gcomm;
-			MPI_Comm_split(comm, coord_other, coord, &gcomm);
+			auto & mp = this->services->template get<message_passing>();
+			mp.comm_split(comm, coord_other, coord, &gcomm);
 			comms(0, this->nlevels - 2) = MPI_Comm_c2f(gcomm);
-			MPI_BMG2_SymStd_SETUP_comm(comms.data(), this->nlevels, coord+1, min_gsz);
+			MPI_BMG2_SymStd_SETUP_comm(comms.data(), this->nlevels, coord+1, min_gsz,
+			                           this->services->template fortran_handle<message_passing>());
 			sor_ptrs.emplace_back(this->nlevels);
 			BMG2_SymStd_SETUP_ADD_SOR_PTRS(nproc, nlines, min_gsz, this->nlevels,
 			                               &workspace_size, sor_ptrs.back().data());

@@ -10,6 +10,7 @@ namespace cedar { namespace services {
 class message_passing : public service
 {
 public:
+	const static std::string name() { return "message passing"; }
 	virtual int comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm) = 0;
 };
 
