@@ -10,6 +10,7 @@
 #ifdef WITH_TAUSCH
 #include <cedar/2d/mpi/tausch_exchanger.h>
 #endif
+#include <cedar/mpi/mpi_wrapper.h>
 
 #include <cedar/2d/mpi/kernel_manager.h>
 
@@ -63,6 +64,7 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 
 	// retister services
 	auto & services = kman->services();
+	services.add<message_passing, mpi_wrapper>("mpi");
 	services.add<halo_exchange, msg_exchanger>("msg");
 	#ifdef WITH_TAUSCH
 	services.add<halo_exchange, tausch_exchanger>("tausch");
@@ -71,6 +73,7 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	if (params->halo == kernel_params::halo_lib::tausch)
 		halo_name = "tausch";
 	services.set<halo_exchange>(halo_name);
+	services.set<message_passing>("mpi");
 
 	return kman;
 }

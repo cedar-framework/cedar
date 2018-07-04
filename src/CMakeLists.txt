@@ -1,4 +1,4 @@
-set(dirs 2d perf util interface)
+set(dirs 2d perf util interface services)
 
 if (ENABLE_3D)
   list(APPEND dirs 3d)

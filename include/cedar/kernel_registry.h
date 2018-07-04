@@ -16,7 +16,6 @@
 #include <cedar/kernels/setup_interp.h>
 #include <cedar/kernels/solve_cg.h>
 
-#include <cedar/kernels/halo_exchange.h>
 #include <cedar/kernels/setup_nog.h>
 
 namespace cedar
