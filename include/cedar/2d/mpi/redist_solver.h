@@ -24,6 +24,10 @@ extern "C" {
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
+
+template<class inner_solver>
+void copy_services(inner_solver & slv, service_manager<stypes> & services);
+
 /**
  Coarse-grid redistribution solver.
 
@@ -47,8 +51,7 @@ public:
 	   @param[in] nblock The destination 2D distribution
 	*/
 	redist_solver(const stencil_op<nine_pt> & so,
-	              halo_exchange *halof,
-	              message_passing *mp_service,
+	              service_manager<stypes> * services,
 	              std::shared_ptr<config> conf,
 	              std::array<int, 2> nblock);
 	/**
@@ -74,7 +77,7 @@ protected:
 	typename inner_solver::grid_func b_redist; /** The redistributed rhs */
 	typename inner_solver::grid_func x_redist; /** The redistributed solution */
 	std::unique_ptr<typename inner_solver::stencil_op> so_redist; /** The redistributed operator */
-	message_passing *mp_service; /** Message passing service */
+	service_manager<stypes> * services;
 
 	/** Redistributes the processor grid.
 
@@ -107,15 +110,15 @@ protected:
 
 template<class inner_solver>
 redist_solver<inner_solver>::redist_solver(const stencil_op<nine_pt> & so,
-                                           halo_exchange *halof,
-                                           message_passing *mp,
+                                           service_manager<stypes> *services,
                                            std::shared_ptr<config> conf,
                                            std::array<int, 2> nblock) :
-	redundant(false), nblock(nblock), active(true), recv_id(-1), mp_service(mp)
+	redundant(false), nblock(nblock), active(true), recv_id(-1), services(services)
 {
 	// Split communicator into collective processor blocks
 	auto & topo = so.grid();
-	auto ctopo = redist_topo(topo, halof->leveldims(0), halof->leveldims(1));
+	auto & halo_service = services->template get<halo_exchange>();
+	auto ctopo = redist_topo(topo, halo_service.leveldims(0), halo_service.leveldims(1));
 	redist_operator(so, ctopo);
 
 	if (inner_solver::is_serial) {
@@ -131,6 +134,8 @@ redist_solver<inner_solver>::redist_solver(const stencil_op<nine_pt> & so,
 		MSG_pause(&parent_comm);
 		log::push_level("redist", *conf);
 		slv = std::make_unique<inner_solver>(*so_redist, conf);
+		if (not inner_solver::is_serial)
+			copy_services(*slv, *services);
 		log::pop_level();
 		MSG_pause(&msg_comm);
 		MSG_play(parent_comm);
@@ -319,11 +324,12 @@ template<class inner_solver>
 	grid->nlocal(0) += 2;
 	grid->nlocal(1) += 2;
 
+	auto & mp_service = this->services->template get<message_passing>();
 	int color = grid->coord(0) + grid->nproc(0)*grid->coord(1);
 	int key = (fine_topo.coord(0) - lowi) + (fine_topo.coord(1) - lowj)*parti.size(grid->coord(0));
-	mp_service->comm_split(fine_topo.comm, color, key, &this->rcomms.pblock_comm);
+	mp_service.comm_split(fine_topo.comm, color, key, &this->rcomms.pblock_comm);
 
-	mp_service->comm_split(fine_topo.comm, key, color, &grid->comm);
+	mp_service.comm_split(fine_topo.comm, key, color, &grid->comm);
 
 	rcomms.redist_comm = grid->comm;
 	rcomms.parent_comm = fine_topo.comm;
@@ -350,7 +356,7 @@ template<class inner_solver>
 		}
 	}
 
-	mp_service->comm_split(fine_topo.comm, color, key, &this->rcomms.active_pblock_comm);
+	mp_service.comm_split(fine_topo.comm, color, key, &this->rcomms.active_pblock_comm);
 
 	timer_redist(rcomms);
 

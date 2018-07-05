@@ -29,7 +29,14 @@ protected:
 class worker_splitter : public mpi_wrapper
 {
 public:
+	worker_splitter(const worker_splitter & other) : currind(0)
+	{
+		keys = other.keys;
+	}
+
+
 	worker_splitter(std::vector<int> *keys) : currind(0), keys(keys) {}
+
 	int comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm) override
 	{
 		if (currind >= keys->size()) {

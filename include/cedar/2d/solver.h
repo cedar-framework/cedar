@@ -24,6 +24,9 @@ struct level2 : public level<sten, stypes>
 	using parent = level<sten, stypes>;
 level2(len_t nx, len_t ny) : parent::level(nx, ny)
 	{
+		this->x = grid_func(nx, ny);
+		this->res = grid_func(nx, ny);
+		this->b = grid_func(nx, ny);
 		this->SOR = {{relax_stencil(nx, ny),
 		              relax_stencil(nx, ny)}};
 		this->R.associate(&this->P);

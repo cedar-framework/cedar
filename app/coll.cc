@@ -36,14 +36,18 @@ int main(int argc, char *argv[])
 	kmans.reserve(nplanes);
 	std::vector<int> split_keys;
 
+	auto registration = [&](service_manager<mpi::stypes> & services) {
+		services.add<mpi::message_passing, master_splitter>("master", &split_keys);
+		services.add<mpi::message_passing, worker_splitter>("worker", &split_keys);
+	};
+
 	for (auto i : range(nplanes)) {
 		(void)i;
 		kmans.push_back(mpi::build_kernel_manager(*conf));
 
 		auto kman = kmans.back();
 		auto & sman = kman->services();
-		sman.add<mpi::message_passing, master_splitter>("master", &split_keys);
-		sman.add<mpi::message_passing, worker_splitter>("worker", &split_keys);
+		sman.set_user_reg(registration);
 	}
 
 	kmans[0]->services().set<mpi::message_passing>("master");
@@ -58,9 +62,22 @@ int main(int argc, char *argv[])
 		mp.comm_split(grid->comm, grid->coord(1), grid->coord(0), &newcomm[i*2+1]);
 
 		if (i == 0)
-			printf("master: %d %d\n", newcomm[i*2], newcomm[i*2+1]);
+			printf("master: %p %p\n", newcomm[i*2], newcomm[i*2+1]);
 		else if (i == 1)
-			printf("worker: %d %d\n", newcomm[i*2], newcomm[i*2+1]);
+			printf("worker: %p %p\n", newcomm[i*2], newcomm[i*2+1]);
+	}
+
+	{
+		auto newkman = mpi::build_kernel_manager(*conf);
+		auto & oldsman = kmans[1]->services();
+		auto & newsman = newkman->services();
+		newsman.set_user_reg(oldsman.get_user_reg());
+		newsman.set<mpi::message_passing>(oldsman.get_key<mpi::message_passing>());
+
+		MPI_Comm comm;
+		auto & mp = newsman.get<mpi::message_passing>();
+		mp.comm_split(grid->comm, grid->coord(0), grid->coord(1), &comm);
+		printf("worker: %p\n", comm);
 	}
 
 	delete[] newcomm;

@@ -32,6 +32,8 @@ public:
 	service_manager<solver_types> & services() { return *sman; }
 	const service_manager<solver_types> & services() const {return *sman; }
 
+	service_manager<solver_types> * services_ptr() { return sman.get(); }
+
 
 	template<class T, class rclass>
 	void add(const std::string & name)

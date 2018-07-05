@@ -48,8 +48,22 @@ public:
 		return kern.get();
 	}
 
+
+	void set_user_reg(std::function<void(service_manager_gen<tlist> &)> reg) {
+		if (reg)
+			reg(*this);
+		user_reg = reg;
+	}
+
+
+	std::function<void(service_manager_gen<tlist> &)> get_user_reg() {
+		return user_reg;
+	}
+
+
 protected:
 	std::shared_ptr<kernel_params> params;
+	std::function<void(service_manager_gen<tlist> &)> user_reg;
 };
 
 

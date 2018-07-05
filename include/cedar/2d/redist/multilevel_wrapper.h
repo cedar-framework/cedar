@@ -29,6 +29,8 @@ struct serial_type { static const bool value; };
 
 			config & get_config() { return inner.get_config(); }
 
+			service_manager<mpi::stypes> & get_services() { return inner.get_kernels()->services(); }
+
 		protected:
 			inner_solver inner;
 		};

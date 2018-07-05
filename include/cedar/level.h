@@ -25,8 +25,7 @@ struct level
 level(stencil_op<sten> & A) : A(A) {}
 	template<class... Args>
 	level(Args&&... args) : Adata(std::forward<Args>(args)...),
-		A(Adata), P(std::forward<Args>(args)...), x(std::forward<Args>(args)...),
-		res(std::forward<Args>(args)...), b(std::forward<Args>(args)...) {}
+		A(Adata), P(std::forward<Args>(args)...) {}
 	stencil_op<sten> Adata;
 	stencil_op<sten> & A;
 	prolong_op  P;

@@ -95,6 +95,16 @@ namespace cedar
 		}
 
 
+		template<class T>
+		std::string get_key()
+		{
+			const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
+			if (i >= defaults.size())
+				log::error << "<type_map> type not found" << std::endl;
+			return defaults[i];
+		}
+
+
 		template<class T, class rclass>
 		void add(const std::string & name)
 		{

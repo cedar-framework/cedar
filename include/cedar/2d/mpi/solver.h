@@ -25,8 +25,11 @@ template<class sten>
 	struct level2mpi : public level<sten, stypes>
 {
 	using parent = level<sten, stypes>;
-level2mpi(topo_ptr topo) : parent::level(topo)
+	level2mpi(topo_ptr topo) : parent::level(topo)
 	{
+		this->x = grid_func(topo);
+		this->res = grid_func(topo);
+		this->b = grid_func(topo);
 		this->SOR = {{relax_stencil(topo->nlocal(0)-2, topo->nlocal(1)-2),
 		              relax_stencil(topo->nlocal(0)-2, topo->nlocal(1)-2)}};
 		this->R.associate(&this->P);
