@@ -15,6 +15,7 @@
 #include <cedar/2d/prolong_op.h>
 #include <cedar/2d/restrict_op.h>
 #include <cedar/2d/kernel_manager.h>
+#include <cedar/services/mempool.h>
 
 namespace cedar { namespace cdr2 {
 
@@ -22,7 +23,7 @@ template<class sten>
 struct level2 : public level<sten, stypes>
 {
 	using parent = level<sten, stypes>;
-level2(len_t nx, len_t ny) : parent::level(nx, ny)
+	level2(services::mempool & mpool, len_t nx, len_t ny) : parent::level(nx, ny)
 	{
 		this->x = grid_func(nx, ny);
 		this->res = grid_func(nx, ny);
@@ -31,7 +32,7 @@ level2(len_t nx, len_t ny) : parent::level(nx, ny)
 		              relax_stencil(nx, ny)}};
 		this->R.associate(&this->P);
 	}
-level2(stencil_op<sten> & A) : parent::level(A)
+	level2(services::mempool & mpool, stencil_op<sten> & A) : parent::level(A)
 	{
 		this->res = grid_func(A.shape(0), A.shape(1));
 		this->SOR = {{relax_stencil(A.shape(0), A.shape(1)),
@@ -77,7 +78,8 @@ solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 
 	void setup_space(std::size_t nlevels)
 	{
-		this->levels.init(nlevels);
+		service_manager<stypes> & sman = this->kman->services();
+		this->levels.init(sman.get<mempool>(), nlevels);
 		auto params = build_kernel_params(*(this->conf));
 
 		for (auto i : range<std::size_t>(nlevels-1)) {
@@ -89,7 +91,7 @@ solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 				len_t nxc = (nx-1)/2. + 1;
 				len_t nyc = (ny-1)/2. + 1;
 
-				this->levels.add(nxc, nyc);
+				this->levels.add(sman.get<mempool>(), nxc, nyc);
 
 				log::debug << "Created coarse grid with dimensions: " << nxc
 				           << ", " << nyc << std::endl;
@@ -100,7 +102,7 @@ solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 				len_t nxc = (nx-1)/2. + 1;
 				len_t nyc = (ny-1)/2. + 1;
 
-				this->levels.add(nxc, nyc);
+				this->levels.add(sman.get<mempool>(), nxc, nyc);
 
 				log::debug << "Created coarse grid with dimensions: " << nxc
 				           << ", " << nyc << std::endl;

@@ -11,6 +11,7 @@
 #include <cedar/2d/mpi/tausch_exchanger.h>
 #endif
 #include <cedar/mpi/mpi_wrapper.h>
+#include <cedar/malloc_pool.h>
 
 #include <cedar/2d/mpi/kernel_manager.h>
 
@@ -64,6 +65,7 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 
 	// retister services
 	auto & services = kman->services();
+	services.add<mempool, malloc_pool>("malloc");
 	services.add<message_passing, mpi_wrapper>("mpi");
 	services.add<halo_exchange, msg_exchanger>("msg");
 	#ifdef WITH_TAUSCH
@@ -74,6 +76,7 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 		halo_name = "tausch";
 	services.set<halo_exchange>(halo_name);
 	services.set<message_passing>("mpi");
+	services.set<mempool>("malloc");
 
 	return kman;
 }

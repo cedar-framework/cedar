@@ -5,6 +5,7 @@
 #include <cedar/2d/restrict.h>
 #include <cedar/2d/solve_cg.h>
 #include <cedar/2d/kernel_manager.h>
+#include <cedar/malloc_pool.h>
 
 namespace cedar { namespace cdr2 {
 kman_ptr build_kernel_manager(config & conf)
@@ -37,6 +38,11 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->set<residual>("system");
 	kman->set<setup_interp>("system");
 	kman->set<solve_cg>("system");
+
+	// register services
+	auto & services = kman->services();
+	services.add<mempool, malloc_pool>("malloc");
+	services.set<mempool>("malloc");
 
 	return kman;
 }

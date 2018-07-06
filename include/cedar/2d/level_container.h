@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cedar/2d/stencil_op.h>
+#include <cedar/services/mempool.h>
 
 namespace cedar { namespace cdr2 {
 
@@ -79,11 +80,12 @@ template<template<class> class stencil_op, template<class> class level>
 	struct init_helper<stencil_op, level, five_pt>
 	{
 		static void init(stencil_op<five_pt> & fine_op,
+		                 services::mempool & mpool,
 		                 std::vector<level<nine_pt>> & lvls_nine,
 		                 std::vector<level<five_pt>> & lvls_five,
 		                 std::size_t nlevels)
 			{
-				lvls_five.emplace_back(fine_op);
+				lvls_five.emplace_back(mpool, fine_op);
 				lvls_nine.reserve(nlevels-1);
 			}
 	};
@@ -93,12 +95,13 @@ template<template<class> class stencil_op, template<class> class level>
 	struct init_helper<stencil_op, level, nine_pt>
 	{
 		static void init(stencil_op<nine_pt> & fine_op,
+		                 services::mempool & mpool,
 		                 std::vector<level<nine_pt>> & lvls_nine,
 		                 std::vector<level<five_pt>> & lvls_five,
 		                 std::size_t nlevels)
 			{
 				lvls_nine.reserve(nlevels);
-				lvls_nine.emplace_back(fine_op);
+				lvls_nine.emplace_back(mpool, fine_op);
 			}
 	};
 
@@ -114,9 +117,10 @@ public:
 
 level_container(stencil_op<fsten> & fine_op) : fine_op(fine_op) {}
 
-	void init(std::size_t nlevels)
+	void init(services::mempool & mpool, std::size_t nlevels)
 	{
 		init_helper<stencil_op, level, fsten>::init(fine_op,
+		                                            mpool,
 		                                            lvls_nine,
 		                                            lvls_five,
 		                                            nlevels);

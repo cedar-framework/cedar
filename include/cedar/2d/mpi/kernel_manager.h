@@ -22,6 +22,7 @@ using setup_interp = kernels::setup_interp<stypes>;
 using setup_nog = kernels::setup_nog<stypes>;
 using halo_exchange = services::halo_exchange<stypes>;
 using message_passing = services::message_passing;
+using mempool = services::mempool;
 
 kman_ptr build_kernel_manager(config & conf);
 kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params);

@@ -25,20 +25,28 @@ template<class sten>
 	struct level2mpi : public level<sten, stypes>
 {
 	using parent = level<sten, stypes>;
-	level2mpi(topo_ptr topo) : parent::level(topo)
+	level2mpi(services::mempool & mpool, topo_ptr topo) : parent::level(topo)
 	{
-		this->x = grid_func(topo);
-		this->res = grid_func(topo);
-		this->b = grid_func(topo);
+		std::size_t nbytes = topo->nlocal(0)*topo->nlocal(1)*sizeof(real_t);
+		real_t *xaddr   = (real_t*) mpool.addr(mempool::sol, nbytes);
+		real_t *resaddr = (real_t*) mpool.addr(mempool::res, nbytes);
+		real_t *baddr   = (real_t*) mpool.addr(mempool::rhs, nbytes);
+
+		this->x = grid_func(xaddr, topo);
+		this->res = grid_func(resaddr, topo);
+		this->b = grid_func(baddr, topo);
 		this->SOR = {{relax_stencil(topo->nlocal(0)-2, topo->nlocal(1)-2),
 		              relax_stencil(topo->nlocal(0)-2, topo->nlocal(1)-2)}};
 		this->R.associate(&this->P);
 	}
 
 
-level2mpi(stencil_op<sten> & A) : parent::level(A)
+	level2mpi(services::mempool & mpool, stencil_op<sten> & A) : parent::level(A)
 	{
-		this->res = mpi::grid_func(A.grid_ptr());
+		topo_ptr topo = A.grid_ptr();
+		std::size_t nbytes = topo->nlocal(0)*topo->nlocal(1)*sizeof(real_t);
+		this->res = mpi::grid_func((real_t*) mpool.addr(mempool::res, nbytes),
+		                           topo);
 		this->SOR = {{relax_stencil(A.shape(0), A.shape(1)),
 		              relax_stencil(A.shape(0), A.shape(1))}};
 	}
@@ -158,7 +166,9 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 
 	void setup_space(std::size_t nlevels)
 	{
-		this->levels.init(nlevels);
+		service_manager<stypes> & sman = kman->services();
+		this->levels.init(sman.get<mempool>(),
+		                  nlevels);
 		for (auto i : range<std::size_t>(nlevels-1)) {
 
 			auto & fgrid = this->get_grid(i);
@@ -205,7 +215,8 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 			cgrid->coord(0) = fgrid.coord(0);
 			cgrid->coord(1) = fgrid.coord(1);
 
-			this->levels.add(cgrid);
+			this->levels.add(sman.get<mempool>(),
+			                 cgrid);
 		}
 		setup_halo();
 	}

@@ -4,6 +4,7 @@
 #include <cedar/type_list.h>
 #include <cedar/services/halo_exchange.h>
 #include <cedar/services/message_passing.h>
+#include <cedar/services/mempool.h>
 
 namespace cedar {
 
@@ -69,7 +70,8 @@ protected:
 
 template<class solver_types>
 using reg_services = type_list<services::halo_exchange<solver_types>,
-                               services::message_passing>;
+                               services::message_passing,
+                               services::mempool>;
 
 template<class solver_types>
 using service_manager = service_manager_gen<reg_services<solver_types>>;

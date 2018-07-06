@@ -4,6 +4,7 @@
 #include <cedar/2d/types.h>
 #include <cedar/kernel_manager.h>
 #include <cedar/kernel_registry.h>
+#include <cedar/service_manager.h>
 
 namespace cedar { namespace cdr2 {
 
@@ -19,6 +20,7 @@ using restriction = kernels::restriction<stypes>;
 using residual = kernels::residual<stypes>;
 using setup_interp = kernels::setup_interp<stypes>;
 using solve_cg = kernels::solve_cg<stypes>;
+using mempool = services::mempool;
 
 
 kman_ptr build_kernel_manager(config & conf);

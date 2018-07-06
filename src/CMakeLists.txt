@@ -19,4 +19,5 @@ set(cedar_src ${sources}
   src/kernel_params.cc
   src/config.cc
   src/multilevel_settings.cc
+  src/malloc_pool.cc
   PARENT_SCOPE)
