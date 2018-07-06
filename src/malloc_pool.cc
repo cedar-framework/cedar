@@ -3,7 +3,7 @@
 
 namespace cedar {
 
-	void * malloc_pool::addr(vecs vtype, std::size_t nbytes)
+	void * malloc_pool::addr(memid vtype, std::size_t nbytes)
 	{
 		void *ret = std::malloc(nbytes);
 

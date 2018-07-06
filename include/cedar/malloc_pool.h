@@ -8,7 +8,7 @@ namespace cedar {
 class malloc_pool : public services::mempool
 {
 public:
-	void *addr(vecs vtype, std::size_t nbytes) override;
+	void *addr(memid vtype, std::size_t nbytes) override;
 
 	~malloc_pool();
 

@@ -20,6 +20,9 @@ template<class sten>
 	using parent = level<sten, stypes>;
 level3(len_t nx, len_t ny, len_t nz) : parent::level(nx, ny, nz)
 	{
+		this->x = grid_func(nx, ny, nz);
+		this->res = grid_func(nx, ny, nz);
+		this->b = grid_func(nx, ny, nz);
 		this->SOR = {{relax_stencil(nx, ny, nz),
 		              relax_stencil(nx, ny, nz)}};
 		this->R.associate(&this->P);

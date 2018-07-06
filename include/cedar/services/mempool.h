@@ -8,9 +8,9 @@ namespace cedar { namespace services {
 class mempool : public service
 {
 public:
-	enum vecs { rhs, sol, res };
+	enum memid { rhs, sol, res, num_memid };
 	const static std::string name() { return "memory pool"; }
-	virtual void *addr(enum vecs vtype, std::size_t nbytes) = 0;
+	virtual void *addr(memid vtype, std::size_t nbytes) = 0;
 };
 
 }}

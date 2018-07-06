@@ -22,6 +22,8 @@ if(ENABLE_MPI)
   list(APPEND sources
 	${interface_SOURCES}
 	redist/cholesky_solver.cc
+	mpi/plane_mpi.cc
+	mpi/plane_mempool.cc
 	mpi/prolong_op.cc
 	mpi/restrict_op.cc
 	mpi/restrict.cc
