@@ -12,6 +12,9 @@ namespace cedar { namespace cdr3 { namespace mpi {
 int log_begin(bool log_planes, int ipl, const std::string & suff);
 void log_end(bool log_planes, int ipl, int lvl);
 
+cdr2::mpi::kman_ptr master_kman(config & conf, int nplanes);
+cdr2::mpi::kman_ptr worker_kman(int worker_id, config & conf, cdr2::mpi::kman_ptr master);
+
 template<class fsten>
 using slv2_ptr = std::unique_ptr<cdr2::mpi::solver<fsten>>;
 
@@ -177,21 +180,33 @@ public:
 	template<class sten3, class sten2>
 	void setup_impl(const stencil_op<sten3> & so, std::vector<slv2_ptr<sten2>> & planes)
 	{
+		int nplanes = so.shape(2);
 		auto rng = so.range(2);
-		if (rdir == relax_dir::xz)
+		if (rdir == relax_dir::xz) {
 			rng = so.range(1);
-		else if (rdir == relax_dir::yz)
+			nplanes = so.shape(1);
+		} else if (rdir == relax_dir::yz) {
 			rng = so.range(0);
+			nplanes = so.shape(0);
+		}
 		auto topo2 = slice_topo(so.grid());
 		auto conf2 = this->params->plane_config;
 		auto log_planes = conf2->template get<bool>("log-planes", true);
+		cdr2::mpi::kman_ptr master_kmans[2];
+		master_kmans[0] = master_kman(*conf2, (nplanes / 2) + (nplanes % 2));
+		master_kmans[1] = master_kman(*conf2, nplanes / 2);
 		for (auto i : rng) {
+			cdr2::mpi::kman_ptr kman2;
+			if (i < 2)
+				kman2 = master_kmans[i];
+			else
+				kman2 = worker_kman(i, *conf2, master_kmans[i % 2]);
 			auto so2_ptr = std::make_unique<cdr2::mpi::stencil_op<sten2>>(topo2);
 			auto & so2 = *so2_ptr;
 			copy_coeff<rdir>(so, so2);
 
 			auto tmp = log_begin(log_planes, i, relax_dir_name<rdir>::value);
-			planes.emplace_back(std::make_unique<cdr2::mpi::solver<sten2>>(so2, conf2));
+			planes.emplace_back(std::make_unique<cdr2::mpi::solver<sten2>>(so2, conf2, kman2));
 			log_end(log_planes, i, tmp);
 			planes.back()->give_op(std::move(so2_ptr));
 			planes.back()->levels.template get<sten2>(0).x = cdr2::mpi::grid_func(topo2);

@@ -1,3 +1,5 @@
+#include <cedar/3d/mpi/plane_mempool.h>
+#include <cedar/3d/mpi/plane_mpi.h>
 #include <cedar/3d/mpi/relax_planes.h>
 
 
@@ -21,6 +23,45 @@ void log_end(bool log_planes, int ipl, int lvl)
 	else
 		log::lvl() = lvl;
 }
+
+
+cdr2::mpi::kman_ptr master_kman(config & conf, int nplanes)
+{
+	auto kman = cdr2::mpi::build_kernel_manager(conf);
+	auto & serv = kman->services();
+
+	auto regis = [nplanes](service_manager<cdr2::mpi::stypes> & sman) {
+		sman.add<services::message_passing, plane_setup_mpi>("plane-setup");
+		sman.add<services::mempool, plane_mempool>("plane", nplanes);
+		sman.set<services::message_passing>("plane-setup");
+		sman.set<services::mempool>("plane");
+	};
+
+	serv.set_user_reg(regis);
+	return kman;
+}
+
+
+cdr2::mpi::kman_ptr worker_kman(int worker_id, config & conf, cdr2::mpi::kman_ptr master)
+{
+	auto kman = cdr2::mpi::build_kernel_manager(conf);
+	auto & serv = kman->services();
+
+	auto mp_service = master->services().get_ptr<services::message_passing>();
+	auto mempool_service = master->services().get_ptr<services::mempool>();
+	auto *mpi_keys = static_cast<plane_setup_mpi*>(mp_service.get())->get_keys();
+	auto *addrs = static_cast<plane_mempool*>(mempool_service.get())->get_addrs();
+	auto regis = [worker_id, addrs, mpi_keys](service_manager<cdr2::mpi::stypes> & sman) {
+		sman.add<services::message_passing, plane_setup_mpi>("plane-setup", mpi_keys);
+		sman.add<services::mempool, plane_mempool>("plane", worker_id, addrs);
+		sman.set<services::message_passing>("plane-setup");
+		sman.set<services::mempool>("plane");
+	};
+
+	serv.set_user_reg(regis);
+	return kman;
+}
+
 
 template<>
 void copy_rhs<relax_dir::xy>(const stencil_op<seven_pt> & so,
