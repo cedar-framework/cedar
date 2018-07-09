@@ -118,6 +118,7 @@ redist_solver<inner_solver>::redist_solver(const stencil_op<nine_pt> & so,
 	// Split communicator into collective processor blocks
 	auto & topo = so.grid();
 	auto & halo_service = services->template get<halo_exchange>();
+	auto & mpool = services->template get<mempool>();
 	auto ctopo = redist_topo(topo, halo_service.leveldims(0), halo_service.leveldims(1));
 	redist_operator(so, ctopo);
 
@@ -125,8 +126,11 @@ redist_solver<inner_solver>::redist_solver(const stencil_op<nine_pt> & so,
 		b_redist = typename inner_solver::grid_func(ctopo->nlocal(0)-2, ctopo->nlocal(1)-2);
 		x_redist = typename inner_solver::grid_func(ctopo->nlocal(0)-2, ctopo->nlocal(1)-2);
 	} else {
-		b_redist = grid_func(ctopo);
-		x_redist = grid_func(ctopo);
+		std::size_t nbytes = ctopo->nlocal(0)*ctopo->nlocal(1)*sizeof(real_t);
+		real_t *xaddr = (real_t*) mpool.addr(mempool::x_redist, nbytes);
+		real_t *baddr = (real_t*) mpool.addr(mempool::b_redist, nbytes);
+		b_redist = grid_func(baddr, ctopo);
+		x_redist = grid_func(xaddr, ctopo);
 	}
 
 	if ((redundant and active) or (not redundant and block_id == 0)) {

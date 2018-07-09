@@ -24,6 +24,7 @@ if(ENABLE_MPI)
 	redist/cholesky_solver.cc
 	mpi/plane_mpi.cc
 	mpi/plane_mempool.cc
+	mpi/plane_exchange.cc
 	mpi/prolong_op.cc
 	mpi/restrict_op.cc
 	mpi/restrict.cc
