@@ -3,6 +3,8 @@
 using namespace cedar;
 using namespace cedar::cdr3::mpi;
 
+ABT_barrier plane_exchange::barrier;
+
 void plane_exchange::setup(std::vector<topo_ptr> topos)
 {
 	if (ismaster) {

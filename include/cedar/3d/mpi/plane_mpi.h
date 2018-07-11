@@ -22,7 +22,17 @@ protected:
 	std::vector<int> *keys;
 };
 
+
+class plane_mpi : public mpi_wrapper
+{
+public:
+	plane_mpi(int nplanes, bool ismaster) : nplanes(nplanes), ismaster(ismaster) {}
+
+protected:
+	int nplanes;
+	bool ismaster;
+};
+
 }}}
 
 #endif
-

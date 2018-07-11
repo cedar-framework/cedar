@@ -35,6 +35,12 @@ std::ostream & operator<<(std::ostream & os, const kernel_params & obj)
 	else
 		os << "no\n";
 
+	os << "plane aggregation:    ";
+	if (obj.plane_agg)
+		os << "yes\n";
+	else
+		os << "no\n";
+
 	os << "multilevel lines:     ";
 	if (obj.ml_relax.enabled) {
 		os << "yes\n";
@@ -69,6 +75,7 @@ std::shared_ptr<kernel_params> build_kernel_params(config & conf)
 	params->relax_symmetric = true;
 	params->definite = true;
 	params->ml_relax.init(conf);
+	params->plane_agg = conf.get<bool>("solver.plane-agg", true);
 	params->plane_config = conf.getconf("plane-config");
 	if (params->plane_config == nullptr) {
 		params->plane_config = std::make_shared<config>("");

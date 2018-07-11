@@ -30,6 +30,7 @@ namespace cedar
 		halo_lib halo;
 		ml_relax_params ml_relax;
 		std::shared_ptr<config> plane_config;
+		bool plane_agg;
 
 		int per_mask() const {
 			int mask = 0;

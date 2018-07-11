@@ -1,5 +1,6 @@
 #include <cedar/3d/mpi/plane_mempool.h>
 #include <cedar/3d/mpi/plane_mpi.h>
+#include <cedar/3d/mpi/plane_exchange.h>
 #include <cedar/3d/mpi/relax_planes.h>
 
 
@@ -25,16 +26,19 @@ void log_end(bool log_planes, int ipl, int lvl)
 }
 
 
-cdr2::mpi::kman_ptr master_kman(config & conf, int nplanes)
+cdr2::mpi::kman_ptr master_kman(config & conf, int nplanes, bool aggregate, plane_team & team)
 {
 	auto kman = cdr2::mpi::build_kernel_manager(conf);
 	auto & serv = kman->services();
 
-	auto regis = [nplanes](service_manager<cdr2::mpi::stypes> & sman) {
+	auto regis = [nplanes, aggregate, &team](service_manager<cdr2::mpi::stypes> & sman) {
+		team.masters.push_back(&sman);
 		sman.add<services::message_passing, plane_setup_mpi>("plane-setup");
 		sman.add<services::mempool, plane_mempool>("plane", nplanes);
+		sman.add<services::halo_exchange<cdr2::mpi::stypes>, plane_exchange>("plane", nplanes, true);
 		sman.set<services::message_passing>("plane-setup");
-		sman.set<services::mempool>("plane");
+		if (aggregate)
+			sman.set<services::mempool>("plane");
 	};
 
 	serv.set_user_reg(regis);
@@ -42,20 +46,31 @@ cdr2::mpi::kman_ptr master_kman(config & conf, int nplanes)
 }
 
 
-cdr2::mpi::kman_ptr worker_kman(int worker_id, config & conf, cdr2::mpi::kman_ptr master)
+cdr2::mpi::kman_ptr worker_kman(config & conf, int nplanes, bool aggregate, plane_team & team, int worker_id)
 {
 	auto kman = cdr2::mpi::build_kernel_manager(conf);
 	auto & serv = kman->services();
 
-	auto mp_service = master->services().get_ptr<services::message_passing>();
-	auto mempool_service = master->services().get_ptr<services::mempool>();
-	auto *mpi_keys = static_cast<plane_setup_mpi*>(mp_service.get())->get_keys();
-	auto *addrs = static_cast<plane_mempool*>(mempool_service.get())->get_addrs();
-	auto regis = [worker_id, addrs, mpi_keys](service_manager<cdr2::mpi::stypes> & sman) {
+	auto regis = [worker_id, nplanes, aggregate, &team](service_manager<cdr2::mpi::stypes> & sman) {
+		// add worker to team
+		auto *sman_ptr = &sman;
+		if (team.masters.size() > team.workers.size())
+			team.workers.push_back({sman_ptr});
+		else
+			team.workers.back().push_back(sman_ptr);
+
+		service_manager<cdr2::mpi::stypes> & master = *team.masters.back();
+		auto mp_service = master.get_ptr<services::message_passing>();
+		auto mempool_service = master.get_ptr<services::mempool>();
+		auto *mpi_keys = static_cast<plane_setup_mpi*>(mp_service.get())->get_keys();
+		auto *addrs = static_cast<plane_mempool*>(mempool_service.get())->get_addrs();
+
 		sman.add<services::message_passing, plane_setup_mpi>("plane-setup", mpi_keys);
 		sman.add<services::mempool, plane_mempool>("plane", worker_id, addrs);
+		sman.add<services::halo_exchange<cdr2::mpi::stypes>, plane_exchange>("plane", nplanes, false);
 		sman.set<services::message_passing>("plane-setup");
-		sman.set<services::mempool>("plane");
+		if (aggregate)
+			sman.set<services::mempool>("plane");
 	};
 
 	serv.set_user_reg(regis);
