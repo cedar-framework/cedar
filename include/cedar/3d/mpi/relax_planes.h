@@ -18,6 +18,15 @@ cdr2::mpi::kman_ptr master_kman(config & conf, int nplanes, bool aggregate, plan
 cdr2::mpi::kman_ptr worker_kman(config & conf, int nplanes, bool aggregate, plane_team & team, int worker_id);
 
 template<class fsten>
+void setup_agg_solve(cdr2::mpi::solver<fsten> & slv)
+{
+	service_manager<cdr2::mpi::stypes> & sman = slv.get_kernels()->services();
+	sman.set<services::halo_exchange<cdr2::mpi::stypes>>("plane");
+	slv.setup_halo();
+}
+
+
+template<class fsten>
 using slv2_ptr = std::unique_ptr<cdr2::mpi::solver<fsten>>;
 
 template<relax_dir rdir, class sten3>
@@ -277,6 +286,13 @@ public:
 
 				planes.back()->levels.template get<sten2>(0).x = cdr2::mpi::grid_func(xaddr, topo2);
 				planes.back()->levels.template get<sten2>(0).b = cdr2::mpi::grid_func(baddr, topo2);
+
+				if (aggregate) {
+					setup_agg_solve(*planes.back());
+					planes.back()->apply_heirs([](cdr2::mpi::solver<cdr2::nine_pt> & child) {
+							setup_agg_solve<cdr2::nine_pt>(child);
+						});
+				}
 			}
 			if (aggregate)
 				threads[i % 2].add_plane(planes.back().get());

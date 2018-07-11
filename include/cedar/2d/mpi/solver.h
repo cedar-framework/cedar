@@ -132,11 +132,8 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 			if ((choice[0] != 1) and (choice[1] != 1)) {
 				log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " cores" << std::endl;
 				using inner_solver = multilevel_wrapper<mpi::solver<nine_pt>>;
-				this->coarse_solver = create_redist_solver<inner_solver>(kman,
-				                                                         *this->conf,
-				                                                         cop,
-				                                                         cg_conf,
-				                                                         choice);
+				this->heir = create_redist_ptr<inner_solver>(kman, cop, cg_conf, choice);
+				this->coarse_solver = wrap_redist_ptr<inner_solver>(*this->conf, kman, this->heir);
 				return;
 			}
 		}
@@ -228,6 +225,11 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 			                 cgrid);
 		}
 		setup_halo();
+		{
+			auto & sop = this->levels.template get<fsten>(0).A;
+			auto & halo_service = kman->services().template get<halo_exchange>();
+			halo_service.run(sop);
+		}
 	}
 
 	void setup_halo()
@@ -242,10 +244,19 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 
 		auto & halo_service = kman->services().template get<halo_exchange>();
 		halo_service.setup(topos);
-		halo_service.run(sop);
 	}
 
 	void give_op(std::unique_ptr<stencil_op<fsten>> fop) {fop_ref = std::move(fop);}
+
+
+	void apply_heirs(std::function<void(solver<nine_pt> &)> fun)
+	{
+		if (heir) {
+			auto & slv = heir->get_inner().get_inner();
+			fun(slv);
+			slv.apply_heirs(fun);
+		}
+	}
 
 
 	MPI_Comm comm;
@@ -253,6 +264,7 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 
 protected:
 	std::unique_ptr<stencil_op<fsten>> fop_ref;
+	std::shared_ptr<redist_solver<multilevel_wrapper<solver<nine_pt>>>> heir;
 };
 
 }}}

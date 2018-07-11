@@ -10,11 +10,15 @@ namespace cedar { namespace cdr3 { namespace mpi {
 class plane_exchange : public cdr2::mpi::tausch_exchanger
 {
 public:
-	static ABT_barrier barrier;
 	using parent = cdr2::mpi::tausch_exchanger;
 
-	plane_exchange(int nplanes, bool ismaster) :
-		nplanes(nplanes), ismaster(ismaster) {}
+	plane_exchange(int nplanes) :
+		nplanes(nplanes), ismaster(true) {}
+
+	plane_exchange(int nplanes, ABT_barrier barrier) :
+		nplanes(nplanes), ismaster(false), barrier(barrier) {}
+
+	ABT_barrier get_barrier() { return barrier; }
 
 	void setup(std::vector<topo_ptr> topos) override;
 	void run(stencil_op<cdr2::five_pt> & so) override
@@ -29,6 +33,7 @@ public:
 protected:
 	int nplanes;
 	bool ismaster;
+	ABT_barrier barrier;
 };
 
 }}}

@@ -35,7 +35,7 @@ cdr2::mpi::kman_ptr master_kman(config & conf, int nplanes, bool aggregate, plan
 		team.masters.push_back(&sman);
 		sman.add<services::message_passing, plane_setup_mpi>("plane-setup");
 		sman.add<services::mempool, plane_mempool>("plane", nplanes);
-		sman.add<services::halo_exchange<cdr2::mpi::stypes>, plane_exchange>("plane", nplanes, true);
+		sman.add<services::halo_exchange<cdr2::mpi::stypes>, plane_exchange>("plane", nplanes);
 		sman.set<services::message_passing>("plane-setup");
 		if (aggregate)
 			sman.set<services::mempool>("plane");
@@ -62,12 +62,14 @@ cdr2::mpi::kman_ptr worker_kman(config & conf, int nplanes, bool aggregate, plan
 		service_manager<cdr2::mpi::stypes> & master = *team.masters.back();
 		auto mp_service = master.get_ptr<services::message_passing>();
 		auto mempool_service = master.get_ptr<services::mempool>();
+		auto halo_service = master.get_ptr<services::halo_exchange<cdr2::mpi::stypes>>("plane");
 		auto *mpi_keys = static_cast<plane_setup_mpi*>(mp_service.get())->get_keys();
 		auto *addrs = static_cast<plane_mempool*>(mempool_service.get())->get_addrs();
+		auto barrier = static_cast<plane_exchange*>(halo_service.get())->get_barrier();
 
 		sman.add<services::message_passing, plane_setup_mpi>("plane-setup", mpi_keys);
 		sman.add<services::mempool, plane_mempool>("plane", worker_id, addrs);
-		sman.add<services::halo_exchange<cdr2::mpi::stypes>, plane_exchange>("plane", nplanes, false);
+		sman.add<services::halo_exchange<cdr2::mpi::stypes>, plane_exchange>("plane", nplanes, barrier);
 		sman.set<services::message_passing>("plane-setup");
 		if (aggregate)
 			sman.set<services::mempool>("plane");

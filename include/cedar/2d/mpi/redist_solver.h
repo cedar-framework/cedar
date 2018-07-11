@@ -61,6 +61,8 @@ public:
 	*/
 	void solve(grid_func & x, const grid_func & b);
 
+	inner_solver & get_inner() { return *slv; }
+
 protected:
 	bool redundant; /** Flag for whether redistribution is performed redundantly */
 	std::unique_ptr<inner_solver> slv; /** Redistributed solver object. */
