@@ -244,22 +244,26 @@ public:
 		auto conf2 = this->params->plane_config;
 		auto log_planes = conf2->template get<bool>("log-planes", true);
 		cdr2::mpi::kman_ptr master_kmans[2];
-		master_kmans[0] = master_kman(*conf2, (nplanes / 2) + (nplanes % 2), aggregate, teams[0]);
-		master_kmans[1] = master_kman(*conf2, nplanes / 2, aggregate, teams[1]);
+		{
+			auto tmp = log_begin(log_planes, 0, relax_dir_name<rdir>::value);
+			master_kmans[0] = master_kman(*conf2, (nplanes / 2) + (nplanes % 2), aggregate, teams[0]);
+			master_kmans[1] = master_kman(*conf2, nplanes / 2, aggregate, teams[1]);
+			log_end(log_planes, 0, tmp);
+		}
 		for (auto ipl : rng) {
 			int i = ipl-1;
 			cdr2::mpi::kman_ptr kman2;
+			auto so2_ptr = std::make_unique<cdr2::mpi::stencil_op<sten2>>(topo2);
+			auto & so2 = *so2_ptr;
+			copy_coeff<rdir>(so, so2);
+
+			auto tmp = log_begin(log_planes, ipl, relax_dir_name<rdir>::value);
 			if (i < 2)
 				kman2 = master_kmans[i];
 			else {
 				kman2 = worker_kman(*conf2, (i % 2 == 0) ? (nplanes / 2) + (nplanes % 2) : nplanes / 2,
 				                    aggregate, teams[i % 2], i / 2);
 			}
-			auto so2_ptr = std::make_unique<cdr2::mpi::stencil_op<sten2>>(topo2);
-			auto & so2 = *so2_ptr;
-			copy_coeff<rdir>(so, so2);
-
-			auto tmp = log_begin(log_planes, ipl, relax_dir_name<rdir>::value);
 			planes.emplace_back(std::make_unique<cdr2::mpi::solver<sten2>>(so2, conf2, kman2));
 			log_end(log_planes, ipl, tmp);
 

@@ -11,6 +11,7 @@ void plane_ult_run_full(void *args)
 
 void plane_ult_run_comp(void *args)
 {
+	std::cout << "plane started" << std::endl;
 	ult_params<cdr2::five_pt> *params = (ult_params<cdr2::five_pt>*) args;
 	auto & slv = *params->slv;
 }

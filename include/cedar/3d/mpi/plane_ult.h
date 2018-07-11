@@ -19,7 +19,6 @@ struct ult_params
 void plane_ult_run_full(void *args);
 void plane_ult_run_comp(void *args);
 
-
 template<class sten2>
 class plane_ult
 {
@@ -28,10 +27,15 @@ public:
 
 	void init()
 	{
-		if (not ABT_initialized())
+		if (ABT_initialized() == ABT_ERR_UNINITIALIZED) {
 			ABT_init(0, NULL);
-		ABT_xstream_self(&xstream);
-		ABT_xstream_get_main_pools(xstream, 1, &pool);
+		}
+
+		if (not initialized) {
+			ABT_xstream_self(&xstream);
+			ABT_xstream_get_main_pools(xstream, 1, &pool);
+		}
+
 		initialized = true;
 	}
 
@@ -44,7 +48,7 @@ public:
 					ABT_thread_free(&threads[i]);
 			}
 
-			if (ABT_initialized()) {
+			if (ABT_initialized() == ABT_SUCCESS) {
 				ABT_finalize();
 			}
 		}
@@ -88,8 +92,8 @@ public:
 
 protected:
 	bool initialized;
-	ABT_xstream xstream;
 	ABT_pool pool;
+	ABT_xstream xstream;
 	std::vector<bool> thread_created;
 	std::vector<ABT_thread> threads;
 	std::vector<ult_params<sten2>> params;
