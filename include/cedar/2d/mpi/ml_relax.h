@@ -16,6 +16,7 @@ extern "C" {
 	                               int *nol);
 	void BMG2_SymStd_SETUP_ADD_SOR_PTRS(int nproc, len_t nlines, int min_gsz, int nol, int *poffset,
 	                                    int *psor_lev);
+	void BMG2_SymStd_SETUP_ADD_GROUP_PTRS(int nlines, MPI_Fint *comm, int nol, int *ptrs, void *mempool);
 	void MPI_BMG2_SymStd_SETUP_comm(MPI_Fint *comm, int nol, int rank, int min_gsz, void *mp);
 	void MPI_BMG2_SymStd_SETUP_lines_x(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl);
 	void MPI_BMG2_SymStd_SETUP_lines_y(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl);
@@ -60,29 +61,56 @@ public:
 			int workspace_size, nspace;
 			MPI_BMG2_SymStd_SETUP_trisolve(nproc, nlines, min_gsz, nog,
 			                               &nspace, &this->nlevels);
-			comms.init(2, this->nlevels - 1);
-			comms.set(MPI_COMM_NULL);
-			MPI_Comm gcomm;
-			auto & mp = this->services->template get<message_passing>();
-			mp.comm_split(comm, coord_other, coord, &gcomm);
-			comms(0, this->nlevels - 2) = MPI_Comm_c2f(gcomm);
-			MPI_BMG2_SymStd_SETUP_comm(comms.data(), this->nlevels, coord+1, min_gsz,
-			                           this->services->template fortran_handle<message_passing>());
+			if (not initialized) {
+				comms.init(2, this->nlevels - 1);
+				comms.set(MPI_COMM_NULL);
+				MPI_Comm gcomm;
+				auto & mp = this->services->template get<message_passing>();
+				mp.comm_split(comm, coord_other, coord, &gcomm);
+				comms(0, this->nlevels - 2) = MPI_Comm_c2f(gcomm);
+				MPI_BMG2_SymStd_SETUP_comm(comms.data(), this->nlevels, coord+1, min_gsz,
+				                           this->services->template fortran_handle<message_passing>());
+
+				group_ptrs.init(2, this->nlevels - 1);
+				BMG2_SymStd_SETUP_ADD_GROUP_PTRS(nlines, comms.data(), this->nlevels, group_ptrs.data(),
+				                                 this->services->template fortran_handle<mempool>());
+			}
+
 			sor_ptrs.emplace_back(this->nlevels);
 			BMG2_SymStd_SETUP_ADD_SOR_PTRS(nproc, nlines, min_gsz, this->nlevels,
 			                               &workspace_size, sor_ptrs.back().data());
 			workspace_size += (nlines + 2)*(nlines_other + 2)*4;
 			tdg.emplace_back(workspace_size);
-			// this bound may not be correct!
-			int rwork_size = std::max(8 * nlines_other * nproc + 8 * nlines,
-			                          8 * nlines * nproc_other + 8 * nlines_other);
-			rwork.emplace_back(rwork_size);
 			bool *fflags;
 			fflags = new bool[2 * nog];
-			initialized = true;
 			for (auto i : range<std::size_t>(2 * nog))
 				fflags[i] = true;
 			fact_flags.push_back(fflags);
+			if (not initialized) {
+				// this bound may not be correct!
+				int rwork_size = std::max(8 * nlines_other * nproc + 8 * nlines,
+				                          8 * nlines * nproc_other + 8 * nlines_other);
+				rwork.resize(rwork_size);
+
+				auto & mpool = this->services->template get<mempool>();
+				int max_gsz = min_gsz + min_gsz % 2;
+				int max_nlines = std::ceil(nlines / 2);
+				mempool::memid group_memid, iface_memid;
+				if (dir == relax_dir::x) {
+					group_memid = mempool::tricomm_group_x;
+					iface_memid = mempool::tricomm_iface_x;
+				} else {
+					group_memid = mempool::tricomm_group_y;
+					iface_memid = mempool::tricomm_iface_y;
+				}
+				tricomm_group = mpool.create(group_memid,
+				                             max_nlines * 8 * max_gsz * sizeof(real_t));
+				tricomm_iface = mpool.create(iface_memid,
+				                             max_nlines * 8 * sizeof(real_t));
+				iface_ptrs[0] = mpool.pos((nlines / 2) * 8) * sizeof(real_t);
+				iface_ptrs[1] = mpool.pos((nlines / 2 + nlines % 2) * 8) * sizeof(real_t);
+			}
+			initialized = true;
 	}
 
 	virtual void setup(const stencil_op<five_pt> & so,
@@ -127,13 +155,13 @@ public:
 		if (dir == relax_dir::x) {
 			init_ndim(topo.nproc(0), topo.nproc(1),
 			          topo.coord(0), topo.coord(1),
-			          topo.nlocal(0) - 2, topo.nlocal(1) - 2,
+			          topo.nlocal(1) - 2, topo.nlocal(0) - 2,
 			          min_gsz, topo.nlevel(), topo.comm);
 			MPI_BMG2_SymStd_SETUP_lines_x(sod.data(), sor.data(), so.len(0), so.len(1), nstencil);
 		} else {
 			init_ndim(topo.nproc(1), topo.nproc(0),
 			          topo.coord(1), topo.coord(0),
-			          topo.nlocal(1) - 2, topo.nlocal(0) - 2,
+			          topo.nlocal(0) - 2, topo.nlocal(1) - 2,
 			          min_gsz, topo.nlevel(), topo.comm);
 			MPI_BMG2_SymStd_SETUP_lines_y(sod.data(), sor.data(), so.len(0), so.len(1), nstencil);
 		}
@@ -192,7 +220,7 @@ public:
 		relax_lines(k, sod.data(), bd.data(), x.data(), sord.data(), res.data(),
 		            so.len(0), so.len(1), topo.is(0), topo.is(1),
 		            kf, nstencil, BMG_RELAX_SYM, updown,
-		            datadist, rwork[kf-k].data(), rwork[kf-k].len(0),
+		            datadist, rwork.data(), rwork.size(),
 		            fcomm, this->comms.data(), this->nlevels,
 		            sor_ptrs[kf-k].data(), tdg[kf-k].len(0), tdg[kf-k].data(),
 		            fact_flags[kf-k], this->factorize,
@@ -204,8 +232,12 @@ protected:
 	std::vector<array<int, 1>> sor_ptrs;    /** Pointers into tridiagonal workspace */
 	std::vector<bool*> fact_flags;          /** flags for factorization */
 	std::vector<array<real_t, 1>> tdg;      /** Tridiagonal solver workspace array */
-	std::vector<array<real_t, 1>> rwork;    /** Buffer workspace for tridiagonal solver */
+	std::vector<real_t> rwork;              /** Buffer workspace for tridiagonal solver */
 	array<MPI_Fint, 2> comms;               /** Communicators for ml lines */
+	services::mempool::pool tricomm_group;  /** Communication buffer for proc group iface system */
+	services::mempool::pool tricomm_iface;  /** Communication buffer for local iface system */
+	array<int, 2> group_ptrs;               /** Pointers to location of proc group iface system */
+	std::array<int, 2> iface_ptrs;          /** Pointers to location of local iface system */
 	bool factorize;                         /** Flag for local factorization (contrast to elimination) */
 	bool initialized;
 };

@@ -35,6 +35,28 @@ void *plane_mempool::addr(memid vtype, std::size_t nbytes)
 	return mloc;
 }
 
+
+plane_mempool::pool plane_mempool::create(memid vtype, std::size_t nbytes)
+{
+	pool ret;
+
+	auto &amap = (*addrs)[vtype];
+	if (ismaster)
+		amap[nbytes] = (char*) std::malloc(nbytes*nplanes);
+	ret.addr = amap[nbytes];
+	ret.fullsize = nbytes*nplanes;
+	ret.size = nbytes;
+
+	return ret;
+}
+
+
+int plane_mempool::pos(std::size_t nbytes)
+{
+	return wid * nbytes;
+}
+
+
 plane_mempool::~plane_mempool()
 {
 	if (ismaster) {

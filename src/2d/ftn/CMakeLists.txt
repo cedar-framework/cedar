@@ -60,6 +60,7 @@ if (ENABLE_MPI)
 	ftn/mpi/BMG2_SymStd_downline.f90
 	ftn/mpi/BMG2_SymStd_upline.f90
 	ftn/mpi/BMG2_SymStd_SETUP_ADD_SOR_PTRS.f90
+	ftn/mpi/BMG2_SymStd_SETUP_ADD_GROUP_PTRS.f90
 	ftn/mpi/BMG2_SymStd_SETUP_comm.f90
 	ftn/mpi/BMG2_SymStd_SETUP_trisolve.f90
 	ftn/mpi/BMG2_SymStd_RWork_2_TDG.f90

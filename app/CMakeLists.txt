@@ -11,3 +11,6 @@ target_link_libraries(test-coll cedar)
 
 add_executable(plane-run plane.cc)
 target_link_libraries(plane-run cedar)
+
+add_executable(line-run line.cc)
+target_link_libraries(line-run cedar)
