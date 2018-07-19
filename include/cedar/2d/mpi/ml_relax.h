@@ -25,6 +25,8 @@ extern "C" {
 	                                      len_t II, len_t JJ, len_t igs, len_t jgs,
 	                                      int nog, int nstencil, int irelax_sym, int updown,
 	                                      len_t *datadist, real_t *rwork, len_t nmsgr,
+	                                      real_t *iface, int niface, int *iface_ptrs,
+	                                      real_t *gwork, int ngwork, int *gptr,
 	                                      MPI_Fint mpicomm, MPI_Fint *xcomm, int nolx,
 	                                      int *tdsx_sor_ptrs, len_t nsor, real_t *tdg,
 	                                      bool *fact_flags, bool factorize, void *halof);
@@ -33,6 +35,8 @@ extern "C" {
 	                                      len_t II, len_t JJ, len_t igs, len_t jgs,
 	                                      int nog, int nstencil, int irelax_sym, int updown,
 	                                      len_t *datadist, real_t *rwork, len_t nmsgr,
+	                                      real_t *iface, int niface, int *iface_ptrs,
+	                                      real_t *gwork, int ngwork, int *gptr,
 	                                      MPI_Fint mpicomm, MPI_Fint *ycomm, int noly,
 	                                      int *tdsy_sor_ptrs, len_t nsor, real_t *tdg,
 	                                      bool *fact_flags, bool factorize, void *halof);
@@ -94,7 +98,7 @@ public:
 
 				auto & mpool = this->services->template get<mempool>();
 				int max_gsz = min_gsz + min_gsz % 2;
-				int max_nlines = std::ceil(nlines / 2);
+				int max_nlines = nlines / 2 + nlines % 2;
 				mempool::memid group_memid, iface_memid;
 				if (dir == relax_dir::x) {
 					group_memid = mempool::tricomm_group_x;
@@ -208,6 +212,8 @@ public:
 		                   len_t II, len_t JJ, len_t igs, len_t jgs,
 		                   int nog, int nstencil, int irelax_sym, int updown,
 		                   len_t *datadist, real_t *rwork, len_t nmsgr,
+		                   real_t *iface, int niface, int *iface_ptrs,
+		                   real_t *gwork, int ngwork, int *gptr,
 		                   MPI_Fint mpicomm, MPI_Fint *xcomm, int nolx,
 		                   int *tdsx_sor_ptrs, len_t nsor, real_t *tdg,
 		                   bool *fact_flags, bool factorize, void *halof)> relax_lines;
@@ -221,6 +227,8 @@ public:
 		            so.len(0), so.len(1), topo.is(0), topo.is(1),
 		            kf, nstencil, BMG_RELAX_SYM, updown,
 		            datadist, rwork.data(), rwork.size(),
+		            (real_t*) tricomm_iface.addr, tricomm_iface.fullsize / sizeof(real_t), iface_ptrs.data(),
+		            (real_t*) tricomm_group.addr, tricomm_group.fullsize / sizeof(real_t), group_ptrs.data(),
 		            fcomm, this->comms.data(), this->nlevels,
 		            sor_ptrs[kf-k].data(), tdg[kf-k].len(0), tdg[kf-k].data(),
 		            fact_flags[kf-k], this->factorize,

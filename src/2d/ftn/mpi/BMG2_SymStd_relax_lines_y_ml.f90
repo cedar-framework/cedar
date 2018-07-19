@@ -1,12 +1,13 @@
       SUBROUTINE BMG2_SymStd_relax_lines_y( &
-     &                K, SO, QF, Q, SOR, B,&
-     &                II, JJ, iGs, jGs,&
-     &                NOG, NStncl, IRELAX_SYM, UPDOWN,&
-     &                DATADIST, RWORK, NMSGr,&
-     &                MPICOMM, &
-     &                YCOMM, NOLY,&
-     &                TDSY_SOR_PTRS,&
-     &                NSOR, TDG, fact_flags, factorize, halof)&
+           K, SO, QF, Q, SOR, B,&
+           II, JJ, iGs, jGs,&
+           NOG, NStncl, IRELAX_SYM, UPDOWN,&
+           DATADIST, RWORK, NMSGr,&
+           iface, niface, iface_ptrs, gwork, ngwork, gptr,&
+           MPICOMM, &
+           YCOMM, NOLY,&
+           TDSY_SOR_PTRS,&
+           NSOR, TDG, fact_flags, factorize, halof)&
      BIND(C,NAME='MPI_BMG2_SymStd_relax_lines_y_ml')
 
 ! ======================================================================
@@ -61,6 +62,7 @@
 !     Argument Declarations
 !
       integer(len_t), value ::  II, JJ, NMSGr, NSOR
+      integer(c_int), value :: ngwork, niface
       integer(c_int), value :: NOG, NStncl
       integer(len_t), value :: iGs, jGs
       integer(c_int), value :: K, IRELAX_SYM, UPDOWN
@@ -70,8 +72,10 @@
 
       real(real_t) :: B(JJ,II), Q(II,JJ), QF(II,JJ), SO(II+1,JJ+1,NStncl)
       real(real_t) :: SOR(JJ,II,2), RWORK(NMSGr), TDG(NSOR)
+      real(real_t) :: iface(niface), gwork(ngwork)
 
       integer :: YCOMM(2,2:NOLY)
+      integer(c_int) :: gptr(2, 2:NOLY), iface_ptrs(2)
       integer(c_int) :: TDSY_SOR_PTRS(NOLY)
 
       logical(c_bool) :: fact_flags(2 * NOG)
@@ -91,6 +95,7 @@
 
       INTEGER CP
       INTEGER AT, BT, CT, FT, XT
+      integer :: icolor, iface_len, iface_ptr
 
 ! ======================================================================
 
@@ -156,8 +161,14 @@
          IEND = I - 2
 
          NPts = JJ-2
+
+         icolor = mod(ibeg, 2) + 1
+         iface_ptr = iface_ptrs(icolor) + 1
+         iface_len = ((II-2) / 2 + mod(ibeg,2) * mod(II-2,2)) * 8
+
          CALL BMG2_SymStd_downline(SOR,B,JJ,II,&
-              IBEG, RWORK, NPts, NLINES, &
+              IBEG, RWORK, gwork, ngwork, gptr,&
+              iface(iface_ptr), iface_len, NPts, NLINES,&
               K, NOLY, YCOMM, NSOR, TDG, &
               NMSGr, NOG, TDSY_SOR_PTRS,&
               CP, fact_flags, factorize)
@@ -176,21 +187,18 @@
 
             NPts = J1-1
 
-            CALL BMG2_SymStd_LineSolve_B_ml( RWORK(MULT*8+1), &
-     &           RWORK(MULT*8+1), &
-     &           RWORK(SIZE*NLINES*8 + AT),&
-     &           RWORK(SIZE*NLINES*8 + BT),&
-     &           RWORK(SIZE*NLINES*8 + CT),&
-     &           RWORK(SIZE*NLINES*8 + FT),&
-     &           RWORK(SIZE*NLINES*8 + XT),&
-     &           2*CP, CP, DATADIST, myid, 8*NLINES, 8*NLINES)
+            CALL BMG2_SymStd_LineSolve_B_ml(gwork(gptr(icolor,2) + MULT*8 + 1),&
+                 gwork(gptr(icolor,2) + MULT*8+1),&
+                 RWORK(AT),RWORK(BT),RWORK(CT),RWORK(FT),RWORK(XT),&
+                 2*CP, CP, DATADIST, myid, 8*NLINES, 8*NLINES)
 
             MULT = MULT+1
 
          ENDDO
 
          call BMG2_SymStd_upline(SOR, B, JJ, II,&
-              IBEG, RWORK, NPts, NLINES, &
+              IBEG, RWORK, gwork, ngwork, gptr,&
+              iface(iface_ptr), iface_len, NPts, NLINES, &
               K, NOLY, YCOMM, NSOR, TDG, &
               NMSGr, NOG, TDSY_SOR_PTRS, CP, factorize)
 

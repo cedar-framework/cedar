@@ -1,10 +1,12 @@
       SUBROUTINE BMG2_SymStd_downline(SOR,Q,II,JJ,&
-     &                JBEG, RWORK, NPts, NLines, &
-     &                K, NOLX, XCOMM, NSOR, TDG, &
-     &                NMSGr, NOG, TDSX_SOR_PTRS,&
-     &                pgSIZE, fact_flags, factorize)
+           JBEG, RWORK, gwork, ngwork, gptr,&
+           iface, niface, NPts, NLines, &
+           K, NOLX, XCOMM, NSOR, TDG, &
+           NMSGr, NOG, TDSX_SOR_PTRS,&
+           pgSIZE, fact_flags, factorize)
 
       use iso_c_binding, only: c_bool
+      use ModInterface
       IMPLICIT NONE
 
       INCLUDE 'mpif.h'
@@ -12,12 +14,15 @@
       INTEGER II, JJ, JBEG, NPts, NLines
 
       INTEGER K, NOLX, NOG, NSOR, NMSGr
+      integer(c_int), value :: ngwork, niface
 
       INTEGER XCOMM(2,2:NOLX)
+      integer(c_int) :: gptr(2,2:NOLX)
 
       INTEGER TDSX_SOR_PTRS(NOLX)
 
       REAL*8 SOR(II,JJ,2), RWORK(NMSGr)
+      real(real_t) :: iface(niface), gwork(ngwork)
 
       REAL*8 Q(II,JJ), TDG(NSOR)
 
@@ -32,6 +37,8 @@
       logical(c_bool) :: inter_flag
       logical(c_bool) :: factorize
 
+      integer :: icolor
+
       ! always factorize interface systems
       inter_flag = .true.
       if (jbeg .eq. 2) then
@@ -39,6 +46,8 @@
       else
          flag_stride = NOLX
       endif
+
+      icolor = mod(jbeg, 2) + 1
 
       CALL MPI_COMM_RANK(XCOMM(1,NOLX), grank, IERR)
 
@@ -63,7 +72,7 @@
          DO J=JBEG, JJ-1, 2
             CALL BMG2_SymStd_LineSolve_A_ml(SOR(2,J,1),&
                  &             SOR(2,J,2), Q(2,J),&
-                 &             RWORK(MULT*8+1),&
+                 &             iface(MULT*8+1),&
                  &             NPts, fact_flags(K+flag_stride))
 
             MULT = MULT + 1
@@ -72,7 +81,7 @@
          DO J=JBEG, JJ-1, 2
             CALL BMG2_SymStd_LineSolve_A_ml_eff(SOR(2,J,1),&
                  &             SOR(2,J,2), Q(2,J),&
-                 &             RWORK(MULT*8+1), NPts)
+                 &             iface(MULT*8+1), NPts)
             MULT = MULT + 1
          END DO
       endif
@@ -84,19 +93,11 @@
       ! Gather interface equations to head node
       !
       IF (pgSIZE .GT. 1) THEN
-         if (myrank .eq. 0) then
-            CALL MPI_GATHER(MPI_IN_PLACE, NLines*8, &
-                 &        MPI_DOUBLE_PRECISION,&
-                 &        RWORK, NLines*8, &
-                 &        MPI_DOUBLE_PRECISION,&
-                 &        0, XCOMM(2,NOLX), IERR)
-         else
-            CALL MPI_GATHER(RWORK, NLines*8, &
-                 &        MPI_DOUBLE_PRECISION,&
-                 &        0.0d0, NLines*8, &
-                 &        MPI_DOUBLE_PRECISION,&
-                 &        0, XCOMM(2,NOLX), IERR)
-         endif
+         call MPI_GATHER(iface, nlines * 8,&
+              MPI_DOUBLE_PRECISION,&
+              gwork(gptr(icolor,NOLX) + 1), nlines*8,&
+              MPI_DOUBLE_PRECISION,&
+              0, XCOMM(2,NOLX), IERR)
       END IF
 
 !     CALL DUMP_RWORK(RWORK, 0, pgSIZE, NLines)
@@ -119,7 +120,7 @@
 
             CALL BMG2_SymStd_RWork_2_TDG(&
      &           TDG(TDSX_SOR_PTRS(kl)),&
-     &           RWORK, pgSIZE, NLines, N,&
+     &           gwork(gptr(icolor,kl+1) + 1), pgSIZE, NLines, N,&
      &           K, kl)
 
 !           write(*,*) ''
@@ -132,7 +133,7 @@
             !
             CALL A_Wrapper(&
      &           TDG(TDSX_SOR_PTRS(kl)),&
-     &           RWORK, N, pgSIZE, &
+     &           iface, N, pgSIZE, &
      &           JBEG, JJ, NLines, inter_flag, factorize)
 
 
@@ -148,19 +149,11 @@
             ! the group head node
             !
             IF (pgSIZE .GT. 1) THEN
-               if (myrank .eq. 0) then
-                  CALL MPI_GATHER(MPI_IN_PLACE, NLines*8, &
-                       &              MPI_DOUBLE_PRECISION,&
-                       &              RWORK, NLines*8, &
-                       &              MPI_DOUBLE_PRECISION,&
-                       &              0, XCOMM(2,kl), IERR)
-               else
-                  CALL MPI_GATHER(RWORK, NLines*8, &
-                       &              MPI_DOUBLE_PRECISION,&
-                       &              0.0d0, NLines*8, &
-                       &              MPI_DOUBLE_PRECISION,&
-                       &              0, XCOMM(2,kl), IERR)
-               endif
+               call MPI_Gather(iface, nlines*8,&
+                    MPI_DOUBLE_PRECISION,&
+                    gwork(gptr(icolor,kl) + 1), nlines*8,&
+                    MPI_DOUBLE_PRECISION,&
+                    0, XCOMM(2, NOLX), IERR)
             END IF
 
 !           write(*,*) ''
