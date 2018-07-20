@@ -106,11 +106,28 @@ int main(int argc, char *argv[])
 		mp.gather(tvals[i], plane_len, MPI_DOUBLE, recv[i], plane_len, MPI_DOUBLE, 0, grid->comm);
 	}
 
-	if (rank == 0) {
-		for (auto i : range<std::size_t>(plane_len * nplanes * grid->nproc())) {
-			std::cout << recv[0][i] << std::endl;
+	// if (rank == 0) {
+	// 	for (auto i : range<std::size_t>(plane_len * nplanes * grid->nproc())) {
+	// 		std::cout << recv[0][i] << std::endl;
+	// 	}
+	// }
+	MPI_Barrier(grid->comm);
+
+	for (auto i : range<std::size_t>(nplanes)) {
+		auto & sman = kmans[i]->services();
+		auto & mp = sman.get<services::message_passing>();
+
+		mp.scatter(recv[i], plane_len, MPI_DOUBLE, tvals[i], plane_len, MPI_DOUBLE, 0, grid->comm);
+	}
+
+	if (rank == 1) {
+		for (auto i : range<std::size_t>(nplanes)) {
+			for (auto j : range<std::size_t>(plane_len)) {
+				std::cout << tvals[i][j] << std::endl;
+			}
 		}
 	}
+
 
 	// for (auto i : range<std::size_t>(nplanes)) {
 	// 	kmans[i]->run<mpi::line_relax<relax_dir::x>>(so, xs[i], bs[i], sor, res, cycle::Dir::DOWN);
