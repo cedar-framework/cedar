@@ -43,4 +43,44 @@ int plane_setup_mpi::comm_split(MPI_Comm comm, int color, int key, MPI_Comm *new
 }
 
 
+int plane_mpi::gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
+                      void *recvbuf, int recvcount, MPI_Datatype recvtype,
+                      int root, MPI_Comm comm)
+{
+	if (not ismaster)
+		return 0;
+
+	int nproc;
+	MPI_Comm_size(comm, &nproc);
+	int plane_len = sendcount;
+	int type_size;
+	MPI_Type_size(sendtype, &type_size);
+
+	// TODO: cache this stuff
+	MPI_Datatype plane_type, agg_type;
+	int *displs = new int[nplanes];
+	for (std::size_t i = 0; i < nplanes; i++)
+		displs[i] = i*nproc*plane_len;
+	MPI_Type_create_indexed_block(nplanes, plane_len, displs, sendtype, &plane_type);
+	MPI_Type_commit(&plane_type);
+	MPI_Type_create_resized(plane_type, 0, plane_len*type_size, &agg_type);
+	MPI_Type_commit(&agg_type);
+
+	int ierr = MPI_Gather(sendbuf, plane_len*nplanes, sendtype,
+	                      recvbuf, 1, agg_type, 0, comm);
+
+	delete[] displs;
+
+	return ierr;
+}
+
+
+int plane_mpi::scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
+                       void *recvbuf, int recvcount, MPI_Datatype recvtype,
+                       int root, MPI_Comm comm)
+{
+	return 0;
+}
+
+
 }}}

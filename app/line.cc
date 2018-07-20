@@ -31,12 +31,13 @@ int main(int argc, char *argv[])
 		auto & sman = kmans.back()->services();
 		if (i == 0) {
 			sman.add<services::message_passing, cdr3::mpi::plane_setup_mpi>("plane-setup");
+			sman.add<services::message_passing, cdr3::mpi::plane_mpi>("plane", nplanes, true);
 			sman.add<services::mempool, cdr3::mpi::plane_mempool>("plane", nplanes);
 			sman.add<services::halo_exchange<cdr2::mpi::stypes>, cdr3::mpi::plane_exchange>("plane", nplanes);
 
 			sman.set<services::message_passing>("plane-setup");
 			sman.set<services::mempool>("plane");
-			sman.set<services::halo_exchange<cdr2::mpi::stypes>>("plane");
+			// sman.set<services::halo_exchange<cdr2::mpi::stypes>>("plane");
 		} else {
 			service_manager<cdr2::mpi::stypes> & master = kmans[0]->services();
 			auto mp_service = master.get_ptr<services::message_passing>();
@@ -46,12 +47,13 @@ int main(int argc, char *argv[])
 			auto *addrs = static_cast<cdr3::mpi::plane_mempool*>(mempool_service.get())->get_addrs();
 			auto barrier = static_cast<cdr3::mpi::plane_exchange*>(halo_service.get())->get_barrier();
 			sman.add<services::message_passing, cdr3::mpi::plane_setup_mpi>("plane-setup", mpi_keys);
+			sman.add<services::message_passing, cdr3::mpi::plane_mpi>("plane", nplanes, false);
 			sman.add<services::mempool, cdr3::mpi::plane_mempool>("plane", i, addrs);
 			sman.add<services::halo_exchange<cdr2::mpi::stypes>, cdr3::mpi::plane_exchange>("plane", nplanes, barrier);
 
 			sman.set<services::message_passing>("plane-setup");
 			sman.set<services::mempool>("plane");
-			sman.set<services::halo_exchange<cdr2::mpi::stypes>>("plane");
+			// sman.set<services::halo_exchange<cdr2::mpi::stypes>>("plane");
 		}
 	}
 
@@ -81,9 +83,39 @@ int main(int argc, char *argv[])
 		kmans[i]->setup<mpi::line_relax<relax_dir::x>>(so, sor);
 	}
 
+	int rank;
+	MPI_Comm_rank(grid->comm, &rank);
+	std::vector<real_t*> tvals;
+	std::vector<real_t*> recv;
+	int plane_len = 3;
 	for (auto i : range<std::size_t>(nplanes)) {
-		kmans[i]->run<mpi::line_relax<relax_dir::x>>(so, xs[i], bs[i], sor, res, cycle::Dir::DOWN);
+		auto & sman = kmans[i]->services();
+		sman.set<services::message_passing>("plane");
+		auto & mpool = sman.get<services::mempool>();
+
+		tvals.push_back((real_t*) mpool.addr(services::mempool::sol, plane_len*sizeof(real_t)));
+		recv.push_back((real_t*) mpool.addr(services::mempool::sol, plane_len*grid->nproc()*sizeof(real_t)));
+		for (auto j : range<std::size_t>(plane_len))
+			tvals[i][j] = j + i*plane_len + rank * nplanes * plane_len;
 	}
+
+	for (auto i : range<std::size_t>(nplanes)) {
+		auto & sman = kmans[i]->services();
+		auto & mp = sman.get<services::message_passing>();
+
+		mp.gather(tvals[i], plane_len, MPI_DOUBLE, recv[i], plane_len, MPI_DOUBLE, 0, grid->comm);
+	}
+
+	if (rank == 0) {
+		for (auto i : range<std::size_t>(plane_len * nplanes * grid->nproc())) {
+			std::cout << recv[0][i] << std::endl;
+		}
+	}
+
+	// for (auto i : range<std::size_t>(nplanes)) {
+	// 	kmans[i]->run<mpi::line_relax<relax_dir::x>>(so, xs[i], bs[i], sor, res, cycle::Dir::DOWN);
+	// }
+	// kmans[0]->run<mpi::line_relax<relax_dir::x>>(so, xs[0], bs[0], sor, res, cycle::Dir::DOWN);
 
 	MPI_Finalize();
 	return 0;

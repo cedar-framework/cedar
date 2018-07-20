@@ -28,6 +28,12 @@ class plane_mpi : public mpi_wrapper
 {
 public:
 	plane_mpi(int nplanes, bool ismaster) : nplanes(nplanes), ismaster(ismaster) {}
+	int gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
+	           void *recvbuf, int recvcount, MPI_Datatype recvtype,
+	           int root, MPI_Comm comm) override;
+	int scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
+	            void *recvbuf, int recvcount, MPI_Datatype recvtype,
+	            int root, MPI_Comm comm) override;
 
 protected:
 	int nplanes;
