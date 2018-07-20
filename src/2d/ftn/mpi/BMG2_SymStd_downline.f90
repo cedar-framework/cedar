@@ -98,6 +98,10 @@
               gwork(gptr(icolor,NOLX) + 1), nlines*8,&
               MPI_DOUBLE_PRECISION,&
               0, XCOMM(2,NOLX), IERR)
+      else
+         do j=1,nlines*8
+            gwork(gptr(icolor,NOLX) + j) = iface(j)
+         enddo
       END IF
 
 !     CALL DUMP_RWORK(RWORK, 0, pgSIZE, NLines)
@@ -153,7 +157,11 @@
                     MPI_DOUBLE_PRECISION,&
                     gwork(gptr(icolor,kl) + 1), nlines*8,&
                     MPI_DOUBLE_PRECISION,&
-                    0, XCOMM(2, NOLX), IERR)
+                    0, XCOMM(2, kl), IERR)
+            else
+               do j=1,nlines*8
+                  gwork(gptr(icolor,kl) + j) = iface(j)
+               enddo
             END IF
 
 !           write(*,*) ''

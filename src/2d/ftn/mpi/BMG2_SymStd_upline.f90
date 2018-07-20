@@ -115,8 +115,8 @@
       ! system
       !
 
-      call MPI_Scatter(iface,NLINES*8,MPI_DOUBLE_PRECISION,&
-           gwork(gptr(icolor,NOLX)+1), NLINES*8, MPI_DOUBLE_PRECISION,&
+      call MPI_Scatter(gwork(gptr(icolor,NOLX)+1),NLINES*8,MPI_DOUBLE_PRECISION,&
+           iface, NLINES*8, MPI_DOUBLE_PRECISION,&
            0, XCOMM(2,NOLX), IERR)
 
       !

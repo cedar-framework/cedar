@@ -97,7 +97,7 @@ public:
 				rwork.resize(rwork_size);
 
 				auto & mpool = this->services->template get<mempool>();
-				int max_gsz = min_gsz + min_gsz % 2;
+				int max_gsz = 2*min_gsz;
 				int max_nlines = nlines / 2 + nlines % 2;
 				mempool::memid group_memid, iface_memid;
 				if (dir == relax_dir::x) {
