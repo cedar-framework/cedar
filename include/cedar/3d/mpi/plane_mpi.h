@@ -3,6 +3,10 @@
 
 #include <vector>
 #include <memory>
+#include <map>
+
+#include "mpi.h"
+
 #include <cedar/mpi/mpi_wrapper.h>
 
 namespace cedar { namespace cdr3 { namespace mpi {
@@ -38,6 +42,9 @@ public:
 protected:
 	int nplanes;
 	bool ismaster;
+	std::map<std::pair<int,int>, MPI_Datatype> tcache;
+
+	MPI_Datatype get_aggtype(MPI_Comm comm, int plane_len, MPI_Datatype dtype);
 };
 
 }}}
