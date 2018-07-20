@@ -20,6 +20,7 @@ protected:
 	int currind;
 	std::unique_ptr<std::vector<int>> key_data;
 	std::vector<int> *keys;
+	std::vector<MPI_Comm> comms;
 };
 
 
