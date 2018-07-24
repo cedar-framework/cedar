@@ -6,6 +6,10 @@
 #include <cedar/3d/mpi/plane_mpi.h>
 #include <cedar/3d/mpi/plane_exchange.h>
 
+extern "C" {
+	void test_gather(cedar::real_t *tvals, int plane_len, cedar::real_t *recv, MPI_Fint comm, void *mp);
+}
+
 int main(int argc, char *argv[])
 {
 	using namespace cedar;
@@ -83,28 +87,37 @@ int main(int argc, char *argv[])
 		kmans[i]->setup<mpi::line_relax<relax_dir::x>>(so, sor);
 	}
 
-	int rank;
-	MPI_Comm_rank(grid->comm, &rank);
-	std::vector<real_t*> tvals;
-	std::vector<real_t*> recv;
-	int plane_len = 3;
+
 	for (auto i : range<std::size_t>(nplanes)) {
 		auto & sman = kmans[i]->services();
 		sman.set<services::message_passing>("plane");
-		auto & mpool = sman.get<services::mempool>();
-
-		tvals.push_back((real_t*) mpool.addr(services::mempool::sol, plane_len*sizeof(real_t)));
-		recv.push_back((real_t*) mpool.addr(services::mempool::sol, plane_len*grid->nproc()*sizeof(real_t)));
-		for (auto j : range<std::size_t>(plane_len))
-			tvals[i][j] = j + i*plane_len + rank * nplanes * plane_len;
 	}
 
-	for (auto i : range<std::size_t>(nplanes)) {
-		auto & sman = kmans[i]->services();
-		auto & mp = sman.get<services::message_passing>();
+	// int rank;
+	// MPI_Comm_rank(grid->comm, &rank);
+	// std::vector<real_t*> tvals;
+	// std::vector<real_t*> recv;
+	// int plane_len = 3;
+	// for (auto i : range<std::size_t>(nplanes)) {
+	// 	auto & sman = kmans[i]->services();
+	// 	sman.set<services::message_passing>("plane");
+	// 	auto & mpool = sman.get<services::mempool>();
 
-		mp.gather(tvals[i], plane_len, MPI_DOUBLE, recv[i], plane_len, MPI_DOUBLE, 0, grid->comm);
-	}
+	// 	tvals.push_back((real_t*) mpool.addr(services::mempool::sol, plane_len*sizeof(real_t)));
+	// 	recv.push_back((real_t*) mpool.addr(services::mempool::sol, plane_len*grid->nproc()*sizeof(real_t)));
+	// 	for (auto j : range<std::size_t>(plane_len))
+	// 		tvals[i][j] = j + i*plane_len + rank * nplanes * plane_len;
+	// }
+
+	// for (auto i : range<std::size_t>(nplanes)) {
+	// 	auto & sman = kmans[i]->services();
+	// 	auto & mp = sman.get<services::message_passing>();
+
+	// 	// mp.gather(tvals[i], plane_len, MPI_DOUBLE, recv[i], plane_len, MPI_DOUBLE, 0, grid->comm);
+	// 	MPI_Fint fcomm = MPI_Comm_c2f(grid->comm);
+	// 	test_gather(tvals[i], plane_len, recv[i], fcomm,
+	// 	            sman.fortran_handle<services::message_passing>());
+	// }
 
 	// if (rank == 0) {
 	// 	for (auto i : range<std::size_t>(plane_len * nplanes * grid->nproc())) {
@@ -113,25 +126,25 @@ int main(int argc, char *argv[])
 	// }
 	MPI_Barrier(grid->comm);
 
-	for (auto i : range<std::size_t>(nplanes)) {
-		auto & sman = kmans[i]->services();
-		auto & mp = sman.get<services::message_passing>();
-
-		mp.scatter(recv[i], plane_len, MPI_DOUBLE, tvals[i], plane_len, MPI_DOUBLE, 0, grid->comm);
-	}
-
-	if (rank == 1) {
-		for (auto i : range<std::size_t>(nplanes)) {
-			for (auto j : range<std::size_t>(plane_len)) {
-				std::cout << tvals[i][j] << std::endl;
-			}
-		}
-	}
-
-
 	// for (auto i : range<std::size_t>(nplanes)) {
-	// 	kmans[i]->run<mpi::line_relax<relax_dir::x>>(so, xs[i], bs[i], sor, res, cycle::Dir::DOWN);
+	// 	auto & sman = kmans[i]->services();
+	// 	auto & mp = sman.get<services::message_passing>();
+
+	// 	mp.scatter(recv[i], plane_len, MPI_DOUBLE, tvals[i], plane_len, MPI_DOUBLE, 0, grid->comm);
 	// }
+
+	// if (rank == 1) {
+	// 	for (auto i : range<std::size_t>(nplanes)) {
+	// 		for (auto j : range<std::size_t>(plane_len)) {
+	// 			std::cout << tvals[i][j] << std::endl;
+	// 		}
+	// 	}
+	// }
+
+
+	for (auto i : range<std::size_t>(nplanes)) {
+		kmans[i]->run<mpi::line_relax<relax_dir::x>>(so, xs[i], bs[i], sor, res, cycle::Dir::DOWN);
+	}
 	// kmans[0]->run<mpi::line_relax<relax_dir::x>>(so, xs[0], bs[0], sor, res, cycle::Dir::DOWN);
 
 	MPI_Finalize();

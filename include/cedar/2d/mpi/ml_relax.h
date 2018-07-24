@@ -29,7 +29,7 @@ extern "C" {
 	                                      real_t *gwork, int ngwork, int *gptr,
 	                                      MPI_Fint mpicomm, MPI_Fint *xcomm, int nolx,
 	                                      int *tdsx_sor_ptrs, len_t nsor, real_t *tdg,
-	                                      bool *fact_flags, bool factorize, void *halof);
+	                                      bool *fact_flags, bool factorize, void *halof, void *mp);
 	void MPI_BMG2_SymStd_relax_lines_y_ml(int k, real_t *so, real_t *qf, real_t *q,
 	                                      real_t *sor, real_t *B,
 	                                      len_t II, len_t JJ, len_t igs, len_t jgs,
@@ -39,7 +39,7 @@ extern "C" {
 	                                      real_t *gwork, int ngwork, int *gptr,
 	                                      MPI_Fint mpicomm, MPI_Fint *ycomm, int noly,
 	                                      int *tdsy_sor_ptrs, len_t nsor, real_t *tdg,
-	                                      bool *fact_flags, bool factorize, void *halof);
+	                                      bool *fact_flags, bool factorize, void *halof, void *mp);
 }
 
 namespace cedar { namespace cdr2 { namespace mpi {
@@ -216,7 +216,7 @@ public:
 		                   real_t *gwork, int ngwork, int *gptr,
 		                   MPI_Fint mpicomm, MPI_Fint *xcomm, int nolx,
 		                   int *tdsx_sor_ptrs, len_t nsor, real_t *tdg,
-		                   bool *fact_flags, bool factorize, void *halof)> relax_lines;
+		                   bool *fact_flags, bool factorize, void *halof, void *mp)> relax_lines;
 
 		if (dir == relax_dir::x)
 			relax_lines = MPI_BMG2_SymStd_relax_lines_x_ml;
@@ -232,7 +232,8 @@ public:
 		            fcomm, this->comms.data(), this->nlevels,
 		            sor_ptrs[kf-k].data(), tdg[kf-k].len(0), tdg[kf-k].data(),
 		            fact_flags[kf-k], this->factorize,
-		            this->services->template fortran_handle<halo_exchange>());
+		            this->services->template fortran_handle<halo_exchange>(),
+		            this->services->template fortran_handle<message_passing>());
 	}
 
 protected:

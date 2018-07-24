@@ -7,7 +7,7 @@
            MPICOMM, &
            XCOMM, NOLX,&
            TDSX_SOR_PTRS, &
-           NSOR, TDG, fact_flags, factorize, halof)&
+           NSOR, TDG, fact_flags, factorize, halof, mp)&
      BIND(C, NAME='MPI_BMG2_SymStd_relax_lines_x_ml')
 
 ! ======================================================================
@@ -80,7 +80,7 @@
 
       logical(c_bool) :: fact_flags(2 * NOG)
       logical(c_bool), value :: factorize
-      type(c_ptr) :: halof
+      type(c_ptr) :: halof, mp
 
 ! ----------------------------
 !     Local Declarations
@@ -189,7 +189,7 @@
               iface(iface_ptr), iface_len, Npts, NLines, &
               K, NOLX, XCOMM, NSOR, TDG, &
               NMSGr, NOG, TDSX_SOR_PTRS,&
-              CP, fact_flags, factorize)
+              CP, fact_flags, factorize, mp)
 
 
          ! Pointers into RWORK
@@ -228,7 +228,7 @@
               iface(iface_ptr), iface_len, Npts, NLines,&
               K, NOLX, XCOMM, NSOR, TDG, &
               NMSGr, NOG, TDSX_SOR_PTRS,&
-              CP, factorize)
+              CP, factorize, mp)
 
 
 

@@ -3,9 +3,10 @@
            iface, niface, NPts, NLines,&
            K, NOLX, XCOMM, NSOR, TDG, &
            NMSGr, NOG, TDSX_SOR_PTRS,&
-           SIZE, factorize)
+           SIZE, factorize, mp)
 
       use iso_c_binding, only: c_bool
+      use message_passing
       use ModInterface
       IMPLICIT NONE
 
@@ -31,6 +32,7 @@
       INTEGER I, J, AT, FT, MULT, grank
 
       logical(c_bool) :: factorize
+      type(c_ptr) :: mp
 
       integer :: icolor
 
@@ -62,7 +64,7 @@
             ! Scatter Solution to processes in this subgroup
             !
             IF (XCOMM(2,kl) .NE. MPI_COMM_NULL) THEN
-               call MPI_Scatter(gwork(gptr(icolor, kl) + 1),&
+               call cedar_scatter(mp, gwork(gptr(icolor, kl) + 1),&
                     NLINES*8, MPI_DOUBLE_PRECISION,&
                     iface, NLINES*8, MPI_DOUBLE_PRECISION,&
                     0, XCOMM(2,kl),IERR)
@@ -115,7 +117,7 @@
       ! system
       !
 
-      call MPI_Scatter(gwork(gptr(icolor,NOLX)+1),NLINES*8,MPI_DOUBLE_PRECISION,&
+      call cedar_scatter(mp, gwork(gptr(icolor,NOLX)+1),NLINES*8,MPI_DOUBLE_PRECISION,&
            iface, NLINES*8, MPI_DOUBLE_PRECISION,&
            0, XCOMM(2,NOLX), IERR)
 

@@ -3,10 +3,11 @@
            iface, niface, NPts, NLines, &
            K, NOLX, XCOMM, NSOR, TDG, &
            NMSGr, NOG, TDSX_SOR_PTRS,&
-           pgSIZE, fact_flags, factorize)
+           pgSIZE, fact_flags, factorize, mp)
 
       use iso_c_binding, only: c_bool
       use ModInterface
+      use message_passing
       IMPLICIT NONE
 
       INCLUDE 'mpif.h'
@@ -36,6 +37,7 @@
       ! Flag for the interface system
       logical(c_bool) :: inter_flag
       logical(c_bool) :: factorize
+      type(c_ptr) :: mp
 
       integer :: icolor
 
@@ -93,7 +95,7 @@
       ! Gather interface equations to head node
       !
       IF (pgSIZE .GT. 1) THEN
-         call MPI_GATHER(iface, nlines * 8,&
+         call cedar_gather(mp, iface, nlines * 8,&
               MPI_DOUBLE_PRECISION,&
               gwork(gptr(icolor,NOLX) + 1), nlines*8,&
               MPI_DOUBLE_PRECISION,&
@@ -153,7 +155,7 @@
             ! the group head node
             !
             IF (pgSIZE .GT. 1) THEN
-               call MPI_Gather(iface, nlines*8,&
+               call cedar_gather(mp, iface, nlines*8,&
                     MPI_DOUBLE_PRECISION,&
                     gwork(gptr(icolor,kl) + 1), nlines*8,&
                     MPI_DOUBLE_PRECISION,&
