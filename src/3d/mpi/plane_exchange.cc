@@ -7,10 +7,6 @@ using namespace cedar::cdr3::mpi;
 void plane_exchange::setup(std::vector<topo_ptr> topos)
 {
 	if (ismaster) {
-		if (ABT_initialized() == ABT_ERR_UNINITIALIZED)
-			ABT_init(0, NULL);
-
-		ABT_barrier_create((std::size_t) nplanes, &barrier);
 		std::vector<topo_ptr> topos_all;
 
 		for (auto tpr : topos) {
@@ -29,6 +25,8 @@ void plane_exchange::setup(std::vector<topo_ptr> topos)
 			send_active[index(lvl, halo_dir::up)] = false;
 			recv_active[index(lvl, halo_dir::up)] = false;
 		}
+	} else {
+		parent::setup(topos);
 	}
 }
 

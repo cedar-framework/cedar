@@ -42,9 +42,8 @@
                call cedar_mempool_pos(mpool, nlcol(1) * 8 * gsize, pos(1))
                call cedar_mempool_pos(mpool, nlcol(2) * 8 * gsize, pos(2))
 
-               ! this assumes double precision
-               ptrs(1, kl) = pos(1) * 8
-               ptrs(2, kl) = pos(2) * 8
+               ptrs(1, kl) = pos(1)
+               ptrs(2, kl) = pos(2)
             endif
          END DO
 

@@ -14,6 +14,8 @@ plane_setup_mpi::plane_setup_mpi(std::vector<int> * keys) :
 
 int plane_setup_mpi::comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm)
 {
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	if (ismaster) {
 		int kvkey;
 		MPI_Comm_create_keyval(MPI_NULL_COPY_FN,
@@ -21,8 +23,11 @@ int plane_setup_mpi::comm_split(MPI_Comm comm, int color, int key, MPI_Comm *new
 		                       &kvkey, (void*) 0);
 		keys->push_back(kvkey);
 		MPI_Comm_split(comm, color, key, newcomm);
-		comms.push_back(*newcomm);
-		MPI_Comm_set_attr(comm, kvkey, &comms.back());
+		// store pointer to new comm for workers
+		auto comm_ptr = std::make_unique<MPI_Comm>();
+		*comm_ptr = *newcomm;
+		comms.push_back(std::move(comm_ptr));
+		MPI_Comm_set_attr(comm, kvkey, comms.back().get());
 	} else {
 		if (currind >= keys->size()) {
 			log::error << "master has not split communicator" << std::endl;
@@ -41,6 +46,19 @@ int plane_setup_mpi::comm_split(MPI_Comm comm, int color, int key, MPI_Comm *new
 
 	return 0;
 }
+
+
+plane_mpi::plane_mpi(int nplanes) : nplanes(nplanes), ismaster(true)
+{
+	if (ABT_initialized() == ABT_ERR_UNINITIALIZED)
+		ABT_init(0, NULL);
+
+	ABT_barrier_create((std::size_t) nplanes, &barrier);
+}
+
+
+plane_mpi::plane_mpi(int nplanes, ABT_barrier barrier) :
+	nplanes(nplanes), ismaster(false), barrier(barrier) {}
 
 
 MPI_Datatype plane_mpi::get_aggtype(MPI_Comm comm, int plane_len, MPI_Datatype dtype)
@@ -74,13 +92,16 @@ int plane_mpi::gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                       void *recvbuf, int recvcount, MPI_Datatype recvtype,
                       int root, MPI_Comm comm)
 {
-	if (not ismaster)
-		return 0;
+	int ierr = 0;
 
-	auto agg_type = get_aggtype(comm, sendcount, sendtype);
+	ABT_barrier_wait(barrier);
+	if (ismaster) {
+		auto agg_type = get_aggtype(comm, sendcount, sendtype);
 
-	int ierr = MPI_Gather(sendbuf, sendcount*nplanes, sendtype,
-	                      recvbuf, 1, agg_type, 0, comm);
+		ierr = MPI_Gather(sendbuf, sendcount*nplanes, sendtype,
+		                  recvbuf, 1, agg_type, 0, comm);
+	}
+	ABT_barrier_wait(barrier);
 
 	return ierr;
 }
@@ -90,13 +111,16 @@ int plane_mpi::scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype
                        void *recvbuf, int recvcount, MPI_Datatype recvtype,
                        int root, MPI_Comm comm)
 {
-	if (not ismaster)
-		return 0;
+	int ierr = 0;
 
-	auto agg_type = get_aggtype(comm, sendcount, sendtype);
+	ABT_barrier_wait(barrier);
+	if (ismaster) {
+		auto agg_type = get_aggtype(comm, sendcount, sendtype);
 
-	int ierr = MPI_Scatter(sendbuf, 1, agg_type,
-	                       recvbuf, sendcount*nplanes, recvtype, 0, comm);
+		ierr = MPI_Scatter(sendbuf, 1, agg_type,
+		                   recvbuf, sendcount*nplanes, recvtype, 0, comm);
+	}
+	ABT_barrier_wait(barrier);
 
 	return ierr;
 }

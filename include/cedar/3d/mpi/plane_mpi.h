@@ -5,7 +5,8 @@
 #include <memory>
 #include <map>
 
-#include "mpi.h"
+#include <mpi.h>
+#include <abt.h>
 
 #include <cedar/mpi/mpi_wrapper.h>
 
@@ -24,14 +25,15 @@ protected:
 	int currind;
 	std::unique_ptr<std::vector<int>> key_data;
 	std::vector<int> *keys;
-	std::vector<MPI_Comm> comms;
+	std::vector<std::unique_ptr<MPI_Comm>> comms;
 };
 
 
 class plane_mpi : public mpi_wrapper
 {
 public:
-	plane_mpi(int nplanes, bool ismaster) : nplanes(nplanes), ismaster(ismaster) {}
+	plane_mpi(int nplanes);
+	plane_mpi(int nplanes, ABT_barrier barrier);
 	int gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	           void *recvbuf, int recvcount, MPI_Datatype recvtype,
 	           int root, MPI_Comm comm) override;
@@ -39,10 +41,13 @@ public:
 	            void *recvbuf, int recvcount, MPI_Datatype recvtype,
 	            int root, MPI_Comm comm) override;
 
+	ABT_barrier get_barrier() { return barrier; }
+
 protected:
 	int nplanes;
 	bool ismaster;
 	std::map<std::pair<int,int>, MPI_Datatype> tcache;
+	ABT_barrier barrier;
 
 	MPI_Datatype get_aggtype(MPI_Comm comm, int plane_len, MPI_Datatype dtype);
 };

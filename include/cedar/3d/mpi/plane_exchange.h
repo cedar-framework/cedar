@@ -13,7 +13,12 @@ public:
 	using parent = cdr2::mpi::tausch_exchanger;
 
 	plane_exchange(int nplanes) :
-		nplanes(nplanes), ismaster(true) {}
+		nplanes(nplanes), ismaster(true) {
+		if (ABT_initialized() == ABT_ERR_UNINITIALIZED)
+			ABT_init(0, NULL);
+
+		ABT_barrier_create((std::size_t) nplanes, &barrier);
+	}
 
 	plane_exchange(int nplanes, ABT_barrier barrier) :
 		nplanes(nplanes), ismaster(false), barrier(barrier) {}

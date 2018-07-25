@@ -173,7 +173,7 @@
 
          icolor = mod(jbeg, 2) + 1
          iface_ptr = iface_ptrs(icolor) + 1
-         iface_len = ((JJ-2) / 2 + mod(jbeg,2) * mod(JJ-2,2)) * 8
+         iface_len = ((JJ-2) / 2 + mod(jbeg+1,2) * mod(JJ-2,2)) * 8
 
          ! ====================================================
          ! Multilevel LineSolve

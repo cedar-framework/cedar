@@ -111,8 +111,8 @@ public:
 				                             max_nlines * 8 * max_gsz * sizeof(real_t));
 				tricomm_iface = mpool.create(iface_memid,
 				                             max_nlines * 8 * sizeof(real_t));
-				iface_ptrs[0] = mpool.pos((nlines / 2) * 8) * sizeof(real_t);
-				iface_ptrs[1] = mpool.pos((nlines / 2 + nlines % 2) * 8) * sizeof(real_t);
+				iface_ptrs[0] = mpool.pos((nlines / 2 + nlines % 2) * 8);
+				iface_ptrs[1] = mpool.pos((nlines / 2) * 8);
 			}
 			initialized = true;
 	}
