@@ -167,11 +167,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	// int rank;
-	// MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	// if (rank == 0) {
-	// 	std::cout << xs[1] << std::endl;
-	// }
+	int rank;
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	if (rank == 5) {
+		std::cout << xs[1] << std::endl;
+	}
 
 	ABT_finalize();
 	MPI_Finalize();

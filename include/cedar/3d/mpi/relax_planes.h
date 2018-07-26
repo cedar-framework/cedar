@@ -22,6 +22,7 @@ void setup_agg_solve(cdr2::mpi::solver<fsten> & slv)
 {
 	service_manager<cdr2::mpi::stypes> & sman = slv.get_kernels()->services();
 	sman.set<services::halo_exchange<cdr2::mpi::stypes>>("plane");
+	sman.set<services::message_passing>("plane");
 	slv.setup_halo();
 }
 
@@ -254,10 +255,12 @@ public:
 		auto log_planes = conf2->template get<bool>("log-planes", true);
 		cdr2::mpi::kman_ptr master_kmans[2];
 		{
-			auto tmp = log_begin(log_planes, 0, relax_dir_name<rdir>::value);
+			auto tmp = log_begin(log_planes, 1, relax_dir_name<rdir>::value);
 			master_kmans[0] = master_kman(*conf2, (nplanes / 2) + (nplanes % 2), aggregate, teams[0]);
+			log_end(log_planes, 1, tmp);
+			tmp = log_begin(log_planes, 2, relax_dir_name<rdir>::value);
 			master_kmans[1] = master_kman(*conf2, nplanes / 2, aggregate, teams[1]);
-			log_end(log_planes, 0, tmp);
+			log_end(log_planes, 2, tmp);
 		}
 		for (auto ipl : rng) {
 			int i = ipl-1;
@@ -277,6 +280,7 @@ public:
 			log_end(log_planes, ipl, tmp);
 
 			planes.back()->give_op(std::move(so2_ptr));
+			// setup fine-grid solution and right hand side with contiguous memory across planes
 			{
 				service_manager<cdr2::mpi::stypes> & sman = kman2->services();
 				auto & mpool = sman.get<services::mempool>();
@@ -286,16 +290,20 @@ public:
 
 				planes.back()->levels.template get<sten2>(0).x = cdr2::mpi::grid_func(xaddr, topo2);
 				planes.back()->levels.template get<sten2>(0).b = cdr2::mpi::grid_func(baddr, topo2);
-
-				if (aggregate) {
-					setup_agg_solve(*planes.back());
-					planes.back()->apply_heirs([](cdr2::mpi::solver<cdr2::nine_pt> & child) {
-							setup_agg_solve<cdr2::nine_pt>(child);
-						});
-				}
 			}
 			if (aggregate)
 				threads[i % 2].add_plane(planes.back().get());
+		}
+
+		// setup services for solve with ults
+		if (aggregate) {
+			for (auto ipl : rng) {
+				int i = ipl - 1;
+				setup_agg_solve(*planes[i]);
+				planes[i]->apply_heirs([](cdr2::mpi::solver<cdr2::nine_pt> & child) {
+						setup_agg_solve<cdr2::nine_pt>(child);
+					});
+			}
 		}
 	}
 

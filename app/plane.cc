@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
 	auto kman = mpi::build_kernel_manager(conf);
 
 	auto grid = util::create_topo(conf);
+	log::status << '\n' << *grid << std::endl;
 	auto so = mpi::gallery::poisson(grid);
 	mpi::grid_func b(grid), x(grid);
 	b.set(1.0);
@@ -31,6 +32,17 @@ int main(int argc, char *argv[])
 
 	// for (auto i : range<std::size_t>(2))
 	kman->run<mpi::plane_relax<relax_dir::xy>>(so, x, b, cycle::Dir::DOWN);
+
+	{
+		auto plane_agg = conf.get<bool>("solver.plane-agg");
+		int rank;
+		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		std::string fname;
+
+		std::ofstream ofile(plane_agg ? "agg-" + std::to_string(rank) : "no-agg-" + std::to_string(rank));
+		ofile << x;
+		ofile.close();
+	}
 
 	MPI_Finalize();
 	return 0;
