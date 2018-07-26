@@ -213,6 +213,23 @@ int main(int argc, char *argv[])
 		timer_end("relax-seq");
 	}
 
+
+	{ // output solution
+		int rank;
+		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+		std::string fname;
+		if (reimpl) {
+			fname = "reimpl-" + std::to_string(rank);
+		} else if (aggregate) {
+			fname = "agg-" + std::to_string(rank);
+		} else {
+			fname = "noagg-" + std::to_string(rank);
+		}
+		std::ofstream ofile(fname);
+		ofile << xs[1];
+		ofile.close();
+	}
+
 	timer_save("thread-times.json");
 
 	delete[] x_data;
