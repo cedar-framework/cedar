@@ -12,6 +12,7 @@ class grid_func: public ::cedar::cdr3::grid_func, public par_object
 public:
 	grid_func(){};
 	grid_func(topo_ptr grid);
+	grid_func(real_t *ext_data, topo_ptr grid);
 	grid_func(len_t nx, len_t ny, len_t nz);
 	using ::cedar::cdr3::grid_func::operator();
 	static grid_func ones(topo_ptr grid);

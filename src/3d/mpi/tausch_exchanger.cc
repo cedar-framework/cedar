@@ -556,4 +556,17 @@ void tausch_exchanger::run(mpi::grid_func & f)
 	}
 }
 
+void tausch_exchanger::activate_send(halo_dir dir, bool active)
+{
+	for (auto lvl : range<std::size_t>(nlevels))
+		send_active[index(lvl, dir)] = active;
+}
+
+
+void tausch_exchanger::activate_recv(halo_dir dir, bool active)
+{
+	for (auto lvl : range<std::size_t>(nlevels))
+		recv_active[index(lvl, dir)] = active;
+}
+
 }}}

@@ -6,6 +6,9 @@ grid_func::grid_func(topo_ptr grid) :
 	::cedar::cdr3::grid_func(grid->nlocal(0)-2, grid->nlocal(1)-2, grid->nlocal(2) - 2),
 	par_object(grid, grid->comm) {}
 
+grid_func::grid_func(real_t *ext_data, topo_ptr grid) :
+	::cedar::cdr3::grid_func(ext_data, grid->nlocal(0)-2, grid->nlocal(1)-2, grid->nlocal(2) - 2),
+	par_object(grid, grid->comm) {}
 
 grid_func::grid_func(len_t nx, len_t ny, len_t nz) : ::cedar::cdr3::grid_func(nx,ny,nz)
 {}

@@ -12,6 +12,7 @@ namespace cedar { namespace cdr3 {
 class grid_func : public array<real_t, 3>, public grid_quantity<len_t, 3>
 {
 public:
+	grid_func(real_t *ext_data, len_t nx, len_t ny, len_t nz, unsigned int nghosts=1);
 	grid_func(len_t nx, len_t ny, len_t nz, unsigned int nghosts=1);
 	grid_func() {}
 	static grid_func like(const grid_func & likeable);

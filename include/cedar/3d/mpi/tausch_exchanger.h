@@ -67,6 +67,9 @@ public:
 	}
 	std::unique_ptr<line_pkg> line_data;
 
+	void activate_send(halo_dir dir, bool active);
+	void activate_recv(halo_dir dir, bool active);
+
 protected:
 	std::unique_ptr<Tausch<real_t>> tausch;
 	std::unique_ptr<Tausch<real_t>> tausch_so;

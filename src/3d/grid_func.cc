@@ -34,6 +34,20 @@ grid_func::grid_func(len_t nx, len_t ny, len_t nz, unsigned int nghosts) :
 }
 
 
+grid_func::grid_func(real_t *ext_data, len_t nx, len_t ny, len_t nz, unsigned int nghosts) :
+	array<real_t, 3>(ext_data, nx+2*nghosts, ny+2*nghosts, nz+2*nghosts)
+{
+	num_ghosts = nghosts;
+	range_[0] = ::cedar::range(static_cast<len_t>(nghosts), static_cast<len_t>(nx + nghosts));
+	range_[1] = ::cedar::range(static_cast<len_t>(nghosts), static_cast<len_t>(ny + nghosts));
+	range_[2] = ::cedar::range(static_cast<len_t>(nghosts), static_cast<len_t>(nz + nghosts));
+
+	grange_[0] = ::cedar::range(static_cast<len_t>(0), static_cast<len_t>(nx + 2*nghosts));
+	grange_[1] = ::cedar::range(static_cast<len_t>(0), static_cast<len_t>(ny + 2*nghosts));
+	grange_[2] = ::cedar::range(static_cast<len_t>(0), static_cast<len_t>(nz + 2*nghosts));
+}
+
+
 grid_func grid_func::ones(len_t nx, len_t ny, len_t nz)
 {
 	grid_func ret(nx, ny, nz);
