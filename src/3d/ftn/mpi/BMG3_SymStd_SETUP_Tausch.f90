@@ -1,8 +1,8 @@
 SUBROUTINE BMG3_SymStd_SETUP_TAUSCH(&
-     &                NOG, &
-     &                DimX, DimY, DimXfine, DimYfine,&
-     &                NProcI, NProcJ, NProcK &
-     &                ) BIND(C, NAME='BMG3_SymStd_SETUP_Tausch')
+     NOG,&
+     DimX, DimY, Dimz, DimXfine, DimYfine, DimZfine,&
+     NProcI, NProcJ, NProcK &
+     ) BIND(C, NAME='BMG3_SymStd_SETUP_Tausch')
 
   use ModInterface
   IMPLICIT NONE
