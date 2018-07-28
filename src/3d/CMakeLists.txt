@@ -34,6 +34,7 @@ if(ENABLE_MPI)
 	mpi/grid_func.cc
 	mpi/stencil_op.cc
     mpi/msg_exchanger.cc
+	mpi/tausch_exchanger.cc
 	mpi/kernel_manager.cc
 	mpi/setup_nog.cc
 	mpi/gallery.cc)
