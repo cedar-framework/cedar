@@ -7,6 +7,7 @@
 #include <cedar/3d/mpi/matvec.h>
 #include <cedar/3d/mpi/setup_nog.h>
 #include <cedar/3d/mpi/msg_exchanger.h>
+#include <cedar/3d/mpi/tausch_exchanger.h>
 
 #include <cedar/3d/mpi/kernel_manager.h>
 
@@ -50,9 +51,11 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	// register services
 	auto & services = kman->services();
 	services.add<halo_exchange, msg_exchanger>("msg");
+	services.add<halo_exchange, tausch_exchanger>("tausch");
 	if (params->halo == kernel_params::halo_lib::tausch)
-		log::error << "Tausch not yet integrated in 3D" << std::endl;
-	services.set<halo_exchange>("msg");
+		services.set<halo_exchange>("tausch");
+	else
+		services.set<halo_exchange>("msg");
 
 	return kman;
 }
