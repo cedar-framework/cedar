@@ -81,7 +81,7 @@ void tausch_exchanger::init_dims(grid_topo & topo)
 	} else {
 		dimzfine.reserve(topo.nproc(2));
 		for (auto k : range(topo.nproc(2))) {
-			dimzfine[k] = topo.nlocal(2) - 2;
+			dimzfine[k] = topo.nlocal(2) - nghost[2];
 		}
 	}
 
@@ -90,7 +90,7 @@ void tausch_exchanger::init_dims(grid_topo & topo)
 	} else {
 		dimyfine.reserve(topo.nproc(1));
 		for (auto j : range(topo.nproc(1))) {
-			dimyfine[j] = topo.nlocal(1) - 2;
+			dimyfine[j] = topo.nlocal(1) - nghost[1];
 		}
 	}
 
@@ -99,7 +99,7 @@ void tausch_exchanger::init_dims(grid_topo & topo)
 	} else {
 		dimxfine.reserve(topo.nproc(0));
 		for (auto i : range(topo.nproc(0))) {
-			dimxfine[i] = topo.nlocal(0) - 2;
+			dimxfine[i] = topo.nlocal(0) - nghost[0];
 		}
 	}
 

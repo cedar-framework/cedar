@@ -3,26 +3,16 @@
 
 #include <abt.h>
 
-#include <cedar/2d/mpi/tausch_exchanger.h>
+#include <cedar/2d/mpi/types.h>
+#include <cedar/3d/mpi/tausch_exchanger.h>
 
 namespace cedar { namespace cdr3 { namespace mpi {
 
-class plane_exchange : public cdr2::mpi::tausch_exchanger
+class plane_exchange : public services::halo_exchange<cdr2::mpi::stypes>
 {
 public:
-	using parent = cdr2::mpi::tausch_exchanger;
-
-	plane_exchange(int nplanes) :
-		nplanes(nplanes), ismaster(true) {
-		if (ABT_initialized() == ABT_ERR_UNINITIALIZED)
-			ABT_init(0, NULL);
-
-		ABT_barrier_create((std::size_t) nplanes, &barrier);
-	}
-
-	plane_exchange(int nplanes, ABT_barrier barrier) :
-		nplanes(nplanes), ismaster(false), barrier(barrier) {}
-
+	plane_exchange(int nplanes);
+	plane_exchange(int nplanes, ABT_barrier barrier);
 	ABT_barrier get_barrier() { return barrier; }
 
 	void setup(std::vector<topo_ptr> topos) override;
@@ -35,7 +25,12 @@ public:
 	void exchange_sten(int k, real_t *gf) override
 		{ log::error << "plane exchange of stencil_op not supported" << std::endl; }
 
+	aarray<int, len_t, 2> & leveldims(int k) override { return halo3->leveldims(k); }
+	len_t * datadist(int k, int grid) override { return halo3->datadist(k, grid); }
+	std::vector<real_t> & linebuf() override { return halo3->linebuf(); }
+
 protected:
+	std::unique_ptr<tausch_exchanger> halo3;
 	int nplanes;
 	bool ismaster;
 	ABT_barrier barrier;

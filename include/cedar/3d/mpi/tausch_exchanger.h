@@ -24,6 +24,7 @@ class tausch_exchanger : public services::halo_exchange<stypes>
 public:
 	using parent = services::halo_exchange<stypes>;
 	enum halo_dir { west=0, east=1, south=2, north=3, bottom=4, top=5, count };
+	tausch_exchanger() : nghost{{2,2,2}} {}
 	void setup(std::vector<topo_ptr> topos) override;
 	void run(stencil_op<seven_pt> & so) override { this->run_impl(so); }
 	void run(stencil_op<xxvii_pt> & so) override { this->run_impl(so); }
@@ -70,6 +71,8 @@ public:
 	void activate_send(halo_dir dir, bool active);
 	void activate_recv(halo_dir dir, bool active);
 
+	int & nhalo(int dim) { return nghost[dim]; }
+
 protected:
 	std::unique_ptr<Tausch<real_t>> tausch;
 	std::unique_ptr<Tausch<real_t>> tausch_so;
@@ -93,6 +96,7 @@ protected:
 	std::array<aarray<int, len_t, 2>, 3> dims;
 	std::array<std::vector<len_t>, 3> dimfine;
 	std::array<int, 3> coord;
+	std::array<int, 3> nghost;
 };
 
 
