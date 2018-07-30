@@ -74,11 +74,11 @@ public:
 				comms(0, this->nlevels - 2) = MPI_Comm_c2f(gcomm);
 				MPI_BMG2_SymStd_SETUP_comm(comms.data(), this->nlevels, coord+1, min_gsz,
 				                           this->services->template fortran_handle<message_passing>());
-
-				group_ptrs.init(2, this->nlevels - 1);
-				BMG2_SymStd_SETUP_ADD_GROUP_PTRS(nlines, comms.data(), this->nlevels, group_ptrs.data(),
-				                                 this->services->template fortran_handle<mempool>());
 			}
+
+			group_ptrs.emplace_back(2, this->nlevels - 1);
+			BMG2_SymStd_SETUP_ADD_GROUP_PTRS(nlines, comms.data(), this->nlevels, group_ptrs.back().data(),
+			                                 this->services->template fortran_handle<mempool>());
 
 			sor_ptrs.emplace_back(this->nlevels);
 			BMG2_SymStd_SETUP_ADD_SOR_PTRS(nproc, nlines, min_gsz, this->nlevels,
@@ -90,30 +90,35 @@ public:
 			for (auto i : range<std::size_t>(2 * nog))
 				fflags[i] = true;
 			fact_flags.push_back(fflags);
+
+			auto & mpool = this->services->template get<mempool>();
+			mempool::memid group_memid, iface_memid;
+			if (dir == relax_dir::x) {
+				group_memid = mempool::tricomm_group_x;
+				iface_memid = mempool::tricomm_iface_x;
+			} else {
+				group_memid = mempool::tricomm_group_y;
+				iface_memid = mempool::tricomm_iface_y;
+			}
+
 			if (not initialized) {
 				// this bound may not be correct!
 				int rwork_size = std::max(8 * nlines_other * nproc + 8 * nlines,
 				                          8 * nlines * nproc_other + 8 * nlines_other);
 				rwork.resize(rwork_size);
 
-				auto & mpool = this->services->template get<mempool>();
 				int max_gsz = 2*min_gsz;
 				int max_nlines = nlines / 2 + nlines % 2;
-				mempool::memid group_memid, iface_memid;
-				if (dir == relax_dir::x) {
-					group_memid = mempool::tricomm_group_x;
-					iface_memid = mempool::tricomm_iface_x;
-				} else {
-					group_memid = mempool::tricomm_group_y;
-					iface_memid = mempool::tricomm_iface_y;
-				}
 				tricomm_group = mpool.create(group_memid,
 				                             max_nlines * 8 * max_gsz * sizeof(real_t));
 				tricomm_iface = mpool.create(iface_memid,
 				                             max_nlines * 8 * sizeof(real_t));
-				iface_ptrs[0] = mpool.pos((nlines / 2 + nlines % 2) * 8);
-				iface_ptrs[1] = mpool.pos((nlines / 2) * 8);
 			}
+
+			iface_ptrs.emplace_back();
+			iface_ptrs.back()[0] = mpool.pos((nlines / 2 + nlines % 2) * 8);
+			iface_ptrs.back()[1] = mpool.pos((nlines / 2) * 8);
+
 			initialized = true;
 	}
 
@@ -227,8 +232,8 @@ public:
 		            so.len(0), so.len(1), topo.is(0), topo.is(1),
 		            kf, nstencil, BMG_RELAX_SYM, updown,
 		            datadist, rwork.data(), rwork.size(),
-		            (real_t*) tricomm_iface.addr, tricomm_iface.fullsize / sizeof(real_t), iface_ptrs.data(),
-		            (real_t*) tricomm_group.addr, tricomm_group.fullsize / sizeof(real_t), group_ptrs.data(),
+		            (real_t*) tricomm_iface.addr, tricomm_iface.fullsize / sizeof(real_t), iface_ptrs[kf-k].data(),
+		            (real_t*) tricomm_group.addr, tricomm_group.fullsize / sizeof(real_t), group_ptrs[kf-k].data(),
 		            fcomm, this->comms.data(), this->nlevels,
 		            sor_ptrs[kf-k].data(), tdg[kf-k].len(0), tdg[kf-k].data(),
 		            fact_flags[kf-k], this->factorize,
@@ -245,8 +250,9 @@ protected:
 	array<MPI_Fint, 2> comms;               /** Communicators for ml lines */
 	services::mempool::pool tricomm_group;  /** Communication buffer for proc group iface system */
 	services::mempool::pool tricomm_iface;  /** Communication buffer for local iface system */
-	array<int, 2> group_ptrs;               /** Pointers to location of proc group iface system */
-	std::array<int, 2> iface_ptrs;          /** Pointers to location of local iface system */
+	std::vector<array<int, 2>> group_ptrs;  /** Pointers to location of proc group iface system */
+	std::vector<
+		std::array<int, 2>> iface_ptrs;     /** Pointers to location of local iface system */
 	bool factorize;                         /** Flag for local factorization (contrast to elimination) */
 	bool initialized;
 };
