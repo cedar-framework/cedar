@@ -14,6 +14,7 @@ class plane_team
 public:
 	std::vector<sman_t*> masters;
 	std::vector<std::vector<sman_t*>> workers;
+	std::vector<ABT_thread> *threads;
 };
 
 }}}

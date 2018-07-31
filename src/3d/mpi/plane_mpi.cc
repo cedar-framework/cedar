@@ -48,17 +48,15 @@ int plane_setup_mpi::comm_split(MPI_Comm comm, int color, int key, MPI_Comm *new
 }
 
 
-plane_mpi::plane_mpi(int nplanes) : nplanes(nplanes), ismaster(true)
+plane_mpi::plane_mpi(int nplanes, std::vector<ABT_thread> *threads) : nplanes(nplanes), ismaster(true), threads(threads), wid(0)
 {
 	if (ABT_initialized() == ABT_ERR_UNINITIALIZED)
 		ABT_init(0, NULL);
-
-	ABT_barrier_create((std::size_t) nplanes, &barrier);
 }
 
 
-plane_mpi::plane_mpi(int nplanes, ABT_barrier barrier) :
-	nplanes(nplanes), ismaster(false), barrier(barrier) {}
+plane_mpi::plane_mpi(int nplanes, int worker_id, std::vector<ABT_thread> *threads) :
+	nplanes(nplanes), ismaster(false), threads(threads), wid(worker_id) {}
 
 
 MPI_Datatype plane_mpi::get_aggtype(MPI_Comm comm, int plane_len, MPI_Datatype dtype)
@@ -94,14 +92,13 @@ int plane_mpi::gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 {
 	int ierr = 0;
 
-	ABT_barrier_wait(barrier);
+	ABT_thread_yield_to((*threads)[(wid+1) % nplanes]);
 	if (ismaster) {
 		auto agg_type = get_aggtype(comm, sendcount, sendtype);
 
 		ierr = MPI_Gather(sendbuf, sendcount*nplanes, sendtype,
 		                  recvbuf, 1, agg_type, 0, comm);
 	}
-	ABT_barrier_wait(barrier);
 
 	return ierr;
 }
@@ -113,14 +110,13 @@ int plane_mpi::scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype
 {
 	int ierr = 0;
 
-	ABT_barrier_wait(barrier);
+	ABT_thread_yield_to((*threads)[(wid+1) % nplanes]);
 	if (ismaster) {
 		auto agg_type = get_aggtype(comm, sendcount, sendtype);
 
 		ierr = MPI_Scatter(sendbuf, 1, agg_type,
 		                   recvbuf, sendcount*nplanes, recvtype, 0, comm);
 	}
-	ABT_barrier_wait(barrier);
 
 	return ierr;
 }

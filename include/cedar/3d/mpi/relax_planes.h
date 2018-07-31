@@ -241,6 +241,8 @@ public:
 	                std::array<plane_ult<sten2>, 2> & threads)
 	{
 		this->aggregate = this->params->plane_agg;
+		teams[0].threads = threads[0].get_threads();
+		teams[1].threads = threads[1].get_threads();
 		int nplanes = so.shape(2);
 		auto rng = so.range(2);
 		if (rdir == relax_dir::xz) {

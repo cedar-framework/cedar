@@ -90,6 +90,9 @@ public:
 		ABT_thread_join(threads[i]);
 	}
 
+
+	std::vector<ABT_thread> * get_threads() { return &threads; }
+
 protected:
 	bool initialized;
 	ABT_pool pool;

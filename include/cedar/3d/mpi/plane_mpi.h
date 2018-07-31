@@ -32,8 +32,8 @@ protected:
 class plane_mpi : public mpi_wrapper
 {
 public:
-	plane_mpi(int nplanes);
-	plane_mpi(int nplanes, ABT_barrier barrier);
+	plane_mpi(int nplanes, std::vector<ABT_thread> *threads);
+	plane_mpi(int nplanes, int worker_id, std::vector<ABT_thread> *threads);
 	int gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	           void *recvbuf, int recvcount, MPI_Datatype recvtype,
 	           int root, MPI_Comm comm) override;
@@ -41,13 +41,12 @@ public:
 	            void *recvbuf, int recvcount, MPI_Datatype recvtype,
 	            int root, MPI_Comm comm) override;
 
-	ABT_barrier get_barrier() { return barrier; }
-
 protected:
 	int nplanes;
 	bool ismaster;
 	std::map<std::pair<int,int>, MPI_Datatype> tcache;
-	ABT_barrier barrier;
+	std::vector<ABT_thread> *threads;
+	int wid;
 
 	MPI_Datatype get_aggtype(MPI_Comm comm, int plane_len, MPI_Datatype dtype);
 };

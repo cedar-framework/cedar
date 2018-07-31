@@ -11,9 +11,8 @@ namespace cedar { namespace cdr3 { namespace mpi {
 class plane_exchange : public services::halo_exchange<cdr2::mpi::stypes>
 {
 public:
-	plane_exchange(int nplanes);
-	plane_exchange(int nplanes, ABT_barrier barrier);
-	ABT_barrier get_barrier() { return barrier; }
+	plane_exchange(int nplanes, std::vector<ABT_thread> *threads);
+	plane_exchange(int nplanes, int worker_id, std::vector<ABT_thread> *threads);
 
 	void setup(std::vector<topo_ptr> topos) override;
 	void run(stencil_op<cdr2::five_pt> & so) override
@@ -33,7 +32,8 @@ protected:
 	std::unique_ptr<tausch_exchanger> halo3;
 	int nplanes;
 	bool ismaster;
-	ABT_barrier barrier;
+	std::vector<ABT_thread> *threads;
+	int wid;
 };
 
 }}}
