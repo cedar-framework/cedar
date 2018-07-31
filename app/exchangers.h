@@ -6,7 +6,6 @@
 #include <cedar/2d/mpi/tausch_exchanger.h>
 #include <cedar/3d/mpi/tausch_exchanger.h>
 
-ABT_barrier comm_barrier;
 ABT_thread *threads;
 
 namespace cedar { namespace cdr2 { namespace mpi {
@@ -38,7 +37,6 @@ public:
 	}
 	void setup(std::vector<topo_ptr> topos) override
 	{
-		ABT_barrier_create((std::size_t) nplanes, &comm_barrier);
 		std::vector<topo_ptr> topos_all;
 
 		for (auto tpr : topos) {
