@@ -26,6 +26,7 @@ if(ENABLE_MPI)
 	mpi/plane_mempool.cc
 	mpi/plane_exchange.cc
 	mpi/plane_ult.cc
+	mpi/plane_team.cc
 	mpi/prolong_op.cc
 	mpi/restrict_op.cc
 	mpi/restrict.cc

@@ -8,6 +8,8 @@
 #include <cedar/3d/mpi/plane_mpi.h>
 #include <cedar/3d/mpi/plane_exchange.h>
 
+#include <cedar/util/time_log.h>
+
 extern "C" {
 	void test_gather(cedar::real_t *tvals, int plane_len, cedar::real_t *recv, MPI_Fint comm, void *mp);
 }
@@ -23,6 +25,7 @@ struct ult_params
 	relax_stencil *sor;
 	mpi::grid_func *res;
 	mpi::kman_ptr kman;
+	int nsweeps;
 };
 
 static void compute(void *args)
@@ -30,13 +33,16 @@ static void compute(void *args)
 	ult_params *params = (ult_params*) args;
 
 	auto kman = params->kman;
+	int nsweeps = params->nsweeps;
 	auto & so = *params->A;
 	auto & x = *params->x;
 	auto & b = *params->b;
 	auto & sor = *params->sor;
 	auto &res = *params->res;
 
-	kman->run<mpi::line_relax<relax_dir::x>>(so, x, b, sor, res, cycle::Dir::DOWN);
+	for (auto sweep : range(nsweeps)) {
+		kman->run<mpi::line_relax<relax_dir::x>>(so, x, b, sor, res, cycle::Dir::DOWN);
+	}
 }
 
 int main(int argc, char *argv[])
@@ -54,13 +60,19 @@ int main(int argc, char *argv[])
 	ABT_xstream_self(&xstream);
 	ABT_xstream_get_main_pools(xstream, 1, &pool);
 
+	timer_init(MPI_COMM_WORLD);
+
 	config conf("config.json");
 	log::init(conf);
 
 	auto nplanes = conf.get<int>("nplanes");
+	auto nsweeps = conf.get<int>("nsweeps");
 	auto aggregate = conf.get<bool>("aggregate");
 
 	auto grid = util::create_topo(conf);
+
+	std::vector<ABT_thread> threads;
+	threads.reserve(nplanes);
 
 	std::vector<mpi::kman_ptr> kmans;
 	std::vector<mpi::grid_func> bs;
@@ -71,9 +83,9 @@ int main(int argc, char *argv[])
 		auto & sman = kmans.back()->services();
 		if (i == 0) {
 			sman.add<services::message_passing, cdr3::mpi::plane_setup_mpi>("plane-setup");
-			sman.add<services::message_passing, cdr3::mpi::plane_mpi>("plane", nplanes);
+			sman.add<services::message_passing, cdr3::mpi::plane_mpi>("plane", nplanes, &threads);
 			sman.add<services::mempool, cdr3::mpi::plane_mempool>("plane", nplanes);
-			sman.add<mpi::halo_exchange, cdr3::mpi::plane_exchange>("plane", nplanes);
+			sman.add<mpi::halo_exchange, cdr3::mpi::plane_exchange>("plane", nplanes, &threads);
 
 			sman.set<services::message_passing>("plane-setup");
 			sman.set<services::mempool>("plane");
@@ -82,17 +94,14 @@ int main(int argc, char *argv[])
 		} else {
 			service_manager<cdr2::mpi::stypes> & master = kmans[0]->services();
 			auto mp_service = master.get_ptr<services::message_passing>();
-			auto mp_service_solve = master.get_ptr<services::message_passing>("plane");
 			auto mempool_service = master.get_ptr<services::mempool>();
-			auto halo_service = master.get_ptr<services::halo_exchange<cdr2::mpi::stypes>>("plane");
 			auto *mpi_keys = static_cast<cdr3::mpi::plane_setup_mpi*>(mp_service.get())->get_keys();
 			auto *addrs = static_cast<cdr3::mpi::plane_mempool*>(mempool_service.get())->get_addrs();
-			auto barrier = static_cast<cdr3::mpi::plane_exchange*>(halo_service.get())->get_barrier();
-			auto barrier_mpi = static_cast<cdr3::mpi::plane_mpi*>(mp_service_solve.get())->get_barrier();
+
 			sman.add<services::message_passing, cdr3::mpi::plane_setup_mpi>("plane-setup", mpi_keys);
-			sman.add<services::message_passing, cdr3::mpi::plane_mpi>("plane", nplanes, barrier_mpi);
+			sman.add<services::message_passing, cdr3::mpi::plane_mpi>("plane", nplanes, i, &threads);
 			sman.add<services::mempool, cdr3::mpi::plane_mempool>("plane", i, addrs);
-			sman.add<mpi::halo_exchange, cdr3::mpi::plane_exchange>("plane", nplanes, barrier);
+			sman.add<mpi::halo_exchange, cdr3::mpi::plane_exchange>("plane", nplanes, i, &threads);
 
 			sman.set<services::message_passing>("plane-setup");
 			sman.set<services::mempool>("plane");
@@ -135,9 +144,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	ABT_thread *threads;
 	if (aggregate) {
-		threads = new ABT_thread[nplanes];
 		ult_params *args = new ult_params[nplanes];
 
 		for (auto i : range<std::size_t>(nplanes)) {
@@ -147,6 +154,12 @@ int main(int argc, char *argv[])
 			args[i].sor = &sor;
 			args[i].res = &res;
 			args[i].kman = kmans[i];
+			args[i].nsweeps = nsweeps;
+		}
+
+		MPI_Barrier(MPI_COMM_WORLD);
+		timer_begin("relax-abt");
+		for (auto i : range<std::size_t>(nplanes)) {
 			ABT_thread_create(pool, compute, (void*) &args[i],
 			                  ABT_THREAD_ATTR_NULL, &threads[i]);
 		}
@@ -154,24 +167,34 @@ int main(int argc, char *argv[])
 		for (auto i : range<std::size_t>(nplanes)) {
 			ABT_thread_join(threads[i]);
 		}
+		timer_end("relax-abt");
 
 		for (auto i : range<std::size_t>(nplanes)) {
 			ABT_thread_free(&threads[i]);
 		}
 
-		delete[] threads;
 		delete[] args;
 	} else {
-		for (auto i : range<std::size_t>(nplanes)) {
-			kmans[i]->run<mpi::line_relax<relax_dir::x>>(so, xs[i], bs[i], sor, res, cycle::Dir::DOWN);
+
+		MPI_Barrier(MPI_COMM_WORLD);
+		timer_begin("relax-seq");
+		for (auto sweep : range(nsweeps)) {
+			for (auto i : range<std::size_t>(nplanes)) {
+				kmans[i]->run<mpi::line_relax<relax_dir::x>>(so, xs[i], bs[i], sor, res, cycle::Dir::DOWN);
+			}
 		}
+		timer_end("relax-seq");
 	}
 
-	int rank;
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	if (rank == 5) {
-		std::cout << xs[1] << std::endl;
-	}
+	timer_save("line-times.json");
+
+	// { // output solution
+	// 	int rank;
+	// 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	// 	std::ofstream ofile(aggregate ? "agg-" + std::to_string(rank) : "no-agg-" + std::to_string(rank));
+	// 	ofile << xs[20];
+	// 	ofile.close();
+	// }
 
 	ABT_finalize();
 	MPI_Finalize();

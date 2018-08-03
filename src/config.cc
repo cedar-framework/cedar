@@ -26,7 +26,8 @@ namespace cedar {
 	    std::replace(path.begin(), path.end(), '.', '/');
 	    std::string rpath("/" + path);
 
-	    json stree = root[json::json_pointer(rpath)];
+	    json stree = (path == "") ? root : root[json::json_pointer(rpath)];
+
 	    if ((stree.size() == 0) and (path != ""))
 		    return nullptr;
 	    else

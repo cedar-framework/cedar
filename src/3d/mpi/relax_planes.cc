@@ -53,14 +53,12 @@ cdr2::mpi::kman_ptr worker_kman(config & conf, int nplanes, bool aggregate, plan
 	auto & serv = kman->services();
 
 	auto regis = [worker_id, nplanes, aggregate, &team](service_manager<cdr2::mpi::stypes> & sman) {
+		service_manager<cdr2::mpi::stypes> & master = team.get_master();
+
 		// add worker to team
 		auto *sman_ptr = &sman;
-		if (team.masters.size() > team.workers.size())
-			team.workers.push_back({sman_ptr});
-		else
-			team.workers.back().push_back(sman_ptr);
+		team.add_worker(sman_ptr);
 
-		service_manager<cdr2::mpi::stypes> & master = *team.masters.back();
 		auto mp_service = master.get_ptr<services::message_passing>();
 		auto mempool_service = master.get_ptr<services::mempool>();
 		auto *mpi_keys = static_cast<plane_setup_mpi*>(mp_service.get())->get_keys();
