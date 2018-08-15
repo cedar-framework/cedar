@@ -63,6 +63,10 @@ public:
 
 	inner_solver & get_inner() { return *slv; }
 
+	bool isactive() {
+		return (redundant and active) or (not redundant and block_id == 0);
+	}
+
 protected:
 	bool redundant; /** Flag for whether redistribution is performed redundantly */
 	std::unique_ptr<inner_solver> slv; /** Redistributed solver object. */

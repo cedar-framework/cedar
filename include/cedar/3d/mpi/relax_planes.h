@@ -303,7 +303,7 @@ public:
 				int i = ipl - 1;
 				setup_agg_solve(*planes[i]);
 				planes[i]->apply_heirs([](cdr2::mpi::solver<cdr2::nine_pt> & child) {
-						setup_agg_solve<cdr2::nine_pt>(child);
+						setup_agg_solve(child);
 					});
 			}
 		}

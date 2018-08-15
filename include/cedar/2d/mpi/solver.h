@@ -251,7 +251,7 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 
 	void apply_heirs(std::function<void(solver<nine_pt> &)> fun)
 	{
-		if (heir) {
+		if (heir and (heir->isactive())) {
 			auto & slv = heir->get_inner().get_inner();
 			fun(slv);
 			slv.apply_heirs(fun);
