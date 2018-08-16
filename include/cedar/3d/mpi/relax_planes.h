@@ -240,9 +240,13 @@ public:
 	void setup_impl(const stencil_op<sten3> & so, std::vector<slv2_ptr<sten2>> & planes,
 	                std::array<plane_ult<sten2>, 2> & threads)
 	{
+		#ifdef PLANE_AGG
 		this->aggregate = this->params->plane_agg;
 		teams[0].threads = threads[0].get_threads();
 		teams[1].threads = threads[1].get_threads();
+		#else
+		this->aggregate = false;
+		#endif
 		int nplanes = so.shape(2);
 		auto rng = so.range(2);
 		if (rdir == relax_dir::xz) {
@@ -293,11 +297,14 @@ public:
 				planes.back()->levels.template get<sten2>(0).x = cdr2::mpi::grid_func(xaddr, topo2);
 				planes.back()->levels.template get<sten2>(0).b = cdr2::mpi::grid_func(baddr, topo2);
 			}
+			#ifdef PLANE_AGG
 			if (aggregate)
 				threads[i % 2].add_plane(planes.back().get());
+			#endif
 		}
 
 		// setup services for solve with ults
+		#ifdef PLANE_AGG
 		if (aggregate) {
 			for (auto ipl : rng) {
 				int i = ipl - 1;
@@ -307,6 +314,7 @@ public:
 					});
 			}
 		}
+		#endif
 	}
 
 	template<class sten>
@@ -315,16 +323,24 @@ public:
 	{
 
 		if (std::is_same<sten, seven_pt>::value) {
+			#ifdef PLANE_AGG
 			if (aggregate)
 				relax_planes_agg<rdir>(so, x, b, cycle_dir, fine_planes, fine_threads);
 			else
 				relax_planes<rdir>(so, x, b, cycle_dir, fine_planes);
+			#else
+			relax_planes<rdir>(so, x, b, cycle_dir, fine_planes);
+			#endif
 		} else {
 			len_t lsize = so.shape(0);
+			#ifdef PLANE_AGG
 			if (aggregate)
 				relax_planes_agg<rdir>(so, x, b, cycle_dir, level_planes[level_map[lsize]], level_threads[level_map[lsize]]);
 			else
 				relax_planes<rdir>(so, x, b, cycle_dir, level_planes[level_map[lsize]]);
+			#else
+			relax_planes<rdir>(so, x, b, cycle_dir, level_planes[level_map[lsize]]);
+			#endif
 		}
 	}
 

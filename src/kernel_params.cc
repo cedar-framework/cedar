@@ -75,7 +75,11 @@ std::shared_ptr<kernel_params> build_kernel_params(config & conf)
 	params->relax_symmetric = true;
 	params->definite = true;
 	params->ml_relax.init(conf);
+	#ifdef PLANE_AGG
 	params->plane_agg = conf.get<bool>("solver.plane-agg", true);
+	#else
+	params->plane_agg = false;
+	#endif
 	params->plane_config = conf.getconf("plane-config");
 	if (params->plane_config == nullptr) {
 		params->plane_config = std::make_shared<config>("");

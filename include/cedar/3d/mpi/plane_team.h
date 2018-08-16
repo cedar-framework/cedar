@@ -2,7 +2,11 @@
 #define CEDAR_3D_MPI_PLANE_TEAM_H
 
 #include <vector>
+#ifdef PLANE_AGG
 #include <abt.h>
+#else
+#define ABT_thread void
+#endif
 
 #include <cedar/2d/mpi/types.h>
 #include <cedar/service_manager.h>

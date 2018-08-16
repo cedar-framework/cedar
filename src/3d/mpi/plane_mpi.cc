@@ -48,6 +48,7 @@ int plane_setup_mpi::comm_split(MPI_Comm comm, int color, int key, MPI_Comm *new
 }
 
 
+#ifdef PLANE_AGG
 plane_mpi::plane_mpi(int nplanes, std::vector<ABT_thread> *threads) : nplanes(nplanes), ismaster(true), threads(threads), wid(0)
 {
 	if (ABT_initialized() == ABT_ERR_UNINITIALIZED)
@@ -120,6 +121,7 @@ int plane_mpi::scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype
 
 	return ierr;
 }
+#endif
 
 
 }}}

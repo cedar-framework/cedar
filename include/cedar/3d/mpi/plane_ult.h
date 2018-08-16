@@ -19,6 +19,7 @@ struct ult_params
 void plane_ult_run_full(void *args);
 void plane_ult_run_comp(void *args);
 
+#ifdef PLANE_AGG
 template<class sten2>
 class plane_ult
 {
@@ -102,6 +103,9 @@ protected:
 	std::vector<ult_params<sten2>> params;
 	bool threads_created;
 };
+#else
+template<class sten2> using plane_ult = int;
+#endif
 
 }}}
 

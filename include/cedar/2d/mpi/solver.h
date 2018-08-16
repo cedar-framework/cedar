@@ -129,7 +129,7 @@ solver(mpi::stencil_op<fsten> & fop) : parent::multilevel(fop), comm(fop.grid().
 			                               std::array<int,2>({{fgrid.nproc(0), fgrid.nproc(1)}}),
 			                               std::array<len_t,2>({{fgrid.nglobal(0), fgrid.nglobal(1)}}));
 			MPI_Bcast(choice.data(), 2, MPI_INT, 0, fgrid.comm);
-			if ((choice[0] != 1) and (choice[1] != 1)) {
+			if (not (choice[0]*choice[1] == 1)) {
 				log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " cores" << std::endl;
 				using inner_solver = multilevel_wrapper<mpi::solver<nine_pt>>;
 				this->heir = create_redist_ptr<inner_solver>(kman, cop, cg_conf, choice);

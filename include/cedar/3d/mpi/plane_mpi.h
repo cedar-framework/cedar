@@ -6,7 +6,9 @@
 #include <map>
 
 #include <mpi.h>
+#ifdef PLANE_AGG
 #include <abt.h>
+#endif
 
 #include <cedar/mpi/mpi_wrapper.h>
 
@@ -29,6 +31,7 @@ protected:
 };
 
 
+#ifdef PLANE_AGG
 class plane_mpi : public mpi_wrapper
 {
 public:
@@ -50,6 +53,7 @@ protected:
 
 	MPI_Datatype get_aggtype(MPI_Comm comm, int plane_len, MPI_Datatype dtype);
 };
+#endif
 
 }}}
 

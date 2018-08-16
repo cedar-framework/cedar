@@ -51,6 +51,10 @@ FIND_PACKAGE(LAPACK REQUIRED)
 
 find_package(MPI REQUIRED)
 
+if (ENABLE_PLANE_AGG)
+  find_package(Argobots REQUIRED)
+endif()
+
 add_subdirectory(src)
 add_library(cedar ${cedar_src})
 add_dependencies(cedar json)
@@ -69,6 +73,12 @@ if (tausch_FOUND)
   target_include_directories(cedar PUBLIC ${TAUSCH_INCLUDE_DIR})
   target_compile_definitions(cedar PUBLIC WITH_TAUSCH)
 endif()
+if (ENABLE_PLANE_AGG)
+  target_link_libraries(cedar PUBLIC ${Argobots_LIBRARIES})
+  target_include_directories(cedar PUBLIC ${Argobots_INCLUDE_DIRS})
+  target_compile_definitions(cedar PUBLIC PLANE_AGG)
+endif()
+
 target_include_directories(cedar PUBLIC
   $<INSTALL_INTERFACE:include/>
   ${MPI_C_INCLUDE_PATH}

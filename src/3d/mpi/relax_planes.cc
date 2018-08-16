@@ -34,9 +34,12 @@ cdr2::mpi::kman_ptr master_kman(config & conf, int nplanes, bool aggregate, plan
 	auto regis = [nplanes, aggregate, &team](service_manager<cdr2::mpi::stypes> & sman) {
 		team.masters.push_back(&sman);
 		sman.add<services::message_passing, plane_setup_mpi>("plane-setup");
-		sman.add<services::message_passing, plane_mpi>("plane", nplanes, team.threads);
 		sman.add<services::mempool, plane_mempool>("plane", nplanes);
+		#ifdef PLANE_AGG
+		sman.add<services::message_passing, plane_mpi>("plane", nplanes, team.threads);
 		sman.add<services::halo_exchange<cdr2::mpi::stypes>, plane_exchange>("plane", nplanes, team.threads);
+		#endif
+
 		sman.set<services::message_passing>("plane-setup");
 		if (aggregate)
 			sman.set<services::mempool>("plane");
@@ -65,9 +68,12 @@ cdr2::mpi::kman_ptr worker_kman(config & conf, int nplanes, bool aggregate, plan
 		auto *addrs = static_cast<plane_mempool*>(mempool_service.get())->get_addrs();
 
 		sman.add<services::message_passing, plane_setup_mpi>("plane-setup", mpi_keys);
-		sman.add<services::message_passing, plane_mpi>("plane", nplanes, worker_id, team.threads);
 		sman.add<services::mempool, plane_mempool>("plane", worker_id, addrs);
+		#ifdef PLANE_AGG
+		sman.add<services::message_passing, plane_mpi>("plane", nplanes, worker_id, team.threads);
 		sman.add<services::halo_exchange<cdr2::mpi::stypes>, plane_exchange>("plane", nplanes, worker_id, team.threads);
+		#endif
+
 		sman.set<services::message_passing>("plane-setup");
 		if (aggregate)
 			sman.set<services::mempool>("plane");
