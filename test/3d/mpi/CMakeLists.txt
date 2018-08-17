@@ -18,5 +18,12 @@ add_par_unit(test-mpi-cgredist-3d ${CMAKE_CURRENT_SOURCE_DIR}/test_cgredist.cc $
 target_link_libraries(test-mpi-cgredist-3d cedar)
 set_par_sizes(test-mpi-cgredist-3d 8)
 
+if (ENABLE_PLANE_AGG)
+  add_par_unit(test-mpi-planeagg ${CMAKE_CURRENT_SOURCE_DIR}/test_planeagg.cc ${CMAKE_CURRENT_SOURCE_DIR}/../../abt_main.cc)
+  target_link_libraries(test-mpi-planeagg cedar)
+  set_par_sizes(test-mpi-planeagg 3 4 8)
+endif()
+
 configure_file(test-cgredist-0.json ${CMAKE_BINARY_DIR}/test-cgredist3-0.json COPYONLY)
 configure_file(test-cgredist-1.json ${CMAKE_BINARY_DIR}/test-cgredist3-1.json COPYONLY)
+configure_file(test-planeagg-lines.json ${CMAKE_BINARY_DIR}/test-planeagg-lines.json COPYONLY)

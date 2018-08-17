@@ -1,0 +1,13 @@
+{
+	"log": ["error"],
+	"solver":
+	{
+		"ml-relax":
+		{
+			"enabled": true,
+			"min-gsz": 3,
+			"factorize": false
+		}
+	},
+	"halo-exchange": "tausch"
+}
