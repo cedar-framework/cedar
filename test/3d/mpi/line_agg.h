@@ -40,7 +40,7 @@ void compute(void *args)
 	auto & x = *params->x;
 	auto & b = *params->b;
 	auto & sor = *params->sor;
-	auto &res = *params->res;
+	auto & res = *params->res;
 
 	for (auto sweep : range(nsweeps)) {
 		kman->template run<mpi::line_relax<rdir>>(so, x, b, sor, res, cycle::Dir::DOWN);
@@ -68,6 +68,7 @@ std::vector<real_t> line_agg(bool aggregate, int nx, int ny, int nplanes)
 	std::vector<mpi::kman_ptr> kmans;
 	std::vector<mpi::grid_func> bs;
 	std::vector<mpi::grid_func> xs;
+	std::vector<mpi::grid_func> res;
 
 	for (auto i : range<std::size_t>(nplanes)) {
 		kmans.push_back(mpi::build_kernel_manager(conf));
@@ -111,16 +112,17 @@ std::vector<real_t> line_agg(bool aggregate, int nx, int ny, int nplanes)
 		std::size_t nbytes = grid->nlocal(0) * grid->nlocal(1) * sizeof(real_t);
 		real_t *xaddr = (real_t*) mpool.addr(services::mempool::sol, nbytes);
 		real_t *baddr = (real_t*) mpool.addr(services::mempool::rhs, nbytes);
+		real_t *raddr = (real_t*) mpool.addr(services::mempool::res, nbytes);
 
 		xs.emplace_back(xaddr, grid);
 		bs.emplace_back(baddr, grid);
+		res.emplace_back(raddr, grid);
 
 		xs[i].set(0.0);
 		bs[i].set(i+1);
 	}
 
 	auto so = create_op<sten2>(grid);
-	mpi::grid_func res(grid);
 	relax_stencil sor(grid->nlocal(0) - 2, grid->nlocal(1) - 2);
 
 	for (auto i : range<std::size_t>(nplanes)) {
@@ -143,7 +145,7 @@ std::vector<real_t> line_agg(bool aggregate, int nx, int ny, int nplanes)
 			args[i].x = &xs[i];
 			args[i].b = &bs[i];
 			args[i].sor = &sor;
-			args[i].res = &res;
+			args[i].res = &res[i];
 			args[i].kman = kmans[i];
 			args[i].nsweeps = nsweeps;
 		}
@@ -165,8 +167,8 @@ std::vector<real_t> line_agg(bool aggregate, int nx, int ny, int nplanes)
 	} else {
 		for (auto sweep : range(nsweeps)) {
 			for (auto i : range<std::size_t>(nplanes)) {
-				kmans[i]->run<mpi::line_relax<rdir>>(so, xs[i], bs[i], sor, res, cycle::Dir::DOWN);
-				kmans[i]->run<mpi::line_relax<rdir>>(so, xs[i], bs[i], sor, res, cycle::Dir::UP);
+				kmans[i]->run<mpi::line_relax<rdir>>(so, xs[i], bs[i], sor, res[i], cycle::Dir::DOWN);
+				kmans[i]->run<mpi::line_relax<rdir>>(so, xs[i], bs[i], sor, res[i], cycle::Dir::UP);
 			}
 		}
 	}
