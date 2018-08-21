@@ -1,0 +1,23 @@
+{
+	"log": ["error"],
+	"plane-config":
+	{
+		"log-planes": false,
+		"log": ["error"],
+		"solver":
+		{
+			"cycle":
+			{
+				"nrelax-pre": 1,
+				"nrelax-post": 1
+			},
+			"relaxation": "line-xy",
+			"tol": 1e-10,
+			"max-iter": 10,
+			"min-coarse": 5,
+			"cg-solver": "redist"
+		},
+		"halo-exchange": "tausch"
+	},
+	"halo-exchange": "msg"
+}

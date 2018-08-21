@@ -55,7 +55,7 @@ std::vector<real_t> line_agg(bool aggregate, int nx, int ny, int nplanes)
 	auto grid = util::create_topo_global(MPI_COMM_WORLD, nx, ny);
 	config conf("test-planeagg-lines.json");
 	log::init(conf);
-	int nsweeps = 1;
+	int nsweeps = 2;
 
 	ABT_pool pool;
 	ABT_xstream xstream;
