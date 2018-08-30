@@ -48,28 +48,28 @@ public:
 
 		for (int dir = 0; dir < halo_dir::count; dir++) {
 			if (recv_active[index(lvl, dir)])
-				tausch_so->postReceive(TAUSCH_CwC, index(lvl, dir), index(lvl, dir));
+				tausch_so->postReceiveCwC(index(lvl, dir), index(lvl, dir));
 		}
 
 		for (int dir = 0; dir < halo_dir::count; dir++) {
 			if (send_active[index(lvl, dir)]) {
 				for (int sdir = 0; sdir < stencil_ndirs<sten>::value; sdir++)
-					tausch_so->packSendBuffer(TAUSCH_CwC, index(lvl,dir), sdir, so.data() + so.index(0,0,sdir));
-				tausch_so->send(TAUSCH_CwC, index(lvl,dir), index(lvl,dir));
+					tausch_so->packSendBufferCwC(index(lvl,dir), sdir, so.data() + so.index(0,0,sdir));
+				tausch_so->sendCwC(index(lvl,dir), index(lvl,dir));
 
 			}
 			if (recv_active[index(lvl, dir)]) {
-				tausch_so->recv(TAUSCH_CwC, index(lvl,dir));
+				tausch_so->recvCwC(index(lvl,dir));
 				for (int sdir = 0; sdir < stencil_ndirs<sten>::value; sdir++)
-					tausch_so->unpackRecvBuffer(TAUSCH_CwC, index(lvl,dir), sdir, so.data() + so.index(0,0,sdir));
+					tausch_so->unpackRecvBufferCwC(index(lvl,dir), sdir, so.data() + so.index(0,0,sdir));
 			}
 		}
 	}
 	std::unique_ptr<line_pkg> line_data;
 
 protected:
-	std::unique_ptr<Tausch<real_t>> tausch;
-	std::unique_ptr<Tausch<real_t>> tausch_so;
+	std::unique_ptr<Tausch2D<real_t>> tausch;
+	std::unique_ptr<Tausch2D<real_t>> tausch_so;
 	std::vector<bool> send_active;
 	std::vector<bool> recv_active;
 

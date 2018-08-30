@@ -153,8 +153,10 @@ void tausch_exchanger::init_gfunc(std::vector<topo_ptr> & topos)
 
 	tausch = std::make_unique<Tausch3D<real_t>>(MPI_DOUBLE, nbuf, nullptr, topos[0]->comm);
 
-	tausch->setLocalHaloInfo(TAUSCH_CwC, halo_dir::count * nlevels, local_spec.data());
-	tausch->setRemoteHaloInfo(TAUSCH_CwC, halo_dir::count * nlevels, remote_spec.data());
+	for (int i = 0; i < halo_dir::count * nlevels; i++) {
+		tausch->addLocalHaloInfoCwC(local_spec[i]);
+		tausch->addRemoteHaloInfoCwC(remote_spec[i]);
+	}
 }
 
 
@@ -181,8 +183,10 @@ void tausch_exchanger::init_so(std::vector<topo_ptr> & topos)
 
 	tausch_so = std::make_unique<Tausch3D<real_t>>(MPI_DOUBLE, nbuf, nullptr, topos[0]->comm);
 
-	tausch_so->setLocalHaloInfo(TAUSCH_CwC, halo_dir::count * nlevels, local_spec.data());
-	tausch_so->setRemoteHaloInfo(TAUSCH_CwC, halo_dir::count * nlevels, remote_spec.data());
+	for (int i = 0; i < halo_dir::count * nlevels; i++) {
+		tausch_so->addLocalHaloInfoCwC(local_spec[i]);
+		tausch_so->addRemoteHaloInfoCwC(remote_spec[i]);
+	}
 }
 
 
@@ -481,18 +485,18 @@ void tausch_exchanger::exchange_func(int k, real_t * gf)
 	int lvl = nlevels - k;
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (recv_active[index(lvl, dir)])
-			tausch->postReceive(TAUSCH_CwC, index(lvl, dir), index(lvl, dir));
+			tausch->postReceiveCwC(index(lvl, dir), index(lvl, dir));
 	}
 
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (send_active[index(lvl, dir)]) {
-			tausch->packSendBuffer(TAUSCH_CwC, index(lvl,dir), 0, gf);
-			tausch->send(TAUSCH_CwC, index(lvl,dir), index(lvl,dir));
+			tausch->packSendBufferCwC(index(lvl,dir), 0, gf);
+			tausch->sendCwC(index(lvl,dir), index(lvl,dir));
 
 		}
 		if (recv_active[index(lvl, dir)]) {
-			tausch->recv(TAUSCH_CwC, index(lvl,dir));
-			tausch->unpackRecvBuffer(TAUSCH_CwC, index(lvl,dir), 0, gf);
+			tausch->recvCwC(index(lvl,dir));
+			tausch->unpackRecvBufferCwC(index(lvl,dir), 0, gf);
 		}
 	}
 }
@@ -511,23 +515,23 @@ void tausch_exchanger::exchange_sten(int k, real_t * so)
 
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (recv_active[index(lvl, dir)])
-			tausch_so->postReceive(TAUSCH_CwC, index(lvl, dir), index(lvl, dir));
+			tausch_so->postReceiveCwC(index(lvl, dir), index(lvl, dir));
 	}
 
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (send_active[index(lvl, dir)]) {
 			for (int sdir = 0; sdir < 5; sdir++) {
 				len_t offset = (JJ+1)*(II+1)*(KK+1)*sdir;
-				tausch_so->packSendBuffer(TAUSCH_CwC, index(lvl,dir), sdir, so + offset);
+				tausch_so->packSendBufferCwC(index(lvl,dir), sdir, so + offset);
 			}
-			tausch_so->send(TAUSCH_CwC, index(lvl,dir), index(lvl,dir));
+			tausch_so->sendCwC(index(lvl,dir), index(lvl,dir));
 
 		}
 		if (recv_active[index(lvl, dir)]) {
-			tausch_so->recv(TAUSCH_CwC, index(lvl,dir));
+			tausch_so->recvCwC(index(lvl,dir));
 			for (int sdir = 0; sdir < 5; sdir++) {
 				len_t offset = (JJ+1)*(II+1)*(KK+1)*sdir;
-				tausch_so->unpackRecvBuffer(TAUSCH_CwC, index(lvl,dir), sdir, so + offset);
+				tausch_so->unpackRecvBufferCwC(index(lvl,dir), sdir, so + offset);
 			}
 		}
 	}
@@ -540,18 +544,18 @@ void tausch_exchanger::run(mpi::grid_func & f)
 
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (recv_active[index(lvl, dir)])
-			tausch->postReceive(TAUSCH_CwC, index(lvl, dir), index(lvl, dir));
+			tausch->postReceiveCwC(index(lvl, dir), index(lvl, dir));
 	}
 
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (send_active[index(lvl, dir)]) {
-			tausch->packSendBuffer(TAUSCH_CwC, index(lvl,dir), 0, f.data());
-			tausch->send(TAUSCH_CwC, index(lvl,dir), index(lvl,dir));
+			tausch->packSendBufferCwC(index(lvl,dir), 0, f.data());
+			tausch->sendCwC(index(lvl,dir), index(lvl,dir));
 
 		}
 		if (recv_active[index(lvl, dir)]) {
-			tausch->recv(TAUSCH_CwC, index(lvl,dir));
-			tausch->unpackRecvBuffer(TAUSCH_CwC, index(lvl,dir), 0, f.data());
+			tausch->recvCwC(index(lvl,dir));
+			tausch->unpackRecvBufferCwC(index(lvl,dir), 0, f.data());
 		}
 	}
 }
