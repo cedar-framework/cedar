@@ -139,7 +139,7 @@ void tausch_exchanger::init_gfunc(std::vector<topo_ptr> & topos)
 
 	tausch = std::make_unique<Tausch2D<real_t>>(MPI_DOUBLE, nbuf, nullptr, topos[0]->comm);
 
-	for (int i = 0; i < halo_dir::count * nlevels; i++) {
+	for (std::size_t i = 0; i < halo_dir::count * nlevels; i++) {
 		tausch->addLocalHaloInfoCwC(local_spec[i]);
 		tausch->addRemoteHaloInfoCwC(remote_spec[i]);
 	}
@@ -165,11 +165,11 @@ void tausch_exchanger::init_so(std::vector<topo_ptr> & topos)
 		                  remote_spec, local_spec);
 	}
 
-	int nbuf = 9;
+	int nbuf = stencil_ndirs<nine_pt>::value;
 
 	tausch_so = std::make_unique<Tausch2D<real_t>>(MPI_DOUBLE, nbuf, nullptr, topos[0]->comm);
 
-	for (int i = 0; i < halo_dir::count * nlevels; i++) {
+	for (std::size_t i = 0; i < halo_dir::count * nlevels; i++) {
 		tausch_so->addLocalHaloInfoCwC(local_spec[i]);
 		tausch_so->addRemoteHaloInfoCwC(remote_spec[i]);
 	}

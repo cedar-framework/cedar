@@ -23,7 +23,7 @@ SUBROUTINE BMG3_SymStd_SETUP_TAUSCH(&
   END DO
 
   do k=1,nprock
-     dimy(k,nog) = dimzfine(k)
+     dimz(k,nog) = dimzfine(k)
   enddo
 
   DO N=NOG-1, 1, -1

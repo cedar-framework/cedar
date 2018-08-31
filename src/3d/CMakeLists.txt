@@ -23,6 +23,7 @@ if(ENABLE_MPI)
 	${interface_SOURCES}
 	redist/cholesky_solver.cc
 	mpi/plane_mpi.cc
+	mpi/redist_solver.cc
 	mpi/plane_mempool.cc
 	mpi/plane_exchange.cc
 	mpi/plane_ult.cc
@@ -35,10 +36,15 @@ if(ENABLE_MPI)
 	mpi/grid_func.cc
 	mpi/stencil_op.cc
     mpi/msg_exchanger.cc
-	mpi/tausch_exchanger.cc
 	mpi/kernel_manager.cc
 	mpi/setup_nog.cc
 	mpi/gallery.cc)
+
+  if (tausch_FOUND)
+	list(APPEND sources
+	  mpi/tausch_exchanger.cc)
+  endif()
+
 endif()
 
 set(3d_SOURCES ${sources} PARENT_SCOPE)

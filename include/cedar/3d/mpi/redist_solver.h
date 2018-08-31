@@ -10,8 +10,8 @@
 #include <cedar/3d/solver.h>
 #include <cedar/3d/mpi/solver.h>
 #include <cedar/3d/stencil_op.h>
-#include <cedar/3d/mpi/msg_exchanger.h>
 #include <cedar/2d/ftn/mpi/BMG_workspace_c.h>
+#include <cedar/3d/mpi/kernel_manager.h>
 
 
 extern "C" {
@@ -21,6 +21,10 @@ extern "C" {
 
 
 namespace cedar { namespace cdr3 { namespace mpi {
+
+
+template<class inner_solver>
+void copy_services(inner_solver & slv, service_manager<stypes> & services);
 
 /**
  Coarse-grid redistribution solver.
@@ -35,7 +39,6 @@ template<class inner_solver>
 class redist_solver
 {
 public:
-	using msg_ctx = cedar::cdr3::impls::MsgCtx;
 	/**
 	   Performs redistribution of the grid topology and stencil
 	   operator given the destination 3D distribution.  This also
@@ -45,8 +48,10 @@ public:
 	   @param[in] conf The config object to use for this solver
 	   @param[in] nblock The destination 3D distribution
 	*/
-	redist_solver(const stencil_op<xxvii_pt> & so, mpi::msg_exchanger *halof,
-	              std::shared_ptr<config> conf, std::array<int, 3> nblock);
+	redist_solver(const stencil_op<xxvii_pt> & so,
+	              service_manager<stypes> * services,
+	              std::shared_ptr<config> conf,
+	              std::array<int, 3> nblock);
 	/**
 	   Runs the redistributed solve phase
 	   @param[in] b rhs
@@ -71,14 +76,20 @@ protected:
 	typename inner_solver::grid_func b_redist;
 	typename inner_solver::grid_func x_redist;
 	std::unique_ptr<typename inner_solver::stencil_op> so_redist; /** The redistributed operator */
+	service_manager<stypes> * services;
 
 	/** Redistributes the processor grid.
 
 	    @param[in] fine_topo The source topology to redistribute
-	    @param[in] msg_ctx The MSG context struct
+	    @param[in] dimx number of grid points on each processor. shape(proc_coord_x, level)
+	    @param[in] dimy number of grid points on each processor. shape(proc_coord_y, level)
+	    @param[in] dimz number of grid points on each processor. shape(proc_coord_z, level)
 	    @returns The redistrubted processor grid topology
 	*/
-	std::shared_ptr<grid_topo> redist_topo(const grid_topo & fine_topo, msg_ctx & ctx);
+	std::shared_ptr<grid_topo> redist_topo(const grid_topo & fine_topo,
+	                                       aarray<int, len_t, 2> & dimx,
+	                                       aarray<int, len_t, 2> & dimy,
+	                                       aarray<int, len_t, 2> & dimz);
 
 	/** Redistributes the operator.
 
@@ -94,14 +105,15 @@ protected:
 
 template<class inner_solver>
 	redist_solver<inner_solver>::redist_solver(const stencil_op<xxvii_pt> & so,
-	                                           mpi::msg_exchanger *halof,
+	                                           service_manager<stypes> * services,
 	                                           std::shared_ptr<config> conf,
 	                                           std::array<int, 3> nblock) :
 		redundant(false), nblock(nblock), active(true), recv_id(-1)
 {
 	auto & topo = so.grid();
-	msg_ctx * ctx = (msg_ctx*) halof->context_ptr();
-	auto ctopo = redist_topo(topo, *ctx);
+	auto & halo_service = services->template get<halo_exchange>();
+	auto ctopo = redist_topo(topo,
+	                         halo_service.leveldims(0), halo_service.leveldims(1), halo_service.leveldims(2));
 	redist_operator(so, ctopo);
 
 	if (inner_solver::is_serial) {
@@ -118,6 +130,8 @@ template<class inner_solver>
 		log::push_level("redist", *conf);
 		timer_down();
 		slv = std::make_unique<inner_solver>(*so_redist, conf);
+		if (not inner_solver::is_serial)
+			copy_services(*slv, *services);
 		timer_up();
 		log::pop_level();
 		MSG_pause(&msg_comm);
@@ -154,17 +168,6 @@ template<class inner_solver>
 
 template <class T>
 	std::unique_ptr<T> create_operator(topo_ptr topo);
-template<>
-	std::unique_ptr<cdr3::stencil_op<xxvii_pt>> create_operator(topo_ptr topo)
-{
-	return std::make_unique<cdr3::stencil_op<xxvii_pt>>(topo->nlocal(0)-2, topo->nlocal(1)-2, topo->nlocal(2)-2);
-}
-
-template<>
-	std::unique_ptr<mpi::stencil_op<xxvii_pt>> create_operator(topo_ptr topo)
-{
-	return std::make_unique<mpi::stencil_op<xxvii_pt>>(topo);
-}
 
 
 template<class inner_solver>
@@ -274,7 +277,9 @@ void redist_solver<inner_solver>::redist_operator(const stencil_op<xxvii_pt> & s
 
 template<class inner_solver>
 	std::shared_ptr<grid_topo> redist_solver<inner_solver>::redist_topo(const grid_topo & fine_topo,
-	                                                                    msg_ctx & ctx)
+	                                                                    aarray<int, len_t, 2> & dimx,
+	                                                                    aarray<int, len_t, 2> & dimy,
+	                                                                    aarray<int, len_t, 2> & dimz)
 {
 	using len_arr = aarray<int, len_t, 1>;
 	auto igrd = std::make_shared<std::vector<len_t>>(NBMG_pIGRD);
@@ -300,25 +305,25 @@ template<class inner_solver>
 	}
 
 	for (auto i = low(0); i <= high(0); i++) {
-		grid->nlocal(0) += ctx.cg_nlocal(0, ctx.proc_grid(i, low(1), low(2))) - 2; // remove ghosts
+		grid->nlocal(0) += dimx(i, 0);
 	}
 	for (auto j = low(1); j <= high(1); j++) {
-		grid->nlocal(1) += ctx.cg_nlocal(1, ctx.proc_grid(low(0), j, low(2))) - 2; // remove ghosts
+		grid->nlocal(1) += dimy(j, 0);
 	}
 	for (auto k = low(2); k <= high(2); k++) {
-		grid->nlocal(2) += ctx.cg_nlocal(2, ctx.proc_grid(low(0), low(1), k)) - 2; // remove ghosts
+		grid->nlocal(2) += dimz(k, 0);
 	}
 
 	for (len_t i = 0; i < low(0); i++) {
-		grid->is(0) += ctx.cg_nlocal(0, ctx.proc_grid(i, low(1), low(2))) - 2;
+		grid->is(0) += dimx(i, 0);
 	}
 	grid->is(0)++;
 	for (len_t j = 0; j < low(1); j++) {
-		grid->is(1) += ctx.cg_nlocal(1, ctx.proc_grid(low(0), j, low(2))) - 2;
+		grid->is(1) += dimy(j, 0);
 	}
 	grid->is(1)++;
 	for (len_t k = 0; k < low(2); k++) {
-		grid->is(2) += ctx.cg_nlocal(2, ctx.proc_grid(low(0), low(1), k)) - 2;
+		grid->is(2) += dimz(k, 0);
 	}
 	grid->is(2)++;
 
@@ -327,36 +332,36 @@ template<class inner_solver>
 	nbz = array<len_t, 1>(high(2) - low(2) + 1);
 
 	for (auto i = low(0); i <= high(0); i++) {
-		nbx(i-low(0)) = ctx.cg_nlocal(0, ctx.proc_grid(i,0,0)) - 2;
+		nbx(i-low(0)) = dimx(i, 0);
 	}
 
 	for (auto j = low(1); j <= high(1); j++) {
-		nby(j-low(1)) = ctx.cg_nlocal(1, ctx.proc_grid(0,j,0)) - 2;
+		nby(j-low(1)) = dimy(j, 0);
 	}
 
 	for (auto k = low(2); k <= high(2); k++) {
-		nbz(k-low(2)) = ctx.cg_nlocal(2, ctx.proc_grid(0,0,k)) - 2;
+		nbz(k-low(2)) = dimz(k, 0);
 	}
 
 	grid->dimxfine.resize(grid->nproc(0));
 	for (auto i : range(grid->nproc(0))) {
 		grid->dimxfine[i] = 0;
 		for (auto ii = part[0].low(i); ii <= part[0].high(i); ii++) {
-			grid->dimxfine[i] += ctx.cg_nlocal(0, ctx.proc_grid(ii,0,0)) - 2;
+			grid->dimxfine[i] += dimx(ii, 0);
 		}
 	}
 	grid->dimyfine.resize(grid->nproc(1));
 	for (auto j : range(grid->nproc(1))) {
 		grid->dimyfine[j] = 0;
 		for (auto jj = part[1].low(j); jj <= part[1].high(j); jj++) {
-			grid->dimyfine[j] += ctx.cg_nlocal(1, ctx.proc_grid(0,jj,0)) - 2;
+			grid->dimyfine[j] += dimy(jj, 0);
 		}
 	}
 	grid->dimzfine.resize(grid->nproc(2));
 	for (auto k : range(grid->nproc(2))) {
 		grid->dimzfine[k] = 0;
 		for (auto kk = part[2].low(k); kk <= part[2].high(k); kk++) {
-			grid->dimzfine[k] += ctx.cg_nlocal(2, ctx.proc_grid(0,0,kk)) - 2;
+			grid->dimzfine[k] += dimz(kk, 0);
 		}
 	}
 
