@@ -17,6 +17,7 @@ public:
 	using stencil_op = typename stypes::template stencil_op<xxvii_pt>;
 	using grid_func = typename stypes::grid_func;
 	cholesky_solver(stencil_op & sop, std::shared_ptr<config> conf);
+	~cholesky_solver();
 	void cycle(grid_func & x, const grid_func & b);
 	config & get_config() { return *conf; }
 

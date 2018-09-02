@@ -17,6 +17,13 @@ cholesky_solver::cholesky_solver(stencil_op & sop,
 }
 
 
+cholesky_solver::~cholesky_solver()
+{
+	if (bbd)
+		delete[] bbd;
+}
+
+
 void cholesky_solver::cycle(grid_func & x, const grid_func & b)
 {
 	kman->run<solve_cg>(x, b, ABD, bbd);
