@@ -372,7 +372,7 @@ void tausch_exchanger::exchange_sten(int k, real_t * so)
 
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (send_active[index(lvl, dir)]) {
-			for (int sdir = 0; sdir < 5; sdir++) {
+			for (int sdir = 0; sdir < stencil_ndirs<nine_pt>::value; sdir++) {
 				len_t offset = (JJ+1)*(II+1)*sdir;
 				tausch_so->packSendBufferCwC(index(lvl,dir), sdir, so + offset);
 			}
@@ -381,7 +381,7 @@ void tausch_exchanger::exchange_sten(int k, real_t * so)
 		}
 		if (recv_active[index(lvl, dir)]) {
 			tausch_so->recvCwC(index(lvl,dir));
-			for (int sdir = 0; sdir < 5; sdir++) {
+			for (int sdir = 0; sdir < stencil_ndirs<nine_pt>::value; sdir++) {
 				len_t offset = (JJ+1)*(II+1)*sdir;
 				tausch_so->unpackRecvBufferCwC(index(lvl,dir), sdir, so + offset);
 			}
