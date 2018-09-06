@@ -69,8 +69,10 @@ void plane_test(cedar::len_t nx, cedar::len_t ny, cedar::len_t nz)
 		kman_mpi->run<mpi::plane_relax<rdir>>(so_mpi, x_mpi, b_mpi, cycle::Dir::UP);
 	}
 
-	real_t tol = 1e-7;
+	real_t tol = 1e-9;
 
+	mpi::grid_func diff(grid);
+	diff.set(0.0);
 	for (auto k : x_mpi.range(2)) {
 		for (auto j : x_mpi.range(1)) {
 			for (auto i : x_mpi.range(0)) {
@@ -78,11 +80,12 @@ void plane_test(cedar::len_t nx, cedar::len_t ny, cedar::len_t nz)
 				len_t js = grid->is(1) + j - 1;
 				len_t ks = grid->is(2) + k - 1;
 
-				auto diff = x_mpi(i,j,k) - x_ser(is,js,ks);
-				ASSERT_LT(std::abs(diff), tol);
+				diff(i,j,k) = std::abs(x_mpi(i,j,k) - x_ser(is,js,ks));
 			}
 		}
 	}
+
+	ASSERT_LT(diff.inf_norm(), tol);
 }
 
 

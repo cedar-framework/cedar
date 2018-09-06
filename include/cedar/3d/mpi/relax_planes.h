@@ -47,20 +47,22 @@ void copy23(const cdr2::mpi::grid_func & x2, grid_func &x, int ipl);
 template<relax_dir rdir, class sten3, class sten2>
 void relax_planes(const stencil_op<sten3> & so, grid_func & x,
                   const grid_func & b, cycle::Dir cdir,
+                  services::halo_exchange<stypes> & halo_service,
                   std::vector<slv2_ptr<sten2>> & planes)
 {
 	auto & conf = planes[0]->get_config();
 	auto log_planes = conf.template get<bool>("log-planes", true);
 	int lstart, lend, lstride;
+	int kgs = so.grid().is(2);
 
 	if (cdir == cycle::Dir::DOWN) {
-		lstart = 1;
-		lend = 3;
-		lstride = 1;
+		lstart = 1 + ((kgs+1) % 2);
+		lstride = (kgs % 2) - ((kgs+1) % 2);
+		lend = lstart + 2*lstride;
 	} else {
-		lstart = 2;
-		lend = 0;
-		lstride = -1;
+		lstart = 1 + (kgs % 2);
+		lstride = ((kgs + 1) % 2) - (kgs % 2);
+		lend = lstart + 2*lstride;
 	}
 
 	// red-black relaxation
@@ -78,6 +80,7 @@ void relax_planes(const stencil_op<sten3> & so, grid_func & x,
 
 			copy23<rdir>(x2, x, ipl);
 		}
+		halo_service.run(x);
 	}
 }
 
@@ -321,15 +324,15 @@ public:
 	void run_impl(const stencil_op<sten> & so, grid_func & x,
 	              const grid_func & b, cycle::Dir cycle_dir)
 	{
-
+		auto & halo_service = this->services->template get<halo_exchange>();
 		if (std::is_same<sten, seven_pt>::value) {
 			#ifdef PLANE_AGG
 			if (aggregate)
 				relax_planes_agg<rdir>(so, x, b, cycle_dir, fine_planes, fine_threads);
 			else
-				relax_planes<rdir>(so, x, b, cycle_dir, fine_planes);
+				relax_planes<rdir>(so, x, b, cycle_dir, halo_service, fine_planes);
 			#else
-			relax_planes<rdir>(so, x, b, cycle_dir, fine_planes);
+			relax_planes<rdir>(so, x, b, cycle_dir, halo_service, fine_planes);
 			#endif
 		} else {
 			len_t lsize = so.shape(0);
@@ -337,9 +340,9 @@ public:
 			if (aggregate)
 				relax_planes_agg<rdir>(so, x, b, cycle_dir, level_planes[level_map[lsize]], level_threads[level_map[lsize]]);
 			else
-				relax_planes<rdir>(so, x, b, cycle_dir, level_planes[level_map[lsize]]);
+				relax_planes<rdir>(so, x, b, cycle_dir, halo_service, level_planes[level_map[lsize]]);
 			#else
-			relax_planes<rdir>(so, x, b, cycle_dir, level_planes[level_map[lsize]]);
+			relax_planes<rdir>(so, x, b, cycle_dir, halo_service, level_planes[level_map[lsize]]);
 			#endif
 		}
 	}
