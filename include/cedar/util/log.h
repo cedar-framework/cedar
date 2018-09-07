@@ -19,6 +19,9 @@ void init();
 
 unsigned int & lvl();
 void set_comm(MPI_Comm comm);
+MPI_Comm get_comm();
+void push_comm(MPI_Comm comm);
+void pop_comm();
 void set_header_msg(std::string header_msg);
 void init_level(config & conf);
 void init(config & conf);

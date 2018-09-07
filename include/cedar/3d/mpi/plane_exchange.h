@@ -19,7 +19,7 @@ public:
 		{ log::error << "plane exchange of stencil_op not supported" << std::endl; }
 	void run(stencil_op<cdr2::nine_pt> & so) override
 		{ log::error << "plane exchange of stencil_op not supported" << std::endl; }
-	void run(grid_func & gf) override;
+	void run(grid_func & gf, unsigned short dmask=7) override;
 	void exchange_func(int k, real_t *gf) override;
 	void exchange_sten(int k, real_t *gf) override
 		{ log::error << "plane exchange of stencil_op not supported" << std::endl; }

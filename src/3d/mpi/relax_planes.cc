@@ -6,23 +6,28 @@
 
 namespace cedar { namespace cdr3 { namespace mpi {
 
-int log_begin(bool log_planes, int ipl, const std::string & suff)
+
+std::tuple<int, MPI_Comm> log_begin(bool log_planes, int ipl, const std::string & suff, MPI_Comm comm)
 {
-	auto tmp = log::lvl();
-	if (log_planes)
+	auto tmp = std::make_tuple<int, MPI_Comm>(log::lvl(), log::get_comm());
+
+	if (log_planes) {
 		log::set_header_msg(" (plane-" + suff + " " + std::to_string(ipl) + ")");
-	else
+		log::set_comm(comm);
+	} else
 		log::lvl() = 0;
+
 	return tmp;
 }
 
 
-void log_end(bool log_planes, int ipl, int lvl)
+void log_end(bool log_planes, std::tuple<int, MPI_Comm> saved)
 {
-	if (log_planes)
+	if (log_planes) {
 		log::set_header_msg("");
-	else
-		log::lvl() = lvl;
+		log::set_comm(std::get<1>(saved));
+	} else
+		log::lvl() = std::get<0>(saved);
 }
 
 

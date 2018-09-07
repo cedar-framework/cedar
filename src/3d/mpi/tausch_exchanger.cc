@@ -537,23 +537,23 @@ void tausch_exchanger::exchange_sten(int k, real_t * so)
 	}
 }
 
-void tausch_exchanger::run(mpi::grid_func & f)
+void tausch_exchanger::run(mpi::grid_func & f, unsigned short dmask)
 {
 	auto lvl = f.grid().level();
 	lvl = nlevels - lvl - 1;
 
 	for (int dir = 0; dir < halo_dir::count; dir++) {
-		if (recv_active[index(lvl, dir)])
+		if (recv_active[index(lvl, dir)] and (dmask & (1 << (dir / 2))))
 			tausch->postReceiveCwC(index(lvl, dir), index(lvl, dir));
 	}
 
 	for (int dir = 0; dir < halo_dir::count; dir++) {
-		if (send_active[index(lvl, dir)]) {
+		if (send_active[index(lvl, dir)] and (dmask & (1 << (dir / 2)))) {
 			tausch->packSendBufferCwC(index(lvl,dir), 0, f.data());
 			tausch->sendCwC(index(lvl,dir), index(lvl,dir));
 
 		}
-		if (recv_active[index(lvl, dir)]) {
+		if (recv_active[index(lvl, dir)] and (dmask & (1 << (dir / 2)))) {
 			tausch->recvCwC(index(lvl,dir));
 			tausch->unpackRecvBufferCwC(index(lvl,dir), 0, f.data());
 		}

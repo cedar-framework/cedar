@@ -40,7 +40,7 @@ void plane_exchange::setup(std::vector<topo_ptr> topos)
 }
 
 
-void plane_exchange::run(grid_func & gf)
+void plane_exchange::run(grid_func & gf, unsigned short dmask)
 {
 	ABT_thread_yield_to((*threads)[(wid+1) % nplanes]);
 	if (ismaster) {

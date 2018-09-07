@@ -30,7 +30,7 @@ public:
 	virtual void setup(std::vector<topo_ptr> topos) = 0;
 	virtual void run(stencil_op<comp_sten> & so) = 0;
 	virtual void run(stencil_op<full_sten> & so) = 0;
-	virtual void run(grid_func & gf) = 0;
+	virtual void run(grid_func & gf, unsigned short dmask=7) = 0;
 
 	virtual aarray<int, len_t, 2> & leveldims(int k) = 0;
 	virtual len_t * datadist(int k, int grid) = 0;

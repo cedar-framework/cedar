@@ -389,7 +389,7 @@ void tausch_exchanger::exchange_sten(int k, real_t * so)
 	}
 }
 
-void tausch_exchanger::run(mpi::grid_func & f)
+void tausch_exchanger::run(mpi::grid_func & f, unsigned short dmask)
 {
 	auto lvl = f.grid().level();
 	lvl = nlevels - lvl - 1;

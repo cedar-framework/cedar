@@ -195,7 +195,7 @@ void msg_exchanger::run(mpi::stencil_op<nine_pt> & sop)
 }
 
 
-void msg_exchanger::run(mpi::grid_func & f)
+void msg_exchanger::run(mpi::grid_func & f, unsigned short dmask)
 {
 	grid_topo &topo = f.grid();
 

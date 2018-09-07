@@ -208,7 +208,7 @@ void msg_exchanger::exchange_sten(int k, real_t * so)
 }
 
 
-void msg_exchanger::run(mpi::grid_func & f)
+void msg_exchanger::run(mpi::grid_func & f, unsigned short dmask)
 {
 		grid_topo &topo = f.grid();
 

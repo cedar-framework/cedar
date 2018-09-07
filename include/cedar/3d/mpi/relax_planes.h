@@ -1,6 +1,8 @@
 #ifndef CEDAR_3D_MPI_RELAX_PLANES_H
 #define CEDAR_3D_MPI_RELAX_PLANES_H
 
+#include <tuple>
+
 #include <cedar/types.h>
 #include <cedar/kernels/plane_relax.h>
 #include <cedar/3d/mpi/types.h>
@@ -11,8 +13,8 @@
 
 namespace cedar { namespace cdr3 { namespace mpi {
 
-int log_begin(bool log_planes, int ipl, const std::string & suff);
-void log_end(bool log_planes, int ipl, int lvl);
+std::tuple<int,MPI_Comm> log_begin(bool log_planes, int ipl, const std::string & suff, MPI_Comm comm);
+void log_end(bool log_planes, std::tuple<int,MPI_Comm> saved);
 
 cdr2::mpi::kman_ptr master_kman(config & conf, int nplanes, bool aggregate, plane_team & team);
 cdr2::mpi::kman_ptr worker_kman(config & conf, int nplanes, bool aggregate, plane_team & team, int worker_id);
@@ -74,13 +76,13 @@ void relax_planes(const stencil_op<sten3> & so, grid_func & x,
 			copy32<rdir>(x, x2, ipl);
 			copy_rhs<rdir>(so, x, b, b2, ipl);
 
-			auto tmp = log_begin(log_planes, ipl, relax_dir_name<rdir>::value);
+			auto tmp = log_begin(log_planes, kgs + ipl - 1, relax_dir_name<rdir>::value, x2.grid().comm);
 			planes[ipl-1]->solve(b2, x2);
-			log_end(log_planes, ipl, tmp);
+			log_end(log_planes, tmp);
 
 			copy23<rdir>(x2, x, ipl);
 		}
-		halo_service.run(x);
+		halo_service.run(x, 4);
 	}
 }
 
@@ -88,24 +90,27 @@ void relax_planes(const stencil_op<sten3> & so, grid_func & x,
 template<relax_dir rdir, class sten3, class sten2>
 void relax_planes_agg(const stencil_op<sten3> & so, grid_func & x,
                       const grid_func & b, cycle::Dir cdir,
+                      services::halo_exchange<stypes> & halo_service,
                       std::vector<slv2_ptr<sten2>> & planes,
                       std::array<plane_ult<sten2>, 2> & threads)
 {
 	auto & conf = planes[0]->get_config();
 	auto log_planes = conf.template get<bool>("log-planes", false);
 	int lstart, lend, lstride;
+	int kgs = so.grid().is(2);
 
 	if (cdir == cycle::Dir::DOWN) {
-		lstart = 1;
-		lend = 3;
-		lstride = 1;
+		lstart = 1 + ((kgs+1) % 2);
+		lstride = (kgs % 2) - ((kgs+1) % 2);
+		lend = lstart + 2*lstride;
 	} else {
-		lstart = 2;
-		lend = 0;
-		lstride = -1;
+		lstart = 1 + (kgs % 2);
+		lstride = ((kgs + 1) % 2) - (kgs % 2);
+		lend = lstart + 2*lstride;
 	}
 
-	auto tmp = log_begin(log_planes, 0, relax_dir_name<rdir>::value);
+	auto tmp = log_begin(log_planes, 0, relax_dir_name<rdir>::value,
+	                     planes[0]->levels.template get<sten2>(0).x.grid().comm);
 	// red-black relaxation
 	for (auto ipl_beg : range<int>(lstart, lend, lstride)) {
 		for (auto ipl : range<int>(ipl_beg, planes.size() + 1, 2)) {
@@ -123,9 +128,10 @@ void relax_planes_agg(const stencil_op<sten3> & so, grid_func & x,
 			auto & x2 = planes[ipl-1]->levels.template get<sten2>(0).x;
 			copy23<rdir>(x2, x, ipl);
 		}
+		halo_service.run(x, 4);
 	}
 
-	log_end(log_planes, 0, tmp);
+	log_end(log_planes, tmp);
 }
 
 
@@ -259,17 +265,18 @@ public:
 			rng = so.range(0);
 			nplanes = so.shape(0);
 		}
+		auto kgs = so.grid().is(2);
 		auto topo2 = slice_topo(so.grid());
 		auto conf2 = this->params->plane_config;
 		auto log_planes = conf2->template get<bool>("log-planes", true);
 		cdr2::mpi::kman_ptr master_kmans[2];
 		{
-			auto tmp = log_begin(log_planes, 1, relax_dir_name<rdir>::value);
+			auto tmp = log_begin(log_planes, kgs + 1 - 1, relax_dir_name<rdir>::value, topo2->comm);
 			master_kmans[0] = master_kman(*conf2, (nplanes / 2) + (nplanes % 2), aggregate, teams[0]);
-			log_end(log_planes, 1, tmp);
-			tmp = log_begin(log_planes, 2, relax_dir_name<rdir>::value);
+			log_end(log_planes, tmp);
+			tmp = log_begin(log_planes, kgs + 2 - 1, relax_dir_name<rdir>::value, topo2->comm);
 			master_kmans[1] = master_kman(*conf2, nplanes / 2, aggregate, teams[1]);
-			log_end(log_planes, 2, tmp);
+			log_end(log_planes, tmp);
 		}
 		for (auto ipl : rng) {
 			int i = ipl-1;
@@ -278,7 +285,7 @@ public:
 			auto & so2 = *so2_ptr;
 			copy_coeff<rdir>(so, so2);
 
-			auto tmp = log_begin(log_planes, ipl, relax_dir_name<rdir>::value);
+			auto tmp = log_begin(log_planes, kgs + ipl - 1, relax_dir_name<rdir>::value, topo2->comm);
 			if (i < 2)
 				kman2 = master_kmans[i];
 			else {
@@ -286,7 +293,7 @@ public:
 				                    aggregate, teams[i % 2], i / 2);
 			}
 			planes.emplace_back(std::make_unique<cdr2::mpi::solver<sten2>>(so2, conf2, kman2));
-			log_end(log_planes, ipl, tmp);
+			log_end(log_planes, tmp);
 
 			planes.back()->give_op(std::move(so2_ptr));
 			// setup fine-grid solution and right hand side with contiguous memory across planes
@@ -328,7 +335,7 @@ public:
 		if (std::is_same<sten, seven_pt>::value) {
 			#ifdef PLANE_AGG
 			if (aggregate)
-				relax_planes_agg<rdir>(so, x, b, cycle_dir, fine_planes, fine_threads);
+				relax_planes_agg<rdir>(so, x, b, cycle_dir, halo_service, fine_planes, fine_threads);
 			else
 				relax_planes<rdir>(so, x, b, cycle_dir, halo_service, fine_planes);
 			#else
@@ -338,7 +345,7 @@ public:
 			len_t lsize = so.shape(0);
 			#ifdef PLANE_AGG
 			if (aggregate)
-				relax_planes_agg<rdir>(so, x, b, cycle_dir, level_planes[level_map[lsize]], level_threads[level_map[lsize]]);
+				relax_planes_agg<rdir>(so, x, b, cycle_dir, halo_service, level_planes[level_map[lsize]], level_threads[level_map[lsize]]);
 			else
 				relax_planes<rdir>(so, x, b, cycle_dir, halo_service, level_planes[level_map[lsize]]);
 			#else

@@ -10,6 +10,7 @@ using lmap_t = std::map<std::string, unsigned int>;
 std::unique_ptr<lmap_t> log_level = nullptr;
 unsigned int level = 0;
 std::stack<std::tuple<unsigned int, std::string>> saved_levels;
+std::stack<MPI_Comm> saved_comms;
 
 LevelLogger memory("memory", Color::Modifier(Color::FG_BLUE));
 LevelLogger status("status", Color::Modifier(Color::FG_DEFAULT));
@@ -26,6 +27,20 @@ unsigned int & lvl() { return level; }
 void set_comm(MPI_Comm new_comm)
 {
 	comm = new_comm;
+}
+
+MPI_Comm get_comm() { return comm; }
+
+void push_comm(MPI_Comm new_comm)
+{
+	saved_comms.push(comm);
+	comm = new_comm;
+}
+
+void pop_comm()
+{
+	comm = saved_comms.top();
+	saved_comms.pop();
 }
 
 void set_header_msg(std::string msg)

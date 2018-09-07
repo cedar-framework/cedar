@@ -72,7 +72,7 @@ namespace mpi {
 		void setup(std::vector<topo_ptr> topos) override;
 		void run(stencil_op<seven_pt> & so) override { this->run_impl(so); }
 		void run(stencil_op<xxvii_pt> & so) override { this->run_impl(so); }
-		void run(grid_func & gf) override;
+		void run(grid_func & gf, unsigned short dmask=7) override;
 		void exchange_func(int k, real_t *gf) override;
 		void exchange_sten(int k, real_t * so) override;
 		aarray<int, len_t, 2> & leveldims(int k) override{
