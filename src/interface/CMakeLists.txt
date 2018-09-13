@@ -1,1 +1,1 @@
-set(interface_SOURCES c/timer.cc PARENT_SCOPE)
+set(interface_SOURCES object.cc PARENT_SCOPE)

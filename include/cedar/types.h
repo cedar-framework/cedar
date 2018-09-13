@@ -10,6 +10,7 @@
 #include <cassert>
 
 #include "cedar/util/align_allocator.h"
+#include <cedar/ctypes.h>
 
 namespace std {
 	template<typename T, typename ...Args>
@@ -40,8 +41,8 @@ namespace cycle {
 enum class Dir {UP, DOWN};
 }
 
-using len_t = unsigned int;
-using real_t = double;
+using len_t = cedar_len;
+using real_t = cedar_real;
 
 template <class T>
 	using AlignedVector = std::vector<T, AlignAllocator<T,16>>;

@@ -3,25 +3,24 @@
 #include <cedar/types.h>
 #include <cedar/mpi/grid_topo.h>
 
-#include <cedar/3d/interface/c/topo.h>
+#include <cedar/capi.h>
+
+#include <cedar/interface/object.h>
 
 extern "C"
 {
 
-	bmg3_topo bmg3_topo_create(MPI_Comm comm,
-	                           unsigned int ngx,
-	                           unsigned int ngy,
-	                           unsigned int ngz,
-	                           unsigned int nlx[],
-	                           unsigned int nly[],
-	                           unsigned int nlz[],
-	                           int nprocx,
-	                           int nprocy,
-	                           int nprocz)
+	int cedar_topo_create3d(MPI_Comm comm,
+	                        unsigned int ngx, unsigned int ngy, unsigned int ngz,
+	                        unsigned int nlx[], unsigned int nly[], unsigned int nlz[],
+	                        int nprocx, int nprocy, int nprocz,
+	                        cedar_topo *newtopo)
 	{
 		using namespace cedar;
-		int rank;
 
+		cedar_object *obj = cedar_object_create(CEDAR_KIND_TOPO);
+
+		int rank;
 		MPI_Comm_rank(comm, &rank);
 
 		std::shared_ptr<grid_topo> *grid_ptr;
@@ -77,7 +76,9 @@ extern "C"
 		}
 
 		grid_ptr = new std::shared_ptr<grid_topo>(std::move(grid));
-		return reinterpret_cast<bmg3_topo>(grid_ptr);
-	}
+		obj->ptr = reinterpret_cast<void*>(grid_ptr);
+		*newtopo = obj->handle;
 
+		return CEDAR_SUCCESS;
+	}
 }

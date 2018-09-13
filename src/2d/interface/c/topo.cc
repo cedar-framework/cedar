@@ -3,21 +3,39 @@
 #include <cedar/types.h>
 #include <cedar/mpi/grid_topo.h>
 
-#include <cedar/2d/interface/c/topo.h>
+#include <cedar/capi.h>
+
+#include <cedar/interface/object.h>
+
+
+std::shared_ptr<cedar::grid_topo> cedar_topo_getobj(cedar_topo handle)
+{
+	if ((handle & CEDAR_KIND_MASK) != CEDAR_KIND_TOPO)
+		return nullptr;
+
+	cedar_object *obj;
+	int ierr = cedar_object_get(handle, &obj);
+	if (ierr or (not obj))
+		return nullptr;
+
+	auto ptrptr = reinterpret_cast<std::shared_ptr<cedar::grid_topo>*>(obj->ptr);
+	return *ptrptr;
+}
+
 
 extern "C"
 {
-	bmg2_topo bmg2_topo_create(MPI_Comm comm,
-	                           unsigned int ngx,
-	                           unsigned int ngy,
-	                           unsigned int nlx[],
-	                           unsigned int nly[],
-	                           int nprocx,
-	                           int nprocy)
+	int cedar_topo_create2d(MPI_Comm comm,
+	                        unsigned int ngx, unsigned int ngy,
+	                        unsigned int nlx[], unsigned int nly[],
+	                        int nprocx, int nprocy,
+	                        cedar_topo *newtopo)
 	{
 		using namespace cedar;
-		int rank;
 
+		cedar_object *obj = cedar_object_create(CEDAR_KIND_TOPO);
+
+		int rank;
 		MPI_Comm_rank(comm, &rank);
 
 		std::shared_ptr<grid_topo> *grid_ptr;
@@ -66,6 +84,31 @@ extern "C"
 	//        grid->is(0), grid->is(1));
 
 		grid_ptr = new std::shared_ptr<grid_topo>(std::move(grid));
-		return reinterpret_cast<bmg2_topo>(grid_ptr);
+		obj->ptr = reinterpret_cast<void*>(grid_ptr);
+		*newtopo = obj->handle;
+
+		return CEDAR_SUCCESS;
+	}
+
+
+	int cedar_topo_free(cedar_topo *topo)
+	{
+		if ((*topo & CEDAR_KIND_MASK) != CEDAR_KIND_TOPO)
+			return CEDAR_ERR_TOPO;
+
+		cedar_object *obj;
+		cedar_object_get(*topo, &obj);
+		if (obj) {
+			if (obj->refcount == 0) {
+				auto *ptr = reinterpret_cast<std::shared_ptr<cedar::grid_topo>*>(obj->ptr);
+				delete ptr;
+				cedar_object_free(*topo);
+			}
+		} else
+			return CEDAR_ERR_TOPO;
+
+		*topo = CEDAR_TOPO_NULL;
+
+		return CEDAR_SUCCESS;
 	}
 }

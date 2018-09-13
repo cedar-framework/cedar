@@ -1,7 +1,8 @@
 set(interface_SOURCES
-  interface/c/operator.cc
+  interface/c/vec.cc
   interface/c/topo.cc
   interface/c/solver.cc
+  interface/c/mat.cc
   PARENT_SCOPE)
 
 # add_library(core SHARED python/core.cc)

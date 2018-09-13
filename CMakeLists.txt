@@ -78,6 +78,9 @@ if (ENABLE_PLANE_AGG)
   target_include_directories(cedar PUBLIC ${Argobots_INCLUDE_DIRS})
   target_compile_definitions(cedar PUBLIC PLANE_AGG)
 endif()
+if (ENABLE_3D)
+  target_compile_definitions(cedar PUBLIC ENABLE_3D)
+endif()
 
 target_include_directories(cedar PUBLIC
   $<INSTALL_INTERFACE:include/>

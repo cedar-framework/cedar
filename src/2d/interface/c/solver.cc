@@ -1,62 +1,122 @@
-#include <cedar/types.h>
 #include <cedar/2d/mpi/solver.h>
-#include <cedar/2d/mpi/stencil_op.h>
+#ifdef ENABLE_3D
+#include <cedar/3d/mpi/solver.h>
+#endif
 
-#include <cedar/2d/interface/c/solver.h>
-#include <cedar/2d/interface/c/types.h>
+#include <cedar/capi.h>
+#include <cedar/interface/object.h>
+#include <cedar/interface/vec.h>
+#include <cedar/interface/mat.h>
+#include <cedar/interface/solver.h>
+
+
+cedar_solver_cont *cedar_solver_getobj(cedar_solver handle)
+{
+	if ((handle & CEDAR_KIND_MASK) != CEDAR_KIND_SOLVER)
+		return nullptr;
+
+	cedar_object *obj;
+	int ierr = cedar_object_get(handle, &obj);
+	if (ierr or (not obj))
+		return nullptr;
+
+	return reinterpret_cast<cedar_solver_cont*>(obj->ptr);
+}
+
 
 extern "C"
 {
-	bmg2_solver bmg2_solver_create(bmg2_operator *op)
+	int cedar_solver_create(cedar_mat mat, cedar_solver *solver)
 	{
-		using namespace cedar::cdr2;
+		using namespace cedar;
 
-		auto & sop = reinterpret_cast<op_container*>(*op)->op;
-
-		auto *bmg = new mpi::solver<nine_pt>(sop);
-		auto & flevel = bmg->levels.get(0);
-		flevel.x = mpi::grid_func::zeros_like(flevel.res);
-		flevel.b = mpi::grid_func::zeros_like(flevel.res);
-
-		return reinterpret_cast<bmg2_solver>(bmg);
-	}
-
-
-	void bmg2_solver_run(bmg2_solver op, double *x, const double *b)
-	{
-		using namespace cedar::cdr2;
-
-		auto *bmg = reinterpret_cast<mpi::solver<nine_pt>*>(op);
-
-		auto & rhs = bmg->levels.get(0).b;
-
-		int idx = 0;
-		for (auto j : rhs.range(1)) {
-			for (auto i : rhs.range(0)) {
-				rhs(i,j) = b[idx];
-				idx++;
-			}
+		auto *matobj = cedar_mat_getobj(mat);
+		if (not matobj) {
+			*solver = CEDAR_SOLVER_NULL;
+			return CEDAR_ERR_MAT;
 		}
 
-		auto & sol = bmg->levels.get(0).x;
-		sol.set(0.0);
-		bmg->solve(rhs, sol);
+		cedar_object *obj = cedar_object_create(CEDAR_KIND_SOLVER);
 
-		idx = 0;
-		for (auto j : sol.range(1)) {
-			for (auto i : sol.range(0)) {
-				x[idx] = sol(i,j);
-				idx++;
-			}
+		cedar_solver_cont *slvobj = new cedar_solver_cont;
+		slvobj->nd = matobj->nd;
+		slvobj->compressed = matobj->compressed;
+
+		if (matobj->nd == 2) {
+			if (matobj->compressed)
+				slvobj->slv2comp = std::make_unique<cdr2::mpi::solver<cdr2::five_pt>>(*(matobj->op2comp));
+			else
+				slvobj->slv2full = std::make_unique<cdr2::mpi::solver<cdr2::nine_pt>>(*(matobj->op2full));
+		} else if (matobj->nd == 3) {
+			#ifdef ENABLE_3D
+			if (matobj->compressed)
+				slvobj->slv3comp = std::make_unique<cdr3::mpi::solver<cdr3::seven_pt>>(*(matobj->op3comp));
+			else
+				slvobj->slv3full = std::make_unique<cdr3::mpi::solver<cdr3::xxvii_pt>>(*(matobj->op3full));
+			#else
+			return CEDAR_ERR_DIM;
+			#endif
 		}
+
+		obj->ptr = reinterpret_cast<void*>(slvobj);
+		*solver = obj->handle;
+
+		return CEDAR_SUCCESS;
 	}
 
-	void bmg2_solver_destroy(bmg2_solver bmg)
+
+	int cedar_solver_run(cedar_solver slv, cedar_vec x, cedar_vec b)
 	{
-		using namespace cedar::cdr2;
+		auto *slvobj = cedar_solver_getobj(slv);
+		if (not slvobj)
+			return CEDAR_ERR_SOLVER;
 
-		auto * ptr =reinterpret_cast<mpi::solver<nine_pt>*>(bmg);
-		delete ptr;
+		auto *xobj = cedar_vec_getobj(x);
+		if (not xobj)
+			return CEDAR_ERR_VEC;
+
+		auto *bobj = cedar_vec_getobj(b);
+		if (not bobj)
+			return CEDAR_ERR_VEC;
+
+		if ((slvobj->nd != bobj->nd) or (slvobj->nd != xobj->nd))
+			return CEDAR_ERR_DIM;
+
+		if (slvobj->nd == 2) {
+			if (slvobj->compressed)
+				slvobj->slv2comp->solve(*(xobj->gfunc2), *(bobj->gfunc2));
+			else
+				slvobj->slv2full->solve(*(xobj->gfunc2), *(bobj->gfunc2));
+		} else {
+			#ifdef ENABLE_3D
+			if (slvobj->compressed)
+				slvobj->slv3comp->solve(*(xobj->gfunc3), *(bobj->gfunc3));
+			else
+				slvobj->slv3full->solve(*(xobj->gfunc3), *(bobj->gfunc3));
+			#else
+			return CEDAR_ERR_DIM;
+			#endif
+		}
+
+		return CEDAR_SUCCESS;
 	}
 
+
+	int cedar_solver_free(cedar_solver *slv)
+	{
+		if ((*slv & CEDAR_KIND_MASK) != CEDAR_KIND_SOLVER)
+			return CEDAR_ERR_SOLVER;
+
+		cedar_object *obj;
+		cedar_object_get(*slv, &obj);
+		if (obj) {
+			auto *cont = reinterpret_cast<cedar_solver_cont*>(obj->ptr);
+			delete cont;
+			cedar_object_free(*slv);
+		} else
+			return CEDAR_ERR_SOLVER;
+
+		*slv = CEDAR_SOLVER_NULL;
+		return CEDAR_SUCCESS;
+	}
 }
