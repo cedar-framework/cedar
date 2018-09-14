@@ -84,15 +84,15 @@ extern "C"
 
 		if (slvobj->nd == 2) {
 			if (slvobj->compressed)
-				slvobj->slv2comp->solve(*(xobj->gfunc2), *(bobj->gfunc2));
+				slvobj->slv2comp->solve(*(bobj->gfunc2), *(xobj->gfunc2));
 			else
-				slvobj->slv2full->solve(*(xobj->gfunc2), *(bobj->gfunc2));
+				slvobj->slv2full->solve(*(bobj->gfunc2), *(xobj->gfunc2));
 		} else {
 			#ifdef ENABLE_3D
 			if (slvobj->compressed)
-				slvobj->slv3comp->solve(*(xobj->gfunc3), *(bobj->gfunc3));
+				slvobj->slv3comp->solve(*(bobj->gfunc3), *(xobj->gfunc3));
 			else
-				slvobj->slv3full->solve(*(xobj->gfunc3), *(bobj->gfunc3));
+				slvobj->slv3full->solve(*(bobj->gfunc3), *(xobj->gfunc3));
 			#else
 			return CEDAR_ERR_DIM;
 			#endif

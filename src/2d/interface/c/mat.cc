@@ -62,6 +62,7 @@ extern "C"
 		cedar_object_incref(topo);
 		config conf("config.json");
 		cont->kman2 = mpi::build_kernel_manager(conf);
+		cont->is_halo_setup = false;
 		if (sten == CEDAR_STENCIL_FIVE_PT) {
 			cont->op2comp = std::make_unique<mpi::stencil_op<five_pt>>(topo_obj);
 			cont->compressed = true;
@@ -215,6 +216,11 @@ extern "C"
 
 		if (mobj->nd == 2) {
 			auto & halo_service = mobj->kman2->services().get<cdr2::mpi::halo_exchange>();
+			auto topo_obj = cedar_topo_getobj(mobj->topo);
+			if (not mobj->is_halo_setup) {
+				halo_service.setup({{topo_obj}});
+				mobj->is_halo_setup = true;
+			}
 			halo_service.run(*xobj->gfunc2);
 			if (mobj->compressed) {
 				mobj->kman2->run<cdr2::mpi::matvec>(*mobj->op2comp, *xobj->gfunc2, *yobj->gfunc2);
@@ -224,6 +230,11 @@ extern "C"
 		} else {
 			#ifdef ENABLE_3D
 			auto & halo_service = mobj->kman3->services().get<cdr3::mpi::halo_exchange>();
+			auto topo_obj = cedar_topo_getobj(mobj->topo);
+			if (not mobj->is_halo_setup) {
+				halo_service.setup({{topo_obj}});
+				mobj->is_halo_setup = true;
+			}
 			halo_service.run(*xobj->gfunc3);
 			if (mobj->compressed) {
 				mobj->kman3->run<cdr3::mpi::matvec>(*mobj->op3comp, *xobj->gfunc3, *yobj->gfunc3);
