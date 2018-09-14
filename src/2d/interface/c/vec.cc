@@ -9,7 +9,7 @@
 
 cedar_vec_cont *cedar_vec_getobj(cedar_vec handle)
 {
-	if ((handle & CEDAR_KIND_MASK) != CEDAR_KIND_VEC)
+	if (CEDAR_GET_KIND(handle) != CEDAR_KIND_VEC)
 		return nullptr;
 
 	cedar_object *obj;
@@ -48,9 +48,59 @@ extern "C"
 	}
 
 
+	int cedar_vec_len2d(cedar_vec vec, cedar_len *ilen, cedar_len *jlen)
+	{
+		auto *cont = cedar_vec_getobj(vec);
+		if (not cont)
+			return CEDAR_ERR_VEC;
+
+		if (cont->nd != 2)
+			return CEDAR_ERR_DIM;
+
+		auto & grid = cont->gfunc2->grid();
+		*ilen = grid.nlocal(0);
+		*jlen = grid.nlocal(1);
+
+		return CEDAR_SUCCESS;
+	}
+
+
+	int cedar_vec_baseptr(cedar_vec vec, cedar_real **base)
+	{
+		auto *cont = cedar_vec_getobj(vec);
+		if (not cont)
+			return CEDAR_ERR_VEC;
+
+		if (cont->nd == 2)
+			*base = cont->gfunc2->data();
+		else if (cont->nd == 3) {
+			#ifdef ENABLE_3D
+			*base = cont->gfunc3->data();
+			#else
+			return CEDAR_ERR_DIM;
+			#endif
+		} else
+			return CEDAR_ERR_DIM;
+
+		return CEDAR_SUCCESS;
+	}
+
+
+	int cedar_vec_getdim(cedar_vec vec, int *nd)
+	{
+		auto *cont = cedar_vec_getobj(vec);
+		if (not cont)
+			return CEDAR_ERR_VEC;
+
+		*nd = cont->nd;
+
+		return CEDAR_SUCCESS;
+	}
+
+
 	int cedar_vec_free(cedar_vec *vec)
 	{
-		if ((*vec & CEDAR_KIND_MASK) != CEDAR_KIND_TOPO)
+		if (CEDAR_GET_KIND(*vec) != CEDAR_KIND_TOPO)
 			return CEDAR_ERR_VEC;
 
 		cedar_object *obj;

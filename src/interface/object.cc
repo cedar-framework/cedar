@@ -9,14 +9,14 @@ static std::vector<cedar_object*> objects;
 extern "C"
 {
 
-	cedar_object *cedar_object_create(unsigned short kind)
+	cedar_object *cedar_object_create(cedar_kind kind)
 	{
 		cedar_object *obj = (cedar_object*) malloc(sizeof(cedar_object));
 		objects.push_back(obj);
 
 		obj->kind = kind;
 		obj->refcount = 0;
-		obj->handle = kind | (objects.size() << 4);
+		obj->handle = (kind << CEDAR_KIND_SHIFT) | objects.size();
 
 		return obj;
 	}
@@ -24,7 +24,7 @@ extern "C"
 
 	int cedar_object_get(int handle, cedar_object **ret)
 	{
-		std::size_t i = handle >> 4;
+		std::size_t i = handle & CEDAR_KEY_MASK;
 		cedar_object *obj;
 		if ((i > objects.size()) or (i == 0))
 			obj = nullptr;
@@ -33,7 +33,7 @@ extern "C"
 
 		*ret = obj;
 		if (obj) {
-			if (obj->kind != (handle & CEDAR_KIND_MASK)) {
+			if (obj->kind != CEDAR_GET_KIND(handle)) {
 				*ret = nullptr;
 				return CEDAR_ERR_KIND;
 			}
@@ -79,7 +79,7 @@ extern "C"
 		if (obj) {
 			if (obj->refcount == 0) {
 				free(obj);
-				objects[(handle >> 4) - 1] = nullptr;
+				objects[(handle & CEDAR_KEY_MASK) - 1] = nullptr;
 			}
 		} else {
 			return 0;
@@ -87,5 +87,4 @@ extern "C"
 
 		return 1;
 	}
-
 }

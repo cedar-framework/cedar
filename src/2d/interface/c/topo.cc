@@ -10,7 +10,7 @@
 
 std::shared_ptr<cedar::grid_topo> cedar_topo_getobj(cedar_topo handle)
 {
-	if ((handle & CEDAR_KIND_MASK) != CEDAR_KIND_TOPO)
+	if (CEDAR_GET_KIND(handle) != CEDAR_KIND_TOPO)
 		return nullptr;
 
 	cedar_object *obj;
@@ -93,7 +93,7 @@ extern "C"
 
 	int cedar_topo_free(cedar_topo *topo)
 	{
-		if ((*topo & CEDAR_KIND_MASK) != CEDAR_KIND_TOPO)
+		if (CEDAR_GET_KIND(*topo) != CEDAR_KIND_TOPO)
 			return CEDAR_ERR_TOPO;
 
 		cedar_object *obj;

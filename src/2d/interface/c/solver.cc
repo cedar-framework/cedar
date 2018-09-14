@@ -12,7 +12,7 @@
 
 cedar_solver_cont *cedar_solver_getobj(cedar_solver handle)
 {
-	if ((handle & CEDAR_KIND_MASK) != CEDAR_KIND_SOLVER)
+	if (CEDAR_GET_KIND(handle) != CEDAR_KIND_SOLVER)
 		return nullptr;
 
 	cedar_object *obj;
@@ -104,7 +104,7 @@ extern "C"
 
 	int cedar_solver_free(cedar_solver *slv)
 	{
-		if ((*slv & CEDAR_KIND_MASK) != CEDAR_KIND_SOLVER)
+		if (CEDAR_GET_KIND(*slv) != CEDAR_KIND_SOLVER)
 			return CEDAR_ERR_SOLVER;
 
 		cedar_object *obj;

@@ -32,4 +32,22 @@ extern "C"
 
 		return CEDAR_SUCCESS;
 	}
+
+
+	int cedar_vec_len3d(cedar_vec vec, cedar_len *ilen, cedar_len *jlen, cedar_len *klen)
+	{
+		auto *cont = cedar_vec_getobj(vec);
+		if (not cont)
+			return CEDAR_ERR_VEC;
+
+		if (cont->nd != 3)
+			return CEDAR_ERR_DIM;
+
+		auto & grid = cont->gfunc3->grid();
+		*ilen = grid.nlocal(0);
+		*jlen = grid.nlocal(1);
+		*klen = grid.nlocal(2);
+
+		return CEDAR_SUCCESS;
+	}
 }

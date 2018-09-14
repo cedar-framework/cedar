@@ -8,9 +8,28 @@
 #include <cedar/interface/mat.h>
 
 
+template<class T>
+static void dump(unsigned short nd, cedar::grid_topo & grid, T & so)
+{
+	std::ofstream ofile;
+
+	int rank;
+	MPI_Comm_rank(grid.comm, &rank);
+	if (rank == 0) {
+		if (nd == 2) {
+			ofile.open("op-" + std::to_string(grid.coord(0)) + "-" + std::to_string(grid.coord(1)) + ".txt", std::ios::out | std::ios::trunc | std::ios::binary);
+		} else {
+			ofile.open("op-" + std::to_string(grid.coord(0)) + "-" + std::to_string(grid.coord(1)) + "-" + std::to_string(grid.coord(2)) + ".txt", std::ios::out | std::ios::trunc | std::ios::binary);
+		}
+		ofile << so;
+		ofile.close();
+	}
+}
+
+
 cedar_mat_cont *cedar_mat_getobj(cedar_mat handle)
 {
-	if ((handle & CEDAR_KIND_MASK) != CEDAR_KIND_MAT)
+	if (CEDAR_GET_KIND(handle) != CEDAR_KIND_MAT)
 		return nullptr;
 
 	cedar_object *obj;
@@ -41,6 +60,8 @@ extern "C"
 		cont->nd = 2;
 		cont->topo = topo;
 		cedar_object_incref(topo);
+		config conf("config.json");
+		cont->kman2 = mpi::build_kernel_manager(conf);
 		if (sten == CEDAR_STENCIL_FIVE_PT) {
 			cont->op2comp = std::make_unique<mpi::stencil_op<five_pt>>(topo_obj);
 			cont->compressed = true;
@@ -126,9 +147,101 @@ extern "C"
 	}
 
 
+	int cedar_mat_dump(cedar_mat mat)
+	{
+		auto *cont = cedar_mat_getobj(mat);
+		if (not cont)
+			return CEDAR_ERR_MAT;
+
+		if (cont->nd == 2) {
+			if (cont->compressed) {
+				auto & so = *cont->op2comp;
+				auto & grid = so.grid();
+				dump(2, grid, so);
+			} else {
+				auto & so = *cont->op2full;
+				auto & grid = so.grid();
+				dump(2, grid, so);
+			}
+		} else {
+			#ifdef ENABLE_3D
+			if (cont->compressed) {
+				auto & so = *cont->op3comp;
+				auto & grid = so.grid();
+				dump(3, grid, so);
+			} else {
+				auto & so = *cont->op3full;
+				auto & grid = so.grid();
+				dump(3, grid, so);
+			}
+			#else
+			return CEDAR_ERR_DIM;
+			#endif
+		}
+
+		return CEDAR_SUCCESS;
+	}
+
+
+	int cedar_mat_gettopo(cedar_mat mat, cedar_topo *topo)
+	{
+		auto *cont = cedar_mat_getobj(mat);
+		if (not cont) {
+			*topo = CEDAR_TOPO_NULL;
+			return CEDAR_ERR_MAT;
+		}
+
+		*topo = cont->topo;
+		return CEDAR_SUCCESS;
+	}
+
+
+	int cedar_matvec(cedar_mat mat, cedar_vec x, cedar_vec y)
+	{
+		using namespace cedar;
+
+		auto *mobj = cedar_mat_getobj(mat);
+		if (not mobj)
+			return CEDAR_ERR_MAT;
+		auto *xobj = cedar_vec_getobj(x);
+		if (not xobj)
+			return CEDAR_ERR_VEC;
+		auto *yobj = cedar_vec_getobj(y);
+		if (not yobj)
+			return CEDAR_ERR_VEC;
+
+		if ((mobj->nd != xobj->nd) or (mobj->nd != yobj->nd))
+			return CEDAR_ERR_DIM;
+
+		if (mobj->nd == 2) {
+			auto & halo_service = mobj->kman2->services().get<cdr2::mpi::halo_exchange>();
+			halo_service.run(*xobj->gfunc2);
+			if (mobj->compressed) {
+				mobj->kman2->run<cdr2::mpi::matvec>(*mobj->op2comp, *xobj->gfunc2, *yobj->gfunc2);
+			} else {
+				mobj->kman2->run<cdr2::mpi::matvec>(*mobj->op2full, *xobj->gfunc2, *yobj->gfunc2);
+			}
+		} else {
+			#ifdef ENABLE_3D
+			auto & halo_service = mobj->kman3->services().get<cdr3::mpi::halo_exchange>();
+			halo_service.run(*xobj->gfunc3);
+			if (mobj->compressed) {
+				mobj->kman3->run<cdr3::mpi::matvec>(*mobj->op3comp, *xobj->gfunc3, *yobj->gfunc3);
+			} else {
+				mobj->kman3->run<cdr3::mpi::matvec>(*mobj->op3full, *xobj->gfunc3, *yobj->gfunc3);
+			}
+			#else
+			return CEDAR_ERR_DIM;
+			#endif
+		}
+
+		return CEDAR_SUCCESS;
+	}
+
+
 	int cedar_mat_free(cedar_mat *mat)
 	{
-		if ((*mat & CEDAR_KIND_MASK) != CEDAR_KIND_MAT)
+		if (CEDAR_GET_KIND(*mat) != CEDAR_KIND_MAT)
 			return CEDAR_ERR_MAT;
 
 		cedar_object *obj;

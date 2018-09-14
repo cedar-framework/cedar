@@ -25,10 +25,10 @@ typedef int cedar_mat;
 typedef int cedar_vec;
 typedef int cedar_solver;
 
-#define CEDAR_TOPO_NULL ((cedar_topo) 1)
-#define CEDAR_MAT_NULL ((cedar_mat) 3)
-#define CEDAR_SOLVER_NULL ((cedar_solver) 2)
-#define CEDAR_VEC_NULL ((cedar_vec) 4)
+#define CEDAR_TOPO_NULL ((cedar_topo) 0x10000000)
+#define CEDAR_MAT_NULL ((cedar_mat) 0x30000000)
+#define CEDAR_SOLVER_NULL ((cedar_solver) 0x20000000)
+#define CEDAR_VEC_NULL ((cedar_vec) 0x40000000)
 
 /**
  * Create 2D distributed grid topology.
@@ -112,6 +112,60 @@ int cedar_vec_create2d(cedar_topo topo, cedar_vec *vec);
 #ifdef ENABLE_3D
 int cedar_vec_create3d(cedar_topo topo, cedar_vec *vec);
 #endif
+
+
+/**
+ * Get base address of storage for vec.
+ *
+ * @param vec
+ * @param base base address of vec's storage
+ * @return
+ *   - CEDAR_SUCCESS: no error
+ *   - CEDAR_ERR_VEC: invalid vector handle
+ *   - CEDAR_ERR_DIM: invalid dimension
+ */
+int cedar_vec_baseptr(cedar_vec vec, cedar_real **base);
+
+
+/**
+ * Get local length of each dimension (including ghosts).
+ *
+ * @param vec vector to query lengths
+ * @param ilen local length of first dimension (including ghosts)
+ * @param jlen local length of second dimension (including ghosts)
+ * @return
+ *   - CEDAR_SUCCESS: no error
+ *   - CEDAR_ERR_VEC: invalid vector handle
+ *   - CEDAR_ERR_DIM: invalid dimension
+ */
+int cedar_vec_len2d(cedar_vec vec, cedar_len *ilen, cedar_len *jlen);
+
+
+/**
+ * Get local length of each dimension (including ghosts).
+ *
+ * @param vec vector to query lengths
+ * @param ilen local length of first dimension (including ghosts)
+ * @param jlen local length of second dimension (including ghosts)
+ * @param klen local length of third dimension (including ghosts)
+ * @return
+ *   - CEDAR_SUCCESS: no error
+ *   - CEDAR_ERR_VEC: invalid vector handle
+ *   - CEDAR_ERR_DIM: invalid dimension
+ */
+int cedar_vec_len3d(cedar_vec vec, cedar_len *ilen, cedar_len *jlen, cedar_len *klen);
+
+
+/**
+ * Get a vector's number of dimensions.
+ *
+ * @param vec vector to query lengths
+ * @param nd number of dimensions
+ * @return
+ *   - CEDAR_SUCCESS: no error
+ *   - CEDAR_ERR_VEC: invalid vector handle
+ */
+int cedar_vec_getdim(cedar_vec vec, int *nd);
 
 
 /**
@@ -212,8 +266,37 @@ int cedar_mat_set3d(cedar_mat mat, unsigned int nvals, cedar_coord_3d coords[], 
 
 /**
  * Computes y = mat * x
+ *
+ * @return
+ *    - CEDAR_SUCCESS: no error
+ *    - CEDAR_ERR_MAT: invalid matrix handle
+ *    - CEDAR_ERR_VEC: invalid vector handle
+ *    - CEDAR_ERR_DIM: invalid dimension
  */
 int cedar_matvec(cedar_mat mat, cedar_vec x, cedar_vec y);
+
+
+/**
+ * Get topo used to create matrix.
+ *
+ * @param mat cedar stencil operator
+ * @param topo distributed grid topology used to create mat
+ *    - CEDAR_SUCCESS: no error
+ *    - CEDAR_ERR_MAT: invalid matrix handle
+ */
+int cedar_mat_gettopo(cedar_mat mat, cedar_topo *topo);
+
+
+/**
+ * Dump cedar stencil operator to text file.
+ *
+ * @param mat matrix to dump
+ * @return
+ *   - CEDAR_SUCCESS: no error
+ *   - CEDAR_ERR_MAT: invalid matrix handle
+ *   - CEDAR_ERR_DIM: invalid dimension
+ */
+int cedar_mat_dump(cedar_mat mat);
 
 
 /**
