@@ -29,7 +29,7 @@ extern "C"
 		if ((i > objects.size()) or (i == 0))
 			obj = nullptr;
 		else
-			obj = objects[i-i];
+			obj = objects[i-1];
 
 		*ret = obj;
 		if (obj) {
