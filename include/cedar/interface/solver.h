@@ -13,11 +13,11 @@ struct cedar_solver_cont
 {
 	unsigned short nd;
 	bool compressed;
-	std::unique_ptr<cedar::cdr2::mpi::solver<cdr2::five_pt>> slv2comp;
-	std::unique_ptr<cedar::cdr2::mpi::solver<cdr2::nine_pt>> slv2full;
+	std::unique_ptr<cedar::cdr2::mpi::solver<cedar::cdr2::five_pt>> slv2comp;
+	std::unique_ptr<cedar::cdr2::mpi::solver<cedar::cdr2::nine_pt>> slv2full;
 	#ifdef ENABLE_3D
-	std::unique_ptr<cedar::cdr3::mpi::solver<cdr3::seven_pt>> slv3comp;
-	std::unique_ptr<cedar::cdr3::mpi::solver<cdr3::xxvii_pt>> slv3full;
+	std::unique_ptr<cedar::cdr3::mpi::solver<cedar::cdr3::seven_pt>> slv3comp;
+	std::unique_ptr<cedar::cdr3::mpi::solver<cedar::cdr3::xxvii_pt>> slv3full;
 	#endif
 };
 
