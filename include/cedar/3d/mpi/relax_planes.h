@@ -82,7 +82,7 @@ void relax_planes(const stencil_op<sten3> & so, grid_func & x,
 
 			copy23<rdir>(x2, x, ipl);
 		}
-		halo_service.run(x, 4);
+		halo_service.run(x, 7);
 	}
 }
 
@@ -128,7 +128,7 @@ void relax_planes_agg(const stencil_op<sten3> & so, grid_func & x,
 			auto & x2 = planes[ipl-1]->levels.template get<sten2>(0).x;
 			copy23<rdir>(x2, x, ipl);
 		}
-		halo_service.run(x, 4);
+		halo_service.run(x, 7);
 	}
 
 	log_end(log_planes, tmp);

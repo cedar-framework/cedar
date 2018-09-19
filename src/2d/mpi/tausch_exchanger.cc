@@ -112,7 +112,8 @@ void tausch_exchanger::init_datadist()
 		ydatadist(1, j) = ydatadist(0, j) + dimyfine[j] - 1;
 	}
 
-	line_data->linebuf.reserve(std::max(dimxfine[0], dimyfine[0])*8*std::max(ydatadist.len(1), xdatadist.len(1)));
+	// This bound may not be correct!
+	line_data->linebuf.resize(std::max(dimxfine[0], dimyfine[0])*(8+1)*std::max(ydatadist.len(1), xdatadist.len(1)));
 }
 
 

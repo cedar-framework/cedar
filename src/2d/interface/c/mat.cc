@@ -1,4 +1,5 @@
 #include <cedar/2d/mpi/stencil_op.h>
+#include <cedar/3d/util/io.h>
 
 #include <cedar/capi.h>
 
@@ -8,22 +9,19 @@
 #include <cedar/interface/mat.h>
 
 
-template<class T>
-static void dump(unsigned short nd, cedar::grid_topo & grid, T & so)
+template<class T> void dump2(cedar::grid_topo & grid, T & so)
 {
 	std::ofstream ofile;
 
-	int rank;
-	MPI_Comm_rank(grid.comm, &rank);
-	if (rank == 0) {
-		if (nd == 2) {
-			ofile.open("op-" + std::to_string(grid.coord(0)) + "-" + std::to_string(grid.coord(1)) + ".txt", std::ios::out | std::ios::trunc | std::ios::binary);
-		} else {
-			ofile.open("op-" + std::to_string(grid.coord(0)) + "-" + std::to_string(grid.coord(1)) + "-" + std::to_string(grid.coord(2)) + ".txt", std::ios::out | std::ios::trunc | std::ios::binary);
-		}
-		ofile << so;
-		ofile.close();
-	}
+	ofile.open("op-" + std::to_string(grid.coord(0)) + "-" + std::to_string(grid.coord(1)) + ".txt", std::ios::out | std::ios::trunc | std::ios::binary);
+	ofile << so;
+	ofile.close();
+}
+
+
+template<class T> void dump3(cedar::grid_topo & grid, T & so)
+{
+	cedar::cdr3::util::writeascii(so);
 }
 
 
@@ -158,22 +156,22 @@ extern "C"
 			if (cont->compressed) {
 				auto & so = *cont->op2comp;
 				auto & grid = so.grid();
-				dump(2, grid, so);
+				dump2(grid, so);
 			} else {
 				auto & so = *cont->op2full;
 				auto & grid = so.grid();
-				dump(2, grid, so);
+				dump2(grid, so);
 			}
 		} else {
 			#ifdef ENABLE_3D
 			if (cont->compressed) {
 				auto & so = *cont->op3comp;
 				auto & grid = so.grid();
-				dump(3, grid, so);
+				dump3(grid, so);
 			} else {
 				auto & so = *cont->op3full;
 				auto & grid = so.grid();
-				dump(3, grid, so);
+				dump3(grid, so);
 			}
 			#else
 			return CEDAR_ERR_DIM;

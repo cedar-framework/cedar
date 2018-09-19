@@ -29,6 +29,7 @@ extern "C"
 		cedar_object_incref(topo);
 		config conf("config.json");
 		cont->kman3 = mpi::build_kernel_manager(conf);
+		cont->is_halo_setup = false;
 		if (sten == CEDAR_STENCIL_SEVEN_PT) {
 			cont->op3comp = std::make_unique<mpi::stencil_op<seven_pt>>(topo_obj);
 			cont->compressed = true;
