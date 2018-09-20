@@ -2,6 +2,7 @@ add_subdirectory(ftn)
 
 set(sources
   ${ftn_SOURCES}
+  relax.cc
   restrict_op.cc
   prolong_op.cc
   restrict.cc
