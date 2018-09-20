@@ -137,42 +137,36 @@ void relax_planes_agg(const stencil_op<sten3> & so, grid_func & x,
 
 template<relax_dir rdir, class sten3, class sten2>
 void copy_coeff(const stencil_op<sten3> & so3,
-                cdr2::mpi::stencil_op<sten2> & so2);
+                cdr2::mpi::stencil_op<sten2> & so2, int ipl);
 
 template<relax_dir rdir>
 void copy_coeff(const stencil_op<seven_pt> & so3,
-                cdr2::mpi::stencil_op<cdr2::five_pt> & so2)
+                cdr2::mpi::stencil_op<cdr2::five_pt> & so2, int ipl)
 {
 	using namespace cdr2;
 
 	if (rdir == relax_dir::xy) {
-		for (auto k : so3.range(2)) {
-			for (auto j : so3.grange(1)) {
-				for (auto i : so3.grange(0)) {
-					so2(i,j,five_pt::c) = so3(i,j,k,seven_pt::p);
-					so2(i,j,five_pt::w) = so3(i,j,k,seven_pt::pw);
-					so2(i,j,five_pt::s) = so3(i,j,k,seven_pt::ps);
-				}
+		for (auto j : so3.grange(1)) {
+			for (auto i : so3.grange(0)) {
+				so2(i,j,five_pt::c) = so3(i,j,ipl,seven_pt::p);
+				so2(i,j,five_pt::w) = so3(i,j,ipl,seven_pt::pw);
+				so2(i,j,five_pt::s) = so3(i,j,ipl,seven_pt::ps);
 			}
 		}
 	} else if (rdir == relax_dir::xz) {
-		for (auto j : so3.range(1)) {
-			for (auto k : so3.grange(2)) {
-				for (auto i : so3.grange(0)) {
-					so2(i,k,five_pt::c) = so3(i,j,k,seven_pt::p);
-					so2(i,k,five_pt::w) = so3(i,j,k,seven_pt::pw);
-					so2(i,k,five_pt::s) = so3(i,j,k,seven_pt::b);
-				}
+		for (auto k : so3.grange(2)) {
+			for (auto i : so3.grange(0)) {
+				so2(i,k,five_pt::c) = so3(i,ipl,k,seven_pt::p);
+				so2(i,k,five_pt::w) = so3(i,ipl,k,seven_pt::pw);
+				so2(i,k,five_pt::s) = so3(i,ipl,k,seven_pt::b);
 			}
 		}
 	} else if (rdir == relax_dir::yz) {
-		for (auto i : so3.range(0)) {
-			for (auto k : so3.grange(2)) {
-				for (auto j : so3.grange(1)) {
-					so2(j,k,five_pt::c) = so3(i,j,k,seven_pt::p);
-					so2(j,k,five_pt::w) = so3(i,j,k,seven_pt::ps);
-					so2(j,k,five_pt::s) = so3(i,j,k,seven_pt::b);
-				}
+		for (auto k : so3.grange(2)) {
+			for (auto j : so3.grange(1)) {
+				so2(j,k,five_pt::c) = so3(ipl,j,k,seven_pt::p);
+				so2(j,k,five_pt::w) = so3(ipl,j,k,seven_pt::ps);
+				so2(j,k,five_pt::s) = so3(ipl,j,k,seven_pt::b);
 			}
 		}
 	}
@@ -180,44 +174,38 @@ void copy_coeff(const stencil_op<seven_pt> & so3,
 
 template<relax_dir rdir>
 void copy_coeff(const stencil_op<xxvii_pt> & so3,
-                cdr2::mpi::stencil_op<cdr2::nine_pt> & so2)
+                cdr2::mpi::stencil_op<cdr2::nine_pt> & so2, int ipl)
 {
 	using namespace cdr2;
 
 	if (rdir == relax_dir::xy) {
-		for (auto k : so3.range(2)) {
-			for (auto j : so3.grange(1)) {
-				for (auto i : so3.grange(0)) {
-					so2(i,j,nine_pt::c) = so3(i,j,k,xxvii_pt::p);
-					so2(i,j,nine_pt::w) = so3(i,j,k,xxvii_pt::pw);
-					so2(i,j,nine_pt::s) = so3(i,j,k,xxvii_pt::ps);
-					so2(i,j,nine_pt::sw) = so3(i,j,k,xxvii_pt::psw);
-					so2(i,j,nine_pt::nw) = so3(i,j,k,xxvii_pt::pnw);
-				}
+		for (auto j : so3.grange(1)) {
+			for (auto i : so3.grange(0)) {
+				so2(i,j,nine_pt::c) = so3(i,j,ipl,xxvii_pt::p);
+				so2(i,j,nine_pt::w) = so3(i,j,ipl,xxvii_pt::pw);
+				so2(i,j,nine_pt::s) = so3(i,j,ipl,xxvii_pt::ps);
+				so2(i,j,nine_pt::sw) = so3(i,j,ipl,xxvii_pt::psw);
+				so2(i,j,nine_pt::nw) = so3(i,j,ipl,xxvii_pt::pnw);
 			}
 		}
 	} else if (rdir == relax_dir::xz) {
-		for (auto j : so3.range(1)) {
-			for (auto k : so3.grange(2)) {
-				for (auto i : so3.grange(0)) {
-					so2(i,k,nine_pt::c) = so3(i,j,k,xxvii_pt::p);
-					so2(i,k,nine_pt::w) = so3(i,j,k,xxvii_pt::pw);
-					so2(i,k,nine_pt::s) = so3(i,j,k,xxvii_pt::b);
-					so2(i,k,nine_pt::sw) = so3(i,j,k,xxvii_pt::bw);
-					so2(i,k,nine_pt::nw) = so3(i,j,k,xxvii_pt::be);
-				}
+		for (auto k : so3.grange(2)) {
+			for (auto i : so3.grange(0)) {
+				so2(i,k,nine_pt::c) = so3(i,ipl,k,xxvii_pt::p);
+				so2(i,k,nine_pt::w) = so3(i,ipl,k,xxvii_pt::pw);
+				so2(i,k,nine_pt::s) = so3(i,ipl,k,xxvii_pt::b);
+				so2(i,k,nine_pt::sw) = so3(i,ipl,k,xxvii_pt::bw);
+				so2(i,k,nine_pt::nw) = so3(i,ipl,k,xxvii_pt::be);
 			}
 		}
 	} else if (rdir == relax_dir::yz) {
-		for (auto i : so3.range(0)) {
-			for (auto k : so3.grange(2)) {
-				for (auto j : so3.grange(1)) {
-					so2(j,k,nine_pt::c) = so3(i,j,k,xxvii_pt::p);
-					so2(j,k,nine_pt::w) = so3(i,j,k,xxvii_pt::ps);
-					so2(j,k,nine_pt::s) = so3(i,j,k,xxvii_pt::b);
-					so2(j,k,nine_pt::sw) = so3(i,j,k,xxvii_pt::bs);
-					so2(j,k,nine_pt::nw) = so3(i,j,k,xxvii_pt::bn);
-				}
+		for (auto k : so3.grange(2)) {
+			for (auto j : so3.grange(1)) {
+				so2(j,k,nine_pt::c) = so3(ipl,j,k,xxvii_pt::p);
+				so2(j,k,nine_pt::w) = so3(ipl,j,k,xxvii_pt::ps);
+				so2(j,k,nine_pt::s) = so3(ipl,j,k,xxvii_pt::b);
+				so2(j,k,nine_pt::sw) = so3(ipl,j,k,xxvii_pt::bs);
+				so2(j,k,nine_pt::nw) = so3(ipl,j,k,xxvii_pt::bn);
 			}
 		}
 	}
@@ -286,7 +274,7 @@ public:
 			cdr2::mpi::kman_ptr kman2;
 			auto so2_ptr = std::make_unique<cdr2::mpi::stencil_op<sten2>>(topo2);
 			auto & so2 = *so2_ptr;
-			copy_coeff<rdir>(so, so2);
+			copy_coeff<rdir>(so, so2, ipl);
 
 			auto tmp = log_begin(log_planes, kgs + ipl - 1, relax_dir_name<rdir>::value, topo2->comm);
 			if (i < 2)
