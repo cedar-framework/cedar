@@ -18,6 +18,19 @@ line_pkg::line_pkg(grid_topo & topo):
 }
 
 
+void tausch_exchanger::setup_worker(std::vector<topo_ptr> topos)
+{
+	this->nlevels = topos.size();
+	for (auto i : range<std::size_t>(3)) {
+		dims[i] = aarray<int, len_t, 2>(topos[0]->nproc(i), nlevels);
+		coord[i] = topos[0]->coord(i);
+	}
+	line_data = std::make_unique<line_pkg>(*topos[0]);
+
+	init_dims(*topos[0]);
+}
+
+
 void tausch_exchanger::setup(std::vector<topo_ptr> topos)
 {
 	this->nlevels = topos.size();

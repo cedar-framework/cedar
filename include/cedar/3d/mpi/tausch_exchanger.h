@@ -25,6 +25,7 @@ public:
 	using parent = services::halo_exchange<stypes>;
 	enum halo_dir { west=0, east=1, south=2, north=3, bottom=4, top=5, count };
 	tausch_exchanger() : nghost{{2,2,2}} {}
+	void setup_worker(std::vector<topo_ptr> topos);
 	void setup(std::vector<topo_ptr> topos) override;
 	void run(stencil_op<seven_pt> & so) override { this->run_impl(so); }
 	void run(stencil_op<xxvii_pt> & so) override { this->run_impl(so); }

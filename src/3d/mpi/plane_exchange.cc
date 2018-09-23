@@ -30,9 +30,13 @@ void plane_exchange::setup(std::vector<topo_ptr> topos)
 
 	halo3->nhalo(2) = 0;
 	halo3->add_params(this->params);
-	halo3->setup(topos);
-	halo3->activate_send(cdr3::mpi::tausch_exchanger::halo_dir::top, false);
-	halo3->activate_recv(cdr3::mpi::tausch_exchanger::halo_dir::bottom, false);
+	if (ismaster) {
+		halo3->setup(topos);
+		halo3->activate_send(cdr3::mpi::tausch_exchanger::halo_dir::top, false);
+		halo3->activate_recv(cdr3::mpi::tausch_exchanger::halo_dir::bottom, false);
+	} else {
+		halo3->setup_worker(topos);
+	}
 
 	for (auto tpr : topos) {
 		tpr->nlocal(2) = 0;
