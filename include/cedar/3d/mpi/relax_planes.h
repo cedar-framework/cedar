@@ -2,6 +2,7 @@
 #define CEDAR_3D_MPI_RELAX_PLANES_H
 
 #include <tuple>
+#include <type_traits>
 
 #include <cedar/types.h>
 #include <cedar/kernels/plane_relax.h>
@@ -12,6 +13,16 @@
 #include <cedar/3d/mpi/plane_team.h>
 
 namespace cedar { namespace cdr3 { namespace mpi {
+
+template<relax_dir rdir>
+struct ortho_dir : std::integral_constant<unsigned short, 0> {};
+template<>
+struct ortho_dir<relax_dir::xy> : std::integral_constant<unsigned short, 4> {};
+template<>
+struct ortho_dir<relax_dir::xz> : std::integral_constant<unsigned short, 2> {};
+template<>
+struct ortho_dir<relax_dir::yz> : std::integral_constant<unsigned short, 1> {};
+
 
 std::tuple<int,MPI_Comm> log_begin(bool log_planes, int ipl, const std::string & suff, MPI_Comm comm);
 void log_end(bool log_planes, std::tuple<int,MPI_Comm> saved);
@@ -82,7 +93,7 @@ void relax_planes(const stencil_op<sten3> & so, grid_func & x,
 
 			copy23<rdir>(x2, x, ipl);
 		}
-		halo_service.run(x, 7);
+		halo_service.run(x, ortho_dir<rdir>::value);
 	}
 }
 
@@ -128,7 +139,7 @@ void relax_planes_agg(const stencil_op<sten3> & so, grid_func & x,
 			auto & x2 = planes[ipl-1]->levels.template get<sten2>(0).x;
 			copy23<rdir>(x2, x, ipl);
 		}
-		halo_service.run(x, 7);
+		halo_service.run(x, ortho_dir<rdir>::value);
 	}
 
 	log_end(log_planes, tmp);

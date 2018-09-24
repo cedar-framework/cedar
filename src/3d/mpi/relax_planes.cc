@@ -6,7 +6,6 @@
 
 namespace cedar { namespace cdr3 { namespace mpi {
 
-
 std::tuple<int, MPI_Comm> log_begin(bool log_planes, int ipl, const std::string & suff, MPI_Comm comm)
 {
 	auto tmp = std::make_tuple<int, MPI_Comm>(log::lvl(), log::get_comm());
