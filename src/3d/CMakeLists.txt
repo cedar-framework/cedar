@@ -28,6 +28,7 @@ if(ENABLE_MPI)
 	mpi/plane_exchange.cc
 	mpi/plane_ult.cc
 	mpi/plane_team.cc
+	mpi/plane_util.cc
 	mpi/prolong_op.cc
 	mpi/restrict_op.cc
 	mpi/restrict.cc
