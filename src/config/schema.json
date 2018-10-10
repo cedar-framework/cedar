@@ -4,17 +4,6 @@
     "type": "object",
     "properties":
     {
-		"kernels":
-		{
-			"type": "object",
-			"properties":
-			{
-				"residual": {
-					"type": "string",
-					"pattern": "fortran|c++"
-				}
-			}
-		},
 		"log":
 		{
 			"type": "array",
@@ -22,12 +11,24 @@
 			{
 				"type": "string",
 				"pattern": "error|status|info|warn"
-			}
+			},
+			"description": "Used to enable desired logging information."
 		},
-		"log-planes": {"type": "bool"},
 		"cg-config":
 		{
-			"type": "object"
+			"type": "object",
+			"description": "Used to set custom configuration for coarse-grid solver (can be nested for recursive coarse-grid solvers).  If this is not set, outer configuration is used for the coarse-grid solver."
+		},
+		"plane-config":
+		{
+			"type": "object",
+			"description": "Used to set custom configuration for 2D plane solves.  If not set, a default plane configuration will be used."
+		},
+		"log-planes": {"type": "bool", "description": "Enable logging of every plane solve."},
+		"halo-exchange":
+		{
+			"type": "string",
+			"pattern": "tausch|msg"
 		},
 		"solver":
 		{
@@ -39,35 +40,59 @@
 					"type": "object",
 					"properties":
 					{
-						"nrelax-pre" : {"type": "integer"},
-						"nrelax-post" : {"type": "integer"}
+						"nrelax-pre" : {"type": "integer", "description": "number of relaxation sweeps before coarse-grid correction."},
+						"nrelax-post" : {"type": "integer", "description": "number of relaxation sweeps after coarse-grid correction."}
 					}
 				},
 				"tol"
 				{
-					"type": "float"
+					"type": "float",
+					"description": "Tolerance condition on relative residual norm for terminating solver iteration."
 				},
 				"max-iter":
 				{
-					"type": "integer"
+					"type": "integer",
+					"description": "Maximum number of iterations to run."
 				},
 				"min-coarse":
 				{
-					"type": "integer"
+					"type": "integer",
+					"description": "Minimum number of points in each direction for coarse-grid."
 				},
 				"num-levels":
 				{
-					"type": "integer"
+					"type": "integer",
+					"description": "Used to set a specific number of multigrid levels for solver.  If not set this is calculated from min-coarse."
 				},
 				"cg-solver":
 				{
 					"type": "string",
-					"pattern": "boxmg|LU|redist"
+					"pattern": "cedar|LU|redist",
+					"description": "Solver to use for coarsest grid."
 				},
 				"relaxation":
 				{
 					"type": "string",
-					"pattern": "point|line-x|line-y|line-xy|plane"
+					"pattern": "point|line-x|line-y|line-xy|plane-xy|plane-xz|plane-yz|planes"
+				},
+				"ml-relax":
+				{
+					"type": "object",
+					"properties":
+					{
+						"enabled": {"type": "bool"},
+						"min-gsz":
+						{
+							"type": "integer",
+							"description": "Minimum processor group size (processor coarsening factor)."
+						},
+						"factorize":
+						{
+							"type": "bool",
+							"description": "Use lapack to factorize local blocks in contrast to memory efficient algorithm."
+						}
+					},
+					"description": "Settings for multilevel line relaxation."
 				}
 			}
 		},
