@@ -398,6 +398,7 @@ void relax_planes(const stencil_op<sten3> & so, grid_func & x,
                   services::halo_exchange<stypes> & halo_service,
                   std::vector<slv2_ptr<sten2>> & planes)
 {
+	timer_down();
 	auto & conf = planes[0]->get_config();
 	auto log_planes = conf.template get<bool>("log-planes", true);
 	int lstart, lend, lstride;
@@ -419,17 +420,24 @@ void relax_planes(const stencil_op<sten3> & so, grid_func & x,
 			auto & x2 = planes[ipl-1]->levels.template get<sten2>(0).x;
 			auto & b2 = planes[ipl-1]->levels.template get<sten2>(0).b;
 
+			timer_begin("plane-copy");
 			copy32<rdir>(x, x2, ipl);
 			copy_rhs<rdir>(so, x, b, b2, ipl);
+			timer_end("plane-copy");
 
 			auto tmp = log_begin(log_planes, kgs + ipl - 1, relax_dir_name<rdir>::value, x2.grid().comm);
 			planes[ipl-1]->solve(b2, x2);
 			log_end(log_planes, tmp);
 
+			timer_begin("plane-copy");
 			copy23<rdir>(x2, x, ipl);
+			timer_end("plane-copy");
 		}
+		timer_begin("halo");
 		halo_service.run(x, ortho_dir<rdir>::value);
+		timer_end("halo");
 	}
+	timer_up();
 }
 template void relax_planes<relax_dir::xy,
                            xxvii_pt, cdr2::nine_pt>(const stencil_op<xxvii_pt> & so, grid_func & x,
@@ -470,6 +478,7 @@ void relax_planes_agg(const stencil_op<sten3> & so, grid_func & x,
                       std::vector<slv2_ptr<sten2>> & planes,
                       std::array<plane_ult<sten2>, 2> & threads)
 {
+	timer_down();
 	auto & conf = planes[0]->get_config();
 	auto log_planes = conf.template get<bool>("log-planes", false);
 	int lstart, lend, lstride;
@@ -493,8 +502,10 @@ void relax_planes_agg(const stencil_op<sten3> & so, grid_func & x,
 			auto & x2 = planes[ipl-1]->levels.template get<sten2>(0).x;
 			auto & b2 = planes[ipl-1]->levels.template get<sten2>(0).b;
 
+			timer_begin("plane-copy");
 			copy32<rdir>(x, x2, ipl);
 			copy_rhs<rdir>(so, x, b, b2, ipl);
+			timer_end("plane-copy");
 
 			threads[(ipl-1) % 2].start((ipl - 1) / 2);
 		}
@@ -502,12 +513,17 @@ void relax_planes_agg(const stencil_op<sten3> & so, grid_func & x,
 		for (auto ipl : range<int>(ipl_beg, planes.size() + 1, 2)) {
 			threads[(ipl-1) % 2].join((ipl - 1) / 2);
 			auto & x2 = planes[ipl-1]->levels.template get<sten2>(0).x;
+			timer_begin("plane-copy");
 			copy23<rdir>(x2, x, ipl);
+			timer_end("plane-copy");
 		}
+		timer_begin("halo");
 		halo_service.run(x, ortho_dir<rdir>::value);
+		timer_end("halo");
 	}
 
 	log_end(log_planes, tmp);
+	timer_up();
 }
 template void relax_planes_agg<relax_dir::xy,
                                seven_pt, cdr2::five_pt>(const stencil_op<seven_pt> & so, grid_func & x,
