@@ -25,9 +25,6 @@ extern "C" {
 namespace cedar { namespace cdr2 { namespace mpi {
 
 
-template<class inner_solver>
-void copy_services(inner_solver & slv, service_manager<stypes> & services);
-
 /**
  Coarse-grid redistribution solver.
 
@@ -143,9 +140,7 @@ redist_solver<inner_solver>::redist_solver(const stencil_op<nine_pt> & so,
 		MPI_Fint parent_comm;
 		MSG_pause(&parent_comm);
 		log::push_level("redist", *conf);
-		slv = std::make_unique<inner_solver>(*so_redist, conf);
-		if (not inner_solver::is_serial)
-			copy_services(*slv, *services);
+		slv = std::make_unique<inner_solver>(*so_redist, conf, *services);
 		log::pop_level();
 		MSG_pause(&msg_comm);
 		MSG_play(parent_comm);

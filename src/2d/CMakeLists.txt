@@ -33,6 +33,7 @@ if(ENABLE_MPI)
 	mpi/interp.cc
 	mpi/kernel_manager.cc
 	mpi/redist_solver.cc
+	mpi/solver.cc
 	redist/cholesky_solver.cc
 	)
 

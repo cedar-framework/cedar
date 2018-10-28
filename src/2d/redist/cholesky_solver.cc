@@ -5,6 +5,12 @@ namespace cedar { namespace cdr2 {
 cholesky_solver::cholesky_solver(stencil_op & sop,
                                  std::shared_ptr<config> conf) : conf(conf)
 {
+	setup(sop);
+}
+
+
+void cholesky_solver::setup(stencil_op & sop)
+{
 	this->kman = build_kernel_manager(*conf);
 	auto params = build_kernel_params(*conf);
 	auto nxc = sop.shape(0);
