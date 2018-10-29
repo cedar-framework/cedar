@@ -121,6 +121,33 @@ int plane_mpi::scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype
 
 	return ierr;
 }
+
+
+int plane_mpi::gatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
+                       void *recvbuf, const int *recvcounts, const int *displs,
+                       MPI_Datatype recvtype, int root, MPI_Comm comm)
+{
+	int ierr = 0;
+	ierr = MPI_Gatherv(sendbuf, sendcount, sendtype,
+	                   recvbuf, recvcounts, displs,
+	                   recvtype, root, comm);
+	ABT_thread_yield_to((*threads)[(wid+1) % nplanes]);
+	return ierr;
+}
+
+
+int plane_mpi::scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
+                        MPI_Datatype sendtype, void *recvbuf, int recvcount,
+                        MPI_Datatype recvtype,
+                        int root, MPI_Comm comm)
+{
+	int ierr = 0;
+	ierr = MPI_Scatterv(sendbuf, sendcounts, displs,
+	                    sendtype, recvbuf, recvcount, recvtype, root, comm);
+	ABT_thread_yield_to((*threads)[(wid+1) % nplanes]);
+	return ierr;
+}
+
 #endif
 
 

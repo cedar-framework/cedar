@@ -393,13 +393,15 @@ void redist_solver<inner_solver>::gather_rhs(const grid_func & b)
 			rbuf_len += rcounts[idx];
 		}
 	}
+
+	auto & mp_service = this->services->template get<message_passing>();
 	array<real_t,1> rbuf(rbuf_len);
 	if (redundant) {
 		MPI_Allgatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
 		               displs.data(), MPI_DOUBLE, rcomms.pblock_comm);
 	} else {
-		MPI_Gatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
-		            displs.data(), MPI_DOUBLE, 0, rcomms.pblock_comm);
+		mp_service.gatherv(sbuf.data(), sbuf.len(0), MPI_DOUBLE, rbuf.data(), rcounts.data(),
+		                   displs.data(), MPI_DOUBLE, 0, rcomms.pblock_comm);
 	}
 
 	if (redundant or (block_id == 0)) {
@@ -468,9 +470,11 @@ void redist_solver<inner_solver>::scatter_sol(grid_func & x)
 				jgs += ny;
 			}
 		}
-		MPI_Scatterv(sbuf.data(), scounts.data(), displs.data(),
-		             MPI_DOUBLE, x.data(), x.len(0)*x.len(1),
-		             MPI_DOUBLE, 0, rcomms.pblock_comm);
+
+		auto & mp_service = this->services->template get<message_passing>();
+		mp_service.scatterv(sbuf.data(), scounts.data(), displs.data(),
+		                    MPI_DOUBLE, x.data(), x.len(0)*x.len(1),
+		                    MPI_DOUBLE, 0, rcomms.pblock_comm);
 	}
 
 	if (redundant and active) {

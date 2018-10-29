@@ -25,6 +25,14 @@ public:
 		                  root, comm);
 	}
 
+	int gatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
+	                    void *recvbuf, const int *recvcounts, const int *displs,
+	                    MPI_Datatype recvtype, int root, MPI_Comm comm) override
+	{
+		return MPI_Gatherv(sendbuf, sendcount, sendtype,
+		                   recvbuf, recvcounts, displs,
+		                   recvtype, root, comm);
+	}
 
 	int scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 	            void *recvbuf, int recvcount, MPI_Datatype recvtype,
@@ -33,6 +41,16 @@ public:
 		return MPI_Scatter(sendbuf, sendcount, sendtype,
 		                   recvbuf, recvcount, recvtype,
 		                   root, comm);
+	}
+
+	int scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
+	             MPI_Datatype sendtype, void *recvbuf, int recvcount,
+	             MPI_Datatype recvtype,
+	             int root, MPI_Comm comm) override
+	{
+		return MPI_Scatterv(sendbuf, sendcounts, displs,
+		                    sendtype, recvbuf, recvcount,
+		                    recvtype, root, comm);
 	}
 };
 
