@@ -120,7 +120,7 @@ void planes<rdir>::setup_impl(const stencil_op<sten3> & so, std::vector<slv2_ptr
 	auto kgs = so.grid().is(2);
 	auto topo2 = slice_topo(so.grid());
 	auto conf2 = this->params->plane_config;
-	auto log_planes = conf2->template get<bool>("log-planes", true);
+	auto log_planes = conf2->template get<bool>("log-planes", false);
 	cdr2::mpi::kman_ptr master_kmans[2];
 	{
 		auto tmp = log_begin(log_planes, kgs + 1 - 1, relax_dir_name<rdir>::value, topo2->comm);
