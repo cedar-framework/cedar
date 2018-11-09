@@ -29,19 +29,26 @@ namespace cedar {
 			stimes.resize(1);
 			ltimes.resize(1);
 			counts.resize(1);
+			active.resize(1);
 		}
 
 
 		void begin(std::string label) {
-			stimes[lvl][label] = timer_util<mmode>::now();
+			if (not active[lvl][label]) {
+				stimes[lvl][label] = timer_util<mmode>::now();
+				active[lvl][label] = true;
+			}
 		}
 
 
 		void end(std::string label) {
-			auto endtime = timer_util<mmode>::now();
-			auto elapsed = timer_util<mmode>::duration(stimes[lvl][label], endtime);
-			ltimes[lvl][label] += elapsed;
-			counts[lvl][label] += 1;
+			if (active[lvl][label]) {
+				auto endtime = timer_util<mmode>::now();
+				auto elapsed = timer_util<mmode>::duration(stimes[lvl][label], endtime);
+				ltimes[lvl][label] += elapsed;
+				counts[lvl][label] += 1;
+				active[lvl][label] = false;
+			}
 		}
 		void up() { lvl--; }
 		void down() {
@@ -50,6 +57,7 @@ namespace cedar {
 				stimes.resize(stimes.size()+1);
 				ltimes.resize(ltimes.size()+1);
 				counts.resize(counts.size()+1);
+				active.resize(active.size()+1);
 			}
 		}
 
@@ -64,6 +72,7 @@ namespace cedar {
 		std::vector<std::map<std::string, double>> ltimes;     /** local elapsed times */
 		std::vector<std::map<std::string, timing_t>> stimes;   /** start times */
 		std::vector<std::map<std::string, int>> counts;
+		std::vector<std::map<std::string, bool>> active;
 		int lvl;
 	};
 	template<> void time_log<machine_mode::MPI>::save(std::string fname);
