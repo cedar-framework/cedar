@@ -48,10 +48,6 @@ public:
 				if (thread_created[i])
 					ABT_thread_free(&threads[i]);
 			}
-
-			if (ABT_initialized() == ABT_SUCCESS) {
-				ABT_finalize();
-			}
 		}
 	}
 
