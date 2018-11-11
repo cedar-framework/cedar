@@ -28,6 +28,10 @@ public:
 	}
 	void setup(const stencil_op<xxvii_pt> & so) override
 	{
+		const auto & grid = so.grid();
+		level_threads.reserve(grid.nlevel()-1);
+		level_teams.reserve(grid.nlevel()-1);
+
 		level_threads.emplace_back();
 		level_planes.emplace_back();
 		level_teams.emplace_back();
