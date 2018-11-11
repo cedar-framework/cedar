@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include <cedar/3d/mpi/plane_mempool.h>
 #include <cedar/3d/mpi/plane_mpi.h>
 #include <cedar/3d/mpi/plane_exchange.h>
@@ -402,7 +404,7 @@ void relax_planes(const stencil_op<sten3> & so, grid_func & x,
 	auto & conf = planes[0]->get_config();
 	auto log_planes = conf.template get<bool>("log-planes", true);
 	int lstart, lend, lstride;
-	int kgs = so.grid().is(2);
+	int kgs = so.grid().is(std::log2(ortho_dir<rdir>::value));
 
 	if (cdir == cycle::Dir::DOWN) {
 		lstart = 1 + ((kgs+1) % 2);
@@ -482,7 +484,7 @@ void relax_planes_agg(const stencil_op<sten3> & so, grid_func & x,
 	auto & conf = planes[0]->get_config();
 	auto log_planes = conf.template get<bool>("log-planes", false);
 	int lstart, lend, lstride;
-	int kgs = so.grid().is(2);
+	int kgs = so.grid().is(std::log2(ortho_dir<rdir>::value));
 
 	if (cdir == cycle::Dir::DOWN) {
 		lstart = 1 + ((kgs+1) % 2);
