@@ -67,7 +67,7 @@ public:
 			                               &nspace, &this->nlevels);
 			if (not initialized) {
 				comms.init(2, this->nlevels - 1);
-				comms.set(MPI_COMM_NULL);
+				comms.set(MPI_Comm_c2f(MPI_COMM_NULL));
 				MPI_Comm gcomm;
 				auto & mp = this->services->template get<message_passing>();
 				mp.comm_split(comm, coord_other, coord, &gcomm);

@@ -65,6 +65,7 @@ target_link_libraries(cedar PUBLIC
   ${LAPACK_LIBRARIES}
   ${BLAS_LIBRARIES}
   ${MPI_C_LIBRARIES}
+  ${MPI_CXX_LIBRARIES}
   ${MPI_Fortran_LIBRARIES})
 include_directories(${json_location})
 if (tausch_FOUND)
