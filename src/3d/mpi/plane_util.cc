@@ -473,6 +473,7 @@ template void relax_planes<relax_dir::xz,
                                                     std::vector<slv2_ptr<cdr2::five_pt>> & planes);
 
 
+#ifdef PLANE_AGG
 template<relax_dir rdir, class sten3, class sten2>
 void relax_planes_agg(const stencil_op<sten3> & so, grid_func & x,
                       const grid_func & b, cycle::Dir cdir,
@@ -563,4 +564,5 @@ template void relax_planes_agg<relax_dir::xz,
                                                         services::halo_exchange<stypes> & halo_service,
                                                         std::vector<slv2_ptr<cdr2::nine_pt>> & planes,
                                                         std::array<plane_ult<cdr2::nine_pt>, 2> & threads);
+#endif
 }}}

@@ -1,7 +1,9 @@
 #ifndef CEDAR_3D_MPI_PLANE_ULT_H
 #define CEDAR_3D_MPI_PLANE_ULT_H
 
+#ifdef PLANE_AGG
 #include <abt.h>
+#endif
 #include <vector>
 #include <memory>
 

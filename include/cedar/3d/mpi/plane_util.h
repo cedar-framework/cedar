@@ -65,13 +65,14 @@ void relax_planes(const stencil_op<sten3> & so, grid_func & x,
                   std::vector<slv2_ptr<sten2>> & planes);
 
 
+#ifdef PLANE_AGG
 template<relax_dir rdir, class sten3, class sten2>
 void relax_planes_agg(const stencil_op<sten3> & so, grid_func & x,
                       const grid_func & b, cycle::Dir cdir,
                       services::halo_exchange<stypes> & halo_service,
                       std::vector<slv2_ptr<sten2>> & planes,
                       std::array<plane_ult<sten2>, 2> & threads);
-
+#endif
 
 template<relax_dir rdir>
 struct plane_util
