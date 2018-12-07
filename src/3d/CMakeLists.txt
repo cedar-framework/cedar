@@ -25,7 +25,6 @@ if(ENABLE_MPI)
 	mpi/plane_mpi.cc
 	mpi/redist_solver.cc
 	mpi/plane_mempool.cc
-	mpi/plane_exchange.cc
 	mpi/plane_ult.cc
 	mpi/plane_team.cc
 	mpi/plane_util.cc
@@ -40,6 +39,11 @@ if(ENABLE_MPI)
 	mpi/kernel_manager.cc
 	mpi/setup_nog.cc
 	mpi/gallery.cc)
+
+  if(ENABLE_PLANE_AGG)
+	list(APPEND sources
+	  mpi/plane_exchange.cc)
+  endif()
 
   if (tausch_FOUND)
 	list(APPEND sources

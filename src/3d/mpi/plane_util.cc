@@ -2,7 +2,9 @@
 
 #include <cedar/3d/mpi/plane_mempool.h>
 #include <cedar/3d/mpi/plane_mpi.h>
+#ifdef PLANE_AGG
 #include <cedar/3d/mpi/plane_exchange.h>
+#endif
 #include <cedar/3d/mpi/plane_util.h>
 
 

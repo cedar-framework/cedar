@@ -1,6 +1,5 @@
 #include <cedar/3d/mpi/plane_mempool.h>
 #include <cedar/3d/mpi/plane_mpi.h>
-#include <cedar/3d/mpi/plane_exchange.h>
 #include <cedar/3d/mpi/relax_planes.h>
 
 
