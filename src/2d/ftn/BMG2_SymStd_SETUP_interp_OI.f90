@@ -65,7 +65,8 @@
      &     JENDC, JEND_y, JJC1, JJCF, JJCF1, JJCF2, JJF1, JJF2, JJFC,&
      &     IPN, PER_x, PER_y, PER_xy
       integer :: IBC
-      real(real_t) :: A, B, EP, EPSILON, SUM, S, ZEPS
+      real(real_t) :: A, B, EP, emach, SUM, S
+      real*8 D1MACH
 
 ! ======================================================================
 
@@ -75,7 +76,7 @@
 !     Useful Constants:
 ! ----------------------------------
 
-      ZEPS = EPSILON(1.D0)
+      emach = D1MACH(3)
 
 ! ----------------------------------
 !     Non-periodic boundary conditions
@@ -119,7 +120,7 @@
                   SUM=A+B+SO(I-1,J,KS)+SO(I-1,J+1,KS)
                   SUM=A+B+(SO(I-1,J,KO)-SUM)*MAX(SO(I-1,J,KO)&
      &                 -(rONE+EP)*SUM,rZERO)/(ABS(SO(I-1,J,KO)&
-     &                 -(rONE+EP)*SUM)+ZEPS)
+     &                 -(rONE+EP)*SUM)+emach)
                   SUM=rONE/SUM
                   CI(IC,JC,LR)=A*SUM
                   CI(IC,JC,LL)=B*SUM
@@ -137,7 +138,7 @@
                   SUM=A+B+SO(I,J-1,KW)+SO(I+1,J-1,KW)
                   SUM=A+B+(SO(I,J-1,KO)-SUM)*MAX(SO(I,J-1,KO)&
      &                 -(rONE+EP)*SUM,rZERO)/(ABS(SO(I,J-1,KO)&
-     &                 -(rONE+EP)*SUM)+ZEPS)
+     &                 -(rONE+EP)*SUM)+emach)
                   SUM=rONE/SUM
                   CI(IC,JC,LA)=A*SUM
                   CI(IC,JC,LB)=B*SUM
@@ -163,7 +164,7 @@
      &                   )
                   SUM=SUM+(SO(I-1,J-1,KO)-SUM)*MAX(SO(I-1,J-1,KO)&
      &                 -(rONE+EP)*SUM,rZERO)/(ABS(SO(I-1,J-1,KO)&
-     &                 -(rONE+EP)*SUM)+ZEPS)
+     &                 -(rONE+EP)*SUM)+emach)
                   S=rONE/SUM
                   CI(IC,JC,LSW)=(SO(I-1,J-1,KS)*CI(IC,JC-1,LL)&
      &                 +SO(I-1,J-1,KW)*CI(IC-1,JC,LB)&
@@ -199,7 +200,7 @@
                   SUM=A+B+SO(I-1,J,KS)+SO(I-1,J+1,KS)
                   SUM=A+B+(SO(I-1,J,KO)-SUM)*MAX(SO(I-1,J,KO)&
      &                 -(rONE+EP)*SUM,rZERO)/(ABS(SO(I-1,J,KO)&
-     &                 -(rONE+EP)*SUM)+ZEPS)
+     &                 -(rONE+EP)*SUM)+emach)
                   SUM=rONE/SUM
                   CI(IC,JC,LR)=A*SUM
                   CI(IC,JC,LL)=B*SUM
@@ -217,7 +218,7 @@
                   SUM=A+B+SO(I,J-1,KW)+SO(I+1,J-1,KW)
                   SUM=A+B+(SO(I,J-1,KO)-SUM)*MAX(SO(I,J-1,KO)&
      &                 -(rONE+EP)*SUM,rZERO)/(ABS(SO(I,J-1,KO)&
-     &                 -(rONE+EP)*SUM)+ZEPS)
+     &                 -(rONE+EP)*SUM)+emach)
                   SUM=rONE/SUM
                   CI(IC,JC,LA)=A*SUM
                   CI(IC,JC,LB)=B*SUM
@@ -238,7 +239,7 @@
      &                   )
                   SUM=SUM+(SO(I-1,J-1,KO)-SUM)*MAX(SO(I-1,J-1,KO)&
      &                 -(rONE+EP)*SUM,rZERO)/(ABS(SO(I-1,J-1,KO)&
-     &                 -(rONE+EP)*SUM)+ZEPS)
+     &                 -(rONE+EP)*SUM)+emach)
                   S=rONE/SUM
                   CI(IC,JC,LSW)=(SO(I-1,J-1,KS)*CI(IC,JC-1,LL)&
      &                 +SO(I-1,J-1,KW)*CI(IC-1,JC,LB))*S
@@ -332,7 +333,7 @@
                SUM=A+B+SO(I-1,J,KS)+SO(I-1,J+1,KS)
                SUM=A+B+(SO(I-1,J,KO)-SUM)*MAX(SO(I-1,J,KO)-&
      &              (rONE+EP)*SUM,rZERO)&
-     &              /(ABS(SO(I-1,J,KO)-(rONE+EP)*SUM)+ZEPS)
+     &              /(ABS(SO(I-1,J,KO)-(rONE+EP)*SUM)+emach)
                SUM=rONE/SUM
                CI(IC,JC,LR)=A*SUM
                CI(IC,JC,LL)=B*SUM
@@ -350,7 +351,7 @@
          SUM=A+B+SO(I-1,J,KS)+SO(I-1,J+1,KS)
          SUM=A+B+(SO(I-1,J,KO)-SUM)*MAX(SO(I-1,J,KO)-&
      &        (rONE+EP)*SUM,rZERO)&
-     &        /(ABS(SO(I-1,J,KO)-(rONE+EP)*SUM)+ZEPS)
+     &        /(ABS(SO(I-1,J,KO)-(rONE+EP)*SUM)+emach)
          SUM=rONE/SUM
          CI(IC,JJC,LR)=A*SUM
          CI(IC,JJC,LL)=B*SUM
@@ -365,7 +366,7 @@
          SUM=A+B+SO(I-1,J,KS)+SO(I-1,J+1,KS)
          SUM=A+B+(SO(I-1,J,KO)-SUM)*MAX(SO(I-1,J,KO)-&
      &        (rONE+EP)*SUM,rZERO)&
-     &        /(ABS(SO(I-1,J,KO)-(rONE+EP)*SUM)+ZEPS)
+     &        /(ABS(SO(I-1,J,KO)-(rONE+EP)*SUM)+emach)
          SUM=rONE/SUM
          CI(IC,1,LR)=A*SUM
          CI(IC,1,LL)=B*SUM
@@ -384,7 +385,7 @@
             EP=MIN(ABS(A/SO(I,J-1,KO)),ABS(B/SO(I,J-1,KO)))
             SUM=A+B+(SO(I,J-1,KO)-SUM)*MAX(SO(I,J-1,KO)-&
      &           (rONE+EP)*SUM,rZERO)&
-     &           /(ABS(SO(I,J-1,KO)-(rONE+EP)*SUM)+ZEPS)
+     &           /(ABS(SO(I,J-1,KO)-(rONE+EP)*SUM)+emach)
             SUM=rONE/SUM
             CI(IC,JC,LA)=A*SUM
             CI(IC,JC,LB)=B*SUM
@@ -402,7 +403,7 @@
             EP=MIN(ABS(A/SO(I,J-1,KO)),ABS(B/SO(I,J-1,KO)))
             SUM=A+B+(SO(I,J-1,KO)-SUM)*MAX(SO(I,J-1,KO)-&
      &           (rONE+EP)*SUM,rZERO)&
-     &           /(ABS(SO(I,J-1,KO)-(rONE+EP)*SUM)+ZEPS)
+     &           /(ABS(SO(I,J-1,KO)-(rONE+EP)*SUM)+emach)
             SUM=rONE/SUM
             CI(IIC,JC,LA)=A*SUM
             CI(IIC,JC,LB)=B*SUM
@@ -417,7 +418,7 @@
             EP=MIN(ABS(A/SO(I,J-1,KO)),ABS(B/SO(I,J-1,KO)))
             SUM=A+B+(SO(I,J-1,KO)-SUM)*MAX(SO(I,J-1,KO)-&
      &           (rONE+EP)*SUM,rZERO)&
-     &           /(ABS(SO(I,J-1,KO)-(rONE+EP)*SUM)+ZEPS)
+     &           /(ABS(SO(I,J-1,KO)-(rONE+EP)*SUM)+emach)
             SUM=rONE/SUM
             CI(1,JC,LA)=A*SUM
             CI(1,JC,LB)=B*SUM
@@ -445,7 +446,7 @@
      &           )
             SUM=SUM+(SO(I-1,J-1,KO)-SUM)*MAX(SO(I-1,J-1,KO)&
      &           -(rONE+EP)*SUM,rZERO)/(ABS(SO(I-1,J-1,KO)&
-     &           -(rONE+EP)*SUM)+ZEPS)
+     &           -(rONE+EP)*SUM)+emach)
             S=rONE/SUM
             CI(IC,JC,LSW)=(SO(I-1,J-1,KS)*CI(IC,JC-1,LL)&
      &           +SO(I-1,J-1,KW)*CI(IC-1,JC,LB)&
@@ -484,7 +485,7 @@
                SUM=A+B+SO(I-1,J,KS)+SO(I-1,J+1,KS)
                SUM=A+B+(SO(I-1,J,KO)-SUM)*MAX(SO(I-1,J,KO)&
      &              -(rONE+EP)*SUM,rZERO)&
-     &              /(ABS(SO(I-1,J,KO)-(rONE+EP)*SUM)+ZEPS)
+     &              /(ABS(SO(I-1,J,KO)-(rONE+EP)*SUM)+emach)
                SUM=rONE/SUM
                CI(IC,JC,LR)=A*SUM
                CI(IC,JC,LL)=B*SUM
@@ -503,7 +504,7 @@
                SUM=A+B+SO(I-1,J,KS)+SO(I-1,J+1,KS)
                SUM=A+B+(SO(I-1,J,KO)-SUM)*MAX(SO(I-1,J,KO)&
      &              -(rONE+EP)*SUM,rZERO)&
-     &              /(ABS(SO(I-1,J,KO)-(rONE+EP)*SUM)+ZEPS)
+     &              /(ABS(SO(I-1,J,KO)-(rONE+EP)*SUM)+emach)
                SUM=rONE/SUM
                CI(IC,JJC,LR)=A*SUM
                CI(IC,JJC,LL)=B*SUM
@@ -518,7 +519,7 @@
                SUM=A+B+SO(I-1,J,KS)+SO(I-1,J+1,KS)
                SUM=A+B+(SO(I-1,J,KO)-SUM)*MAX(SO(I-1,J,KO)&
      &              -(rONE+EP)*SUM,rZERO)&
-     &              /(ABS(SO(I-1,J,KO)-(rONE+EP)*SUM)+ZEPS)
+     &              /(ABS(SO(I-1,J,KO)-(rONE+EP)*SUM)+emach)
                SUM=rONE/SUM
                CI(IC,1,LR)=A*SUM
                CI(IC,1,LL)=B*SUM
@@ -538,7 +539,7 @@
                SUM=A+B+SO(I,J-1,KW)+SO(I+1,J-1,KW)
                SUM=A+B+(SO(I,J-1,KO)-SUM)*MAX(SO(I,J-1,KO)&
      &              -(rONE+EP)*SUM,rZERO)&
-     &              /(ABS(SO(I,J-1,KO)-(rONE+EP)*SUM)+ZEPS)
+     &              /(ABS(SO(I,J-1,KO)-(rONE+EP)*SUM)+emach)
                SUM=rONE/SUM
                CI(IC,JC,LA)=A*SUM
                CI(IC,JC,LB)=B*SUM
@@ -556,7 +557,7 @@
                SUM=A+B+SO(I,J-1,KW)+SO(I+1,J-1,KW)
                SUM=A+B+(SO(I,J-1,KO)-SUM)*MAX(SO(I,J-1,KO)&
      &              -(rONE+EP)*SUM,rZERO)&
-     &              /(ABS(SO(I,J-1,KO)-(rONE+EP)*SUM)+ZEPS)
+     &              /(ABS(SO(I,J-1,KO)-(rONE+EP)*SUM)+emach)
                SUM=rONE/SUM
                CI(IIC,JC,LA)=A*SUM
                CI(IIC,JC,LB)=B*SUM
@@ -571,7 +572,7 @@
                SUM=A+B+SO(I,J-1,KW)+SO(I+1,J-1,KW)
                SUM=A+B+(SO(I,J-1,KO)-SUM)*MAX(SO(I,J-1,KO)&
      &              -(rONE+EP)*SUM,rZERO)&
-     &              /(ABS(SO(I,J-1,KO)-(rONE+EP)*SUM)+ZEPS)
+     &              /(ABS(SO(I,J-1,KO)-(rONE+EP)*SUM)+emach)
                SUM=rONE/SUM
                CI(1,JC,LA)=A*SUM
                CI(1,JC,LB)=B*SUM
@@ -593,7 +594,7 @@
      &              )
                SUM=SUM+(SO(I-1,J-1,KO)-SUM)*MAX(SO(I-1,J-1,KO)-&
      &              (rONE+EP)*SUM,&
-     &              rZERO)/(ABS(SO(I-1,J-1,KO)-(rONE+EP)*SUM)+ZEPS)
+     &              rZERO)/(ABS(SO(I-1,J-1,KO)-(rONE+EP)*SUM)+emach)
                S=rONE/SUM
                CI(IC,JC,LSW)=(SO(I-1,J-1,KS)*CI(IC,JC-1,LL)&
      &              +SO(I-1,J-1,KW)*CI(IC-1,JC,LB))*S

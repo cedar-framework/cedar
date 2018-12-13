@@ -11,6 +11,7 @@
 			"min-coarse": 3,
 			"cg-solver": "cedar"
 		},
-		"halo-exchange": "msg"
-	}
+		"halo-exchange": "tausch"
+	},
+	"solver": {"plane-agg": false}
 }
