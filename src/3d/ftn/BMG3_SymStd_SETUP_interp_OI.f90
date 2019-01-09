@@ -72,10 +72,11 @@
       INTEGER PER_sum_x, Per_sum_y, Per_sum_z
       REAL*8  a, b, c, de, dn, dne, dnw, dp, ds, dse, dsw, dw,&
      &        eMACH, ep, sum
+      real*8 D1MACH
 
 ! ======================================================================
 
-      eMACH = 1.d-13
+      eMACH = D1MACH(3)
       IPN = IABS(JPN)
 
 ! ----------------------------------

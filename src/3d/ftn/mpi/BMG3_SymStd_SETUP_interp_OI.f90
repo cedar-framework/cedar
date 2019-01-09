@@ -75,6 +75,7 @@
 
       REAL*8  a, b, c, de, dn, dne, dnw, dp, ds, dse, dsw, dw,&
      &        eMACH, ep, sum
+      real*8 D1MACH
       LOGICAL LEFTPLANE, BOTTOMPLANE, FRONTPLANE,&
      &        RIGHTPLANE, TOPPLANE, BACKPLANE
       INTEGER ISTART, JSTART, KSTART, ICSTART, JCSTART, KCSTART, &
@@ -119,7 +120,7 @@
                     JPN.EQ.BMG_BCs_indef_per_yz  .OR.&
                     JPN.EQ.BMG_BCs_indef_per_xyz)
 
-      eMACH = 1.d-13
+      eMACH = D1MACH(3)
 
       IIC1 = IIC-1
       JJC1 = JJC-1
