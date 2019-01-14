@@ -24,7 +24,9 @@ public:
 	void setup(const stencil_op<seven_pt> & so) override
 	{
 		level_teams.emplace_back();
+		timer_pause();
 		this->setup_impl(so, fine_planes, fine_threads, level_teams.back());
+		timer_play();
 	}
 	void setup(const stencil_op<xxvii_pt> & so) override
 	{
