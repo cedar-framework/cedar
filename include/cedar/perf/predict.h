@@ -33,10 +33,30 @@ namespace cedar {
 				}
 			}
 		} else if (settings.search_strat == redist_settings::search::coarsen) {
+			float curr_min = std::numeric_limits<float>::max();
+			int curr_ind = 0;
 			for (unsigned short i = 0; i < ND; ++i) {
-				nblocks[i] = nproc[i] / 2;
-				if (nblocks[i] < 1) nblocks[i] = 1;
+				nblocks[i] = nproc[i];
+				float val = nglobal[i] / nproc[i];
+				if (nproc[i] > 1 and val < curr_min) {
+					curr_min = val;
+					curr_ind = i;
+				}
 			}
+			nblocks[curr_ind] = nblocks[curr_ind] / 2;
+			if (nblocks[curr_ind] < 1) nblocks[curr_ind] = 1;
+
+			// second pass to make sure we can get 2 levels out of redistribution
+			for (unsigned short i = 0; i < ND; ++i) {
+				if ((nglobal[i] / nblocks[i]) < 7) {
+					nblocks[i] = nproc[i] / 2;
+					if (nblocks[i] < 1) nblocks[i] = 1;
+				}
+			}
+			// for (unsigned short i = 0; i < ND; ++i) {
+			// 	nblocks[i] = nproc[i] / 2;
+			// 	if (nblocks[i] < 1) nblocks[i] = 1;
+			// }
 		} else if (settings.search_strat == redist_settings::search::astar) {
 			if (ND == 2) {
 				auto model = perf_factory::astar_vcycle(settings, nproc[0], nproc[1], nglobal[0], nglobal[1]);
