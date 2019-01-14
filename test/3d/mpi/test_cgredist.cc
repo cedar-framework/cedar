@@ -91,6 +91,5 @@ TEST(MPICGSolver3, Redist) {
 
 	auto diff = sol0 - sol1;
 
-	ASSERT_LT(std::abs(diff.inf_norm()),
-	          1e-10);
+	ASSERT_EQ(std::abs(diff.inf_norm()), 0);
 }

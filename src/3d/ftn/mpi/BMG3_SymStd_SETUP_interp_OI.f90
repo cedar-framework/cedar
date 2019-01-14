@@ -625,12 +625,14 @@
      &                 +SO(i-1,j,k,kbse)+SO(i-1,j-1,k,kbe)&
      &                 +SO(i-1,j-1,k,kbne)&
      &                 +SO(i-1,j-1,k-1,kpsw)+SO(i-1,j-1,k-1,kbsw)&
-     &                 +SO(i-1,j-1,k-1,kbw)+SO(i-1,j,k-1,kbnw)),&
+     &                 +SO(i-1,j-1,k-1,kbw)+SO(i-1,j,k-1,kbnw))/&
+     &                    so(i-1,j-1,k-1,kp),&
      &                 abs(SO(i,j-1,k-1,kpw)+SO(i,j,k-1,kpsw)&
      &                 +SO(i,j,k,kbsw)+SO(i,j-1,k,kbw)&
      &                 +SO(i,j-1,k,kbnw)+SO(i,j-1,k-1,kpnw)&
      &                 +SO(i,j-1,k-1,kbse)&
-     &                 +SO(i,j-1,k-1,kbe)+SO(i,j,k-1,kbne)),&
+     &                 +SO(i,j-1,k-1,kbe)+SO(i,j,k-1,kbne))/&
+     &                    so(i-1,j-1,k-1,kp),&
      &                 abs(SO(i-1,j,k-1,kps)+SO(i-1,j,k-1,kpnw)&
      &                 +SO(i-1,j,k,kbse)+SO(i-1,j,k,kbs)+SO(i,j,k,kbsw)&
      &                 +SO(i,j,k-1,kpsw)+SO(i,j,k-1,kbne)&
@@ -639,7 +641,8 @@
      &                 +SO(i-1,j-1,k-1,kpsw)+SO(i-1,j-1,k,kbne)&
      &                 +SO(i-1,j-1,k,kbn)+SO(i,j-1,k,kbnw)&
      &                 +SO(i,j-1,k-1,kpnw)+SO(i,j-1,k-1,kbse)&
-     &                 +SO(i-1,j-1,k-1,kbs)+SO(i,j-1,k-1,kbse)),rONE)
+     &                 +SO(i-1,j-1,k-1,kbs)+SO(i,j-1,k-1,kbse))/&
+     &                    so(i-1,j-1,k-1,kp))
                   yo(ic,JJF,2,kpw)=MIN(yo(ic,JJF,2,kpw),&
      &                 abs(SO(i-1,j-1,k-1,kb)+SO(i-1,j-1,k-1,kbw)&
      &                 +SO(i-1,j,k-1,kbnw)+SO(i-1,j,k-1,kbn)&
@@ -650,7 +653,8 @@
      &                 +SO(i-1,j-1,k,kbe)+SO(i-1,j,k,kbse)&
      &                 +SO(i-1,j,k,kbs)&
      &                 +SO(i,j,k,kbsw)+SO(i,j-1,k,kbw)+SO(i,j-1,k,kbnw)&
-     &                 +SO(i-1,j-1,k,kbn)+SO(i-1,j-1,k,kbne)),rONE)
+     &                 +SO(i-1,j-1,k,kbn)+SO(i-1,j-1,k,kbne))/&
+     &                    so(i-1,j-1,k-1,kp))
                   yo(ic,JJF,2,kp)&
      &                 =yo(ic,JJF,2,kp)+(SO(i-1,j-1,k-1,kp)&
      &                 -yo(ic,JJF,2,kp))*MAX(SO(i-1,j-1,k-1,kp)&
