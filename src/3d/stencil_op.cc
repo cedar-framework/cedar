@@ -51,7 +51,7 @@ std::ostream & operator<<(std::ostream & os, const cdr3::stencil_op<cdr3::xxvii_
 			for (auto i : so.range(0)) {
 				os << std::setw(width) << (k+1-2)*(nx*ny) + (j+1-2)*nx + i+1-2 << " "
 				   << std::setw(width) << i+1 << ", " << std::setw(width) << j+1 << ", "
-				   << std::setw(width) << k + 1 << ", " << " N, "
+				   << std::setw(width) << k + 1 << ", N, "
 				   << std::scientific << -so(i,j+1,k+1,xxvii_pt::bse) << ", "
 				   << std::scientific << -so(i,j+1,k+1,xxvii_pt::bs) << ", "
 				   << std::scientific << -so(i+1,j+1,k+1,xxvii_pt::bsw) << ", "
@@ -64,7 +64,7 @@ std::ostream & operator<<(std::ostream & os, const cdr3::stencil_op<cdr3::xxvii_
 
 				os << std::setw(width) << (k+1-2)*(nx*ny) + (j+1-2)*nx + i+1-2 << " "
 				   << std::setw(width) << i+1 << ", " << std::setw(width) << j+1 << ", "
-				   << std::setw(width) << k + 1 << ", " << " O, "
+				   << std::setw(width) << k + 1 << ", O, "
 				   << std::scientific << -so(i,j,k+1,xxvii_pt::be) << ", "
 				   << std::scientific << -so(i,j,k+1,xxvii_pt::b) << ", "
 				   << std::scientific << -so(i+1,j,k+1,xxvii_pt::bw) << ", "
@@ -77,7 +77,7 @@ std::ostream & operator<<(std::ostream & os, const cdr3::stencil_op<cdr3::xxvii_
 
 				os << std::setw(width) << (k+1-2)*(nx*ny) + (j+1-2)*nx + i+1-2 << " "
 				   << std::setw(width) << i+1 << ", " << std::setw(width) << j+1 << ", "
-				   << std::setw(width) << k + 1 << ", " << " S, "
+				   << std::setw(width) << k + 1 << ", S, "
 				   << std::scientific << -so(i,j,k+1,xxvii_pt::bne) << ", "
 				   << std::scientific << -so(i,j,k+1,xxvii_pt::bn) << ", "
 				   << std::scientific << -so(i+1,j,k+1,xxvii_pt::bnw) << ", "
