@@ -145,8 +145,8 @@ void tausch_exchanger::init_datadist()
 
 void tausch_exchanger::init_gfunc(std::vector<topo_ptr> & topos)
 {
-	std::vector<TauschHaloSpec> remote_spec;
-	std::vector<TauschHaloSpec> local_spec;
+	std::vector<TauschHaloRegion> remote_spec;
+	std::vector<TauschHaloRegion> local_spec;
 
 	remote_spec.reserve(halo_dir::count * nlevels);
 	local_spec.reserve(halo_dir::count * nlevels);
@@ -164,19 +164,19 @@ void tausch_exchanger::init_gfunc(std::vector<topo_ptr> & topos)
 
 	int nbuf = 1;
 
-	tausch = std::make_unique<Tausch3D<real_t>>(MPI_DOUBLE, nbuf, nullptr, topos[0]->comm);
+	tausch = std::make_unique<Tausch<real_t>>(MPI_DOUBLE, topos[0]->comm);
 
 	for (std::size_t i = 0; i < halo_dir::count * nlevels; i++) {
-		tausch->addLocalHaloInfoCwC(local_spec[i]);
-		tausch->addRemoteHaloInfoCwC(remote_spec[i]);
+		tausch->addLocalHaloInfo(local_spec[i], nbuf);
+		tausch->addRemoteHaloInfo(remote_spec[i], nbuf);
 	}
 }
 
 
 void tausch_exchanger::init_so(std::vector<topo_ptr> & topos)
 {
-	std::vector<TauschHaloSpec> remote_spec;
-	std::vector<TauschHaloSpec> local_spec;
+	std::vector<TauschHaloRegion> remote_spec;
+	std::vector<TauschHaloRegion> local_spec;
 
 	remote_spec.reserve(halo_dir::count * nlevels);
 	local_spec.reserve(halo_dir::count * nlevels);
@@ -194,19 +194,19 @@ void tausch_exchanger::init_so(std::vector<topo_ptr> & topos)
 
 	int nbuf = stencil_ndirs<xxvii_pt>::value;
 
-	tausch_so = std::make_unique<Tausch3D<real_t>>(MPI_DOUBLE, nbuf, nullptr, topos[0]->comm);
+	tausch_so = std::make_unique<Tausch<real_t>>(MPI_DOUBLE, topos[0]->comm);
 
 	for (std::size_t i = 0; i < halo_dir::count * nlevels; i++) {
-		tausch_so->addLocalHaloInfoCwC(local_spec[i]);
-		tausch_so->addRemoteHaloInfoCwC(remote_spec[i]);
+		tausch_so->addLocalHaloInfo(local_spec[i], nbuf);
+		tausch_so->addRemoteHaloInfo(remote_spec[i], nbuf);
 	}
 }
 
 
 void tausch_exchanger::set_level_spec(int lvl, int rank,
                                       grid_topo & topo,
-                                      std::vector<TauschHaloSpec> & remote_spec,
-                                      std::vector<TauschHaloSpec> & local_spec)
+                                      std::vector<TauschHaloRegion> & remote_spec,
+                                      std::vector<TauschHaloRegion> & local_spec)
 {
 	for (int i = 0; i < halo_dir::count; i++) {
 		remote_spec[index(lvl,i)].bufferWidth = topo.nlocal(0);
@@ -350,8 +350,8 @@ void tausch_exchanger::set_level_spec(int lvl, int rank,
 
 void tausch_exchanger::set_level_spec_so(int lvl, int rank,
                                          grid_topo & topo,
-                                         std::vector<TauschHaloSpec> & remote_spec,
-                                         std::vector<TauschHaloSpec> & local_spec)
+                                         std::vector<TauschHaloRegion> & remote_spec,
+                                         std::vector<TauschHaloRegion> & local_spec)
 {
 	for (int i = 0; i < halo_dir::count; i++) {
 		remote_spec[index(lvl,i)].bufferWidth = topo.nlocal(0) + 1;
@@ -497,19 +497,14 @@ void tausch_exchanger::exchange_func(int k, real_t * gf)
 {
 	int lvl = nlevels - k;
 	for (int dir = 0; dir < halo_dir::count; dir++) {
-		if (recv_active[index(lvl, dir)])
-			tausch->postReceiveCwC(index(lvl, dir), index(lvl, dir));
-	}
-
-	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (send_active[index(lvl, dir)]) {
-			tausch->packSendBufferCwC(index(lvl,dir), 0, gf);
-			tausch->sendCwC(index(lvl,dir), index(lvl,dir));
+			tausch->packSendBuffer(index(lvl,dir), 0, gf);
+			tausch->send(index(lvl,dir), index(lvl,dir));
 
 		}
 		if (recv_active[index(lvl, dir)]) {
-			tausch->recvCwC(index(lvl,dir));
-			tausch->unpackRecvBufferCwC(index(lvl,dir), 0, gf);
+			tausch->recv(index(lvl,dir), index(lvl, dir));
+			tausch->unpackRecvBuffer(index(lvl,dir), 0, gf);
 		}
 	}
 }
@@ -527,24 +522,19 @@ void tausch_exchanger::exchange_sten(int k, real_t * so)
 	len_t KK = dimz(coord[2], k-1) + 2;
 
 	for (int dir = 0; dir < halo_dir::count; dir++) {
-		if (recv_active[index(lvl, dir)])
-			tausch_so->postReceiveCwC(index(lvl, dir), index(lvl, dir));
-	}
-
-	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (send_active[index(lvl, dir)]) {
 			for (int sdir = 0; sdir < stencil_ndirs<xxvii_pt>::value; sdir++) {
 				len_t offset = (JJ+1)*(II+1)*(KK+1)*sdir;
-				tausch_so->packSendBufferCwC(index(lvl,dir), sdir, so + offset);
+				tausch_so->packSendBuffer(index(lvl,dir), sdir, so + offset);
 			}
-			tausch_so->sendCwC(index(lvl,dir), index(lvl,dir));
+			tausch_so->send(index(lvl,dir), index(lvl,dir));
 
 		}
 		if (recv_active[index(lvl, dir)]) {
-			tausch_so->recvCwC(index(lvl,dir));
+			tausch_so->recv(index(lvl,dir), index(lvl, dir));
 			for (int sdir = 0; sdir < stencil_ndirs<xxvii_pt>::value; sdir++) {
 				len_t offset = (JJ+1)*(II+1)*(KK+1)*sdir;
-				tausch_so->unpackRecvBufferCwC(index(lvl,dir), sdir, so + offset);
+				tausch_so->unpackRecvBuffer(index(lvl,dir), sdir, so + offset);
 			}
 		}
 	}
@@ -556,19 +546,14 @@ void tausch_exchanger::run(mpi::grid_func & f, unsigned short dmask)
 	lvl = nlevels - lvl - 1;
 
 	for (int dir = 0; dir < halo_dir::count; dir++) {
-		if (recv_active[index(lvl, dir)] and (dmask & (1 << (dir / 2))))
-			tausch->postReceiveCwC(index(lvl, dir), index(lvl, dir));
-	}
-
-	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (send_active[index(lvl, dir)] and (dmask & (1 << (dir / 2)))) {
-			tausch->packSendBufferCwC(index(lvl,dir), 0, f.data());
-			tausch->sendCwC(index(lvl,dir), index(lvl,dir));
+			tausch->packSendBuffer(index(lvl,dir), 0, f.data());
+			tausch->send(index(lvl,dir), index(lvl,dir));
 
 		}
 		if (recv_active[index(lvl, dir)] and (dmask & (1 << (dir / 2)))) {
-			tausch->recvCwC(index(lvl,dir));
-			tausch->unpackRecvBufferCwC(index(lvl,dir), 0, f.data());
+			tausch->recv(index(lvl,dir), index(lvl, dir));
+			tausch->unpackRecvBuffer(index(lvl,dir), 0, f.data());
 		}
 	}
 }

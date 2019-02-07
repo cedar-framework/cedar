@@ -69,8 +69,6 @@ target_link_libraries(cedar PUBLIC
   ${MPI_Fortran_LIBRARIES})
 include_directories(${json_location})
 if (tausch_FOUND)
-  get_property(tausch_location TARGET tausch PROPERTY LOCATION)
-  target_link_libraries(cedar PUBLIC ${tausch_location})
   target_include_directories(cedar PUBLIC ${TAUSCH_INCLUDE_DIR})
   target_compile_definitions(cedar PUBLIC WITH_TAUSCH)
 endif()
