@@ -28,7 +28,6 @@ ExternalProject_Add(
   tausch
   PREFIX ${CMAKE_BINARY_DIR}/tausch
   GIT_REPOSITORY https://bitbucket.org/luspi/tausch.git
-  GIT_TAG a06b57319d29a59398fcf36e599d32d92123de8a
   UPDATE_DISCONNECTED 1
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
