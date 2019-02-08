@@ -182,6 +182,12 @@ void tausch_exchanger::set_level_spec(int lvl, int rank,
                                       std::vector<TauschHaloRegion> & remote_spec,
                                       std::vector<TauschHaloRegion> & local_spec)
 {
+
+	for (int i = 0; i < halo_dir::count; i++) {
+		remote_spec[index(lvl,i)].dimensions = 2;
+		local_spec[index(lvl,i)].dimensions = 2;
+	}
+
 	for (int i = 0; i < halo_dir::count; i++) {
 		remote_spec[index(lvl,i)].bufferWidth = topo.nlocal(0);
 		remote_spec[index(lvl,i)].bufferHeight = topo.nlocal(1);
@@ -261,6 +267,12 @@ void tausch_exchanger::set_level_spec_so(int lvl, int rank,
                                          std::vector<TauschHaloRegion> & remote_spec,
                                          std::vector<TauschHaloRegion> & local_spec)
 {
+
+	for (int i = 0; i < halo_dir::count; i++) {
+		remote_spec[index(lvl,i)].dimensions = 2;
+		local_spec[index(lvl,i)].dimensions = 2;
+	}
+
 	for (int i = 0; i < halo_dir::count; i++) {
 		remote_spec[index(lvl,i)].bufferWidth = topo.nlocal(0) + 1;
 		remote_spec[index(lvl,i)].bufferHeight = topo.nlocal(1) + 1;
