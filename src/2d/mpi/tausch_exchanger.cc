@@ -119,11 +119,16 @@ void tausch_exchanger::init_datadist()
 
 void tausch_exchanger::init_gfunc(std::vector<topo_ptr> & topos)
 {
-	std::vector<TauschHaloRegion> remote_spec;
-	std::vector<TauschHaloRegion> local_spec;
+
+    std::vector<std::vector<int> > remote_spec;
+    std::vector<std::vector<int> > local_spec;
+    std::vector<int> remote_remoteMpiRank;
+    std::vector<int> local_remoteMpiRank;
 
 	remote_spec.reserve(halo_dir::count * nlevels);
 	local_spec.reserve(halo_dir::count * nlevels);
+	remote_remoteMpiRank.reserve(halo_dir::count * nlevels);
+	local_remoteMpiRank.reserve(halo_dir::count * nlevels);
 	send_active.reserve(halo_dir::count * nlevels);
 	recv_active.reserve(halo_dir::count * nlevels);
 
@@ -133,7 +138,8 @@ void tausch_exchanger::init_gfunc(std::vector<topo_ptr> & topos)
 	for (std::size_t lvl = 0; lvl < nlevels; lvl++) {
 		set_level_spec(lvl, rank,
 		               *topos[lvl],
-		               remote_spec, local_spec);
+		               remote_spec, local_spec,
+                       remote_remoteMpiRank, local_remoteMpiRank);
 	}
 
 	int nbuf = 1;
@@ -141,19 +147,24 @@ void tausch_exchanger::init_gfunc(std::vector<topo_ptr> & topos)
 	tausch = std::make_unique<Tausch<real_t>>(MPI_DOUBLE, topos[0]->comm);
 
 	for (std::size_t i = 0; i < halo_dir::count * nlevels; i++) {
-		tausch->addLocalHaloInfo(local_spec[i], nbuf);
-		tausch->addRemoteHaloInfo(remote_spec[i], nbuf);
+		tausch->addLocalHaloInfo(local_spec[i], nbuf, local_remoteMpiRank[i]);
+		tausch->addRemoteHaloInfo(remote_spec[i], nbuf, remote_remoteMpiRank[i]);
 	}
 }
 
 
 void tausch_exchanger::init_so(std::vector<topo_ptr> & topos)
 {
-	std::vector<TauschHaloRegion> remote_spec;
-	std::vector<TauschHaloRegion> local_spec;
+
+    std::vector<std::vector<int> > remote_spec;
+    std::vector<std::vector<int> > local_spec;
+    std::vector<int> remote_remoteMpiRank;
+    std::vector<int> local_remoteMpiRank;
 
 	remote_spec.reserve(halo_dir::count * nlevels);
 	local_spec.reserve(halo_dir::count * nlevels);
+	remote_remoteMpiRank.reserve(halo_dir::count * nlevels);
+	local_remoteMpiRank.reserve(halo_dir::count * nlevels);
 	send_active.reserve(halo_dir::count * nlevels);
 	recv_active.reserve(halo_dir::count * nlevels);
 
@@ -163,7 +174,8 @@ void tausch_exchanger::init_so(std::vector<topo_ptr> & topos)
 	for (std::size_t lvl = 0; lvl < nlevels; lvl++) {
 		set_level_spec_so(lvl, rank,
 		                  *topos[lvl],
-		                  remote_spec, local_spec);
+		                  remote_spec, local_spec,
+                          remote_remoteMpiRank, local_remoteMpiRank);
 	}
 
 	int nbuf = stencil_ndirs<nine_pt>::value;
@@ -171,179 +183,117 @@ void tausch_exchanger::init_so(std::vector<topo_ptr> & topos)
 	tausch_so = std::make_unique<Tausch<real_t>>(MPI_DOUBLE, topos[0]->comm);
 
 	for (std::size_t i = 0; i < halo_dir::count * nlevels; i++) {
-		tausch_so->addLocalHaloInfo(local_spec[i], nbuf);
-		tausch_so->addRemoteHaloInfo(remote_spec[i], nbuf);
+		tausch_so->addLocalHaloInfo(local_spec[i], nbuf, local_remoteMpiRank[i]);
+		tausch_so->addRemoteHaloInfo(remote_spec[i], nbuf, remote_remoteMpiRank[i]);
 	}
 }
 
 
 void tausch_exchanger::set_level_spec(int lvl, int rank,
                                       grid_topo & topo,
-                                      std::vector<TauschHaloRegion> & remote_spec,
-                                      std::vector<TauschHaloRegion> & local_spec)
+                                      std::vector<std::vector<int> > & remote_spec,
+                                      std::vector<std::vector<int> > & local_spec,
+                                      std::vector<int> & remote_remoteMpiRank,
+                                      std::vector<int> & local_remoteMpiRank)
 {
 
-	for (int i = 0; i < halo_dir::count; i++) {
-		remote_spec[index(lvl,i)].dimensions = 2;
-		local_spec[index(lvl,i)].dimensions = 2;
-	}
-
-	for (int i = 0; i < halo_dir::count; i++) {
-		remote_spec[index(lvl,i)].bufferWidth = topo.nlocal(0);
-		remote_spec[index(lvl,i)].bufferHeight = topo.nlocal(1);
-		local_spec[index(lvl,i)].bufferWidth = topo.nlocal(0);
-		local_spec[index(lvl,i)].bufferHeight = topo.nlocal(1);
-	}
-
 	// right
-	remote_spec[index(lvl,halo_dir::right)].haloX = 0;
-	remote_spec[index(lvl,halo_dir::right)].haloY = 0;
-	remote_spec[index(lvl,halo_dir::right)].haloWidth = 1;
-	remote_spec[index(lvl,halo_dir::right)].haloHeight = topo.nlocal(1);
-	if (topo.coord(0) == 0)
-		remote_spec[index(lvl,halo_dir::right)].remoteMpiRank = rank + topo.nproc(0) - 1;
-	else
-		remote_spec[index(lvl,halo_dir::right)].remoteMpiRank = rank - 1;
 
-	local_spec[index(lvl,halo_dir::right)].haloX = topo.nlocal(0)-2;
-	local_spec[index(lvl,halo_dir::right)].haloY = 0;
-	local_spec[index(lvl,halo_dir::right)].haloWidth = 1;
-	local_spec[index(lvl,halo_dir::right)].haloHeight = topo.nlocal(1);
-	if ((rank + 1) % topo.nproc(0) == 0)
-		local_spec[index(lvl,halo_dir::right)].remoteMpiRank = rank - topo.nproc(0) + 1;
-	else
-		local_spec[index(lvl,halo_dir::right)].remoteMpiRank = rank + 1;
+    for(size_t y = 0; y < topo.nlocal(1); ++y)
+        remote_spec[index(lvl,halo_dir::right)].push_back(y*topo.nlocal(0));
+    remote_remoteMpiRank[index(lvl,halo_dir::right)] = rank + ((topo.coord(0) == 0) ? (topo.nproc(0) - 1) : -1);
 
+    for(size_t y = 0; y < topo.nlocal(1); ++y)
+        local_spec[index(lvl,halo_dir::right)].push_back(topo.nlocal(0)-2 + y*topo.nlocal(0));
+    local_remoteMpiRank[index(lvl,halo_dir::right)] = rank + (((rank + 1) % topo.nproc(0) == 0) ? (-topo.nproc(0) + 1) : 1);
 
 	// left
-	remote_spec[index(lvl,halo_dir::left)].haloX = topo.nlocal(0) - 1;
-	remote_spec[index(lvl,halo_dir::left)].haloY = 0;
-	remote_spec[index(lvl,halo_dir::left)].haloWidth = 1;
-	remote_spec[index(lvl,halo_dir::left)].haloHeight = topo.nlocal(1);
-	remote_spec[index(lvl,halo_dir::left)].remoteMpiRank = local_spec[index(lvl,halo_dir::right)].remoteMpiRank;
 
-	local_spec[index(lvl,halo_dir::left)].haloX = 1;
-	local_spec[index(lvl,halo_dir::left)].haloY = 0;
-	local_spec[index(lvl,halo_dir::left)].haloWidth = 1;
-	local_spec[index(lvl,halo_dir::left)].haloHeight = topo.nlocal(1);
-	local_spec[index(lvl,halo_dir::left)].remoteMpiRank = remote_spec[index(lvl,halo_dir::right)].remoteMpiRank;
+    for(size_t y = 0; y < topo.nlocal(1); ++y)
+        remote_spec[index(lvl,halo_dir::left)].push_back(topo.nlocal(0)-1 + y*topo.nlocal(0));
+    remote_remoteMpiRank[index(lvl,halo_dir::left)] = local_remoteMpiRank[index(lvl,halo_dir::right)];
 
+    for(size_t y = 0; y < topo.nlocal(1); ++y)
+        local_spec[index(lvl,halo_dir::left)].push_back(1 + y*topo.nlocal(1));
+    local_remoteMpiRank[index(lvl,halo_dir::left)] = remote_remoteMpiRank[index(lvl,halo_dir::right)];
 
 	// up
-	remote_spec[index(lvl,halo_dir::up)].haloX = 0;
-	remote_spec[index(lvl,halo_dir::up)].haloY = 0;
-	remote_spec[index(lvl,halo_dir::up)].haloWidth = topo.nlocal(0);
-	remote_spec[index(lvl,halo_dir::up)].haloHeight = 1;
-	if (topo.coord(1) == 0)
-		remote_spec[index(lvl,halo_dir::up)].remoteMpiRank = rank + topo.nproc(0)*topo.nproc(1) - topo.nproc(0);
-	else
-		remote_spec[index(lvl,halo_dir::up)].remoteMpiRank = rank - topo.nproc(0);
 
-	local_spec[index(lvl,halo_dir::up)].haloX = 0;
-	local_spec[index(lvl,halo_dir::up)].haloY = topo.nlocal(1) - 2;
-	local_spec[index(lvl,halo_dir::up)].haloWidth = topo.nlocal(0);
-	local_spec[index(lvl,halo_dir::up)].haloHeight = 1;
-	if (topo.coord(1) == (topo.nproc(1) - 1))
-		local_spec[index(lvl,halo_dir::up)].remoteMpiRank = rank - topo.nproc(0)*topo.nproc(1) + topo.nproc(0);
-	else
-		local_spec[index(lvl,halo_dir::up)].remoteMpiRank = rank + topo.nproc(0);
+    for(size_t x = 0; x < topo.nlocal(0); ++x)
+        remote_spec[index(lvl,halo_dir::up)].push_back(x);
+    remote_remoteMpiRank[index(lvl,halo_dir::up)] = rank + ((topo.coord(1) == 0) ? (topo.nproc(0)*topo.nproc(1) - topo.nproc(0)) : -topo.nproc(0));
+
+    for(size_t x = 0; x < topo.nlocal(0); ++x)
+        local_spec[index(lvl,halo_dir::up)].push_back((topo.nlocal(1)-2)*topo.nlocal(0) + x);
+    local_remoteMpiRank[index(lvl,halo_dir::up)] = rank + ((topo.coord(1) == (topo.nproc(1) - 1)) ? (-topo.nproc(0)*topo.nproc(1) + topo.nproc(0)) : topo.nproc(0));
+
 	// down
-	remote_spec[index(lvl,halo_dir::down)].haloX = 0;
-	remote_spec[index(lvl,halo_dir::down)].haloY = topo.nlocal(1) - 1;
-	remote_spec[index(lvl,halo_dir::down)].haloWidth = topo.nlocal(0);
-	remote_spec[index(lvl,halo_dir::down)].haloHeight = 1;
-	remote_spec[index(lvl,halo_dir::down)].remoteMpiRank = local_spec[index(lvl,halo_dir::up)].remoteMpiRank;
 
-	local_spec[index(lvl,halo_dir::down)].haloX = 0;
-	local_spec[index(lvl,halo_dir::down)].haloY = 1;
-	local_spec[index(lvl,halo_dir::down)].haloWidth = topo.nlocal(0);
-	local_spec[index(lvl,halo_dir::down)].haloHeight = 1;
-	local_spec[index(lvl,halo_dir::down)].remoteMpiRank = remote_spec[index(lvl,halo_dir::up)].remoteMpiRank;
+    for(size_t x = 0; x < topo.nlocal(0); ++x)
+        remote_spec[index(lvl,halo_dir::down)].push_back((topo.nlocal(1)-1)*topo.nlocal(0) + x);
+    remote_remoteMpiRank[index(lvl,halo_dir::down)] = local_remoteMpiRank[index(lvl,halo_dir::up)];
+
+    for(size_t x = 0; x < topo.nlocal(0); ++x)
+        local_spec[index(lvl,halo_dir::down)].push_back(topo.nlocal(0) + x);
+    local_remoteMpiRank[index(lvl,halo_dir::down)] = remote_remoteMpiRank[index(lvl,halo_dir::up)];
+
 }
 
 
 void tausch_exchanger::set_level_spec_so(int lvl, int rank,
                                          grid_topo & topo,
-                                         std::vector<TauschHaloRegion> & remote_spec,
-                                         std::vector<TauschHaloRegion> & local_spec)
+                                         std::vector<std::vector<int> > & remote_spec,
+                                         std::vector<std::vector<int> > & local_spec,
+                                         std::vector<int> & remote_remoteMpiRank,
+                                         std::vector<int> & local_remoteMpiRank)
 {
 
-	for (int i = 0; i < halo_dir::count; i++) {
-		remote_spec[index(lvl,i)].dimensions = 2;
-		local_spec[index(lvl,i)].dimensions = 2;
-	}
-
-	for (int i = 0; i < halo_dir::count; i++) {
-		remote_spec[index(lvl,i)].bufferWidth = topo.nlocal(0) + 1;
-		remote_spec[index(lvl,i)].bufferHeight = topo.nlocal(1) + 1;
-		local_spec[index(lvl,i)].bufferWidth = topo.nlocal(0) + 1;
-		local_spec[index(lvl,i)].bufferHeight = topo.nlocal(1) + 1;
-	}
-
 	// right
-	remote_spec[index(lvl,halo_dir::right)].haloX = 0;
-	remote_spec[index(lvl,halo_dir::right)].haloY = 0;
-	remote_spec[index(lvl,halo_dir::right)].haloWidth = 1;
-	remote_spec[index(lvl,halo_dir::right)].haloHeight = topo.nlocal(1);
-	if (topo.coord(0) == 0)
-		remote_spec[index(lvl,halo_dir::right)].remoteMpiRank = rank + topo.nproc(0) - 1;
-	else
-		remote_spec[index(lvl,halo_dir::right)].remoteMpiRank = rank - 1;
 
-	local_spec[index(lvl,halo_dir::right)].haloX = topo.nlocal(0)-2;
-	local_spec[index(lvl,halo_dir::right)].haloY = 0;
-	local_spec[index(lvl,halo_dir::right)].haloWidth = 1;
-	local_spec[index(lvl,halo_dir::right)].haloHeight = topo.nlocal(1);
-	if ((rank + 1) % topo.nproc(0) == 0)
-		local_spec[index(lvl,halo_dir::right)].remoteMpiRank = rank - topo.nproc(0) + 1;
-	else
-		local_spec[index(lvl,halo_dir::right)].remoteMpiRank = rank + 1;
+    for(size_t y = 0; y < topo.nlocal(1); ++y)
+        remote_spec[index(lvl,halo_dir::right)].push_back(y*(topo.nlocal(0)+1));
+    remote_remoteMpiRank[index(lvl,halo_dir::right)] = rank + ((topo.coord(0) == 0) ? (topo.nproc(0) - 1) : -1);
 
+    for(size_t y = 0; y < topo.nlocal(1); ++y)
+        local_spec[index(lvl,halo_dir::right)].push_back(y*(topo.nlocal(0)+1) + topo.nlocal(0)-2);
+    local_remoteMpiRank[index(lvl,halo_dir::right)] = rank + (((rank + 1) % topo.nproc(0) == 0) ? (-topo.nproc(0) + 1) : 1);
 
 	// left
-	remote_spec[index(lvl,halo_dir::left)].haloX = topo.nlocal(0) - 1;
-	remote_spec[index(lvl,halo_dir::left)].haloY = 0;
-	remote_spec[index(lvl,halo_dir::left)].haloWidth = 2;
-	remote_spec[index(lvl,halo_dir::left)].haloHeight = topo.nlocal(1);
-	remote_spec[index(lvl,halo_dir::left)].remoteMpiRank = local_spec[index(lvl,halo_dir::right)].remoteMpiRank;
 
-	local_spec[index(lvl,halo_dir::left)].haloX = 1;
-	local_spec[index(lvl,halo_dir::left)].haloY = 0;
-	local_spec[index(lvl,halo_dir::left)].haloWidth = 2;
-	local_spec[index(lvl,halo_dir::left)].haloHeight = topo.nlocal(1);
-	local_spec[index(lvl,halo_dir::left)].remoteMpiRank = remote_spec[index(lvl,halo_dir::right)].remoteMpiRank;
+    for(size_t y = 0; y < topo.nlocal(1); ++y) {
+        remote_spec[index(lvl,halo_dir::left)].push_back(y*(topo.nlocal(0)+1) + topo.nlocal(0)-1);
+        remote_spec[index(lvl,halo_dir::left)].push_back(y*(topo.nlocal(0)+1) + topo.nlocal(0)  );
+    }
+    remote_remoteMpiRank[index(lvl,halo_dir::left)] = local_remoteMpiRank[index(lvl,halo_dir::right)];
 
+    for(size_t y = 0; y < topo.nlocal(1); ++y) {
+       local_spec[index(lvl,halo_dir::left)].push_back(y*(topo.nlocal(0)+1) + 1);
+       local_spec[index(lvl,halo_dir::left)].push_back(y*(topo.nlocal(0)+1) + 2);
+    }
+    local_remoteMpiRank[index(lvl,halo_dir::left)] = remote_remoteMpiRank[index(lvl,halo_dir::right)];
 
 	// up
-	remote_spec[index(lvl,halo_dir::up)].haloX = 0;
-	remote_spec[index(lvl,halo_dir::up)].haloY = 0;
-	remote_spec[index(lvl,halo_dir::up)].haloWidth = topo.nlocal(0);
-	remote_spec[index(lvl,halo_dir::up)].haloHeight = 1;
-	if (topo.coord(1) == 0)
-		remote_spec[index(lvl,halo_dir::up)].remoteMpiRank = rank + topo.nproc(0)*topo.nproc(1) - topo.nproc(0);
-	else
-		remote_spec[index(lvl,halo_dir::up)].remoteMpiRank = rank - topo.nproc(0);
 
-	local_spec[index(lvl,halo_dir::up)].haloX = 0;
-	local_spec[index(lvl,halo_dir::up)].haloY = topo.nlocal(1) - 2;
-	local_spec[index(lvl,halo_dir::up)].haloWidth = topo.nlocal(0);
-	local_spec[index(lvl,halo_dir::up)].haloHeight = 1;
-	if (topo.coord(1) == (topo.nproc(1) - 1))
-		local_spec[index(lvl,halo_dir::up)].remoteMpiRank = rank - topo.nproc(0)*topo.nproc(1) + topo.nproc(0);
-	else
-		local_spec[index(lvl,halo_dir::up)].remoteMpiRank = rank + topo.nproc(0);
+	for(size_t x = 0; x < topo.nlocal(0); ++x)
+        remote_spec[index(lvl,halo_dir::up)].push_back(x);
+    remote_remoteMpiRank[index(lvl,halo_dir::up)] = rank + ((topo.coord(1) == 0) ? (topo.nproc(0)*topo.nproc(1) - topo.nproc(0)) : -topo.nproc(0));
+
+    for(size_t x = 0; x < topo.nlocal(0); ++x)
+        local_spec[index(lvl,halo_dir::up)].push_back((topo.nlocal(1)-2)*(topo.nlocal(0)+1) + x);
+    local_remoteMpiRank[index(lvl,halo_dir::up)] = rank + ((topo.coord(1) == (topo.nproc(1) - 1)) ? (-topo.nproc(0)*topo.nproc(1) + topo.nproc(0)) : topo.nproc(0));
+
 	// down
-	remote_spec[index(lvl,halo_dir::down)].haloX = 0;
-	remote_spec[index(lvl,halo_dir::down)].haloY = topo.nlocal(1) - 1;
-	remote_spec[index(lvl,halo_dir::down)].haloWidth = topo.nlocal(0);
-	remote_spec[index(lvl,halo_dir::down)].haloHeight = 2;
-	remote_spec[index(lvl,halo_dir::down)].remoteMpiRank = local_spec[index(lvl,halo_dir::up)].remoteMpiRank;
 
-	local_spec[index(lvl,halo_dir::down)].haloX = 0;
-	local_spec[index(lvl,halo_dir::down)].haloY = 1;
-	local_spec[index(lvl,halo_dir::down)].haloWidth = topo.nlocal(0);
-	local_spec[index(lvl,halo_dir::down)].haloHeight = 2;
-	local_spec[index(lvl,halo_dir::down)].remoteMpiRank = remote_spec[index(lvl,halo_dir::up)].remoteMpiRank;
+    for(size_t y = 0; y < 2; ++y)
+        for(size_t x = 0; x < topo.nlocal(0); ++x)
+            remote_spec[index(lvl,halo_dir::down)].push_back((topo.nlocal(1)-1+y)*(topo.nlocal(0)+1) + x);
+    remote_remoteMpiRank[index(lvl,halo_dir::down)] = local_remoteMpiRank[index(lvl,halo_dir::up)];
+
+    for(size_t y = 0; y < 2; ++y)
+        for(size_t x = 0; x < topo.nlocal(0); ++x)
+            local_spec[index(lvl,halo_dir::down)].push_back((1+y)*(topo.nlocal(0)+1) + x);
+    local_remoteMpiRank[index(lvl,halo_dir::down)] = remote_remoteMpiRank[index(lvl,halo_dir::up)];
+
 }
 
 
