@@ -120,15 +120,11 @@ void tausch_exchanger::init_datadist()
 void tausch_exchanger::init_gfunc(std::vector<topo_ptr> & topos)
 {
 
-    std::vector<std::vector<int> > remote_spec;
-    std::vector<std::vector<int> > local_spec;
-    std::vector<int> remote_remoteMpiRank;
-    std::vector<int> local_remoteMpiRank;
+    std::vector<std::vector<int> > remote_spec(halo_dir::count * nlevels);
+    std::vector<std::vector<int> > local_spec(halo_dir::count * nlevels);
+    std::vector<int> remote_remoteMpiRank(halo_dir::count * nlevels);
+    std::vector<int> local_remoteMpiRank(halo_dir::count * nlevels);
 
-	remote_spec.reserve(halo_dir::count * nlevels);
-	local_spec.reserve(halo_dir::count * nlevels);
-	remote_remoteMpiRank.reserve(halo_dir::count * nlevels);
-	local_remoteMpiRank.reserve(halo_dir::count * nlevels);
 	send_active.reserve(halo_dir::count * nlevels);
 	recv_active.reserve(halo_dir::count * nlevels);
 
@@ -156,15 +152,11 @@ void tausch_exchanger::init_gfunc(std::vector<topo_ptr> & topos)
 void tausch_exchanger::init_so(std::vector<topo_ptr> & topos)
 {
 
-    std::vector<std::vector<int> > remote_spec;
-    std::vector<std::vector<int> > local_spec;
-    std::vector<int> remote_remoteMpiRank;
-    std::vector<int> local_remoteMpiRank;
+    std::vector<std::vector<int> > remote_spec(halo_dir::count * nlevels);
+    std::vector<std::vector<int> > local_spec(halo_dir::count * nlevels);
+    std::vector<int> remote_remoteMpiRank(halo_dir::count * nlevels);
+    std::vector<int> local_remoteMpiRank(halo_dir::count * nlevels);
 
-	remote_spec.reserve(halo_dir::count * nlevels);
-	local_spec.reserve(halo_dir::count * nlevels);
-	remote_remoteMpiRank.reserve(halo_dir::count * nlevels);
-	local_remoteMpiRank.reserve(halo_dir::count * nlevels);
 	send_active.reserve(halo_dir::count * nlevels);
 	recv_active.reserve(halo_dir::count * nlevels);
 
