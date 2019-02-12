@@ -38,16 +38,12 @@ if(ENABLE_MPI)
     mpi/msg_exchanger.cc
 	mpi/kernel_manager.cc
 	mpi/setup_nog.cc
-	mpi/gallery.cc)
+	mpi/gallery.cc
+	mpi/tausch_exchanger.cc)
 
   if(ENABLE_PLANE_AGG)
 	list(APPEND sources
 	  mpi/plane_exchange.cc)
-  endif()
-
-  if (tausch_FOUND)
-	list(APPEND sources
-	  mpi/tausch_exchanger.cc)
   endif()
 
 endif()
