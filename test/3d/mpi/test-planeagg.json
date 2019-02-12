@@ -1,5 +1,5 @@
 {
-	"log": ["status","error","info"],
+	"log": ["error"],
 	"plane-config":
 	{
 		"log-planes": false,
