@@ -27,6 +27,7 @@ level3mpi(topo_ptr topo ): parent::level(topo)
 	{
 		this->x = grid_func(topo);
 		this->res = grid_func(topo);
+		this->res.set(0.0);
 		this->b = grid_func(topo);
 		this->SOR = {{relax_stencil(topo->nlocal(0) - 2, topo->nlocal(1) - 2, topo->nlocal(2) - 2),
 		              relax_stencil(topo->nlocal(0) - 2, topo->nlocal(1) - 2, topo->nlocal(2) - 2)}};
@@ -36,6 +37,7 @@ level3mpi(topo_ptr topo ): parent::level(topo)
 level3mpi(stencil_op<sten> & A) : parent::level(A)
 	{
 		this->res = mpi::grid_func(A.grid_ptr());
+		this->res.set(0.0);
 		this->SOR = {{relax_stencil(A.shape(0), A.shape(1), A.shape(2)),
 		              relax_stencil(A.shape(0), A.shape(1), A.shape(2)),}};
 	}

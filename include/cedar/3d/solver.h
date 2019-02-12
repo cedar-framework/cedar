@@ -22,6 +22,7 @@ level3(len_t nx, len_t ny, len_t nz) : parent::level(nx, ny, nz)
 	{
 		this->x = grid_func(nx, ny, nz);
 		this->res = grid_func(nx, ny, nz);
+		this->res.set(0.0);
 		this->b = grid_func(nx, ny, nz);
 		this->SOR = {{relax_stencil(nx, ny, nz),
 		              relax_stencil(nx, ny, nz)}};
@@ -30,6 +31,7 @@ level3(len_t nx, len_t ny, len_t nz) : parent::level(nx, ny, nz)
 level3(stencil_op<sten> & A) : parent::level(A)
 	{
 		this->res = grid_func(A.shape(0), A.shape(1), A.shape(2));
+		this->res.set(0.0);
 		this->SOR = {{relax_stencil(A.shape(0), A.shape(1), A.shape(2)),
 		              relax_stencil(A.shape(0), A.shape(1), A.shape(2)),}};
 	}

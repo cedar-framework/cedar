@@ -27,6 +27,7 @@ struct level2 : public level<sten, stypes>
 	{
 		this->x = grid_func(nx, ny);
 		this->res = grid_func(nx, ny);
+		this->res.set(0.0);
 		this->b = grid_func(nx, ny);
 		this->SOR = {{relax_stencil(nx, ny),
 		              relax_stencil(nx, ny)}};
@@ -35,6 +36,7 @@ struct level2 : public level<sten, stypes>
 	level2(services::mempool & mpool, stencil_op<sten> & A) : parent::level(A)
 	{
 		this->res = grid_func(A.shape(0), A.shape(1));
+		this->res.set(0.0);
 		this->SOR = {{relax_stencil(A.shape(0), A.shape(1)),
 		              relax_stencil(A.shape(0), A.shape(1))}};
 	}

@@ -136,6 +136,7 @@ void planes<rdir>::setup_impl(const stencil_op<sten3> & so, std::vector<slv2_ptr
 		auto & so2 = *so2_ptr;
 		plane_util<rdir>::copy_coeff(so, so2, ipl);
 
+		timer_pause();
 		auto tmp = log_begin(log_planes, kgs + ipl - 1, relax_dir_name<rdir>::value, topo2->comm);
 		if (i < 2)
 			kman2 = master_kmans[i];
@@ -147,6 +148,7 @@ void planes<rdir>::setup_impl(const stencil_op<sten3> & so, std::vector<slv2_ptr
 		log_end(log_planes, tmp);
 
 		planes.back()->give_op(std::move(so2_ptr));
+		timer_play();
 		// setup fine-grid solution and right hand side with contiguous memory across planes
 		{
 			service_manager<cdr2::mpi::stypes> & sman = kman2->services();

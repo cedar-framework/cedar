@@ -34,6 +34,7 @@ template<class sten>
 
 		this->x = grid_func(xaddr, topo);
 		this->res = grid_func(resaddr, topo);
+		this->res.set(0.0);
 		this->b = grid_func(baddr, topo);
 		this->SOR = {{relax_stencil(topo->nlocal(0)-2, topo->nlocal(1)-2),
 		              relax_stencil(topo->nlocal(0)-2, topo->nlocal(1)-2)}};
@@ -47,6 +48,7 @@ template<class sten>
 		std::size_t nbytes = topo->nlocal(0)*topo->nlocal(1)*sizeof(real_t);
 		this->res = mpi::grid_func((real_t*) mpool.addr(mempool::res, nbytes),
 		                           topo);
+		this->res.set(0.0);
 		this->SOR = {{relax_stencil(A.shape(0), A.shape(1)),
 		              relax_stencil(A.shape(0), A.shape(1))}};
 	}
