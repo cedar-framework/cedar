@@ -1,0 +1,10 @@
+{
+	"log": ["error","status"],
+	"nsweeps": 10,
+	"halo-exchange": "msg",
+	"grid":
+	{
+		"n": [30, 30, 30],
+		"np": [2, 2]
+	}
+}
