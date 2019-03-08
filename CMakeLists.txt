@@ -19,7 +19,7 @@ include(ExternalProject)
 
 enable_language(C CXX Fortran)
 
-add_definitions(-fPIC)
+add_definitions(-fPIC -Iinclude)
 include_directories(include)
 install(DIRECTORY include/ DESTINATION include)
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)

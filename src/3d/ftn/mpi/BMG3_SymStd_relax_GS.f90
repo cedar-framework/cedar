@@ -76,7 +76,7 @@
       INTEGER pts, ibeg, iend
       INTEGER ptstart, ptend, ptstride
 
-      !$omp target enter data map(to:Q(:NLx*NLy*NLz),QF(:NLx*NLy*NLz),SO(:(NLx+1)*(NLy+1)*(NLz+1)*NStncl),SOR(:NLx*NLy*NLz*NSORv))
+      !!$omp target enter data map(to:Q(:NLx,:NLy,:NLz),QF(:NLx,:NLy,:NLz),SO(:(NLx+1),:(NLy+1),:(NLz+1),:NStncl),SOR(:NLx,:NLy,:NLz,:NSORv))
 
 
 ! ======================================================================
@@ -102,9 +102,9 @@
             ptstride = -1
          ENDIF
 
-         !$omp target teams map(to:Q(:NLx*NLy*NLz),QF(:NLx*NLy*NLz),SO(:(NLx+1)*(NLy+1)*(NLz+1)*NStncl),SOR(:NLx*NLy*NLz*NSORv))
-         !$omp distribute parallel do simd collapse(4)
          DO pts = ptstart, ptend, ptstride ! >>> BEGIN: loop over colors
+         !$omp target teams map(tofrom:Q(:NLx,:NLy,:NLz),QF(:NLx,:NLy,:NLz),SO(:(NLx+1),:(NLy+1),:(NLz+1),:NStncl),SOR(:NLx,:NLy,:NLz,:NSORv))
+         !$omp distribute parallel do simd collapse(3)
             DO k=2+mod(mod((pts-1)/4,2)+mod(kGs+1,2),2),K1,2
                !
                DO j=2+mod(mod((pts-1)/2,2)+mod(jGs+1,2),2),J1,2
@@ -145,8 +145,9 @@
                ENDDO
                !
             ENDDO
+            !$omp end target teams
 
-            !$omp target update data map(to:Q(:NLx*NLy*NLz))
+            !!$omp target update from(Q(:NLx,:NLy,:NLz))
             call halo_exchange(KG, Q, halof)
 
          ENDDO   ! >>> END: loop over colors <<<<<<<<<<<<<<<<<<<<<<<<<<

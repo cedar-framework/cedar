@@ -12,7 +12,8 @@ macro(check_for_cxx11_compiler _CXX11CHECK)
         (CMAKE_CXX_COMPILER_ID STREQUAL "PGI" AND
             NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 14.3) OR
         (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND
-            NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 3.1))
+            NOT ${CMAKE_CXX_COMPILER_VERSION} VERSION_LESS 3.1) OR
+        CMAKE_CXX_COMPILER_ID STREQUAL "XL")
 
         set(${_CXX11CHECK} 1)
         message(STATUS "Checking for C++11 compiler - yes")
