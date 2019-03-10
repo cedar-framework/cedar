@@ -145,9 +145,8 @@ void tausch_exchanger::init_datadist()
 
 void tausch_exchanger::init_gfunc(std::vector<topo_ptr> & topos)
 {
-
-    std::vector<std::vector<int> > remote_spec(halo_dir::count * nlevels);
-    std::vector<std::vector<int> > local_spec(halo_dir::count * nlevels);
+	std::vector<std::vector<std::array<int, 3> > > remote_spec(halo_dir::count * nlevels);
+	std::vector<std::vector<std::array<int, 3> > > local_spec(halo_dir::count * nlevels);
     std::vector<int> remote_remoteMpiRank(halo_dir::count * nlevels);
     std::vector<int> local_remoteMpiRank(halo_dir::count * nlevels);
 
@@ -177,9 +176,8 @@ void tausch_exchanger::init_gfunc(std::vector<topo_ptr> & topos)
 
 void tausch_exchanger::init_so(std::vector<topo_ptr> & topos)
 {
-
-    std::vector<std::vector<int> > remote_spec(halo_dir::count * nlevels);
-    std::vector<std::vector<int> > local_spec(halo_dir::count * nlevels);
+	std::vector<std::vector<std::array<int, 3> > > remote_spec(halo_dir::count * nlevels);
+	std::vector<std::vector<std::array<int, 3> > > local_spec(halo_dir::count * nlevels);
     std::vector<int> remote_remoteMpiRank(halo_dir::count * nlevels);
     std::vector<int> local_remoteMpiRank(halo_dir::count * nlevels);
 
@@ -209,23 +207,20 @@ void tausch_exchanger::init_so(std::vector<topo_ptr> & topos)
 
 void tausch_exchanger::set_level_spec(int lvl, int rank,
                                       grid_topo & topo,
-                                      std::vector<std::vector<int> > & remote_spec,
-                                      std::vector<std::vector<int> > & local_spec,
-                                      std::vector<int> & local_remoteMpiRank,
-                                      std::vector<int> & remote_remoteMpiRank)
+                                      std::vector<std::vector<std::array<int, 3> > > & remote_spec,
+                                      std::vector<std::vector<std::array<int, 3> > > & local_spec,
+                                      std::vector<int> & remote_remoteMpiRank,
+                                      std::vector<int> & local_remoteMpiRank)
 {
-
-    const size_t nx = topo.nlocal(0);
-    const size_t ny = topo.nlocal(1);
-    const size_t nz = topo.nlocal(2);
+	const int nx = topo.nlocal(0);
+    const int ny = topo.nlocal(1);
+    const int nz = topo.nlocal(2);
 
 	// right
 
-    for(size_t z = 0; z < nz; ++z) {
-        for(size_t y = 0; y < ny; ++y) {
-            remote_spec[index(lvl,halo_dir::east)].push_back(z*(nx*ny) + y*(nx));
-            local_spec[index(lvl,halo_dir::east)].push_back(z*(nx*ny) + y*(nx) + nx-2);
-        }
+    for(int z = 0; z < nz; ++z) {
+        remote_spec[index(lvl,halo_dir::east)].push_back(std::array<int, 3>{z*(nx*ny)       , ny, nx});
+        local_spec [index(lvl,halo_dir::east)].push_back(std::array<int, 3>{z*(nx*ny) + nx-2, ny, nx});
     }
 
     if(topo.coord(0) == 0)
@@ -240,11 +235,9 @@ void tausch_exchanger::set_level_spec(int lvl, int rank,
 
 	// left
 
-    for(size_t z = 0; z < nz; ++z) {
-        for(size_t y = 0; y < ny; ++y) {
-            remote_spec[index(lvl,halo_dir::west)].push_back(z*(nx*ny) + y*(nx) + nx-1);
-            local_spec[index(lvl,halo_dir::west)].push_back(z*(nx*ny) + y*(nx) + 1);
-        }
+    for(int z = 0; z < nz; ++z) {
+        remote_spec[index(lvl,halo_dir::west)].push_back(std::array<int, 3>{z*(nx*ny) + nx-1, ny, nx});
+        local_spec [index(lvl,halo_dir::west)].push_back(std::array<int, 3>{z*(nx*ny) + 1   , ny, nx});
     }
 
     remote_remoteMpiRank[index(lvl,halo_dir::west)] = local_remoteMpiRank[index(lvl,halo_dir::east)];
@@ -252,11 +245,9 @@ void tausch_exchanger::set_level_spec(int lvl, int rank,
 
 	// north
 
-    for(size_t z = 0; z < nz; ++z) {
-        for(size_t x = 0; x < nx; ++x) {
-            remote_spec[index(lvl,halo_dir::north)].push_back(z*(nx*ny) + x);
-            local_spec[index(lvl,halo_dir::north)].push_back(z*(nx*ny) + (ny - 2)*nx + x);
-        }
+    for(int z = 0; z < nz; ++z) {
+        remote_spec[index(lvl,halo_dir::north)].push_back(std::array<int, 3>{z*(nx*ny)            , nx, 1});
+        local_spec [index(lvl,halo_dir::north)].push_back(std::array<int, 3>{z*(nx*ny) + (ny-2)*nx, nx, 1});
     }
 
     if(topo.coord(1) == 0)
@@ -271,11 +262,9 @@ void tausch_exchanger::set_level_spec(int lvl, int rank,
 
 	// south
 
-    for(size_t z = 0; z < nz; ++z) {
-        for(size_t x = 0; x < nx; ++x) {
-            remote_spec[index(lvl,halo_dir::south)].push_back(z*(nx*ny) + (ny - 1)*nx + x);
-            local_spec[index(lvl,halo_dir::south)].push_back(z*(nx*ny) + nx + x);
-        }
+    for(int z = 0; z < nz; ++z) {
+        remote_spec[index(lvl,halo_dir::south)].push_back(std::array<int, 3>{z*(nx*ny) + (ny-1)*nx, nx, 1});
+        local_spec [index(lvl,halo_dir::south)].push_back(std::array<int, 3>{z*(nx*ny) +        nx, nx, 1});
     }
 
     remote_remoteMpiRank[index(lvl,halo_dir::south)] = local_remoteMpiRank[index(lvl,halo_dir::north)];
@@ -283,11 +272,9 @@ void tausch_exchanger::set_level_spec(int lvl, int rank,
 
 	// top
 
-    for(size_t y = 0; y < ny; ++y) {
-        for(size_t x = 0; x < nx; ++x) {
-            remote_spec[index(lvl,halo_dir::top)].push_back(y*nx + x);
-            local_spec[index(lvl,halo_dir::top)].push_back((nz - 2)*(nx*ny) + y*nx + x);
-        }
+    for(int y = 0; y < ny; ++y) {
+        remote_spec[index(lvl,halo_dir::top)].push_back(std::array<int, 3>{                 y*nx, nx, 1});
+        local_spec [index(lvl,halo_dir::top)].push_back(std::array<int, 3>{(nz-2)*(nx*ny) + y*nx, nx, 1});
     }
 
     if(topo.coord(2) == 0)
@@ -302,40 +289,33 @@ void tausch_exchanger::set_level_spec(int lvl, int rank,
 
 	// bottom
 
-    for(size_t y = 0; y < ny; ++y) {
-        for(size_t x = 0; x < nx; ++x) {
-            remote_spec[index(lvl,halo_dir::bottom)].push_back((nz - 1)*(nx*ny) + y*nx + x);
-            local_spec[index(lvl,halo_dir::bottom)].push_back((nx*ny) + y*nx + x);
-        }
+    for(int y = 0; y < ny; ++y) {
+        remote_spec[index(lvl,halo_dir::bottom)].push_back(std::array<int, 3>{(nz-1)*(nx*ny) + y*nx, nx, 1});
+        local_spec [index(lvl,halo_dir::bottom)].push_back(std::array<int, 3>{       (nx*ny) + y*nx, nx, 1});
     }
 
     remote_remoteMpiRank[index(lvl,halo_dir::bottom)] = local_remoteMpiRank[index(lvl,halo_dir::top)];
     local_remoteMpiRank[index(lvl,halo_dir::bottom)] = remote_remoteMpiRank[index(lvl,halo_dir::top)];
-
 }
 
 
 void tausch_exchanger::set_level_spec_so(int lvl, int rank,
                                          grid_topo & topo,
-                                         std::vector<std::vector<int> > & remote_spec,
-                                         std::vector<std::vector<int> > & local_spec,
-                                         std::vector<int> & local_remoteMpiRank,
-                                         std::vector<int> & remote_remoteMpiRank)
+                                         std::vector<std::vector<std::array<int,3> > > & remote_spec,
+                                         std::vector<std::vector<std::array<int,3> > > & local_spec,
+                                         std::vector<int> & remote_remoteMpiRank,
+                                         std::vector<int> & local_remoteMpiRank)
 {
-
-    const size_t nx = topo.nlocal(0)+1;
-    const size_t ny = topo.nlocal(1)+1;
-    const size_t nz = topo.nlocal(2)+1;
+	const int nx = topo.nlocal(0)+1;
+    const int ny = topo.nlocal(1)+1;
+    const int nz = topo.nlocal(2)+1;
 
 	// right
 
-    for(size_t z = 0; z < nz-1; ++z) {
-        for(size_t y = 0; y < ny-1; ++y) {
-            remote_spec[index(lvl,halo_dir::east)].push_back(z*(nx*ny) + y*nx);
-            local_spec[index(lvl,halo_dir::east)].push_back(z*(nx*ny) + y*nx + nx-3);
-        }
+    for(int z = 0; z < nz-1; ++z) {
+        remote_spec[index(lvl,halo_dir::east)].push_back(std::array<int, 3>{z*(nx*ny)       , ny-1, nx});
+        local_spec [index(lvl,halo_dir::east)].push_back(std::array<int, 3>{z*(nx*ny) + nx-3, ny-1, nx});
     }
-
 
     if(topo.coord(0) == 0)
         remote_remoteMpiRank[index(lvl,halo_dir::east)] = rank + topo.nproc(0)-1;
@@ -349,25 +329,20 @@ void tausch_exchanger::set_level_spec_so(int lvl, int rank,
 
 	// left
 
-    for(size_t z = 0; z < nz-1; ++z) {
-        for(size_t y = 0; y < ny-1; ++y) {
-            remote_spec[index(lvl,halo_dir::west)].push_back(z*(nx*ny) + y*nx + nx-2  );
-            remote_spec[index(lvl,halo_dir::west)].push_back(z*(nx*ny) + y*nx + nx-2+1);
-            local_spec[index(lvl,halo_dir::west)].push_back(z*(nx*ny) + y*nx + 1  );
-            local_spec[index(lvl,halo_dir::west)].push_back(z*(nx*ny) + y*nx + 1+1);
+    for(int z = 0; z < nz-1; ++z) {
+        for(int y = 0; y < ny-1; ++y) {
+            remote_spec[index(lvl,halo_dir::west)].push_back(std::array<int, 3>{z*(nx*ny) + y*nx + nx-2, 2, 1});
+            local_spec [index(lvl,halo_dir::west)].push_back(std::array<int, 3>{z*(nx*ny) + y*nx + 1   , 2, 1});
         }
     }
 
     remote_remoteMpiRank[index(lvl,halo_dir::west)] = local_remoteMpiRank[index(lvl,halo_dir::east)];
-    local_remoteMpiRank[index(lvl,halo_dir::west)] = remote_remoteMpiRank[index(lvl,halo_dir::east)];
 
-	// north
+    // north
 
-    for(size_t z = 0; z < nz-1; ++z) {
-        for(size_t x = 0; x < nx-1; ++x) {
-            remote_spec[index(lvl,halo_dir::north)].push_back(z*(nx*ny) + x);
-            local_spec[index(lvl,halo_dir::north)].push_back(z*(nx*ny) + (ny-3)*nx + x);
-        }
+    for(int z = 0; z < nz-1; ++z) {
+        remote_spec[index(lvl,halo_dir::north)].push_back(std::array<int, 3>{z*(nx*ny)            , nx-1, 1});
+        local_spec [index(lvl,halo_dir::north)].push_back(std::array<int, 3>{z*(nx*ny) + (ny-3)*nx, nx-1, 1});
     }
 
     if(topo.coord(1) == 0)
@@ -380,27 +355,23 @@ void tausch_exchanger::set_level_spec_so(int lvl, int rank,
     else
         local_remoteMpiRank[index(lvl,halo_dir::north)] = rank + topo.nproc(0);
 
-	// south
+    // south
 
-    for(size_t z = 0; z < nz-1; ++z) {
-        for(size_t y = 0; y < 2; ++y) {
-            for(size_t x = 0; x < nx-1; ++x) {
-                remote_spec[index(lvl,halo_dir::south)].push_back(z*(nx*ny) + (ny-2 +y)*nx + x);
-                local_spec[index(lvl,halo_dir::south)].push_back(z*(nx*ny) + (1+y)*nx + x);
-            }
+    for(int z = 0; z < nz-1; ++z) {
+        for(int y = 0; y < 2; ++y) {
+            remote_spec[index(lvl,halo_dir::south)].push_back(std::array<int, 3>{z*(nx*ny) + (ny-2+y)*nx, nx-1, 1});
+            local_spec [index(lvl,halo_dir::south)].push_back(std::array<int, 3>{z*(nx*ny) +    (1+y)*nx, nx-1, 1});
         }
     }
 
     remote_remoteMpiRank[index(lvl,halo_dir::south)] = local_remoteMpiRank[index(lvl,halo_dir::north)];
     local_remoteMpiRank[index(lvl,halo_dir::south)] = remote_remoteMpiRank[index(lvl,halo_dir::north)];
 
-	// top
+    // top
 
-    for(size_t y = 0; y < ny-1; ++y) {
-        for(size_t x = 0; x < nx-1; ++x) {
-            remote_spec[index(lvl,halo_dir::top)].push_back(y*nx + x);
-            local_spec[index(lvl,halo_dir::top)].push_back((nz-3)*(nx*ny) + y*nx + x);
-        }
+    for(int y = 0; y < ny-1; ++y) {
+        remote_spec[index(lvl,halo_dir::top)].push_back(std::array<int, 3>{                 y*nx, nx-1, 1});
+        local_spec [index(lvl,halo_dir::top)].push_back(std::array<int, 3>{(nz-3)*(nx*ny) + y*nx, nx-1, 1});
     }
 
     if(topo.coord(2) == 0)
@@ -413,14 +384,13 @@ void tausch_exchanger::set_level_spec_so(int lvl, int rank,
     else
         local_remoteMpiRank[index(lvl,halo_dir::top)] = rank + topo.nproc(0)*topo.nproc(1);
 
-	// bottom
 
-    for(size_t z = 0; z < 2; ++z) {
-        for(size_t y = 0; y < ny-1; ++y) {
-            for(size_t x = 0; x < nx-1; ++x) {
-                remote_spec[index(lvl,halo_dir::bottom)].push_back((nz-2 +z)*(nx*ny) + y*nx + x);
-                local_spec[index(lvl,halo_dir::bottom)].push_back((1+z)*(nx*ny) + y*nx + x);
-            }
+    // bottom
+
+    for(int z = 0; z < 2; ++z) {
+        for(int y = 0; y < ny-1; ++y) {
+            remote_spec[index(lvl,halo_dir::bottom)].push_back(std::array<int, 3>{(nz-2+z)*(nx*ny) + y*nx, nx-1, 1});
+            local_spec [index(lvl,halo_dir::bottom)].push_back(std::array<int, 3>{   (1+z)*(nx*ny) + y*nx, nx-1, 1});
         }
     }
 
@@ -433,6 +403,7 @@ void tausch_exchanger::set_level_spec_so(int lvl, int rank,
 void tausch_exchanger::exchange_func(int k, real_t * gf)
 {
 	int lvl = nlevels - k;
+
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (send_active[index(lvl, dir)]) {
 			tausch->packSendBuffer(index(lvl,dir), 0, gf);
@@ -440,7 +411,7 @@ void tausch_exchanger::exchange_func(int k, real_t * gf)
 
 		}
 		if (recv_active[index(lvl, dir)]) {
-			tausch->recv(index(lvl,dir), index(lvl, dir));
+			tausch->recv(index(lvl,dir), index(lvl,dir));
 			tausch->unpackRecvBuffer(index(lvl,dir), 0, gf);
 		}
 	}
@@ -468,7 +439,7 @@ void tausch_exchanger::exchange_sten(int k, real_t * so)
 
 		}
 		if (recv_active[index(lvl, dir)]) {
-			tausch_so->recv(index(lvl,dir), index(lvl, dir));
+			tausch_so->recv(index(lvl,dir), index(lvl,dir));
 			for (int sdir = 0; sdir < stencil_ndirs<xxvii_pt>::value; sdir++) {
 				len_t offset = (JJ+1)*(II+1)*(KK+1)*sdir;
 				tausch_so->unpackRecvBuffer(index(lvl,dir), sdir, so + offset);
@@ -489,7 +460,7 @@ void tausch_exchanger::run(mpi::grid_func & f, unsigned short dmask)
 
 		}
 		if (recv_active[index(lvl, dir)] and (dmask & (1 << (dir / 2)))) {
-			tausch->recv(index(lvl,dir), index(lvl, dir));
+			tausch->recv(index(lvl,dir), index(lvl,dir));
 			tausch->unpackRecvBuffer(index(lvl,dir), 0, f.data());
 		}
 	}

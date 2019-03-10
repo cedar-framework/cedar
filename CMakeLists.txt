@@ -64,7 +64,7 @@ endif()
 
 add_subdirectory(src)
 add_library(cedar ${cedar_src})
-add_dependencies(cedar json)
+add_dependencies(cedar json tausch)
 target_compile_definitions(cedar PUBLIC MSG_DOUBLE NO_SECOND_UNDERSCORE)
 
 target_link_libraries(cedar PUBLIC
@@ -74,7 +74,8 @@ target_link_libraries(cedar PUBLIC
   ${MPI_C_LIBRARIES}
   ${MPI_CXX_LIBRARIES}
   ${MPI_Fortran_LIBRARIES})
-include_directories(${json_location} ${tausch_location})
+include_directories(${json_location})
+include_directories(${tausch_location})
 target_compile_definitions(cedar PUBLIC WITH_TAUSCH)
 if (ENABLE_PLANE_AGG)
   target_link_libraries(cedar PUBLIC ${Argobots_LIBRARIES})
