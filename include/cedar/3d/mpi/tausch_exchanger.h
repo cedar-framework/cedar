@@ -56,7 +56,7 @@ public:
 
 			}
 			if (recv_active[index(lvl, dir)]) {
-				tausch_so->recv(index(lvl,dir), index(lvl, dir));
+				tausch_so->recv(index(lvl,dir), index(lvl,dir));
 				for (int sdir = 0; sdir < stencil_ndirs<sten>::value; sdir++)
 					tausch_so->unpackRecvBuffer(index(lvl,dir), sdir, so.data() + so.index(0,0,sdir));
 			}
@@ -77,14 +77,14 @@ protected:
 
 	void set_level_spec(int lvl, int rank,
 	                    grid_topo & topo,
-	                    std::vector<std::vector<int> > & remote_spec,
-	                    std::vector<std::vector<int> > & local_spec,
+	                    std::vector<std::vector<std::array<int, 3> > > & remote_spec,
+	                    std::vector<std::vector<std::array<int, 3> > > & local_spec,
 	                    std::vector<int> & remote_remoteMpiRank,
 	                    std::vector<int> & local_remoteMpiRank);
 	void set_level_spec_so(int lvl, int rank,
 	                       grid_topo & topo,
-	                       std::vector<std::vector<int> > & remote_spec,
-	                       std::vector<std::vector<int> > & local_spec,
+	                       std::vector<std::vector<std::array<int, 3> > > & remote_spec,
+	                       std::vector<std::vector<std::array<int, 3> > > & local_spec,
 	                       std::vector<int> & remote_remoteMpiRank,
 	                       std::vector<int> & local_remoteMpiRank);
 	void init_gfunc(std::vector<topo_ptr> & topos);
