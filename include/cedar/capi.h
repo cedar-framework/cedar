@@ -18,8 +18,11 @@ extern "C" {
 #define CEDAR_ERR_DIM     6
 #define CEDAR_ERR_STENCIL 7
 #define CEDAR_ERR_SOLVER  8
-#define CEDAR_ERR_OTHER   9
+#define CEDAR_ERR_CONFIG  9
+#define CEDAR_ERR_FNAME   10
+#define CEDAR_ERR_OTHER   11
 
+typedef int cedar_config;
 typedef int cedar_topo;
 typedef int cedar_mat;
 typedef int cedar_vec;
@@ -29,6 +32,32 @@ typedef int cedar_solver;
 #define CEDAR_MAT_NULL ((cedar_mat) 0x30000000)
 #define CEDAR_SOLVER_NULL ((cedar_solver) 0x20000000)
 #define CEDAR_VEC_NULL ((cedar_vec) 0x40000000)
+#define CEDAR_CONFIG_NULL ((cedar_config) 0x50000000)
+
+
+
+/**
+ * Create Cedar config object
+ *
+ * @param[in] fname filename for config file
+ * @param[out] newconfig new config handle
+ * @return
+ *   - CEDAR_SUCCESS: no error
+ *   - CEDAR_ERR_FNAME: file with name fname not found
+ */
+int cedar_config_create(char *fname, cedar_config *newconfig);
+
+
+/**
+ * Free memory for config object
+ *
+ * @param conf config to be destroyed
+ * @return
+ * - CEDAR_SUCCESS: no error
+ * - CEDAR_ERR_CONFIG: invalid config object
+ */
+int cedar_config_free(cedar_config *conf);
+
 
 /**
  * Create 2D distributed grid topology.
@@ -314,12 +343,14 @@ int cedar_mat_free(cedar_mat *mat);
  * Create solver object and run cedar setup phase.
  *
  * @param mat fine grid matrix
+ * @param conf cedar config handle
  * @param solver solver object to create
  * @return
  *   - CEDAR_SUCCESS: no error
  *   - CEDAR_ERR_MAT: invalid mat handle
+ *   - CEDAR_ERR_CONFIG: invalid config handle
  */
-int cedar_solver_create(cedar_mat mat, cedar_solver *solver);
+int cedar_solver_create(cedar_mat mat, cedar_config conf, cedar_solver *solver);
 
 
 /**
