@@ -30,7 +30,7 @@ static bool file_exists(const char *fname)
 
 extern "C"
 {
-	int cedar_config_create(char *fname, cedar_config *newconfig)
+	int cedar_config_create(const char *fname, cedar_config *newconfig)
 	{
 		using namespace cedar;
 

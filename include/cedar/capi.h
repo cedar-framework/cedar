@@ -45,7 +45,7 @@ typedef int cedar_solver;
  *   - CEDAR_SUCCESS: no error
  *   - CEDAR_ERR_FNAME: file with name fname not found
  */
-int cedar_config_create(char *fname, cedar_config *newconfig);
+int cedar_config_create(const char *fname, cedar_config *newconfig);
 
 
 /**
