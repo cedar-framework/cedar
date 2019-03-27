@@ -4,6 +4,7 @@ set(interface_SOURCES
   interface/c/solver.cc
   interface/c/mat.cc
   interface/c/config.cc
+  interface/c/log.cc
   PARENT_SCOPE)
 
 # add_library(core SHARED python/core.cc)

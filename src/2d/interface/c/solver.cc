@@ -27,7 +27,7 @@ cedar_solver_cont *cedar_solver_getobj(cedar_solver handle)
 
 extern "C"
 {
-	int cedar_solver_create(cedar_mat mat, cedar_config conf, cedar_solver *solver)
+	int cedar_solver_create(cedar_mat mat, cedar_solver *solver)
 	{
 		using namespace cedar;
 
@@ -37,7 +37,7 @@ extern "C"
 			return CEDAR_ERR_MAT;
 		}
 
-		auto confobj = cedar_config_getobj(conf);
+		auto confobj = cedar_config_getobj(matobj->conf);
 		if (not confobj) {
 			*solver = CEDAR_SOLVER_NULL;
 			return CEDAR_ERR_CONFIG;

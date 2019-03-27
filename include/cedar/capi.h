@@ -35,6 +35,16 @@ typedef int cedar_solver;
 #define CEDAR_CONFIG_NULL ((cedar_config) 0x50000000)
 
 
+/**
+ * Initialize logging library
+ *
+ * @param[in] conf config object handle
+ * @return
+ *   - CEDAR_SUCCESS: no error
+ *   - CEDAR_ERR_CONFIG: invalid config object
+ */
+int cedar_log_init(cedar_config conf);
+
 
 /**
  * Create Cedar config object
@@ -236,18 +246,21 @@ typedef enum {
 /**
  * Create 2D cedar matrix.
  *
+ * @param[in] conf cedar config object
  * @param[in] topo 2D distributed grid topology
  * @param[out] mat new matrix
  * @return
  *   - CEDAR_SUCCESS: no error
  *   - CEDAR_ERR_TOPO: invalid topology object
+ *   - CEDAR_ERR_CONFIG: invalid config object
  */
-int cedar_mat_create2d(cedar_topo topo, cedar_stencil_2d sten_type, cedar_mat *mat);
+int cedar_mat_create2d(cedar_config conf, cedar_topo topo, cedar_stencil_2d sten_type, cedar_mat *mat);
 
 
 /**
  * Create 3D cedar matrix.
  *
+ * @param[in] conf cedar config object
  * @param[in] topo 3D distributed grid topology
  * @param[out] mat new matrix
  * @return
@@ -255,7 +268,7 @@ int cedar_mat_create2d(cedar_topo topo, cedar_stencil_2d sten_type, cedar_mat *m
  *   - CEDAR_ERR_TOPO: invalid topology object
  */
 #ifdef ENABLE_3D
-int cedar_mat_create3d(cedar_topo topo, cedar_stencil_3d sten_type, cedar_mat *mat);
+int cedar_mat_create3d(cedar_config conf, cedar_topo topo, cedar_stencil_3d sten_type, cedar_mat *mat);
 #endif
 
 
@@ -343,14 +356,13 @@ int cedar_mat_free(cedar_mat *mat);
  * Create solver object and run cedar setup phase.
  *
  * @param mat fine grid matrix
- * @param conf cedar config handle
  * @param solver solver object to create
  * @return
  *   - CEDAR_SUCCESS: no error
  *   - CEDAR_ERR_MAT: invalid mat handle
- *   - CEDAR_ERR_CONFIG: invalid config handle
+ *   - CEDAR_ERR_CONFIG: invalid config handle (from mat)
  */
-int cedar_solver_create(cedar_mat mat, cedar_config conf, cedar_solver *solver);
+int cedar_solver_create(cedar_mat mat, cedar_solver *solver);
 
 
 /**
