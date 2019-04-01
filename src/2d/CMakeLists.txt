@@ -35,12 +35,7 @@ if(ENABLE_MPI)
 	mpi/redist_solver.cc
 	mpi/solver.cc
 	redist/cholesky_solver.cc
-	)
-
-  if (tausch_FOUND)
-	list(APPEND sources
-	  mpi/tausch_exchanger.cc)
-  endif()
+    mpi/tausch_exchanger.cc)
 endif()
 
 set(2d_SOURCES ${sources} PARENT_SCOPE)

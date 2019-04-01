@@ -11,7 +11,6 @@ set(CEDAR_CMAKE_CONFIG_DIR          "${CMAKE_CURRENT_BINARY_DIR}/cmake_config")
 set(CEDAR_CMAKE_VERSION_CONFIG_FILE "${CEDAR_CMAKE_CONFIG_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
 set(CEDAR_CMAKE_PROJECT_CONFIG_FILE "${CEDAR_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Config.cmake")
 
-include(cxx11)
 include(cxx_config)
 include(options)
 include(testing)
@@ -24,11 +23,18 @@ include_directories(include)
 install(DIRECTORY include/ DESTINATION include)
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 
-find_package(tausch QUIET)
-if (tausch_FOUND)
-  include_directories(${TAUSCH_INCLUDE_DIR})
-  add_definitions(-DWITH_TAUSCH)
-endif()
+ExternalProject_Add(
+  tausch
+  PREFIX ${CMAKE_BINARY_DIR}/tausch
+  GIT_REPOSITORY https://bitbucket.org/luspi/tausch.git
+  UPDATE_DISCONNECTED 1
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND ""
+  INSTALL_COMMAND ""
+  LOG_DOWNLOAD ON
+)
+ExternalProject_Get_Property(tausch source_dir)
+set(tausch_location ${source_dir}/..)
 
 ExternalProject_Add(
   json
@@ -57,8 +63,10 @@ endif()
 
 add_subdirectory(src)
 add_library(cedar ${cedar_src})
-add_dependencies(cedar json)
+add_dependencies(cedar json tausch)
 target_compile_definitions(cedar PUBLIC MSG_DOUBLE NO_SECOND_UNDERSCORE)
+target_compile_features(cedar PUBLIC cxx_std_11)
+target_compile_options(cedar PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>)
 
 target_link_libraries(cedar PUBLIC
   ${Boost_LIBRARIES}
@@ -68,12 +76,8 @@ target_link_libraries(cedar PUBLIC
   ${MPI_CXX_LIBRARIES}
   ${MPI_Fortran_LIBRARIES})
 include_directories(${json_location})
-if (tausch_FOUND)
-  get_property(tausch_location TARGET tausch PROPERTY LOCATION)
-  target_link_libraries(cedar PUBLIC ${tausch_location})
-  target_include_directories(cedar PUBLIC ${TAUSCH_INCLUDE_DIR})
-  target_compile_definitions(cedar PUBLIC WITH_TAUSCH)
-endif()
+include_directories(${tausch_location})
+target_compile_definitions(cedar PUBLIC WITH_TAUSCH)
 if (ENABLE_PLANE_AGG)
   target_link_libraries(cedar PUBLIC ${Argobots_LIBRARIES})
   target_include_directories(cedar PUBLIC ${Argobots_INCLUDE_DIRS})

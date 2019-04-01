@@ -9,7 +9,8 @@ typedef enum {
 	CEDAR_KIND_TOPO   = 0x1,
 	CEDAR_KIND_SOLVER = 0x2,
 	CEDAR_KIND_MAT    = 0x3,
-	CEDAR_KIND_VEC    = 0x4
+	CEDAR_KIND_VEC    = 0x4,
+	CEDAR_KIND_CONFIG = 0x5
 } cedar_kind;
 
 typedef struct {

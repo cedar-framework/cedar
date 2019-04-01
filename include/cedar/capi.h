@@ -18,8 +18,11 @@ extern "C" {
 #define CEDAR_ERR_DIM     6
 #define CEDAR_ERR_STENCIL 7
 #define CEDAR_ERR_SOLVER  8
-#define CEDAR_ERR_OTHER   9
+#define CEDAR_ERR_CONFIG  9
+#define CEDAR_ERR_FNAME   10
+#define CEDAR_ERR_OTHER   11
 
+typedef int cedar_config;
 typedef int cedar_topo;
 typedef int cedar_mat;
 typedef int cedar_vec;
@@ -29,6 +32,42 @@ typedef int cedar_solver;
 #define CEDAR_MAT_NULL ((cedar_mat) 0x30000000)
 #define CEDAR_SOLVER_NULL ((cedar_solver) 0x20000000)
 #define CEDAR_VEC_NULL ((cedar_vec) 0x40000000)
+#define CEDAR_CONFIG_NULL ((cedar_config) 0x50000000)
+
+
+/**
+ * Initialize logging library
+ *
+ * @param[in] conf config object handle
+ * @return
+ *   - CEDAR_SUCCESS: no error
+ *   - CEDAR_ERR_CONFIG: invalid config object
+ */
+int cedar_log_init(cedar_config conf);
+
+
+/**
+ * Create Cedar config object
+ *
+ * @param[in] fname filename for config file
+ * @param[out] newconfig new config handle
+ * @return
+ *   - CEDAR_SUCCESS: no error
+ *   - CEDAR_ERR_FNAME: file with name fname not found
+ */
+int cedar_config_create(const char *fname, cedar_config *newconfig);
+
+
+/**
+ * Free memory for config object
+ *
+ * @param conf config to be destroyed
+ * @return
+ * - CEDAR_SUCCESS: no error
+ * - CEDAR_ERR_CONFIG: invalid config object
+ */
+int cedar_config_free(cedar_config *conf);
+
 
 /**
  * Create 2D distributed grid topology.
@@ -207,18 +246,21 @@ typedef enum {
 /**
  * Create 2D cedar matrix.
  *
+ * @param[in] conf cedar config object
  * @param[in] topo 2D distributed grid topology
  * @param[out] mat new matrix
  * @return
  *   - CEDAR_SUCCESS: no error
  *   - CEDAR_ERR_TOPO: invalid topology object
+ *   - CEDAR_ERR_CONFIG: invalid config object
  */
-int cedar_mat_create2d(cedar_topo topo, cedar_stencil_2d sten_type, cedar_mat *mat);
+int cedar_mat_create2d(cedar_config conf, cedar_topo topo, cedar_stencil_2d sten_type, cedar_mat *mat);
 
 
 /**
  * Create 3D cedar matrix.
  *
+ * @param[in] conf cedar config object
  * @param[in] topo 3D distributed grid topology
  * @param[out] mat new matrix
  * @return
@@ -226,7 +268,7 @@ int cedar_mat_create2d(cedar_topo topo, cedar_stencil_2d sten_type, cedar_mat *m
  *   - CEDAR_ERR_TOPO: invalid topology object
  */
 #ifdef ENABLE_3D
-int cedar_mat_create3d(cedar_topo topo, cedar_stencil_3d sten_type, cedar_mat *mat);
+int cedar_mat_create3d(cedar_config conf, cedar_topo topo, cedar_stencil_3d sten_type, cedar_mat *mat);
 #endif
 
 
@@ -318,6 +360,7 @@ int cedar_mat_free(cedar_mat *mat);
  * @return
  *   - CEDAR_SUCCESS: no error
  *   - CEDAR_ERR_MAT: invalid mat handle
+ *   - CEDAR_ERR_CONFIG: invalid config handle (from mat)
  */
 int cedar_solver_create(cedar_mat mat, cedar_solver *solver);
 

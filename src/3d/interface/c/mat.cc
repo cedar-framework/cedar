@@ -4,13 +4,14 @@
 
 #include <cedar/interface/object.h>
 #include <cedar/interface/topo.h>
+#include <cedar/interface/config.h>
 #include <cedar/interface/vec.h>
 #include <cedar/interface/mat.h>
 
 
 extern "C"
 {
-	int cedar_mat_create3d(cedar_topo topo, cedar_stencil_3d sten, cedar_mat *mat)
+	int cedar_mat_create3d(cedar_config conf, cedar_topo topo, cedar_stencil_3d sten, cedar_mat *mat)
 	{
 		using namespace cedar;
 		using namespace cedar::cdr3;
@@ -21,14 +22,21 @@ extern "C"
 			return CEDAR_ERR_TOPO;
 		}
 
+		auto confobj = cedar_config_getobj(conf);
+		if (not confobj) {
+			*mat = CEDAR_MAT_NULL;
+			return CEDAR_ERR_CONFIG;
+		}
+
 		cedar_object *obj = cedar_object_create(CEDAR_KIND_MAT);
 
 		cedar_mat_cont *cont = new cedar_mat_cont;
 		cont->nd = 3;
 		cont->topo = topo;
 		cedar_object_incref(topo);
-		config conf("config.json");
-		cont->kman3 = mpi::build_kernel_manager(conf);
+		cont->conf = conf;
+		cedar_object_incref(conf);
+		cont->kman3 = mpi::build_kernel_manager(*confobj);
 		cont->is_halo_setup = false;
 		if (sten == CEDAR_STENCIL_SEVEN_PT) {
 			cont->op3comp = std::make_unique<mpi::stencil_op<seven_pt>>(topo_obj);

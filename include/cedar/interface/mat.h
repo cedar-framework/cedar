@@ -16,6 +16,7 @@ struct cedar_mat_cont
 	unsigned short nd;
 	bool compressed;  /** Compressed stencil in 2D means five_pt */
 	cedar_topo topo;
+	cedar_config conf;
 	bool is_halo_setup;
 	std::unique_ptr<cedar::cdr2::mpi::stencil_op<cedar::cdr2::five_pt>> op2comp;
 	std::unique_ptr<cedar::cdr2::mpi::stencil_op<cedar::cdr2::nine_pt>> op2full;

@@ -51,8 +51,23 @@ void set_header_msg(std::string msg)
 
 void init()
 {
-	config conf;
-	init(conf);
+	log_level = std::make_unique<lmap_t>();
+	std::vector<std::string> levels{"status", "info", "error", "memory", "debug", "timer"};
+
+	int count = 0;
+	for (auto lvl : levels) {
+		(*log_level)[lvl] = 2<<count;
+		count++;
+	}
+
+	level = 0;
+
+	// sensible defaults
+	std::vector<std::string> clevels{"status", "error"};
+	for (auto clvl : clevels) level |= (*log_level)[clvl];
+
+	// config conf;
+	// init(conf);
 }
 
 

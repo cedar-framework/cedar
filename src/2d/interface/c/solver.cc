@@ -8,6 +8,7 @@
 #include <cedar/interface/vec.h>
 #include <cedar/interface/mat.h>
 #include <cedar/interface/solver.h>
+#include <cedar/interface/config.h>
 
 
 cedar_solver_cont *cedar_solver_getobj(cedar_solver handle)
@@ -36,6 +37,12 @@ extern "C"
 			return CEDAR_ERR_MAT;
 		}
 
+		auto confobj = cedar_config_getobj(matobj->conf);
+		if (not confobj) {
+			*solver = CEDAR_SOLVER_NULL;
+			return CEDAR_ERR_CONFIG;
+		}
+
 		cedar_object *obj = cedar_object_create(CEDAR_KIND_SOLVER);
 
 		cedar_solver_cont *slvobj = new cedar_solver_cont;
@@ -44,15 +51,15 @@ extern "C"
 
 		if (matobj->nd == 2) {
 			if (matobj->compressed)
-				slvobj->slv2comp = std::make_unique<cdr2::mpi::solver<cdr2::five_pt>>(*(matobj->op2comp));
+				slvobj->slv2comp = std::make_unique<cdr2::mpi::solver<cdr2::five_pt>>(*(matobj->op2comp), confobj);
 			else
-				slvobj->slv2full = std::make_unique<cdr2::mpi::solver<cdr2::nine_pt>>(*(matobj->op2full));
+				slvobj->slv2full = std::make_unique<cdr2::mpi::solver<cdr2::nine_pt>>(*(matobj->op2full), confobj);
 		} else if (matobj->nd == 3) {
 			#ifdef ENABLE_3D
 			if (matobj->compressed)
-				slvobj->slv3comp = std::make_unique<cdr3::mpi::solver<cdr3::seven_pt>>(*(matobj->op3comp));
+				slvobj->slv3comp = std::make_unique<cdr3::mpi::solver<cdr3::seven_pt>>(*(matobj->op3comp), confobj);
 			else
-				slvobj->slv3full = std::make_unique<cdr3::mpi::solver<cdr3::xxvii_pt>>(*(matobj->op3full));
+				slvobj->slv3full = std::make_unique<cdr3::mpi::solver<cdr3::xxvii_pt>>(*(matobj->op3full), confobj);
 			#else
 			return CEDAR_ERR_DIM;
 			#endif

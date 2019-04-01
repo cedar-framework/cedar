@@ -49,21 +49,16 @@ public:
 		lvl = nlevels - lvl - 1;
 
 		for (int dir = 0; dir < halo_dir::count; dir++) {
-			if (recv_active[index(lvl, dir)])
-				tausch_so->postReceiveCwC(index(lvl, dir), index(lvl, dir));
-		}
-
-		for (int dir = 0; dir < halo_dir::count; dir++) {
 			if (send_active[index(lvl, dir)]) {
 				for (int sdir = 0; sdir < stencil_ndirs<sten>::value; sdir++)
-					tausch_so->packSendBufferCwC(index(lvl,dir), sdir, so.data() + so.index(0,0,sdir));
-				tausch_so->sendCwC(index(lvl,dir), index(lvl,dir));
+					tausch_so->packSendBuffer(index(lvl,dir), sdir, so.data() + so.index(0,0,sdir));
+				tausch_so->send(index(lvl,dir), index(lvl,dir));
 
 			}
 			if (recv_active[index(lvl, dir)]) {
-				tausch_so->recvCwC(index(lvl,dir));
+				tausch_so->recv(index(lvl,dir), index(lvl,dir));
 				for (int sdir = 0; sdir < stencil_ndirs<sten>::value; sdir++)
-					tausch_so->unpackRecvBufferCwC(index(lvl,dir), sdir, so.data() + so.index(0,0,sdir));
+					tausch_so->unpackRecvBuffer(index(lvl,dir), sdir, so.data() + so.index(0,0,sdir));
 			}
 		}
 	}
@@ -75,19 +70,23 @@ public:
 	int & nhalo(int dim) { return nghost[dim]; }
 
 protected:
-	std::unique_ptr<Tausch3D<real_t>> tausch;
-	std::unique_ptr<Tausch3D<real_t>> tausch_so;
+	std::unique_ptr<Tausch<real_t>> tausch;
+	std::unique_ptr<Tausch<real_t>> tausch_so;
 	std::vector<bool> send_active;
 	std::vector<bool> recv_active;
 
 	void set_level_spec(int lvl, int rank,
 	                    grid_topo & topo,
-	                    std::vector<TauschHaloSpec> & remote_spec,
-	                    std::vector<TauschHaloSpec> & local_spec);
+	                    std::vector<std::vector<std::array<int, 3> > > & remote_spec,
+	                    std::vector<std::vector<std::array<int, 3> > > & local_spec,
+	                    std::vector<int> & remote_remoteMpiRank,
+	                    std::vector<int> & local_remoteMpiRank);
 	void set_level_spec_so(int lvl, int rank,
 	                       grid_topo & topo,
-	                       std::vector<TauschHaloSpec> & remote_spec,
-	                       std::vector<TauschHaloSpec> & local_spec);
+	                       std::vector<std::vector<std::array<int, 3> > > & remote_spec,
+	                       std::vector<std::vector<std::array<int, 3> > > & local_spec,
+	                       std::vector<int> & remote_remoteMpiRank,
+	                       std::vector<int> & local_remoteMpiRank);
 	void init_gfunc(std::vector<topo_ptr> & topos);
 	void init_so(std::vector<topo_ptr> & topos);
 	void init_dims(grid_topo & topo);
