@@ -18,8 +18,8 @@ int plane_setup_mpi::comm_split(MPI_Comm comm, int color, int key, MPI_Comm *new
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	if (ismaster) {
 		int kvkey;
-		MPI_Comm_create_keyval(MPI_NULL_COPY_FN,
-		                       MPI_NULL_DELETE_FN,
+		MPI_Comm_create_keyval(MPI_COMM_NULL_COPY_FN,
+		                       MPI_COMM_NULL_DELETE_FN,
 		                       &kvkey, (void*) 0);
 		keys->push_back(kvkey);
 		MPI_Comm_split(comm, color, key, newcomm);
