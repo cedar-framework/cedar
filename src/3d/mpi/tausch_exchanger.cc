@@ -337,6 +337,7 @@ void tausch_exchanger::set_level_spec_so(int lvl, int rank,
     }
 
     remote_remoteMpiRank[index(lvl,halo_dir::west)] = local_remoteMpiRank[index(lvl,halo_dir::east)];
+    local_remoteMpiRank[index(lvl,halo_dir::west)] = remote_remoteMpiRank[index(lvl,halo_dir::east)];
 
     // north
 
