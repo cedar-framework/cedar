@@ -1,7 +1,7 @@
 #ifndef CEDAR_3D_TAUSCH_EXCHANGER_H
 #define CEDAR_3D_TAUSCH_EXCHANGER_H
 
-#include <tausch/tausch.h>
+#include <tausch.h>
 
 #include <cedar/services/halo_exchange.h>
 #include <cedar/3d/mpi/stencil_op.h>

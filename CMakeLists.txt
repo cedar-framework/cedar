@@ -34,7 +34,7 @@ ExternalProject_Add(
   LOG_DOWNLOAD ON
 )
 ExternalProject_Get_Property(tausch source_dir)
-set(tausch_location ${source_dir}/..)
+set(tausch_location ${source_dir})
 
 ExternalProject_Add(
   json
