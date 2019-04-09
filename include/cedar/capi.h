@@ -20,7 +20,8 @@ extern "C" {
 #define CEDAR_ERR_SOLVER  8
 #define CEDAR_ERR_CONFIG  9
 #define CEDAR_ERR_FNAME   10
-#define CEDAR_ERR_OTHER   11
+#define CEDAR_ERR_CONFIG_PATH 11
+#define CEDAR_ERR_OTHER   12
 
 typedef int cedar_config;
 typedef int cedar_topo;
@@ -56,6 +57,20 @@ int cedar_log_init(cedar_config conf);
  *   - CEDAR_ERR_FNAME: file with name fname not found
  */
 int cedar_config_create(const char *fname, cedar_config *newconfig);
+
+
+/**
+ * Get value from Cedar config
+ *
+ * @param[in] conf config handle
+ * @param[in] confpath config path (key) for requested value
+ * @param[out] val value of requested key in config
+ * @return
+ *   - CEDAR_SUCCESS: no error
+ *   - CEDAR_ERR_CONFIG: invalid config object
+ *   - CEDAR_ERR_CONFIG_PATH: path does not exist in config file
+ */
+int cedar_config_get_int(cedar_config conf, const char *confpath, int *val);
 
 
 /**

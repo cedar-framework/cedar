@@ -51,6 +51,27 @@ extern "C"
 	}
 
 
+	int cedar_config_get_int(cedar_config conf, const char *confpath, int *key)
+	{
+		using namespace cedar;
+
+		if (CEDAR_GET_KIND(conf) != CEDAR_KIND_CONFIG)
+			return CEDAR_ERR_CONFIG;
+
+		auto confobj = cedar_config_getobj(conf);
+		if (not confobj)
+			return CEDAR_ERR_CONFIG;
+
+		try {
+			*key = confobj->get<int>(confpath);
+		} catch(...) {
+			return CEDAR_ERR_CONFIG_PATH;
+		}
+
+		return CEDAR_SUCCESS;
+	}
+
+
 	int cedar_config_free(cedar_config *conf)
 	{
 		if (CEDAR_GET_KIND(*conf) != CEDAR_KIND_CONFIG)
