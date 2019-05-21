@@ -68,13 +68,16 @@ target_compile_definitions(cedar PUBLIC MSG_DOUBLE NO_SECOND_UNDERSCORE)
 target_compile_features(cedar PUBLIC cxx_std_11)
 target_compile_options(cedar PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>)
 
+find_package(OpenMP)
 target_link_libraries(cedar PUBLIC
   ${Boost_LIBRARIES}
   ${LAPACK_LIBRARIES}
   ${BLAS_LIBRARIES}
   ${MPI_C_LIBRARIES}
   ${MPI_CXX_LIBRARIES}
-  ${MPI_Fortran_LIBRARIES})
+  ${MPI_Fortran_LIBRARIES}
+  OpenMP::OpenMP_CXX
+  OpenMP::OpenMP_Fortran)
 include_directories(${json_location})
 include_directories(${tausch_location})
 target_compile_definitions(cedar PUBLIC WITH_TAUSCH)
