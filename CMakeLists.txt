@@ -135,4 +135,4 @@ if(ENABLE_UNIT_TESTS)
   add_subdirectory(test)
 endif()
 
-# add_subdirectory(app)
+add_subdirectory(app)

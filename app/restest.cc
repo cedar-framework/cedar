@@ -1,0 +1,287 @@
+#include <random>
+#include <type_traits>
+#include <limits>
+
+#include <cuda_runtime.h>
+
+#include <cedar/kernels/residual.h>
+#include <cedar/2d/types.h>
+#include <cedar/2d/kernel_manager.h>
+
+using namespace cedar;
+using namespace cedar::cdr2;
+
+extern "C" {
+	using namespace cedar;
+	void BMG2_SymStd_residual_intent(int*,real_t*,real_t*,real_t*,real_t*,len_t*,len_t*,
+	                                 int*,int*,int*,int*,int*,int*,int*);
+	void BMG2_SymStd_residual_offload(int*,real_t*,real_t*,real_t*,real_t*,len_t*,len_t*,
+	                                  int*,int*,int*,int*,int*,int*,int*);
+
+	void BMG_get_bc(int, int*);
+}
+
+
+class residual_intent : public kernels::residual<stypes>
+{
+	void run(const stencil_op<five_pt> & so,
+	         const grid_func & x,
+	         const grid_func & b,
+	         grid_func & r) override {
+		this->run_impl(so, x, b, r);
+	}
+
+
+	void run(const stencil_op<nine_pt> & so,
+	         const grid_func & x,
+	         const grid_func & b,
+	         grid_func & r) override {
+		this->run_impl(so, x, b, r);
+	}
+
+	template<class sten>
+	void run_impl(const stencil_op<sten> & so,
+	              const grid_func & x,
+	              const grid_func & b,
+	              grid_func & r)
+	{
+		int k = 0;
+		int kf = 0;
+		int ifd;
+		int ibc;
+		int nstncl = stencil_ndirs<sten>::value;
+		if (std::is_same<sten, five_pt>::value)
+			ifd = 1;
+		else
+			ifd = 0;
+		int irelax = 0;
+		int irelax_sym = 0;
+		int updown = 0;
+		len_t ii = r.len(0);
+		len_t jj = r.len(1);
+
+		auto & Ad = const_cast<stencil_op<sten>&>(so);
+		grid_func &xd = const_cast<grid_func&>(x);
+		grid_func &bd = const_cast<grid_func&>(b);
+
+		BMG_get_bc(params->per_mask(), &ibc);
+		BMG2_SymStd_residual_intent(&k, Ad.data(), bd.data(), xd.data(), r.data(), &ii, &jj,
+		                            &kf, &ifd, &nstncl, &ibc, &irelax, &irelax_sym, &updown);
+	}
+};
+
+
+class residual_omp : public kernels::residual<stypes>
+{
+	void run(const stencil_op<five_pt> & so,
+	         const grid_func & x,
+	         const grid_func & b,
+	         grid_func & r) override {
+		this->run_impl(so, x, b, r);
+	}
+
+
+	void run(const stencil_op<nine_pt> & so,
+	         const grid_func & x,
+	         const grid_func & b,
+	         grid_func & r) override {
+		this->run_impl(so, x, b, r);
+	}
+
+	template<class sten>
+	void run_impl(const stencil_op<sten> & so,
+	              const grid_func & x,
+	              const grid_func & b,
+	              grid_func & r)
+	{
+		int k = 0;
+		int kf = 0;
+		int ifd;
+		int ibc;
+		int nstncl = stencil_ndirs<sten>::value;
+		if (std::is_same<sten, five_pt>::value)
+			ifd = 1;
+		else
+			ifd = 0;
+		int irelax = 0;
+		int irelax_sym = 0;
+		int updown = 0;
+		len_t ii = r.len(0);
+		len_t jj = r.len(1);
+
+		auto & Ad = const_cast<stencil_op<sten>&>(so);
+		grid_func &xd = const_cast<grid_func&>(x);
+		grid_func &bd = const_cast<grid_func&>(b);
+
+		BMG_get_bc(params->per_mask(), &ibc);
+		BMG2_SymStd_residual_offload(&k, Ad.data(), bd.data(), xd.data(), r.data(), &ii, &jj,
+		                             &kf, &ifd, &nstncl, &ibc, &irelax, &irelax_sym, &updown);
+	}
+};
+
+
+class residual_cuda : public kernels::residual<stypes>
+{
+	void run(const stencil_op<five_pt> & so,
+	         const grid_func & x,
+	         const grid_func & b,
+	         grid_func & r) override {
+
+	}
+
+
+	void run(const stencil_op<nine_pt> & so,
+	         const grid_func & x,
+	         const grid_func & b,
+	         grid_func & r) override {
+
+	}
+};
+
+
+static void set_random(grid_func & x)
+{
+	using namespace cedar;
+
+	std::mt19937 gen;
+	gen.seed(0);
+	std::uniform_real_distribution<real_t> dis;
+
+	for (auto j : x.range(1)) {
+		for (auto i : x.range(0)) {
+			x(i,j) = dis(gen);
+		}
+	}
+}
+
+
+template<class sten>
+static void set_random(stencil_op<sten> & so)
+{
+	using namespace cedar;
+
+	std::mt19937 gen;
+	gen.seed(0);
+	std::uniform_real_distribution<real_t> dis;
+
+	for (auto j : so.range(1)) {
+		for (auto i : so.range(0)) {
+			for (auto k : range(stencil_ndirs<sten>::value)) {
+				so(i,j,static_cast<sten>(k)) = dis(gen);
+			}
+		}
+	}
+}
+
+
+template<class T>
+struct managed_allocator
+{
+	static T * allocate(const std::size_t n)
+	{
+		void *pv;
+		cudaMallocManaged(&pv, n*sizeof(T), cudaMemAttachGlobal);
+
+		return static_cast<T*>(pv);
+	}
+
+	static void deallocate(T * const p, const std::size_t n)
+	{
+		cudaFree(p);
+	}
+};
+
+
+template<class T>
+struct default_allocator
+{
+	static T * allocate(const std::size_t n)
+	{
+		void *pv;
+
+		posix_memalign(&pv, 64, n*sizeof(T));
+
+		return static_cast<T*>(pv);
+	}
+
+	static void deallocate(T * const p, const std::size_t n)
+	{
+		free(p);
+	}
+};
+
+
+template<class allocator>
+grid_func allocate_vec(len_t nx, len_t ny)
+{
+	auto *addr = allocator::allocate((nx+2)*(ny+2));
+	grid_func ret(addr, nx, ny);
+
+	return ret;
+}
+
+
+template<class sten, class allocater>
+stencil_op<sten> allocate_op(len_t nx, len_t ny)
+{
+	auto *addr = allocater::allocate((nx+2)*(ny+2)*stencil_ndirs<sten>::value);
+	stencil_op<sten> ret(addr, nx, ny);
+
+	return ret;
+}
+
+
+template<class sten>
+std::function<stencil_op<sten>(len_t nx, len_t ny)> get_alloc_op(bool managed)
+{
+	if (managed)
+		return allocate_op<sten, managed_allocator<real_t>>;
+	else
+		return allocate_op<sten, default_allocator<real_t>>;
+}
+
+
+std::function<grid_func(len_t nx, len_t ny)> get_alloc_vec(bool managed)
+{
+	if (managed)
+		return allocate_vec<managed_allocator<real_t>>;
+	else
+		return allocate_vec<default_allocator<real_t>>;
+}
+
+
+int main(int argc, char *argv[])
+{
+	config conf("restest.json");
+	log::init(conf);
+	auto ndofs = conf.getvec<len_t>("grid.n");
+	auto nx = ndofs[0];
+	auto ny = ndofs[1];
+
+	auto kreg = build_kernel_manager(conf);
+	kreg->add<residual, residual_intent>("intent");
+	kreg->add<residual, residual_omp>("omp");
+
+	bool managed = conf.get<bool>("managed");
+	auto alloc_op = get_alloc_op<nine_pt>(managed);
+	auto alloc_vec = get_alloc_vec(managed);
+
+	auto so = alloc_op(nx, ny);
+	auto x = alloc_vec(nx, ny);
+	auto b = alloc_vec(nx, ny);
+	auto r = alloc_vec(nx, ny);
+
+	set_random(so);
+	set_random(x);
+	set_random(b);
+
+	auto kname = conf.get<std::string>("impl");
+	kreg->set<residual>(kname);
+
+	int nruns = conf.get<int>("nruns");
+	for (int i = 0; i < nruns; i++) {
+		kreg->run<residual>(so, x, b, r);
+	}
+
+	return 0;
+}

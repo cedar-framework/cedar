@@ -1,0 +1,9 @@
+{
+	"nruns": 10,
+	"managed": false,
+	"impl": "system",
+	"grid":
+	{
+		"n": [30, 30]
+	}
+}

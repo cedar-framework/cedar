@@ -44,12 +44,26 @@ template <std::size_t nd, typename stype, std::size_t... Is>
 	public grid_quantity<len_t, nd>
 {
 public:
-stencil_op_nd() {}
-stencil_op_nd(decltype(Is, len_t{})... args)
+	stencil_op_nd() {}
+	stencil_op_nd(decltype(Is, len_t{})... args)
 	{
 		this->num_ghosts = 1;
 		array<real_t, nd+1>::reshape(std::forward<decltype(args)>(args+2*this->num_ghosts)...,
 		                                    static_cast<len_t>(stype::ndirs));
+
+		for (std::size_t i = 0; i < nd; ++i) {
+			this->range_[i] = cedar::range(static_cast<len_t>(this->num_ghosts),
+			                               static_cast<len_t>(this->len(i)-1));
+			this->grange_[i] = cedar::range(static_cast<len_t>(0),
+			                                this->len(i));
+		}
+	}
+
+	stencil_op_nd(real_t *ext_data, decltype(Is, len_t{})... args)
+	{
+		this->num_ghosts = 1;
+		array<real_t, nd+1>::reshape(ext_data, std::forward<decltype(args)>(args+2*this->num_ghosts)...,
+		                             static_cast<len_t>(stype::ndirs));
 
 		for (std::size_t i = 0; i < nd; ++i) {
 			this->range_[i] = cedar::range(static_cast<len_t>(this->num_ghosts),

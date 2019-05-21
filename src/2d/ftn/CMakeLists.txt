@@ -1,5 +1,7 @@
 set(sources
   ftn/BMG2_SymStd_residual.f90
+  ftn/BMG2_SymStd_residual_intent.f90
+  ftn/BMG2_SymStd_residual_offload.f90
   ftn/BMG2_SymStd_interp_add.f90
   ftn/BMG2_SymStd_restrict.f90
   ftn/BMG2_SymStd_relax_GS.f90
