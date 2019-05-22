@@ -87,6 +87,7 @@
          !
          !  9-point stencil
          !
+         !$omp parallel do simd collapse(2)
          DO J=2,J1
             DO I=2,I1
                RES(I,J) = QF(I,J)&
@@ -101,11 +102,12 @@
      &                  - SO(I  ,J  ,KO )*Q(I  ,J)
             ENDDO
          ENDDO
-         !
+         !$omp end parallel do simd
       ELSE
          !
          !  5-point stencil
          !
+         !$omp parallel do simd collapse(2)
          DO J=2,J1
             DO I=2,I1
                RES(I,J) = QF(I,J)&
@@ -116,7 +118,7 @@
      &                  - SO(I  ,J  ,KO)*Q(I  ,J)
             ENDDO
          ENDDO
-         !
+         !$omp end parallel do simd
       ENDIF
 
 ! ======================================================================

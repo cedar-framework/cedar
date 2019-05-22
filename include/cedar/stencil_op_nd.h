@@ -77,6 +77,7 @@ public:
 	using array<real_t, nd+1>::data;
 	using array<real_t, nd+1>::set;
 	using array<real_t, nd+1>::index;
+	using array<real_t, nd+1>::size;
 	real_t & operator()(decltype(Is, len_t{})... args, stype dir)
 	{
 		return array<real_t,nd+1>::operator()(std::forward<decltype(args)>(args)...,static_cast<len_t>(dir));

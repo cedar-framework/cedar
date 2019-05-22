@@ -210,6 +210,7 @@ public:
 	}
 
 	data_type * data() { return base_ptr; }
+	len_type size() { return flat_len; }
 };
 
 template<typename data_type, unsigned short ND>

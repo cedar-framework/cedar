@@ -3,10 +3,12 @@
 #include <limits>
 
 #include <cuda_runtime.h>
+#include <omp.h>
 
 #include <cedar/kernels/residual.h>
 #include <cedar/2d/types.h>
 #include <cedar/2d/kernel_manager.h>
+#include <cedar/util/timer_util.h>
 
 using namespace cedar;
 using namespace cedar::cdr2;
@@ -147,8 +149,9 @@ static void set_random(grid_func & x)
 	gen.seed(0);
 	std::uniform_real_distribution<real_t> dis;
 
-	for (auto j : x.range(1)) {
-		for (auto i : x.range(0)) {
+	#pragma omp parallel for simd collapse(2)
+	for (int j = 1; j < x.len(1); j++) {
+		for (int i = 1; i < x.len(0); i++) {
 			x(i,j) = dis(gen);
 		}
 	}
@@ -164,10 +167,45 @@ static void set_random(stencil_op<sten> & so)
 	gen.seed(0);
 	std::uniform_real_distribution<real_t> dis;
 
-	for (auto j : so.range(1)) {
-		for (auto i : so.range(0)) {
+	#pragma omp parallel for simd collapse(2)
+	for (int j = 1; j < so.len(1); j++) {
+		for (int i = 1; i < so.len(0); i++) {
 			for (auto k : range(stencil_ndirs<sten>::value)) {
 				so(i,j,static_cast<sten>(k)) = dis(gen);
+			}
+		}
+	}
+}
+
+
+static void set_constant(grid_func & x, real_t val)
+{
+	using namespace cedar;
+
+	len_t jlen = x.len(1);
+	len_t ilen = x.len(0);
+	real_t *data = x.data();
+	#pragma omp target teams distribute parallel for simd collapse(2)
+	for (int j = 1; j < jlen; j++) {
+		for (int i = 1; i < ilen; i++) {
+			data[j*ilen + i] = val;
+		}
+	}
+}
+
+
+template<class sten>
+static void set_constant(stencil_op<sten> & so, real_t val)
+{
+	len_t jlen = so.len(1);
+	len_t ilen = so.len(0);
+	int klen = stencil_ndirs<sten>::value;
+	real_t *data = so.data();
+	#pragma omp target teams distribute parallel for simd collapse(2)
+	for (int j = 1; j < jlen; j++) {
+		for (int i = 1; i < ilen; i++) {
+			for (int k = 0; k < klen; k++) {
+				data[k*ilen*jlen + j*ilen + i] = val;
 			}
 		}
 	}
@@ -250,6 +288,14 @@ std::function<grid_func(len_t nx, len_t ny)> get_alloc_vec(bool managed)
 }
 
 
+template<class T>
+void prefetch(T arr)
+{
+	int defdev = omp_get_default_device();
+	cudaMemPrefetchAsync(arr.data(), arr.size()*sizeof(real_t), defdev, cudaStreamLegacy);
+}
+
+
 int main(int argc, char *argv[])
 {
 	config conf("restest.json");
@@ -271,17 +317,33 @@ int main(int argc, char *argv[])
 	auto b = alloc_vec(nx, ny);
 	auto r = alloc_vec(nx, ny);
 
-	set_random(so);
-	set_random(x);
-	set_random(b);
-
 	auto kname = conf.get<std::string>("impl");
 	kreg->set<residual>(kname);
 
+	if (kname == "omp") {
+		prefetch(so);
+		prefetch(x);
+		prefetch(b);
+		prefetch(r);
+		cudaDeviceSynchronize();
+		set_constant(so, 4);
+		set_constant(x, 2);
+		set_constant(b, 1);
+	} else {
+		set_random(so);
+		set_random(x);
+		set_random(b);
+	}
+
 	int nruns = conf.get<int>("nruns");
+	auto start = timer_util<machine_mode::SERIAL>::now();
 	for (int i = 0; i < nruns; i++) {
 		kreg->run<residual>(so, x, b, r);
 	}
+	auto end = timer_util<machine_mode::SERIAL>::now();
+	auto elapsed = timer_util<machine_mode::SERIAL>::duration(start, end);
+	elapsed = elapsed / nruns;
+	std::cout << elapsed << " s " << nx * ny * 8 * (5+3) / 1e6 / elapsed << " MB/s" << std::endl;
 
 	return 0;
 }
