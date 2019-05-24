@@ -10,6 +10,8 @@
 #include <cedar/2d/kernel_manager.h>
 #include <cedar/util/timer_util.h>
 
+#include "rescuda.h"
+
 using namespace cedar;
 using namespace cedar::cdr2;
 
@@ -128,7 +130,6 @@ class residual_cuda : public kernels::residual<stypes>
 	         const grid_func & x,
 	         const grid_func & b,
 	         grid_func & r) override {
-
 	}
 
 
@@ -136,7 +137,13 @@ class residual_cuda : public kernels::residual<stypes>
 	         const grid_func & x,
 	         const grid_func & b,
 	         grid_func & r) override {
-
+		int ilen = r.len(0);
+		int jlen = r.len(1);
+		auto & Ad = const_cast<stencil_op<nine_pt>&>(so);
+		grid_func &xd = const_cast<grid_func&>(x);
+		grid_func &bd = const_cast<grid_func&>(b);
+		residual_cuda9(ilen, jlen, r.data(), Ad.data(), xd.data(), bd.data());
+		cudaDeviceSynchronize();
 	}
 };
 
@@ -231,6 +238,24 @@ struct managed_allocator
 
 
 template<class T>
+struct explicit_allocator
+{
+	static T * allocate(const std::size_t n)
+	{
+		void *pv;
+		cudaMalloc(&pv, n*sizeof(T));
+
+		return static_cast<T*>(pv);
+	}
+
+	static void deallocate(T * const p, const std::size_t n)
+	{
+		cudaFree(p);
+	}
+};
+
+
+template<class T>
 struct default_allocator
 {
 	static T * allocate(const std::size_t n)
@@ -270,19 +295,23 @@ stencil_op<sten> allocate_op(len_t nx, len_t ny)
 
 
 template<class sten>
-std::function<stencil_op<sten>(len_t nx, len_t ny)> get_alloc_op(bool managed)
+std::function<stencil_op<sten>(len_t nx, len_t ny)> get_alloc_op(const std::string & memt)
 {
-	if (managed)
+	if (memt == "managed")
 		return allocate_op<sten, managed_allocator<real_t>>;
+	else if (memt == "explicit")
+		return allocate_op<sten, explicit_allocator<real_t>>;
 	else
 		return allocate_op<sten, default_allocator<real_t>>;
 }
 
 
-std::function<grid_func(len_t nx, len_t ny)> get_alloc_vec(bool managed)
+std::function<grid_func(len_t nx, len_t ny)> get_alloc_vec(const std::string & memt)
 {
-	if (managed)
+	if (memt == "managed")
 		return allocate_vec<managed_allocator<real_t>>;
+	else if (memt == "explicit")
+		return allocate_vec<explicit_allocator<real_t>>;
 	else
 		return allocate_vec<default_allocator<real_t>>;
 }
@@ -307,17 +336,25 @@ int main(int argc, char *argv[])
 	auto kreg = build_kernel_manager(conf);
 	kreg->add<residual, residual_intent>("intent");
 	kreg->add<residual, residual_omp>("omp");
+	kreg->add<residual, residual_cuda>("cuda");
 
 	bool managed = conf.get<bool>("managed");
-	auto alloc_op = get_alloc_op<nine_pt>(managed);
-	auto alloc_vec = get_alloc_vec(managed);
+	auto kname = conf.get<std::string>("impl");
+	std::string memt;
+	if (managed)
+		memt = "managed";
+	else
+		memt = "ats";
+	if (kname == "cuda")
+		memt = "explicit";
+	auto alloc_op = get_alloc_op<nine_pt>(memt);
+	auto alloc_vec = get_alloc_vec(memt);
 
 	auto so = alloc_op(nx, ny);
 	auto x = alloc_vec(nx, ny);
 	auto b = alloc_vec(nx, ny);
 	auto r = alloc_vec(nx, ny);
 
-	auto kname = conf.get<std::string>("impl");
 	kreg->set<residual>(kname);
 
 	if (kname == "omp") {
@@ -329,6 +366,11 @@ int main(int argc, char *argv[])
 		set_constant(so, 4);
 		set_constant(x, 2);
 		set_constant(b, 1);
+	} else if (kname == "cuda") {
+		set_constant_cuda(so.data(), so.size(), 4);
+		set_constant_cuda(x.data(), x.size(), 2);
+		set_constant_cuda(b.data(), b.size(), 1);
+		cudaDeviceSynchronize();
 	} else {
 		set_random(so);
 		set_random(x);

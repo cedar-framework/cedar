@@ -1,3 +1,5 @@
+cuda_add_library(rescuda rescuda.cu)
+target_link_libraries(rescuda cedar)
 add_executable(restest restest.cc)
-target_link_libraries(restest cedar)
+target_link_libraries(restest cedar rescuda)
 configure_file(restest.json ${CMAKE_BINARY_DIR}/restest.json COPYONLY)
