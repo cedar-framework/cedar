@@ -3,3 +3,6 @@ target_link_libraries(rescuda cedar)
 add_executable(restest restest.cc)
 target_link_libraries(restest cedar rescuda)
 configure_file(restest.json ${CMAKE_BINARY_DIR}/restest.json COPYONLY)
+
+add_executable(resdebug resdebug.cc)
+target_link_libraries(resdebug cedar rescuda)

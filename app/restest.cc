@@ -9,6 +9,7 @@
 #include <cedar/2d/types.h>
 #include <cedar/2d/kernel_manager.h>
 #include <cedar/util/timer_util.h>
+#include <cedar/mpi/block_partition.h>
 
 #include "rescuda.h"
 
@@ -21,7 +22,8 @@ extern "C" {
 	                                 int*,int*,int*,int*,int*,int*,int*);
 	void BMG2_SymStd_residual_offload(int*,real_t*,real_t*,real_t*,real_t*,len_t*,len_t*,
 	                                  int*,int*,int*,int*,int*,int*,int*);
-
+	void BMG2_SymStd_residual_noffload(int*,real_t*,real_t*,real_t*,real_t*,len_t*,len_t*,
+	                                   int*,int*,int*,int*,int*,int*,int*, len_t*, len_t*, int);
 	void BMG_get_bc(int, int*);
 }
 
@@ -77,6 +79,8 @@ class residual_intent : public kernels::residual<stypes>
 
 class residual_omp : public kernels::residual<stypes>
 {
+public:
+	residual_omp(int ndev) : ndev(ndev) {}
 	void run(const stencil_op<five_pt> & so,
 	         const grid_func & x,
 	         const grid_func & b,
@@ -118,9 +122,23 @@ class residual_omp : public kernels::residual<stypes>
 		grid_func &bd = const_cast<grid_func&>(b);
 
 		BMG_get_bc(params->per_mask(), &ibc);
-		BMG2_SymStd_residual_offload(&k, Ad.data(), bd.data(), xd.data(), r.data(), &ii, &jj,
-		                             &kf, &ifd, &nstncl, &ibc, &irelax, &irelax_sym, &updown);
+		if (ndev == 1) {
+			BMG2_SymStd_residual_offload(&k, Ad.data(), bd.data(), xd.data(), r.data(), &ii, &jj,
+			                             &kf, &ifd, &nstncl, &ibc, &irelax, &irelax_sym, &updown);
+		} else {
+			block_partition part(jj-2, ndev);
+			len_t jbeg[4], jend[4];
+			for (int di = 0; di < ndev; di++) {
+				jbeg[di] = part.low(di) + 2;
+				jend[di] = part.high(di) + 2;
+			}
+			BMG2_SymStd_residual_noffload(&k, Ad.data(), bd.data(), xd.data(), r.data(), &ii, &jj,
+			                              &kf, &ifd, &nstncl, &ibc, &irelax, &irelax_sym, &updown,
+			                              jbeg, jend, ndev);
+		}
 	}
+protected:
+	int ndev;
 };
 
 
@@ -185,37 +203,49 @@ static void set_random(stencil_op<sten> & so)
 }
 
 
-static void set_constant(grid_func & x, real_t val)
+static void set_constant(int ndev, grid_func & x, real_t val)
 {
-	using namespace cedar;
-
 	len_t jlen = x.len(1);
 	len_t ilen = x.len(0);
-	real_t *data = x.data();
-	#pragma omp target teams distribute parallel for simd collapse(2)
-	for (int j = 1; j < jlen; j++) {
-		for (int i = 1; i < ilen; i++) {
-			data[j*ilen + i] = val;
+	double *data = x.data();
+	// partition logical xlines across devices
+	block_partition part(jlen-2, ndev);
+	for (int di = 0; di < ndev; di++) {
+		auto jbeg = part.low(di) + 1;
+		auto jend = part.high(di) + 1;
+		#pragma omp target teams distribute parallel for simd collapse(2) device(di) nowait
+		for (int j = jbeg; j <= jend; j++) {
+			for (int i = 1; i < ilen; i++) {
+				data[j*ilen + i] = val;
+			}
 		}
 	}
+	#pragma omp taskwait
 }
 
 
 template<class sten>
-static void set_constant(stencil_op<sten> & so, real_t val)
+static void set_constant(int ndev, stencil_op<sten> & so, real_t val)
 {
 	len_t jlen = so.len(1);
 	len_t ilen = so.len(0);
 	int klen = stencil_ndirs<sten>::value;
 	real_t *data = so.data();
-	#pragma omp target teams distribute parallel for simd collapse(2)
-	for (int j = 1; j < jlen; j++) {
-		for (int i = 1; i < ilen; i++) {
-			for (int k = 0; k < klen; k++) {
-				data[k*ilen*jlen + j*ilen + i] = val;
+	// partition logical xlines across devices
+	block_partition part(jlen-2, ndev);
+	for (int di = 0; di < ndev; di++) {
+		auto jbeg = part.low(di) + 1;
+		auto jend = part.high(di) + 1;
+		#pragma omp target teams distribute parallel for simd collapse(2) device(di) nowait
+		for (int j = jbeg; j <= jend; j++) {
+			for (int i = 1; i < ilen; i++) {
+				for (int k = 0; k < klen; k++) {
+					data[k*ilen*jlen + j*ilen + i] = val;
+				}
 			}
 		}
 	}
+	#pragma omp taskwait
 }
 
 
@@ -318,10 +348,86 @@ std::function<grid_func(len_t nx, len_t ny)> get_alloc_vec(const std::string & m
 
 
 template<class T>
-void prefetch(T arr)
+void prefetch(T & arr, int ndev, int nsten)
 {
-	int defdev = omp_get_default_device();
-	cudaMemPrefetchAsync(arr.data(), arr.size()*sizeof(real_t), defdev, cudaStreamLegacy);
+	if (ndev == 1) {
+		int defdev = omp_get_default_device();
+		cudaMemAdvise(arr.data(), arr.size()*sizeof(real_t), cudaMemAdviseSetPreferredLocation, defdev);
+		cudaMemPrefetchAsync(arr.data(), arr.size()*sizeof(real_t), defdev, cudaStreamLegacy);
+	} else {
+		auto ilen = arr.len(0);
+		auto jlen = arr.len(1);
+		block_partition part(jlen-2, ndev);
+		for (int di = 0; di < ndev; di++) {
+			auto jbeg = part.low(di) + 1;
+			auto jsize = part.size(di);
+			cudaSetDevice(di);
+			for (int k = 0; k < nsten; k++) {
+				real_t *dataptr = arr.data() + (jbeg*ilen) + k*ilen*jlen;
+				std::size_t datasize = jsize*ilen*sizeof(real_t);
+				cudaMemAdvise(dataptr, datasize,
+				              cudaMemAdviseSetPreferredLocation, di);
+				cudaMemPrefetchAsync(dataptr, datasize, di, cudaStreamLegacy);
+			}
+			cudaDeviceSynchronize();
+		}
+	}
+}
+
+
+template<class T>
+void advise_halo(T & arr, int ndev, int nsten, cudaMemoryAdvise advise)
+{
+	auto ilen = arr.len(0);
+	auto jlen = arr.len(1);
+	block_partition part(jlen-2, ndev);
+	for (int di = 0; di < ndev; di++) {
+		auto jbeg = part.low(di) + 1;
+		auto jend = part.high(di) + 1;
+		auto jsize = part.size(di);
+		cudaSetDevice(di);
+		for (int k = 0; k < nsten; k++) {
+			if (di != 0) {
+				// prefetch lower halo readonly
+				cudaMemAdvise(arr.data() + (jbeg-1)*ilen + k*ilen*jlen,
+				              ilen*sizeof(real_t), advise, di);
+			}
+			if (di != (ndev - 1)) {
+				// prefetch upper halo readonly
+				cudaMemAdvise(arr.data() + (jend+1)*ilen + k*ilen*jlen,
+				              ilen*sizeof(real_t), advise, di);
+			}
+		}
+		cudaDeviceSynchronize();
+	}
+}
+
+
+template<class T>
+void prefetch_halo(T & arr, int ndev, int nsten)
+{
+	auto ilen = arr.len(0);
+	auto jlen = arr.len(1);
+	block_partition part(jlen-2, ndev);
+	for (int di = 0; di < ndev; di++) {
+		auto jbeg = part.low(di) + 1;
+		auto jend = part.high(di) + 1;
+		auto jsize = part.size(di);
+		cudaSetDevice(di);
+		for (int k = 0; k < nsten; k++) {
+			if (di != 0) {
+				// prefetch lower halo
+				cudaMemPrefetchAsync(arr.data() + (jbeg-1)*ilen + k*ilen*jlen,
+				                     ilen*sizeof(real_t), di, cudaStreamLegacy);
+			}
+			if (di != (ndev - 1)) {
+				// prefetch upper halo
+				cudaMemPrefetchAsync(arr.data() + (jend+1)*ilen + k*ilen*jlen,
+				                     ilen*sizeof(real_t), di, cudaStreamLegacy);
+			}
+		}
+		cudaDeviceSynchronize();
+	}
 }
 
 
@@ -332,12 +438,15 @@ int main(int argc, char *argv[])
 	auto ndofs = conf.getvec<len_t>("grid.n");
 	auto nx = ndofs[0];
 	auto ny = ndofs[1];
+	auto ndev = conf.get<int>("ndev");
 
 	auto kreg = build_kernel_manager(conf);
 	kreg->add<residual, residual_intent>("intent");
-	kreg->add<residual, residual_omp>("omp");
+	kreg->add<residual, residual_omp>("omp", ndev);
 	kreg->add<residual, residual_cuda>("cuda");
 
+	// halo optimization for multiple devices
+	bool halo = conf.get<bool>("halo");
 	bool managed = conf.get<bool>("managed");
 	auto kname = conf.get<std::string>("impl");
 	std::string memt;
@@ -358,14 +467,24 @@ int main(int argc, char *argv[])
 	kreg->set<residual>(kname);
 
 	if (kname == "omp") {
-		prefetch(so);
-		prefetch(x);
-		prefetch(b);
-		prefetch(r);
+		prefetch(so, ndev, stencil_ndirs<nine_pt>::value);
+		prefetch(x, ndev, 1);
+		prefetch(b, ndev, 1);
+		prefetch(r, ndev, 1);
 		cudaDeviceSynchronize();
-		set_constant(so, 4);
-		set_constant(x, 2);
-		set_constant(b, 1);
+		set_constant(ndev, so, 4);
+		set_constant(ndev, x, 2);
+		set_constant(ndev, b, 1);
+		if (halo) {
+			advise_halo(r, ndev, 1, cudaMemAdviseSetAccessedBy);
+			advise_halo(so, ndev, stencil_ndirs<nine_pt>::value, cudaMemAdviseSetReadMostly);
+			advise_halo(x, ndev, 1, cudaMemAdviseSetReadMostly);
+			advise_halo(b, ndev, 1, cudaMemAdviseSetReadMostly);
+
+			prefetch_halo(so, ndev, stencil_ndirs<nine_pt>::value);
+			prefetch_halo(x, ndev, 1);
+			prefetch_halo(b, ndev, 1);
+		}
 	} else if (kname == "cuda") {
 		set_constant_cuda(so.data(), so.size(), 4);
 		set_constant_cuda(x.data(), x.size(), 2);

@@ -2,6 +2,8 @@
 	"nruns": 10,
 	"managed": false,
 	"impl": "system",
+	"halo": false,
+	"ndev": 1,
 	"grid":
 	{
 		"n": [30, 30]
