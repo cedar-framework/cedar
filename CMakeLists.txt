@@ -86,6 +86,9 @@ endif()
 if (ENABLE_3D)
   target_compile_definitions(cedar PUBLIC ENABLE_3D)
 endif()
+if (ENABLE_OFFLOAD)
+  target_compile_definitions(cedar PUBLIC OFFLOAD)
+endif()
 
 target_include_directories(cedar PUBLIC
   $<INSTALL_INTERFACE:include/>

@@ -17,6 +17,12 @@ set(sources
   ftn/BMG_get_bc.f90
   ftn/util.f90)
 
+if (ENABLE_OFFLOAD)
+  list(APPEND sources
+	ftn/BMG2_SymStd_residual_offload.f90
+	)
+endif()
+
 if (ENABLE_MPI)
   list(APPEND sources
 	ftn/mpi/BMG2_SymStd_SETUP_nog.f90

@@ -6,8 +6,14 @@
 
 extern "C" {
 	using namespace cedar;
-	void BMG2_SymStd_residual(int*,real_t*,real_t*,real_t*,real_t*,len_t*,len_t*,
-	                          int*,int*,int*,int*,int*,int*,int*);
+	void BMG2_SymStd_residual(int k, real_t *so, real_t *qf, real_t *q, real_t *res,
+	                          len_t II, len_t jj,
+	                          int kf, int ifd, int nstncl, int ibc, int irelax,
+	                          int irelax_sym ,int updown);
+	void BMG2_SymStd_residual_offload(int k, real_t *so, real_t *qf, real_t *q, real_t *res,
+	                                  len_t II, len_t jj,
+	                                  int kf, int ifd, int nstncl, int ibc, int irelax,
+	                                  int irelax_sym ,int updown);
 	void BMG_get_bc(int, int*);
 }
 
@@ -15,6 +21,16 @@ namespace cedar { namespace cdr2 {
 
 class residual_f90 : public kernels::residual<stypes>
 {
+public:
+	residual_f90(bool offload)
+	{
+		if (offload)
+			rescall = BMG2_SymStd_residual_offload;
+		else
+			rescall = BMG2_SymStd_residual;
+	}
+
+
 	void run(const stencil_op<five_pt> & so,
 	         const grid_func & x,
 	         const grid_func & b,
@@ -56,10 +72,16 @@ class residual_f90 : public kernels::residual<stypes>
 		grid_func &bd = const_cast<grid_func&>(b);
 
 		BMG_get_bc(params->per_mask(), &ibc);
-		BMG2_SymStd_residual(&k, Ad.data(), bd.data(), xd.data(), r.data(), &ii, &jj,
-							 &kf, &ifd, &nstncl, &ibc, &irelax, &irelax_sym, &updown);
+		rescall(k, Ad.data(), bd.data(), xd.data(), r.data(), ii, jj,
+		        kf, ifd, nstncl, ibc, irelax, irelax_sym, updown);
 	}
 
+
+protected:
+	std::function<void(int k, real_t *so, real_t *qf, real_t *q, real_t *res,
+	                   len_t II, len_t jj,
+	                   int kf, int ifd, int nstncl, int ibc, int irelax,
+	                   int irelax_sym ,int updown)> rescall;
 };
 
 }}

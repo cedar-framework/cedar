@@ -25,7 +25,8 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->add<coarsen_op, galerkin>("system");
 	kman->add<interp_add, interp_f90>("system");
 	kman->add<restriction, restrict_f90>("system");
-	kman->add<residual, residual_f90>("system");
+	kman->add<residual, residual_f90>("system", false);
+	kman->add<residual, residual_f90>("offload", true);
 	kman->add<setup_interp, setup_interp_f90>("system");
 	kman->add<solve_cg, solve_cg_f90>("system");
 
@@ -38,6 +39,10 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->set<residual>("system");
 	kman->set<setup_interp>("system");
 	kman->set<solve_cg>("system");
+
+	if (params->offload) {
+		kman->set<residual>("offload");
+	}
 
 	// register services
 	auto & services = kman->services();

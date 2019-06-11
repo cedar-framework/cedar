@@ -1,8 +1,8 @@
-      SUBROUTINE BMG2_SymStd_residual( &
+      SUBROUTINE BMG2_SymStd_residual_offload( &
      &                K, SO, QF, Q, RES, II, JJ,&
      &                KF, IFD, NStncl, IBC,&
      &                IRELAX, IRELAX_SYM, UPDOWN &
-     &                ) BIND(C,NAME='BMG2_SymStd_residual')
+     &                ) BIND(C,NAME='BMG2_SymStd_residual_offload')
 
 ! ======================================================================
 !  --------------------
@@ -64,11 +64,12 @@
 ! ----------------------------
 !     Argument Declarations
 !
-      INTEGER(len_t), value :: II, JJ
-      INTEGER(C_INT), value :: NStncl
+      integer(len_t), intent(in), value :: II, JJ
+      integer(c_int), intent(in), value :: NStncl
 
-      INTEGER(C_INT), value :: IBC, IFD, IRELAX, IRELAX_SYM, K, KF, UPDOWN
-      REAL(real_t) :: Q(II,JJ), QF(II,JJ), SO(II,JJ,NStncl), RES(II,JJ)
+      integer(c_int), intent(in), value :: IBC, IFD, IRELAX, IRELAX_SYM, K, KF, UPDOWN
+      real(real_t), intent(in) :: Q(II,JJ), QF(II,JJ), SO(II,JJ,NStncl)
+      real(real_t), intent(out) :: RES(II,JJ)
 
 ! ----------------------------
 !     Local Declarations
@@ -86,6 +87,7 @@
          !
          !  9-point stencil
          !
+         !$omp target teams distribute parallel do simd collapse(2)
          DO J=2,J1
             DO I=2,I1
                RES(I,J) = QF(I,J)&
@@ -100,11 +102,12 @@
      &                  - SO(I  ,J  ,KO )*Q(I  ,J)
             ENDDO
          ENDDO
-         !
+         !$omp end target teams distribute parallel do
       ELSE
          !
          !  5-point stencil
          !
+         !$omp target teams distribute parallel do simd collapse(2)
          DO J=2,J1
             DO I=2,I1
                RES(I,J) = QF(I,J)&
@@ -115,7 +118,7 @@
      &                  - SO(I  ,J  ,KO)*Q(I  ,J)
             ENDDO
          ENDDO
-         !
+         !$omp end target teams distribute parallel do
       ENDIF
 
 ! ======================================================================
