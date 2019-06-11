@@ -20,6 +20,7 @@ set(sources
 if (ENABLE_OFFLOAD)
   list(APPEND sources
 	ftn/BMG2_SymStd_residual_offload.f90
+	ftn/BMG2_SymStd_restrict_offload.f90
 	)
 endif()
 

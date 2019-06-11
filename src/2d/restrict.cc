@@ -5,11 +5,24 @@ extern "C" {
 	using namespace cedar;
 	void BMG2_SymStd_restrict(real_t*, real_t*, real_t*,
 	                          int, int, int, int, int);
+	void BMG2_SymStd_restrict_offload(real_t*, real_t*, real_t*,
+	                                  int, int, int, int, int);
 	void BMG_get_bc(int, int*);
 }
 
 using namespace cedar;
 using namespace cedar::cdr2;
+
+
+restrict_f90::restrict_f90(bool offload)
+{
+	fcall = BMG2_SymStd_restrict;
+	#ifdef OFFLOAD
+	if (offload)
+		fcall = BMG2_SymStd_restrict_offload;
+	#endif
+}
+
 
 void restrict_f90::run(const restrict_op & R,
                        const grid_func & fine,
@@ -23,7 +36,7 @@ void restrict_f90::run(const restrict_op & R,
 
 		BMG_get_bc(params->per_mask(), &ibc);
 
-		BMG2_SymStd_restrict(fined.data(), coarse.data(),
-		                     P.data(), fined.len(0), fined.len(1),
-		                     coarse.len(0), coarse.len(1), ibc);
+		fcall(fined.data(), coarse.data(),
+		      P.data(), fined.len(0), fined.len(1),
+		      coarse.len(0), coarse.len(1), ibc);
 }
