@@ -94,6 +94,11 @@ if (ENABLE_3D)
 endif()
 if (ENABLE_OFFLOAD)
   target_compile_definitions(cedar PUBLIC OFFLOAD)
+  find_package(OpenMP)
+  target_link_libraries(cedar PUBLIC
+	OpenMP::OpenMP_CXX
+	OpenMP::OpenMP_Fortran
+	-qsm -qoffload)
 endif()
 
 target_include_directories(cedar PUBLIC

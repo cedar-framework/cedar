@@ -24,10 +24,11 @@ class residual_f90 : public kernels::residual<stypes>
 public:
 	residual_f90(bool offload)
 	{
+		rescall = BMG2_SymStd_residual;
+		#ifdef OFFLOAD
 		if (offload)
 			rescall = BMG2_SymStd_residual_offload;
-		else
-			rescall = BMG2_SymStd_residual;
+		#endif
 	}
 
 
