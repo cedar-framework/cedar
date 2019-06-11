@@ -11,17 +11,16 @@ set(CEDAR_CMAKE_CONFIG_DIR          "${CMAKE_CURRENT_BINARY_DIR}/cmake_config")
 set(CEDAR_CMAKE_VERSION_CONFIG_FILE "${CEDAR_CMAKE_CONFIG_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
 set(CEDAR_CMAKE_PROJECT_CONFIG_FILE "${CEDAR_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Config.cmake")
 
-include(cxx_config)
 include(options)
 include(testing)
 include(ExternalProject)
 
 enable_language(C CXX Fortran)
 
-add_definitions(-fPIC)
 include_directories(include)
 install(DIRECTORY include/ DESTINATION include)
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
+include_directories(${CMAKE_BINARY_DIR}/include)
 
 ExternalProject_Add(
   tausch
@@ -64,9 +63,16 @@ endif()
 add_subdirectory(src)
 add_library(cedar ${cedar_src})
 add_dependencies(cedar json tausch)
-target_compile_definitions(cedar PUBLIC MSG_DOUBLE NO_SECOND_UNDERSCORE)
+target_compile_definitions(cedar PUBLIC
+  MSG_DOUBLE
+  NO_SECOND_UNDERSCORE
+  $<$<CONFIG:DEBUG>:DEBUG;BOUNDS_CHECK>)
 target_compile_features(cedar PUBLIC cxx_std_11)
-target_compile_options(cedar PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>)
+target_compile_options(cedar PUBLIC
+  $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
+  $<$<CONFIG:DEBUG>:-O0;-Wall;-g>
+  $<$<CONFIG:RELEASE>:-O3>)
+set_target_properties(cedar PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(cedar PUBLIC
   ${Boost_LIBRARIES}
