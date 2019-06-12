@@ -24,7 +24,8 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->add<line_relax<relax_dir::x>, lines<relax_dir::x>>("system");
 	kman->add<line_relax<relax_dir::y>, lines<relax_dir::y>>("system");
 	kman->add<coarsen_op, galerkin>("system");
-	kman->add<interp_add, interp_f90>("system");
+	kman->add<interp_add, interp_f90>("system", false);
+	kman->add<interp_add, interp_f90>("offload", true);
 	kman->add<restriction, restrict_f90>("system", false);
 	kman->add<restriction, restrict_f90>("offload", true);
 	kman->add<residual, residual_f90>("system", false);
@@ -46,6 +47,7 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 		kman->set<residual>("offload");
 		kman->set<restriction>("offload");
 		kman->set<point_relax>("offload");
+		kman->set<interp_add>("offload");
 	}
 
 	// register services

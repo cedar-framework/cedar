@@ -12,12 +12,17 @@ namespace cedar { namespace cdr2 {
 
 class interp_f90 : public kernels::interp_add<cdr2::stypes>
 {
+public:
 	using prolong_op = cedar::cdr2::prolong_op;
 	using grid_func = cedar::cdr2::grid_func;
+	interp_f90(bool offload);
 	void run(const prolong_op & P,
 	         const grid_func & coarse,
 	         const grid_func & residual,
 	         grid_func & fine) override;
+protected:
+	std::function<void(real_t*, real_t*, real_t*,real_t*,real_t*,
+	                   len_t, len_t, len_t, len_t, int, int)> fcall;
 };
 
 

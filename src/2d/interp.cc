@@ -7,6 +7,8 @@ extern "C" {
 	using namespace cedar;
 	void BMG2_SymStd_interp_add(real_t*, real_t*, real_t*,real_t*,real_t*,
 	                            len_t, len_t, len_t, len_t, int, int);
+	void BMG2_SymStd_interp_add_offload(real_t*, real_t*, real_t*,real_t*,real_t*,
+	                                    len_t, len_t, len_t, len_t, int, int);
 	void BMG2_SymStd_SETUP_interp_OI(real_t *so, real_t *soc, real_t *ci,
 	                                 len_t iif, len_t jjf, len_t iic, len_t jjc,
 	                                 int ifd, int nstncl, int jpn, int irelax);
@@ -16,6 +18,15 @@ extern "C" {
 
 using namespace cedar;
 using namespace cedar::cdr2;
+
+interp_f90::interp_f90(bool offload)
+{
+	fcall = BMG2_SymStd_interp_add;
+	#ifdef OFFLOAD
+	if (offload)
+		fcall = BMG2_SymStd_interp_add_offload;
+	#endif
+}
 
 void interp_f90::run(const prolong_op & P,
                      const grid_func & coarse,
@@ -40,9 +51,9 @@ void interp_f90::run(const prolong_op & P,
 
 		BMG_get_bc(params->per_mask(), &ibc);
 
-		BMG2_SymStd_interp_add(fine.data(), coarsed.data(), res.data(), fop_data, Pd.data(),
-		                       coarsed.len(0), coarsed.len(1), fine.len(0), fine.len(1),
-		                       nstencil, ibc);
+		fcall(fine.data(), coarsed.data(), res.data(), fop_data, Pd.data(),
+		      coarsed.len(0), coarsed.len(1), fine.len(0), fine.len(1),
+		      nstencil, ibc);
 }
 
 
