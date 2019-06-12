@@ -10,6 +10,8 @@ namespace cedar { namespace cdr2 {
 
 class rbgs : public kernels::point_relax<stypes>
 {
+public:
+	rbgs(bool offload);
 	void setup(const stencil_op<five_pt> & so,
 	           relax_stencil & sor) override
 	{
@@ -37,6 +39,7 @@ class rbgs : public kernels::point_relax<stypes>
 		this->run_impl(so, x, b, sor, cdir);
 	}
 
+protected:
 	template<class sten>
 	void setup_impl(const stencil_op<sten> & so,
 	                relax_stencil & sor);
@@ -47,6 +50,9 @@ class rbgs : public kernels::point_relax<stypes>
 	              const grid_func & b,
 	              const relax_stencil & sor,
 	              cycle::Dir cdir);
+
+	std::function<void(int, real_t*, real_t*, real_t*, real_t*, len_t, len_t,
+	                   int, int, int, int, int, int, int)> fcall;
 };
 
 

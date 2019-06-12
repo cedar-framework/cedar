@@ -9,6 +9,8 @@ extern "C" {
 	void BMG2_SymStd_SETUP_lines_y(real_t *SO, real_t *SOR, len_t Nx, len_t Ny, int NStncl, int JPN);
 	void BMG2_SymStd_relax_GS(int, real_t*, real_t*, real_t*, real_t*, len_t, len_t,
 	                          int, int, int, int, int, int, int);
+	void BMG2_SymStd_relax_GS_offload(int, real_t*, real_t*, real_t*, real_t*, len_t, len_t,
+	                                  int, int, int, int, int, int, int);
 	void BMG2_SymStd_relax_lines_x(int k, real_t *SO, real_t *QF, real_t *Q, real_t *SOR,
 	                               real_t *B, len_t II, len_t JJ, int kf, int ifd,
 	                               int nstencil, int irelax_sym, int updown, int jpn);
@@ -19,6 +21,15 @@ extern "C" {
 }
 
 namespace cedar { namespace cdr2 {
+
+rbgs::rbgs(bool offload)
+{
+	fcall = BMG2_SymStd_relax_GS;
+	#ifdef OFFLOAD
+	if (offload)
+		fcall = BMG2_SymStd_relax_GS_offload;
+	#endif
+}
 
 template<class sten>
 void rbgs::setup_impl(const stencil_op<sten> & so,
@@ -62,9 +73,9 @@ void rbgs::run_impl(const stencil_op<sten> & so,
 
 	BMG_get_bc(params->per_mask(), &ibc);
 
-	BMG2_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
-	                     so.len(0), so.len(1), kf, ifd, nstencil, nsorv,
-	                     BMG_RELAX_SYM, updown, ibc);
+	fcall(k, sod.data(), bd.data(), x.data(), sord.data(),
+	      so.len(0), so.len(1), kf, ifd, nstencil, nsorv,
+	      BMG_RELAX_SYM, updown, ibc);
 }
 template void rbgs::run_impl(const stencil_op<five_pt> & so, grid_func & x,
                              const grid_func & b,
