@@ -20,4 +20,5 @@ set(cedar_src ${sources}
   src/config.cc
   src/multilevel_settings.cc
   src/malloc_pool.cc
+  src/memory.cc
   PARENT_SCOPE)

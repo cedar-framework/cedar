@@ -23,9 +23,6 @@ namespace cedar { namespace cdr2 {
 		grid_func(real_t *ext_data, len_t nx, len_t ny, unsigned int nghosts=1);
 		grid_func(len_t nx, len_t ny, unsigned int nghosts=1);
 		grid_func() {}
-		grid_func & operator=(grid_func&& gf);
-		grid_func(const grid_func & gf) = default;
-		grid_func & operator=(const grid_func & gf) = default;
 		static grid_func ones(len_t nx, len_t ny);
 		static grid_func zeros(len_t nx, len_t ny);
 		static grid_func random(len_t nx, len_t ny);

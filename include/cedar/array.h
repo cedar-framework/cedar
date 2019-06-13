@@ -4,6 +4,7 @@
 #include <cassert>
 #include <tuple>
 #include <array>
+#include <cedar/memory.h>
 #include <cedar/types.h>
 #include <cedar/array_base.h>
 
@@ -24,7 +25,7 @@ template <typename len_type, typename data_type, unsigned short ND>
 class aarray : public virtual array_base<len_type>
 {
 protected:
-	AlignedVector<data_type> vec;     /** Vector where the data is stored. */
+	bool owns_data;
 	data_type *base_ptr;
 	len_type flat_len;
 	std::array<len_type, ND> strides; /** Strides of each dimension, e.g., first index is stride 1. */
@@ -47,7 +48,34 @@ public:
 		return pos-1;
 	}
 
-	aarray() {};
+	aarray() : owns_data(false) {};
+	~aarray() { if (owns_data) memory::free(base_ptr); }
+	aarray(const aarray &other)
+		: owns_data(true), flat_len(other.flat_len),
+		  strides(other.strides), extents(other.extents)
+	{
+		base_ptr = memory::alloc<data_type>(other.flat_len);
+		std::copy(other.base_ptr, other.base_ptr + other.flat_len, base_ptr);
+	}
+	aarray(aarray&& other) noexcept {
+		*this = std::move(other);
+	}
+	aarray & operator=(const aarray & other)
+	{
+		return *this = aarray(other);
+	}
+	aarray & operator=(aarray&& other) noexcept {
+		if (this == &other) return *this;
+		strides = std::move(other.strides);
+		extents = std::move(other.extents);
+		flat_len = other.flat_len;
+		base_ptr = other.base_ptr;
+		owns_data = other.owns_data;
+		other.owns_data = false;
+		other.base_ptr = nullptr;
+		other.flat_len = 0;
+		return *this;
+	}
 	template <typename... T> aarray(data_type *ext, T... args)
 	{
 		reshape(ext, std::forward<decltype(args)>(args)...);
@@ -69,9 +97,10 @@ public:
 		len_type len = 1;
 		for (unsigned short i = 0; i < ND; i++)
 			len *= extents[i];
-		vec.resize(len);
+
+		base_ptr = memory::alloc<data_type>(len);
+		owns_data = true;
 		flat_len = len;
-		base_ptr = vec.data();
 
 		strides[0] = 1;
 		for (unsigned short i = 1; i < ND; i++) {
