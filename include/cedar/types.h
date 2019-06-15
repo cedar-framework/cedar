@@ -2,7 +2,6 @@
 #define CEDAR_UTIL_TYPES_H
 
 #include <mpi.h>
-#include <memory>
 
 #include <boost/iterator/counting_iterator.hpp>
 #include <boost/range/iterator_range.hpp>
@@ -10,17 +9,9 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <cassert>
 
-#include "cedar/util/align_allocator.h"
 #include <cedar/ctypes.h>
 #include <cedar/config.h>
 
-// namespace std {
-// 	template<typename T, typename ...Args>
-// 		std::unique_ptr<T> make_unique( Args&& ...args )
-// 	{
-// 		return std::unique_ptr<T>( new T( std::forward<Args>(args)... ) );
-// 	}
-// }
 
 namespace cedar {
 
@@ -48,10 +39,6 @@ enum class Dir {UP, DOWN};
 
 using len_t = cedar_len;
 using real_t = cedar_real;
-
-template <class T>
-	using AlignedVector = std::vector<T, AlignAllocator<T,16>>;
-
 
 template <class T>
 boost::iterator_range<boost::counting_iterator<T> > range(T to)

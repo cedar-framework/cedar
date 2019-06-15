@@ -1,5 +1,6 @@
 #include <cedar/global_manager.h>
 #include <cedar/types.h>
+#include <cedar/log.h>
 
 namespace cedar {
 

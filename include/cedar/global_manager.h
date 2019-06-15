@@ -4,6 +4,7 @@
 #include <tuple>
 #include <memory>
 
+#include <cedar/cxx14.h>
 #include <cedar/type_list.h>
 #include <cedar/global_params.h>
 #include <cedar/util/basic_logger.h>

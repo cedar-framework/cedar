@@ -3,7 +3,6 @@
 #include <math.h>
 
 #include <cedar/types.h>
-#include <cedar/util/grid.h>
 #include <cedar/2d/grid_func.h>
 #include <cedar/2d/stencil_op.h>
 #include <cedar/2d/solver.h>

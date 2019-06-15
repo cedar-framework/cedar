@@ -1,3 +1,4 @@
+#include <cedar/log.h>
 #include <cedar/multilevel_settings.h>
 
 namespace cedar {

@@ -2,6 +2,7 @@
 #define CEDAR_SERVICE_MANAGER_H
 
 #include <cedar/type_list.h>
+#include <cedar/log.h>
 #include <cedar/services/halo_exchange.h>
 #include <cedar/services/message_passing.h>
 #include <cedar/services/mempool.h>
