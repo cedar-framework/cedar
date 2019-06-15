@@ -10,7 +10,7 @@
 #include <cedar/kernel_params.h>
 #include <cedar/2d/mpi/kernel_manager.h>
 
-#include <cedar/util/time_log.h>
+#include <cedar/timer.h>
 
 #include "per_halo.h"
 

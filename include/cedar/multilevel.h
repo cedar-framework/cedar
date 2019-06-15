@@ -3,7 +3,7 @@
 
 #include <cedar/types.h>
 #include <cedar/kernel_registry.h>
-#include <cedar/util/timer.h>
+#include <cedar/timer.h>
 #include <cedar/cycle/types.h>
 #include <cedar/cycle/vcycle.h>
 #include <cedar/cycle/fcycle.h>

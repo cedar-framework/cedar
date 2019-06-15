@@ -17,8 +17,12 @@ endforeach(dir)
 
 set(cedar_src ${sources}
   src/kernel_params.cc
+  src/global_params.cc
+  src/global_manager.cc
   src/config.cc
   src/multilevel_settings.cc
   src/malloc_pool.cc
   src/memory.cc
+  src/log.cc
+  src/init.cc
   PARENT_SCOPE)

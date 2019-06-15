@@ -1,9 +1,12 @@
-#include <cedar/util/log.h>
-#include <cedar/util/time_log.h>
+#include <cedar/util/agg_timer.h>
 
-namespace cedar {
+namespace cedar
+{
 
-template<> void time_log<machine_mode::MPI>::save(std::string fname)
+agg_timer::agg_timer(global_params & params) : active(true), serial(true) {}
+
+
+template<> void time_log<machine_mode::MPI>::save(const std::string & fname)
 {
 	using namespace boost::property_tree;
 	ptree pt;
@@ -100,7 +103,7 @@ template<> void time_log<machine_mode::MPI>::save(std::string fname)
 }
 
 
-template<> void time_log<machine_mode::SERIAL>::save(std::string fname)
+template<> void time_log<machine_mode::SERIAL>::save(const std::string & fname)
 {
 	using namespace boost::property_tree;
 	ptree pt;
@@ -128,8 +131,5 @@ template<> void time_log<machine_mode::SERIAL>::save(std::string fname)
 	this->lvl = 0;
 }
 
-	time_log<machine_mode::MPI> tlog;
-	time_log<machine_mode::SERIAL> tlog_ser;
-	bool serial_timers = true;
-	bool active = true;
+
 }

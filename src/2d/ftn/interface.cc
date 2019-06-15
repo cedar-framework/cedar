@@ -1,6 +1,6 @@
-#include "cedar/util/log.h"
+#include <cedar/log.h>
 #include <cedar/types.h>
-#include <cedar/util/time_log.h>
+#include <cedar/timer.h>
 #include <cedar/services/halo_exchange.h>
 
 extern "C" {

@@ -1,4 +1,4 @@
-#include <cedar/util/log.h>
+#include <cedar/log.h>
 #include <cedar/capi.h>
 #include <cedar/interface/object.h>
 #include <cedar/interface/config.h>

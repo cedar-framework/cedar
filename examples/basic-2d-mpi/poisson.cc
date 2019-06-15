@@ -9,7 +9,7 @@
 #include <cedar/2d/mpi/solver.h>
 #include <cedar/2d/mpi/gallery.h>
 
-#include <cedar/util/time_log.h>
+#include <cedar/timer.h>
 
 
 static void set_problem(cedar::cdr2::mpi::grid_func & b)
