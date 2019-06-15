@@ -7,6 +7,7 @@
 #include <cedar/type_list.h>
 #include <cedar/global_params.h>
 #include <cedar/util/basic_logger.h>
+#include <cedar/util/agg_timer.h>
 
 namespace cedar {
 
@@ -17,7 +18,7 @@ class global_manager<type_list<types...>>
 public:
 	using gtype = std::tuple<std::unique_ptr<types>...>;
 	using logger = typename std::tuple_element<0, gtype>::type::element_type;
-	// using timer  = typename std::tuple_element<1, gtype>::type;
+	using timer  = typename std::tuple_element<1, gtype>::type::element_type;
 	global_manager() {}
 	global_manager(global_params & params) :
 		globals(std::make_unique<types>(params)...) {}
@@ -31,7 +32,7 @@ protected:
 	gtype globals;
 };
 
-using reg_globals = type_list<basic_logger>;
+using reg_globals = type_list<basic_logger, agg_timer>;
 using gmant = global_manager<reg_globals>;
 extern global_manager<reg_globals> gman;
 

@@ -1,6 +1,7 @@
 #ifndef CEDAR_UTIL_TYPES_H
 #define CEDAR_UTIL_TYPES_H
 
+#include <mpi.h>
 #include <memory>
 
 #include <boost/iterator/counting_iterator.hpp>
@@ -24,6 +25,8 @@
 namespace cedar {
 
 void init(config & conf);
+void init(config & conf, MPI_Comm comm);
+
 enum class exec_mode { serial, mpi };
 enum class relax_dir {x, y, xy, xz, yz};
 template<relax_dir rdir>

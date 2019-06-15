@@ -27,7 +27,7 @@ struct global_params
 
 loglevel_t getloglevel(config & conf);
 
-std::shared_ptr<global_params> build_global_params(config & conf);
+global_params build_global_params(config & conf);
 
 }
 

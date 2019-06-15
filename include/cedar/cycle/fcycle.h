@@ -2,7 +2,7 @@
 #define CEDAR_CYCLE_FCYCLE_H
 
 #include <cedar/types.h>
-#include <cedar/util/timer.h>
+#include <cedar/timer.h>
 #include <cedar/cycle/vcycle.h>
 
 namespace cedar { namespace cycle {

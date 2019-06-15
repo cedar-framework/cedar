@@ -1,6 +1,5 @@
 set(util_SOURCES
   grid.cc
-  timer.cc
-  time_log.cc
+  agg_timer.cc
   basic_logger.cc
   PARENT_SCOPE)

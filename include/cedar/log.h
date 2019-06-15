@@ -1,7 +1,7 @@
 #ifndef CEDAR_LOG_H
 #define CEDAR_LOG_H
 
-#include <istream>
+#include <ostream>
 #include <cedar/global_manager.h>
 
 namespace cedar { namespace log {

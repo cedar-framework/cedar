@@ -9,7 +9,7 @@
 #include <cedar/2d/mpi/solver.h>
 #include <cedar/2d/mpi/gallery.h>
 
-#include <cedar/util/time_log.h>
+#include <cedar/timer.h>
 
 using namespace cedar;
 using namespace cedar::cdr2;

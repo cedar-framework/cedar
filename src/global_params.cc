@@ -21,11 +21,11 @@ loglevel_t getloglevel(config & conf)
 	return level;
 }
 
-std::shared_ptr<global_params> build_global_params(config & conf)
+global_params build_global_params(config & conf)
 {
-	auto params = std::make_shared<global_params>();
+	global_params params;
 
-	params->log_level = getloglevel(conf);
+	params.log_level = getloglevel(conf);
 
 	return params;
 }

@@ -8,7 +8,7 @@
 #include <cedar/2d/util/topo.h>
 #include <cedar/kernel_params.h>
 
-#include <cedar/util/time_log.h>
+#include <cedar/timer.h>
 
 using namespace cedar;
 using namespace cedar::cdr2;
