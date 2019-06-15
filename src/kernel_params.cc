@@ -1,5 +1,5 @@
 #include <cedar/kernel_params.h>
-#include <cedar/util/log.h>
+#include <cedar/log.h>
 #include <iostream>
 
 using namespace cedar;

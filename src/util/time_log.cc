@@ -1,4 +1,4 @@
-#include <cedar/util/log.h>
+#include <cedar/log.h>
 #include <cedar/util/time_log.h>
 
 namespace cedar {

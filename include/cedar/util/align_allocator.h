@@ -2,7 +2,7 @@
 #define CEDAR_UTIL_ALLOCATOR_H
 
 #include <stdexcept>
-#include "log.h"
+#include <cedar/log.h>
 
 template <typename T, std::size_t Alignment>
 	class AlignAllocator

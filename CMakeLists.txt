@@ -67,9 +67,9 @@ target_compile_definitions(cedar PUBLIC
   MSG_DOUBLE
   NO_SECOND_UNDERSCORE
   $<$<CONFIG:DEBUG>:DEBUG;BOUNDS_CHECK>)
-target_compile_features(cedar PUBLIC cxx_std_11)
+target_compile_features(cedar PUBLIC cxx_std_14)
 target_compile_options(cedar PUBLIC
-  $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
+  $<$<COMPILE_LANGUAGE:CXX>:-std=c++14>
   $<$<CONFIG:DEBUG>:-O0;-Wall;-g>
   $<$<CONFIG:RELEASE>:-O3>)
 set_target_properties(cedar PROPERTIES POSITION_INDEPENDENT_CODE ON)

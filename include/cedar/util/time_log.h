@@ -12,7 +12,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#include <cedar/util/log.h>
+#include <cedar/log.h>
 #include <cedar/mpi/redist_comms.h>
 #include <cedar/util/timer_util.h>
 

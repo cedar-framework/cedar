@@ -5,8 +5,6 @@
 #include <map>
 #include <tuple>
 
-#include <cedar/util/log.h>
-
 namespace cedar
 {
 	template<class... T> struct type_list {};
@@ -66,8 +64,8 @@ namespace cedar
 		std::shared_ptr<T> get_ptr()
 		{
 			const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
-			if (i >= defaults.size())
-				log::error << "<type_map> type not found" << std::endl;
+			// if (i >= defaults.size())
+			// 	log::error << "<type_map> type not found" << std::endl;
 			return std::get<i>(kerns)[defaults[i]];
 		}
 
@@ -76,8 +74,8 @@ namespace cedar
 		std::shared_ptr<T> get_ptr(const std::string & name)
 		{
 			const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
-			if (i >= defaults.size())
-				log::error << "<type_map> type not found" << std::endl;
+			// if (i >= defaults.size())
+			// 	log::error << "<type_map> type not found" << std::endl;
 			return std::get<i>(kerns)[name];
 		}
 
@@ -99,8 +97,8 @@ namespace cedar
 		std::string get_key()
 		{
 			const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
-			if (i >= defaults.size())
-				log::error << "<type_map> type not found" << std::endl;
+			// if (i >= defaults.size())
+			// 	log::error << "<type_map> type not found" << std::endl;
 			return defaults[i];
 		}
 
@@ -109,8 +107,8 @@ namespace cedar
 		void add(const std::string & name)
 		{
 			const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
-			if (i >= defaults.size())
-				log::error << "<type_map> type not found" << std::endl;
+			// if (i >= defaults.size())
+			// 	log::error << "<type_map> type not found" << std::endl;
 			std::get<i>(kerns)[name] = std::make_shared<rclass>();
 		}
 
@@ -119,8 +117,8 @@ namespace cedar
 		void add(const std::string & name, Args&&... args)
 		{
 			const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
-			if (i >= defaults.size())
-				log::error << "<type_map> type not found" << std::endl;
+			// if (i >= defaults.size())
+			// 	log::error << "<type_map> type not found" << std::endl;
 			std::get<i>(kerns)[name] = std::make_shared<rclass>(std::forward<Args>(args)...);
 		}
 
@@ -129,8 +127,8 @@ namespace cedar
 		void set(const std::string & name)
 		{
 			const std::size_t i = matching_index<0, T, map_of_type<0, T>::value>::value;
-			if (i >= defaults.size())
-				log::error << "<type_map> type not found" << std::endl;
+			// if (i >= defaults.size())
+			// 	log::error << "<type_map> type not found" << std::endl;
 			defaults[i] = name;
 		}
 	};

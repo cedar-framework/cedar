@@ -11,17 +11,19 @@
 
 #include "cedar/util/align_allocator.h"
 #include <cedar/ctypes.h>
+#include <cedar/config.h>
 
-namespace std {
-	template<typename T, typename ...Args>
-		std::unique_ptr<T> make_unique( Args&& ...args )
-	{
-		return std::unique_ptr<T>( new T( std::forward<Args>(args)... ) );
-	}
-}
+// namespace std {
+// 	template<typename T, typename ...Args>
+// 		std::unique_ptr<T> make_unique( Args&& ...args )
+// 	{
+// 		return std::unique_ptr<T>( new T( std::forward<Args>(args)... ) );
+// 	}
+// }
 
 namespace cedar {
 
+void init(config & conf);
 enum class exec_mode { serial, mpi };
 enum class relax_dir {x, y, xy, xz, yz};
 template<relax_dir rdir>
