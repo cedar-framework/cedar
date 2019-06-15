@@ -1,19 +1,16 @@
 #ifndef CEDAR_MEMORY_H
 #define CEDAR_MEMORY_H
 
-#include <functional>
-#include <cedar/config.h>
+#include <cedar/global_manager.h>
+
 namespace cedar { namespace memory {
 
-// TODO: move these to global manager
-extern std::function<void*(std::size_t nbytes)> allocator;
-extern std::function<void(void * addr)> deallocator;
+using mtype = global_manager<reg_globals>::memory;
 
-void init(config & conf);
 template<class T>
-inline T * alloc(std::size_t N) { return static_cast<T*>(allocator(N*sizeof(T))); }
+inline T * alloc(std::size_t N) { return gman.get<mtype>().alloc<T>(N); }
 template<class T>
-inline void free(T *addr) { deallocator(static_cast<void*>(addr)); }
+inline void free(T *addr) { return gman.get<mtype>().free(addr); }
 
 }}
 

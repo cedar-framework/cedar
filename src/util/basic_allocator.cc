@@ -5,18 +5,16 @@
 #include <cuda_runtime.h>
 #endif
 
-#include <cedar/memory.h>
+#include <cedar/util/basic_allocator.h>
 
-namespace cedar { namespace memory {
-
-std::function<void*(std::size_t nbytes)> allocator = std::malloc;
-std::function<void(void * addr)> deallocator = std::free;
-
-void init(config & conf)
+namespace cedar
 {
-	auto mtype = conf.get<std::string>("memory", "malloc");
+
+basic_allocator::basic_allocator(global_params & params) :
+	allocator(std::malloc), deallocator(std::free)
+{
 	#ifdef CUDA_MANAGED
-	if (mtype == "managed") {
+	if (params.memory_type == memtype::managed) {
 		allocator = [](std::size_t nbytes)
 		            {
 			            void *addr;
@@ -28,4 +26,4 @@ void init(config & conf)
 	#endif
 }
 
-}}
+}

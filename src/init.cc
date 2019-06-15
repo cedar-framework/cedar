@@ -18,6 +18,7 @@ void init(config & conf, MPI_Comm comm)
 {
 	auto params = build_global_params(conf);
 	gman = global_manager<reg_globals>(params);
+	gman.get<gmant::logger>().status << params;
 	wraplog();
 	gman.get<gmant::timer>().init(comm);
 }
@@ -26,6 +27,7 @@ void init(config & conf)
 {
 	auto params = build_global_params(conf);
 	gman = global_manager<reg_globals>(params);
+	gman.get<gmant::logger>().status << params;
 	wraplog();
 }
 
