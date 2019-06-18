@@ -116,7 +116,8 @@
       !$omp target teams
       !$omp distribute parallel do simd
       DO IC=3,IICF1
-         I=I+2
+         I=(IC-1)*2
+         J=2
          Q(I,J)=Q(I,J)+QC(IC,2)
          A=CI(IC,2,LR)*QC(IC,2)+CI(IC,2,LL)*QC(IC-1,2)
          Q(I-1,J)=Q(I-1,J)+A+RES(I-1,J)
@@ -124,7 +125,7 @@
       !$omp end distribute parallel do
       !$omp distribute parallel do simd
       DO JC=3,JJCF1
-         J=J+2
+         J=(JC-1)*2
          I=2
          Q(2,J)=Q(2,J)+QC(2,JC)
          AQ=CI(2,JC,LA)*QC(2,JC)+CI(2,JC,LB)*QC(2,JC-1)
@@ -136,7 +137,8 @@
       !$omp target teams distribute parallel do simd collapse(2)
       DO JC=3,JJCF1
          DO  IC=3,IICF1
-            I=I+2
+            I=(IC-1)*2
+            J=(JC-1)*2
             Q(I,J)=Q(I,J)+QC(IC,JC)
             A=CI(IC,JC,LR)*QC(IC,JC)+CI(IC,JC,LL)*QC(IC-1,JC)
             Q(I-1,J)=Q(I-1,J)+A+RES(I-1,J)
@@ -148,7 +150,6 @@
          ENDDO
       ENDDO
       !$omp end target teams distribute parallel do
-
       IPN=IABS(JPN)
       IF(IPN.EQ.BMG_BCs_definite .OR. IPN.EQ.BMG_BCs_indef_nonper)&
      & RETURN

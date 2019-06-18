@@ -73,13 +73,11 @@
       IF(IPN.EQ.BMG_BCs_definite .OR. IPN.EQ.BMG_BCs_indef_nonper)&
      &     THEN
 
-         j=0
          !$omp target teams distribute parallel do simd collapse(2)
          DO jc=2, Nyc-1
-            j=j+2
-            i=0
             DO ic=2, Nxc-1
-               i=i+2
+               i = (ic-1)*2
+               j = (jc-1)*2
                QC(ic,jc) = CI(ic,jc,LNE)*Q(i-1,j-1)&
      &              + CI(ic,jc,LA)*Q(i,j-1)&
      &              + CI(ic+1,jc,LNW)*Q(i+1,j-1)&
@@ -115,13 +113,11 @@
             ENDDO
             !$omp end target teams distribute parallel do
          ENDIF
-         j=0
          !$omp target teams distribute parallel do simd collapse(2)
          DO jc=2, Nyc-1
-            j=j+2
-            i=0
             DO ic=2, Nxc-1
-               i=i+2
+               i = (ic-1)*2
+               j = (jc-1)*2
                QC(ic,jc) = CI(ic,jc,LNE)*Q(i-1,j-1)&
      &              + CI(ic,jc,LA)*Q(i,j-1)&
      &              + CI(ic+1,jc,LNW)*Q(i+1,j-1)&
