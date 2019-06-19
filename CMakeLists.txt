@@ -98,7 +98,7 @@ if (ENABLE_OFFLOAD)
   target_link_libraries(cedar PUBLIC
 	OpenMP::OpenMP_CXX
 	OpenMP::OpenMP_Fortran
-	-qsm -qoffload)
+	-qsmp -qoffload)
 endif()
 
 target_include_directories(cedar PUBLIC

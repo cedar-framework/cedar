@@ -26,4 +26,21 @@ basic_allocator::basic_allocator(global_params & params) :
 	#endif
 }
 
+
+void basic_allocator::prefetch_impl(void *addr, std::size_t nbytes)
+{
+	#ifdef CUDA_MANAGED
+	int defdev = omp_get_default_device();
+	cudaMemPrefetchAsync(addr, nbytes, defdev, cudaStreamLegacy);
+	#endif
+}
+
+
+void basic_allocator::sync()
+{
+	#ifdef CUDA_MANAGED
+	cudaDeviceSynchronize();
+	#endif
+}
+
 }

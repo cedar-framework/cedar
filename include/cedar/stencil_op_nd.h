@@ -61,6 +61,7 @@ stencil_op_nd(decltype(Is, len_t{})... args)
 
 	using array<real_t, nd+1>::len;
 	using array<real_t, nd+1>::data;
+	using array<real_t, nd+1>::size;
 	using array<real_t, nd+1>::set;
 	using array<real_t, nd+1>::index;
 	real_t & operator()(decltype(Is, len_t{})... args, stype dir)

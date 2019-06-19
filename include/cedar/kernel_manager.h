@@ -80,6 +80,8 @@ public:
 		kern.add_services(sman.get());
 	}
 
+	std::shared_ptr<kernel_params> get_params() { return params; }
+
 	// void add_halo(halo_exchanger_base * halof)
 	// {
 	// 	static const std::size_t n = std::tuple_size<mtype>::value;

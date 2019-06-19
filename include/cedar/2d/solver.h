@@ -47,19 +47,54 @@ class solver: public multilevel<exec_mode::serial, level_container<level2,fsten>
 {
 public:
 	using parent = multilevel<exec_mode::serial, level_container<level2, fsten>, fsten, solver<fsten>>;
+	using parent::levels;
 solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 	{
 		this->kman = build_kernel_manager(*this->conf);
-		parent::setup(fop);
+		setup(fop);
 	}
 	solver(stencil_op<fsten> & fop,
 	       std::shared_ptr<config> conf) :
 	parent::multilevel(fop, conf)
 	{
 		this->kman = build_kernel_manager(*this->conf);
-		parent::setup(fop);
+		setup(fop);
 	}
 	~solver() { delete[] this->bbd; }
+
+	void setup(stencil_op<fsten> & fop)
+	{
+		parent::setup(fop);
+		auto kparams = this->kman->get_params();
+		if (kparams->offload)
+			prefetch();
+	}
+
+	void prefetch()
+	{
+		auto & lvl = levels.template get<fsten>(0);
+		memory::prefetch(lvl.A.data(), lvl.A.size());
+		memory::prefetch(lvl.res.data(), lvl.res.size());
+		memory::prefetch(lvl.SOR[0].data(), lvl.SOR[0].size());
+		memory::prefetch(lvl.SOR[1].data(), lvl.SOR[1].size());
+
+		for (std::size_t i = 1; i < levels.size() - 1; i++) {
+			auto & lvl = levels.get(i);
+			memory::prefetch(lvl.A.data(), lvl.A.size());
+			memory::prefetch(lvl.res.data(), lvl.res.size());
+			memory::prefetch(lvl.SOR[0].data(), lvl.SOR[0].size());
+			memory::prefetch(lvl.SOR[1].data(), lvl.SOR[1].size());
+			memory::prefetch(lvl.x.data(), lvl.x.size());
+			memory::prefetch(lvl.b.data(), lvl.b.size());
+			memory::prefetch(lvl.P.data(), lvl.P.size());
+		}
+
+		memory::prefetch(this->ABD.data(), this->ABD.size());
+		memory::prefetch(this->bbd, this->ABD.len(1));
+		memory::sync();
+	}
+
+
 	std::size_t compute_num_levels(stencil_op<fsten> & fop)
 	{
 		float nxc, nyc;

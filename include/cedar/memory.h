@@ -11,6 +11,9 @@ template<class T>
 inline T * alloc(std::size_t N) { return gman.get<mtype>().alloc<T>(N); }
 template<class T>
 inline void free(T *addr) { return gman.get<mtype>().free(addr); }
+template<class T>
+inline void prefetch(T *addr, std::size_t N) { gman.get<mtype>().prefetch(addr, N); }
+inline void sync() { gman.get<mtype>().sync(); }
 
 }}
 
