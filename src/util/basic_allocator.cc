@@ -3,6 +3,7 @@
 
 #ifdef OFFLOAD
 #include <cuda_runtime.h>
+#include <omp.h>
 #endif
 
 #include <cedar/util/basic_allocator.h>
