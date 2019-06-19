@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <iostream>
 
-#ifdef CUDA_MANAGED
+#ifdef OFFLOAD
 #include <cuda_runtime.h>
 #endif
 
@@ -13,7 +13,7 @@ namespace cedar
 basic_allocator::basic_allocator(global_params & params) :
 	allocator(std::malloc), deallocator(std::free)
 {
-	#ifdef CUDA_MANAGED
+	#ifdef OFFLOAD
 	if (params.memory_type == memtype::managed) {
 		allocator = [](std::size_t nbytes)
 		            {
@@ -29,7 +29,7 @@ basic_allocator::basic_allocator(global_params & params) :
 
 void basic_allocator::prefetch_impl(void *addr, std::size_t nbytes)
 {
-	#ifdef CUDA_MANAGED
+	#ifdef OFFLOAD
 	int defdev = omp_get_default_device();
 	cudaMemPrefetchAsync(addr, nbytes, defdev, cudaStreamLegacy);
 	#endif
@@ -38,7 +38,7 @@ void basic_allocator::prefetch_impl(void *addr, std::size_t nbytes)
 
 void basic_allocator::sync()
 {
-	#ifdef CUDA_MANAGED
+	#ifdef OFFLOAD
 	cudaDeviceSynchronize();
 	#endif
 }
