@@ -41,11 +41,20 @@ namespace cedar { namespace cdr2 {
 	{
 		real_t result = 0;
 
+		#ifdef OFFLOAD
+		#pragma omp target teams distribute parallel for simd collapse(2) reduction(+:result) if (memory::hint(this->cdata()) == memory::location::gpu)
+		for (len_t j = 1; j < this->shape(1) + 1; j++) {
+			for (len_t i = 1; i < this->shape(0) + 1; i++) {
+				result += std::pow((*this)(i,j), p);
+			}
+		}
+		#else
 		for (auto j : this->range(1)) {
 			for (auto i : this->range(0)) {
 				result += std::pow((*this)(i,j), p);
 			}
 		}
+		#endif
 
 		return std::pow(result, 1./p);
 	}

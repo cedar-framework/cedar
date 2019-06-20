@@ -1,8 +1,10 @@
 #ifndef CEDAR_UTIL_BASIC_ALLOCATOR_H
 #define CEDAR_UTIL_BASIC_ALLOCATOR_H
 
+#include <unordered_map>
 #include <functional>
 #include <cedar/global_params.h>
+#include <cedar/memory_types.h>
 
 namespace cedar
 {
@@ -21,10 +23,17 @@ public:
 		prefetch_impl(static_cast<void*>(addr), n*sizeof(T));
 	}
 	void sync();
+	template<class T>
+	memory::location hint(const T *addr)
+	{
+		return hint_impl(static_cast<const void*>(addr));
+	}
 protected:
 	std::function<void*(std::size_t nbytes)> allocator;
 	std::function<void(void*addr)> deallocator;
+	std::unordered_map<const void*, memory::location> hints;
 	void prefetch_impl(void *addr, std::size_t nbytes);
+	memory::location hint_impl(const void *addr);
 };
 
 }

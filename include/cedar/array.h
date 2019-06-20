@@ -227,8 +227,15 @@ public:
 
 	void set(data_type v)
 	{
+		#ifdef OFFLOAD
+		bool ongpu = memory::hint(base_ptr) == memory::location::gpu;
+		#pragma omp target teams distribute parallel for simd if (ongpu)
 		for (len_type i = 0; i < flat_len; i++)
 			base_ptr[i] = v;
+		#else
+		for (len_type i = 0; i < flat_len; i++)
+			base_ptr[i] = v;
+		#endif
 	}
 
 
@@ -239,6 +246,7 @@ public:
 	}
 
 	data_type * data() { return base_ptr; }
+	const data_type * cdata() const { return base_ptr; }
 	len_type size() { return flat_len; }
 };
 

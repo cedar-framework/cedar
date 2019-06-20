@@ -33,6 +33,7 @@ void basic_allocator::prefetch_impl(void *addr, std::size_t nbytes)
 	#ifdef OFFLOAD
 	int defdev = omp_get_default_device();
 	cudaMemPrefetchAsync(addr, nbytes, defdev, cudaStreamLegacy);
+	hints[addr] = memory::location::gpu;
 	#endif
 }
 
@@ -41,6 +42,20 @@ void basic_allocator::sync()
 {
 	#ifdef OFFLOAD
 	cudaDeviceSynchronize();
+	#endif
+}
+
+
+memory::location basic_allocator::hint_impl(const void *addr)
+{
+	#ifdef OFFLOAD
+	auto it = hints.find(addr);
+	if (it != hints.end())
+		return it->second;
+	else
+		return memory::location::cpu;
+	#else
+	return memory::location::cpu;
 	#endif
 }
 
