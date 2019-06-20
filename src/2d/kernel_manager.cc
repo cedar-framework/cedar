@@ -19,8 +19,9 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	log::status << *params << std::endl;
 
 	auto kman = std::make_shared<kernel_manager<kernels2,stypes>>(params);
-	kman->add<point_relax, rbgs>("system", false);
-	kman->add<point_relax, rbgs>("offload", true);
+	kman->add<point_relax, rbgs>("system", kmode::serial);
+	kman->add<point_relax, rbgs>("offload", kmode::offload);
+	kman->add<point_relax, rbgs>("omp", kmode::omp);
 	kman->add<line_relax<relax_dir::x>, lines<relax_dir::x>>("system");
 	kman->add<line_relax<relax_dir::y>, lines<relax_dir::y>>("system");
 	kman->add<coarsen_op, galerkin>("system");

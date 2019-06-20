@@ -129,7 +129,7 @@
      &              + CI(ic+1,jc+1,LSW)*Q(i+1,j+1)
             ENDDO
          ENDDO
-         !$omp end parallel do
+         !$omp end parallel do simd
 
       ENDIF
 

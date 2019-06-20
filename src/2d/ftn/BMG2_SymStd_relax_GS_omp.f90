@@ -98,7 +98,7 @@
          ! 9-point stencil
          !
          do pts = ptstart, ptend, ptstride
-            !$omp parallel do simd collapse(2)
+            !$omp parallel do collapse(2)
             do j = 2 + mod(mod((pts-1)/2,2),2), j1, 2
                do i = 2 + mod(pts-1,2), i1, 2
                   Q(I,J) = ( QF(I,J) &
@@ -113,7 +113,7 @@
                        )*SOR(I,J,MSOR)
                enddo
             enddo
-            !$omp end parallel do simd
+            !$omp end parallel do
          enddo
          !
       ELSE
@@ -198,7 +198,7 @@
                Q(I,1)=Q(I,J1)
                Q(I,JJ)=Q(I,2)
             ENDDO
-            !$omp end parallel do
+            !$omp end parallel do simd
          ENDIF
          !
       ELSE
