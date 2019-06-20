@@ -11,6 +11,8 @@ extern "C" {
 	                          int, int, int, int, int, int, int);
 	void BMG2_SymStd_relax_GS_offload(int, real_t*, real_t*, real_t*, real_t*, len_t, len_t,
 	                                  int, int, int, int, int, int, int);
+	void BMG2_SymStd_relax_GS_omp(int, real_t*, real_t*, real_t*, real_t*, len_t, len_t,
+	                                  int, int, int, int, int, int, int);
 	void BMG2_SymStd_relax_lines_x(int k, real_t *SO, real_t *QF, real_t *Q, real_t *SOR,
 	                               real_t *B, len_t II, len_t JJ, int kf, int ifd,
 	                               int nstencil, int irelax_sym, int updown, int jpn);
@@ -22,12 +24,17 @@ extern "C" {
 
 namespace cedar { namespace cdr2 {
 
-rbgs::rbgs(bool offload)
+rbgs::rbgs(kmode kernmode)
 {
-	fcall = BMG2_SymStd_relax_GS;
 	#ifdef OFFLOAD
-	if (offload)
+	if (kernmode == kmode::offload)
 		fcall = BMG2_SymStd_relax_GS_offload;
+	else if (kernmode == kmode::omp)
+		fcall = BMG2_SymStd_relax_GS_omp;
+	else
+		fcall = BMG2_SymStd_relax_GS;
+	#else
+	fcall = BMG2_SymStd_relax_GS;
 	#endif
 }
 

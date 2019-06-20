@@ -24,12 +24,15 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->add<line_relax<relax_dir::x>, lines<relax_dir::x>>("system");
 	kman->add<line_relax<relax_dir::y>, lines<relax_dir::y>>("system");
 	kman->add<coarsen_op, galerkin>("system");
-	kman->add<interp_add, interp_f90>("system", false);
-	kman->add<interp_add, interp_f90>("offload", true);
-	kman->add<restriction, restrict_f90>("system", false);
-	kman->add<restriction, restrict_f90>("offload", true);
-	kman->add<residual, residual_f90>("system", false);
-	kman->add<residual, residual_f90>("offload", true);
+	kman->add<interp_add, interp_f90>("system", kmode::serial);
+	kman->add<interp_add, interp_f90>("offload", kmode::offload);
+	kman->add<interp_add, interp_f90>("omp", kmode::omp);
+	kman->add<restriction, restrict_f90>("system", kmode::serial);
+	kman->add<restriction, restrict_f90>("offload", kmode::offload);
+	kman->add<restriction, restrict_f90>("omp", kmode::omp);
+	kman->add<residual, residual_f90>("system", kmode::serial);
+	kman->add<residual, residual_f90>("offload", kmode::offload);
+	kman->add<residual, residual_f90>("omp", kmode::omp);
 	kman->add<setup_interp, setup_interp_f90>("system");
 	kman->add<solve_cg, solve_cg_f90>("system");
 

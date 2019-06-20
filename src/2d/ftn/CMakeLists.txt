@@ -23,6 +23,10 @@ if (ENABLE_OFFLOAD)
 	ftn/BMG2_SymStd_restrict_offload.f90
 	ftn/BMG2_SymStd_relax_GS_offload.f90
 	ftn/BMG2_SymStd_interp_add_offload.f90
+	ftn/BMG2_SymStd_interp_add_omp.f90
+	ftn/BMG2_SymStd_relax_GS_omp.f90
+	ftn/BMG2_SymStd_restrict_omp.f90
+	ftn/BMG2_SymStd_residual_omp.f90
 	)
 endif()
 

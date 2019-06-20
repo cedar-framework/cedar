@@ -7,6 +7,8 @@ extern "C" {
 	                          int, int, int, int, int);
 	void BMG2_SymStd_restrict_offload(real_t*, real_t*, real_t*,
 	                                  int, int, int, int, int);
+	void BMG2_SymStd_restrict_omp(real_t*, real_t*, real_t*,
+	                              int, int, int, int, int);
 	void BMG_get_bc(int, int*);
 }
 
@@ -14,12 +16,17 @@ using namespace cedar;
 using namespace cedar::cdr2;
 
 
-restrict_f90::restrict_f90(bool offload)
+restrict_f90::restrict_f90(kmode kernmode)
 {
-	fcall = BMG2_SymStd_restrict;
 	#ifdef OFFLOAD
-	if (offload)
+	if (kernmode == kmode::offload)
 		fcall = BMG2_SymStd_restrict_offload;
+	else if (kernmode == kmode::omp)
+		fcall = BMG2_SymStd_restrict_offload;
+	else
+		fcall = BMG2_SymStd_restrict;
+	#else
+	fcall = BMG2_SymStd_restrict;
 	#endif
 }
 

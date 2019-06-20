@@ -9,6 +9,8 @@ extern "C" {
 	                            len_t, len_t, len_t, len_t, int, int);
 	void BMG2_SymStd_interp_add_offload(real_t*, real_t*, real_t*,real_t*,real_t*,
 	                                    len_t, len_t, len_t, len_t, int, int);
+	void BMG2_SymStd_interp_add_omp(real_t*, real_t*, real_t*,real_t*,real_t*,
+	                                len_t, len_t, len_t, len_t, int, int);
 	void BMG2_SymStd_SETUP_interp_OI(real_t *so, real_t *soc, real_t *ci,
 	                                 len_t iif, len_t jjf, len_t iic, len_t jjc,
 	                                 int ifd, int nstncl, int jpn, int irelax);
@@ -19,12 +21,17 @@ extern "C" {
 using namespace cedar;
 using namespace cedar::cdr2;
 
-interp_f90::interp_f90(bool offload)
+interp_f90::interp_f90(kmode kernmode)
 {
-	fcall = BMG2_SymStd_interp_add;
 	#ifdef OFFLOAD
-	if (offload)
+	if (kernmode == kmode::offload)
 		fcall = BMG2_SymStd_interp_add_offload;
+	else if (kernmode == kmode::omp)
+		fcall = BMG2_SymStd_interp_add_omp;
+	else
+		fcall = BMG2_SymStd_interp_add;
+	#else
+	fcall = BMG2_SymStd_interp_add;
 	#endif
 }
 

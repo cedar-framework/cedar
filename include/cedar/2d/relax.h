@@ -11,7 +11,7 @@ namespace cedar { namespace cdr2 {
 class rbgs : public kernels::point_relax<stypes>
 {
 public:
-	rbgs(bool offload);
+	rbgs(kmode kernmode);
 	void setup(const stencil_op<five_pt> & so,
 	           relax_stencil & sor) override
 	{

@@ -9,7 +9,7 @@ namespace cedar { namespace cdr2 {
 class restrict_f90 : public kernels::restriction<stypes>
 {
 public:
-	restrict_f90(bool offload);
+	restrict_f90(kmode kernmode);
 	void run(const restrict_op & R,
 	         const grid_func & x,
 	         grid_func & y) override;

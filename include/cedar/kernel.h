@@ -7,6 +7,8 @@
 
 namespace cedar {
 
+enum class kmode { serial, omp, offload };
+
 	template<class solver_types>
 	class kernel
 	{

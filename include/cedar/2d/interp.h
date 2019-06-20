@@ -15,7 +15,7 @@ class interp_f90 : public kernels::interp_add<cdr2::stypes>
 public:
 	using prolong_op = cedar::cdr2::prolong_op;
 	using grid_func = cedar::cdr2::grid_func;
-	interp_f90(bool offload);
+	interp_f90(kmode kernmode);
 	void run(const prolong_op & P,
 	         const grid_func & coarse,
 	         const grid_func & residual,

@@ -14,6 +14,10 @@ extern "C" {
 	                                  len_t II, len_t jj,
 	                                  int kf, int ifd, int nstncl, int ibc, int irelax,
 	                                  int irelax_sym ,int updown);
+	void BMG2_SymStd_residual_omp(int k, real_t *so, real_t *qf, real_t *q, real_t *res,
+	                              len_t II, len_t jj,
+	                              int kf, int ifd, int nstncl, int ibc, int irelax,
+	                              int irelax_sym ,int updown);
 	void BMG_get_bc(int, int*);
 }
 
@@ -22,12 +26,17 @@ namespace cedar { namespace cdr2 {
 class residual_f90 : public kernels::residual<stypes>
 {
 public:
-	residual_f90(bool offload)
+	residual_f90(kmode kernmode)
 	{
-		rescall = BMG2_SymStd_residual;
 		#ifdef OFFLOAD
-		if (offload)
+		if (kernmode == kmode::offload)
 			rescall = BMG2_SymStd_residual_offload;
+		else if (kernmode == kmode::omp)
+			rescall = BMG2_SymStd_residual_omp;
+		else
+			rescall = BMG2_SymStd_residual;
+		#else
+		rescall = BMG2_SymStd_residual;
 		#endif
 	}
 
