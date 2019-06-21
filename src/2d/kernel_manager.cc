@@ -35,7 +35,8 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->add<residual, residual_f90>("offload", kmode::offload);
 	kman->add<residual, residual_f90>("omp", kmode::omp);
 	kman->add<setup_interp, setup_interp_f90>("system");
-	kman->add<solve_cg, solve_cg_f90>("system");
+	kman->add<solve_cg, solve_cg_f90>("system", kmode::serial);
+	kman->add<solve_cg, solve_cg_f90>("offload", kmode::offload);
 
 	kman->set<point_relax>("system");
 	kman->set<line_relax<relax_dir::x>>("system");
@@ -52,6 +53,7 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 		kman->set<restriction>("offload");
 		kman->set<point_relax>("offload");
 		kman->set<interp_add>("offload");
+		kman->set<solve_cg>("offload");
 	}
 
 	// register services

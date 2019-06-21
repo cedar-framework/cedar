@@ -7,7 +7,6 @@
 
 extern "C" {
 	using namespace cedar;
-	void BMG2_SymStd_SETUP_cg_LU(real_t*, len_t*, len_t*, int*, real_t*, len_t*,len_t*,int*);
 	void BMG_get_bc(int, int*);
 }
 
@@ -17,6 +16,8 @@ namespace cedar { namespace cdr2 {
 class solve_cg_f90 : public kernels::solve_cg<stypes>
 {
 public:
+
+	solve_cg_f90(kmode kernmode);
 
 	void setup(const stencil_op<five_pt> & so,
 	           grid_func & ABD) override
@@ -50,14 +51,17 @@ public:
 
 		BMG_get_bc(params->per_mask(), &ibc);
 
-		BMG2_SymStd_SETUP_cg_LU(sod.data(), &nx, &ny, &nstencil,
-		                        ABD.data(), &nabd1, &nabd2, &ibc);
+		fcall_setup(sod.data(), &nx, &ny, &nstencil,
+		            ABD.data(), &nabd1, &nabd2, &ibc);
 	}
 
 	void run(grid_func & x,
 	         const grid_func & b,
 	         const grid_func & ABD,
 	         real_t * bbd) override;
+protected:
+	std::function<void(real_t*, real_t*, len_t, len_t, real_t*, real_t*, len_t, len_t, int)> fcall;
+	std::function<void(real_t*, len_t*, len_t*, int*, real_t*, len_t*,len_t*,int*)> fcall_setup;
 };
 
 }}
