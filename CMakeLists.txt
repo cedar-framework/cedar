@@ -95,17 +95,14 @@ endif()
 if (ENABLE_OFFLOAD)
   find_package(OpenMP)
   find_package(CUDA 9.2 REQUIRED)
-  find_package(MAGMA REQUIRED)
   target_compile_definitions(cedar PUBLIC OFFLOAD)
   target_link_libraries(cedar PUBLIC
 	OpenMP::OpenMP_CXX
 	OpenMP::OpenMP_Fortran
 	-qsmp -qoffload
-	${CUDA_LIBRARIES}
-	${MAGMA_LIBRARIES})
+	${CUDA_LIBRARIES})
   target_include_directories(cedar PUBLIC
-	${CUDA_INCLUDE_DIRS}
-	${MAGMA_INCLUDE_DIRS})
+	${CUDA_INCLUDE_DIRS})
 endif()
 
 target_include_directories(cedar PUBLIC
