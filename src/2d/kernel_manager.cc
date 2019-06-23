@@ -54,6 +54,11 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 		kman->set<point_relax>("offload");
 		kman->set<interp_add>("offload");
 		kman->set<solve_cg>("offload");
+	} else if (params->openmp) {
+		kman->set<residual>("omp");
+		kman->set<restriction>("omp");
+		kman->set<point_relax>("omp");
+		kman->set<interp_add>("omp");
 	}
 
 	// register services

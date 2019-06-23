@@ -46,6 +46,11 @@ std::ostream & operator<<(std::ostream & os, const kernel_params & obj)
 		os << "yes\n";
 	else
 		os << "no\n";
+	os << "OpenMP        :       ";
+	if (obj.openmp)
+		os << "yes\n";
+	else
+		os << "no\n";
 
 	os << "multilevel lines:     ";
 	if (obj.ml_relax.enabled) {
@@ -83,8 +88,10 @@ std::shared_ptr<kernel_params> build_kernel_params(config & conf)
 	params->ml_relax.init(conf);
 	#ifdef OFFLOAD
 	params->offload = conf.get<bool>("solver.offload", true);
+	params->openmp = conf.get<bool>("solver.openmp", false);
 	#else
 	params->offload = false;
+	params->openmp = false;
 	#endif
 
 	#ifdef PLANE_AGG
