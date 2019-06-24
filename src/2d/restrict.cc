@@ -22,7 +22,7 @@ restrict_f90::restrict_f90(kmode kernmode)
 	if (kernmode == kmode::offload)
 		fcall = BMG2_SymStd_restrict_offload;
 	else if (kernmode == kmode::omp)
-		fcall = BMG2_SymStd_restrict_offload;
+		fcall = BMG2_SymStd_restrict_omp;
 	else
 		fcall = BMG2_SymStd_restrict;
 	#else

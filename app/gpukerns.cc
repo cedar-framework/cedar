@@ -73,25 +73,9 @@ static void set_problem(grid_func & b)
 }
 
 
-int main(int argc, char *argv[])
+void run_kern(solver<nine_pt> & bmg, grid_func & x, grid_func & b,
+              std::string kname, bool offload, bool openmp, std::size_t N)
 {
-	config conf;
-	cedar::init(conf);
-	auto ndofs = conf.getvec<len_t>("grid.n");
-	auto nx = ndofs[0];
-	auto ny = ndofs[1];
-
-	auto so = gallery::fe(nx, ny);
-	grid_func b(nx, ny);
-	set_problem(b);
-
-	solver<nine_pt> bmg(so);
-
-	auto offload = conf.get<bool>("solver.offload");
-	auto openmp = conf.get<bool>("solver.openmp");
-	auto kname = conf.get<std::string>("kernel");
-
-	auto x = grid_func::ones(nx, ny);
 	auto & flvl = bmg.levels.get(0);
 	auto & clvl = bmg.levels.get(1);
 	if (offload) {
@@ -141,11 +125,43 @@ int main(int argc, char *argv[])
 	timer_end("gpukern");
 
 	if (offload)
-		timer_save("offload-" + kname + "-" + std::to_string(nx*ny) + ".json");
+		timer_save("offload-" + kname + "-" + std::to_string(N) + ".json");
 	else if (openmp)
-		timer_save("openmp-" + kname + "-" + std::to_string(nx*ny) + ".json");
+		timer_save("openmp-" + kname + "-" + std::to_string(N) + ".json");
 	else
-		timer_save("serial-" + kname + "-" + std::to_string(nx*ny) + ".json");
+		timer_save("serial-" + kname + "-" + std::to_string(N) + ".json");
+}
+
+
+int main(int argc, char *argv[])
+{
+	config conf;
+	cedar::init(conf);
+	auto ndofs = conf.getvec<len_t>("grid.n");
+	auto nx = ndofs[0];
+	auto ny = ndofs[1];
+
+	auto so = gallery::fe(nx, ny);
+	grid_func b(nx, ny);
+	set_problem(b);
+
+	solver<nine_pt> bmg(so);
+
+	auto offload = conf.get<bool>("solver.offload");
+	auto openmp = conf.get<bool>("solver.openmp");
+	auto kname = conf.get<std::string>("kernel");
+	auto x = grid_func::ones(nx, ny);
+
+	if (kname == "all") {
+		log::status << "Running all kernels" << std::endl;
+		std::array<std::string, 4> kerns{{"residual", "relax", "restrict", "interp"}};
+		for (auto & kern : kerns) {
+			run_kern(bmg, x, b, kern, offload, openmp, nx*ny);
+		}
+	} else {
+		log::status << "Running kernel <" << kname << ">" << std::endl;
+		run_kern(bmg, x, b, kname, offload, openmp, nx*ny);
+	}
 
 	log::status << "Finished Test" << std::endl;
 

@@ -89,8 +89,8 @@ solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 			memory::prefetch(lvl.P.data(), lvl.P.size());
 		}
 
-		memory::prefetch(this->ABD.data(), this->ABD.size());
-		memory::prefetch(this->bbd, this->ABD.len(1));
+		// memory::prefetch(this->ABD.data(), this->ABD.size());
+		// memory::prefetch(this->bbd, this->ABD.len(1));
 		memory::sync();
 	}
 
