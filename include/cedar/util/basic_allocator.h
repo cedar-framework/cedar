@@ -28,7 +28,9 @@ public:
 	{
 		return hint_impl(static_cast<const void*>(addr));
 	}
+	std::size_t prefetchsize() { return pfsize; }
 protected:
+	std::size_t pfsize;
 	std::function<void*(std::size_t nbytes)> allocator;
 	std::function<void(void*addr)> deallocator;
 	std::unordered_map<const void*, memory::location> hints;

@@ -247,7 +247,7 @@ public:
 
 	data_type * data() { return base_ptr; }
 	const data_type * cdata() const { return base_ptr; }
-	len_type size() { return flat_len; }
+	len_type size() const { return flat_len; }
 };
 
 template<typename data_type, unsigned short ND>

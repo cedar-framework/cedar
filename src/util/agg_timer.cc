@@ -126,8 +126,12 @@ template<> void time_log<machine_mode::SERIAL>::save(const std::string & fname)
 	// Clean up (reinitialize timers)
 	this->ltimes.clear();
 	this->stimes.clear();
+	this->counts.clear();
+	this->active.clear();
 	this->ltimes.resize(1);
 	this->stimes.resize(1);
+	this->counts.resize(1);
+	this->active.resize(1);
 	this->lvl = 0;
 }
 

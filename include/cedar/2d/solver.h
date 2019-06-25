@@ -92,6 +92,7 @@ solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 		// memory::prefetch(this->ABD.data(), this->ABD.size());
 		// memory::prefetch(this->bbd, this->ABD.len(1));
 		memory::sync();
+		log::status << "Prefetched: " << memory::prefetchsize() / 1e9 << " GB" << std::endl;
 	}
 
 

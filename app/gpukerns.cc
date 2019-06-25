@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 	auto offload = conf.get<bool>("solver.offload");
 	auto openmp = conf.get<bool>("solver.openmp");
 	auto kname = conf.get<std::string>("kernel");
-	auto x = grid_func::ones(nx, ny);
+	auto x = grid_func::zeros(nx, ny);
 
 	if (kname == "all") {
 		log::status << "Running all kernels" << std::endl;

@@ -22,6 +22,7 @@ inline void sync() { gman.get<mtype>().sync(); }
 template<class T>
 inline location hint(const T *addr) { return gman.get<mtype>().hint(addr); }
 
+inline std::size_t prefetchsize() { return gman.get<mtype>().prefetchsize(); }
 }}
 
 #endif

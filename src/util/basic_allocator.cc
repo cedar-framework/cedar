@@ -12,7 +12,7 @@ namespace cedar
 {
 
 basic_allocator::basic_allocator(global_params & params) :
-	allocator(std::malloc), deallocator(std::free)
+	pfsize(0), allocator(std::malloc), deallocator(std::free)
 {
 	#ifdef OFFLOAD
 	if (params.memory_type == memtype::managed) {
@@ -34,6 +34,7 @@ void basic_allocator::prefetch_impl(void *addr, std::size_t nbytes)
 	int defdev = omp_get_default_device();
 	cudaMemPrefetchAsync(addr, nbytes, defdev, cudaStreamLegacy);
 	hints[addr] = memory::location::gpu;
+	pfsize += nbytes;
 	#endif
 }
 
