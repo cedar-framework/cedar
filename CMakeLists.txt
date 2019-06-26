@@ -96,6 +96,7 @@ if (ENABLE_OFFLOAD)
   find_package(OpenMP)
   find_package(CUDA 9.2 REQUIRED)
   target_compile_definitions(cedar PUBLIC OFFLOAD)
+  target_compile_options(cedar PUBLIC -qsmp -qoffload)
   target_link_libraries(cedar PUBLIC
 	OpenMP::OpenMP_CXX
 	OpenMP::OpenMP_Fortran

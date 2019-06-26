@@ -19,7 +19,6 @@ set(sources
 
 if (ENABLE_OFFLOAD)
   list(APPEND sources
-	ftn/magma_init.f90
 	ftn/BMG2_SymStd_residual_offload.f90
 	ftn/BMG2_SymStd_restrict_offload.f90
 	ftn/BMG2_SymStd_relax_GS_offload.f90
