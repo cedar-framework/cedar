@@ -152,7 +152,7 @@ solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 		auto nyc = cop.shape(1);
 
 		len_t abd_len_0 = nxc+2;
-		if (params->periodic[0] or params->periodic[1])
+		if (params->periodic[0] or params->periodic[1] or params->offload)
 			abd_len_0 = nxc*nyc;
 		this->ABD = grid_func(abd_len_0, nxc*nyc, 0);
 		this->bbd = new real_t[this->ABD.len(1)];

@@ -52,7 +52,7 @@
 !
 ! ======================================================================
       USE ModInterface
-      use magma
+      use gpuchol
       IMPLICIT NONE
 
 ! -----------------------------
@@ -68,7 +68,8 @@
 
 !     LOCAL VARIABLES
 
-      integer I, I1, I2, IPN, J, J1, KK, N, INFO
+      integer I, I1, I2, IPN, J, J1, N
+      integer(c_int) :: KK, info
       real*8 C, CINT, QINT, RZERO
       INTEGER  PER_x, PER_y, PER_xy
 !
@@ -98,7 +99,7 @@
          ENDDO
       ENDDO
 
-      call magma_dpotrs_gpu('U',KK,1,ABD,NABD1,BBD,NABD2,INFO)
+      call dpotrs_gpu(c_char_'U', KK,1,ABD,NABD1,BBD,NABD2,INFO)
 
       IF (INFO .NE. 0) THEN
          call print_error(C_CHAR_"Coarse grid solve failed!"//C_NULL_CHAR)

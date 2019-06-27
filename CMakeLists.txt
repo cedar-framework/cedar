@@ -101,6 +101,7 @@ if (ENABLE_OFFLOAD)
 	OpenMP::OpenMP_CXX
 	OpenMP::OpenMP_Fortran
 	-qsmp -qoffload
+	${CUDA_cusolver_LIBRARY}
 	${CUDA_LIBRARIES})
   target_include_directories(cedar PUBLIC
 	${CUDA_INCLUDE_DIRS})

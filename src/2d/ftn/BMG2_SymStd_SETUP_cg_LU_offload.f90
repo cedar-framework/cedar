@@ -47,7 +47,7 @@
 !
 ! ======================================================================
       USE ModInterface
-      use magma
+      use gpuchol
       IMPLICIT NONE
 
 ! ----------------------------
@@ -67,7 +67,8 @@
 ! ---------------------------
 !     Local Declarations
 !
-      INTEGER I, INFO, IPN, I1, I2, J, J1, J2, KK, N
+      INTEGER I, IPN, I1, I2, J, J1, J2, KK
+      integer(c_int) :: N, info
       INTEGER PER_x, PER_y, PER_xy
 
 ! ======================================================================
@@ -75,7 +76,7 @@
 !     WRITE(*,*) "SETUP_cg_LU: IBC = ", IBC
 !     WRITE(*,*) "SETUP_cg_LU: NStncl = ", NStncl
 
-      call magmaf_init()
+      call init_lapack_gpu()
 ! -------------------------------------------------------
 !     Copy the operator on the coarsest grid into ABD
 ! -------------------------------------------------------
@@ -117,7 +118,7 @@
             !
             ! Factor using the LAPACK routine DPOTRF
             !
-            CALL DPOTRF('U',N,ABD,NABD1,INFO)
+            CALL dpotrf_gpu(c_char_'U', N, ABD, NABD1, INFO)
             !
          else
             KK=1
@@ -193,8 +194,7 @@
             !
             ! Factor using the LAPACK routine DPOTRF
             !
-            CALL DPOTRF('U',N,ABD,NABD1,INFO)
-
+            call dpotrf_gpu(c_char_'U', N, ABD, NABD1, INFO)
          ENDIF
 
       ELSEIF ( NStncl.EQ.3 ) THEN
@@ -272,7 +272,7 @@
             !
             ! Factor using the LAPACK routine DPOTRF
             !
-            CALL DPOTRF('U',N,ABD,NABD1,INFO)
+            call dpotrf_gpu(c_char_'U', N, ABD, NABD1, INFO)
          !
       ELSE
          call print_error(C_CHAR_"NEED: NStencil = 3 or 5"//C_NULL_CHAR)

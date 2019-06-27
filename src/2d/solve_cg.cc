@@ -15,18 +15,18 @@ namespace cedar { namespace cdr2 {
 
 solve_cg_f90::solve_cg_f90(kmode kernmode)
 {
-	// #ifdef OFFLOAD
-	// if (kernmode == kmode::offload) {
-	// 	fcall = BMG2_SymStd_SOLVE_cg_offload;
-	// 	fcall_setup = BMG2_SymStd_SETUP_cg_LU_offload;
-	// } else {
-	// 	fcall = BMG2_SymStd_SOLVE_cg;
-	// 	fcall_setup = BMG2_SymStd_SETUP_cg_LU;
-	// }
-	// #else
+	#ifdef OFFLOAD
+	if (kernmode == kmode::offload) {
+		fcall = BMG2_SymStd_SOLVE_cg_offload;
+		fcall_setup = BMG2_SymStd_SETUP_cg_LU_offload;
+	} else {
+		fcall = BMG2_SymStd_SOLVE_cg;
+		fcall_setup = BMG2_SymStd_SETUP_cg_LU;
+	}
+	#else
 	fcall = BMG2_SymStd_SOLVE_cg;
 	fcall_setup = BMG2_SymStd_SETUP_cg_LU;
-	// #endif
+	#endif
 }
 
 

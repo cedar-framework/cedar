@@ -29,11 +29,27 @@ public:
 		return hint_impl(static_cast<const void*>(addr));
 	}
 	std::size_t prefetchsize() { return pfsize; }
+	template<class T>
+	void save(const std::string & key, T * value)
+	{
+		saved[key] = static_cast<void*>(value);
+	}
+	template<class T>
+	T * load(const std::string & key)
+	{
+		auto it = saved.find(key);
+		if (it != saved.end())
+			return static_cast<T*>(it->second);
+		else
+			return static_cast<T*>(nullptr);
+	}
 protected:
 	std::size_t pfsize;
 	std::function<void*(std::size_t nbytes)> allocator;
 	std::function<void(void*addr)> deallocator;
 	std::unordered_map<const void*, memory::location> hints;
+	std::unordered_map<std::string, void*> saved;
+
 	void prefetch_impl(void *addr, std::size_t nbytes);
 	memory::location hint_impl(const void *addr);
 };
