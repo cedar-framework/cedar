@@ -90,14 +90,17 @@
       J1=JJ-1
       I2=I1-1
       N=I2*(J1-1)
-      KK=0
 
+      !$omp target teams distribute parallel do simd collapse(2)
       DO  J=2,J1
          DO  I=2,I1
-            KK=KK+1
+            KK=(J-2)*(I1-1) + (I-2) + 1
             BBD(KK)=QF(I,J)
          ENDDO
       ENDDO
+      !$omp end target teams distribute parallel do
+
+      KK = (J1-1)*(I1-1)
 
       call dpotrs_gpu(c_char_'U', KK,1,ABD,NABD1,BBD,NABD2,INFO)
 
@@ -106,14 +109,15 @@
          RETURN
       ENDIF
 
-
-      KK=0
+      !$omp target teams distribute parallel do simd collapse(2)
       DO  J=2,J1
          DO I=2,I1
-            KK=KK+1
+            KK=(J-2)*(I1-1) + (I-2) + 1
             Q(I,J)=BBD(KK)
          ENDDO
       ENDDO
+      !$omp end target teams distribute parallel do
+
 
       IF ( JPN.NE.0 ) THEN
          CINT=RZERO
