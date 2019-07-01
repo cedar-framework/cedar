@@ -29,6 +29,8 @@ if (ENABLE_OFFLOAD)
 	ftn/BMG2_SymStd_residual_omp.f90
 	ftn/BMG2_SymStd_SETUP_cg_LU_offload.f90
 	ftn/BMG2_SymStd_SOLVE_cg_offload.f90
+	ftn/BMG2_SymStd_SETUP_cg_LU_omp.f90
+	ftn/BMG2_SymStd_SOLVE_cg_omp.f90
 	ftn/gpuchol.cc
 	ftn/gpuchol.f90
 	)

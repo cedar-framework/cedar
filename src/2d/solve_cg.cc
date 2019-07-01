@@ -5,8 +5,10 @@ extern "C" {
 	using namespace cedar;
 	void BMG2_SymStd_SETUP_cg_LU(real_t*, len_t*, len_t*, int*, real_t*, len_t*,len_t*,int*);
 	void BMG2_SymStd_SETUP_cg_LU_offload(real_t*, len_t*, len_t*, int*, real_t*, len_t*,len_t*,int*);
+	void BMG2_SymStd_SETUP_cg_LU_omp(real_t*, len_t*, len_t*, int*, real_t*, len_t*,len_t*,int*);
 	void BMG2_SymStd_SOLVE_cg(real_t*, real_t*, len_t, len_t, real_t*, real_t*, len_t, len_t, int);
 	void BMG2_SymStd_SOLVE_cg_offload(real_t*, real_t*, len_t, len_t, real_t*, real_t*, len_t, len_t, int);
+	void BMG2_SymStd_SOLVE_cg_omp(real_t*, real_t*, len_t, len_t, real_t*, real_t*, len_t, len_t, int);
 	void BMG_get_bc(int, int*);
 }
 
