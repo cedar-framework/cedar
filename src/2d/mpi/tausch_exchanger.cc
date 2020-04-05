@@ -121,8 +121,8 @@ void tausch_exchanger::init_gfunc(std::vector<topo_ptr> & topos)
 {
 	std::vector<std::vector<std::array<int, 4> > > remote_spec(halo_dir::count * nlevels);
 	std::vector<std::vector<std::array<int, 4> > > local_spec(halo_dir::count * nlevels);
-    std::vector<int> remote_remoteMpiRank(halo_dir::count * nlevels);
-    std::vector<int> local_remoteMpiRank(halo_dir::count * nlevels);
+	std::vector<int> remote_remoteMpiRank(halo_dir::count * nlevels);
+	std::vector<int> local_remoteMpiRank(halo_dir::count * nlevels);
 
 	send_active.reserve(halo_dir::count * nlevels);
 	recv_active.reserve(halo_dir::count * nlevels);
@@ -134,7 +134,7 @@ void tausch_exchanger::init_gfunc(std::vector<topo_ptr> & topos)
 		set_level_spec(lvl, rank,
 		               *topos[lvl],
 		               remote_spec, local_spec,
-                       remote_remoteMpiRank, local_remoteMpiRank);
+		               remote_remoteMpiRank, local_remoteMpiRank);
 	}
 
 	int nbuf = 1;
@@ -152,8 +152,8 @@ void tausch_exchanger::init_so(std::vector<topo_ptr> & topos)
 {
 	std::vector<std::vector<std::array<int, 4> > > remote_spec(halo_dir::count * nlevels);
 	std::vector<std::vector<std::array<int, 4> > > local_spec(halo_dir::count * nlevels);
-    std::vector<int> remote_remoteMpiRank(halo_dir::count * nlevels);
-    std::vector<int> local_remoteMpiRank(halo_dir::count * nlevels);
+	std::vector<int> remote_remoteMpiRank(halo_dir::count * nlevels);
+	std::vector<int> local_remoteMpiRank(halo_dir::count * nlevels);
 
 	send_active.reserve(halo_dir::count * nlevels);
 	recv_active.reserve(halo_dir::count * nlevels);
@@ -165,7 +165,7 @@ void tausch_exchanger::init_so(std::vector<topo_ptr> & topos)
 		set_level_spec_so(lvl, rank,
 		                  *topos[lvl],
 		                  remote_spec, local_spec,
-                          remote_remoteMpiRank, local_remoteMpiRank);
+		                  remote_remoteMpiRank, local_remoteMpiRank);
 	}
 
 	int nbuf = stencil_ndirs<nine_pt>::value;
@@ -187,53 +187,54 @@ void tausch_exchanger::set_level_spec(int lvl, int rank,
                                       std::vector<int> & local_remoteMpiRank)
 {
 	const int nx = topo.nlocal(0);
-    const int ny = topo.nlocal(1);
+	const int ny = topo.nlocal(1);
 
 	// right
 
-    remote_spec[index(lvl,halo_dir::right)].push_back(std::array<int,4>{0, 1, ny, nx});
-    local_spec[index(lvl,halo_dir::right)].push_back(std::array<int,4>{nx-2, 1, ny, nx});
+	remote_spec[index(lvl,halo_dir::right)].push_back(std::array<int,4>{   0, 1, ny, nx});
+	local_spec [index(lvl,halo_dir::right)].push_back(std::array<int,4>{nx-2, 1, ny, nx});
 
-    if(topo.coord(0) == 0)
-        remote_remoteMpiRank[index(lvl,halo_dir::right)] = rank + topo.nproc(0) - 1;
-    else
-        remote_remoteMpiRank[index(lvl,halo_dir::right)] = rank - 1;
+	if(topo.coord(0) == 0)
+		remote_remoteMpiRank[index(lvl,halo_dir::right)] = rank + topo.nproc(0) - 1;
+	else
+		remote_remoteMpiRank[index(lvl,halo_dir::right)] = rank - 1;
 
-    if((rank + 1) % topo.nproc(0) == 0)
-        local_remoteMpiRank[index(lvl,halo_dir::right)] = rank - topo.nproc(0) + 1;
-    else
-        local_remoteMpiRank[index(lvl,halo_dir::right)] = rank + 1;
+	if((rank + 1) % topo.nproc(0) == 0)
+		local_remoteMpiRank[index(lvl,halo_dir::right)] = rank - topo.nproc(0) + 1;
+	else
+		local_remoteMpiRank[index(lvl,halo_dir::right)] = rank + 1;
 
 	// left
 
-    remote_spec[index(lvl,halo_dir::left)].push_back(std::array<int,4>{nx-1, 1, ny, nx});
-    local_spec[index(lvl,halo_dir::left)].push_back(std::array<int,4>{1, 1, ny, nx});
+	remote_spec[index(lvl,halo_dir::left)].push_back(std::array<int,4>{nx-1, 1, ny, nx});
+	local_spec [index(lvl,halo_dir::left)].push_back(std::array<int,4>{   1, 1, ny, nx});
 
-    remote_remoteMpiRank[index(lvl,halo_dir::left)] = local_remoteMpiRank[index(lvl,halo_dir::right)];
-    local_remoteMpiRank[index(lvl,halo_dir::left)] = remote_remoteMpiRank[index(lvl,halo_dir::right)];
+	remote_remoteMpiRank[index(lvl,halo_dir::left)] = local_remoteMpiRank[index(lvl,halo_dir::right)];
+	local_remoteMpiRank[index(lvl,halo_dir::left)] = remote_remoteMpiRank[index(lvl,halo_dir::right)];
 
 	// up
 
-    remote_spec[index(lvl,halo_dir::up)].push_back(std::array<int,4>{0, nx, 1, 1});
-    local_spec[index(lvl,halo_dir::up)].push_back(std::array<int,4>{(ny-2)*nx, nx, 1, 1});
+	remote_spec[index(lvl,halo_dir::up)].push_back(std::array<int,4>{        0, nx, 1, 1});
+	local_spec [index(lvl,halo_dir::up)].push_back(std::array<int,4>{(ny-2)*nx, nx, 1, 1});
 
-    if(topo.coord(1) == 0)
-        remote_remoteMpiRank[index(lvl,halo_dir::up)] = rank + topo.nproc(0)*topo.nproc(1) - topo.nproc(0);
-    else
-        remote_remoteMpiRank[index(lvl,halo_dir::up)] = rank - topo.nproc(0);
+	if(topo.coord(1) == 0)
+		remote_remoteMpiRank[index(lvl,halo_dir::up)] = rank + topo.nproc(0)*topo.nproc(1) - topo.nproc(0);
+	else
+		remote_remoteMpiRank[index(lvl,halo_dir::up)] = rank - topo.nproc(0);
 
-    if(topo.coord(1) == (topo.nproc(1) - 1))
-        local_remoteMpiRank[index(lvl,halo_dir::up)] = rank - topo.nproc(0)*topo.nproc(1) + topo.nproc(0);
-    else
-        local_remoteMpiRank[index(lvl,halo_dir::up)] = rank + topo.nproc(0);
+	if(topo.coord(1) == (topo.nproc(1) - 1))
+		local_remoteMpiRank[index(lvl,halo_dir::up)] = rank - topo.nproc(0)*topo.nproc(1) + topo.nproc(0);
+	else
+		local_remoteMpiRank[index(lvl,halo_dir::up)] = rank + topo.nproc(0);
 
 	// down
 
-    remote_spec[index(lvl,halo_dir::down)].push_back(std::array<int,4>{(ny-1)*nx, nx, 1, 1});
-    local_spec[index(lvl,halo_dir::down)].push_back(std::array<int,4>{nx, nx, 1, 1});
+	remote_spec[index(lvl,halo_dir::down)].push_back(std::array<int,4>{(ny-1)*nx, nx, 1, 1});
+	local_spec [index(lvl,halo_dir::down)].push_back(std::array<int,4>{       nx, nx, 1, 1});
 
-    remote_remoteMpiRank[index(lvl,halo_dir::down)] = local_remoteMpiRank[index(lvl,halo_dir::up)];
-    local_remoteMpiRank[index(lvl,halo_dir::down)] = remote_remoteMpiRank[index(lvl,halo_dir::up)];
+	remote_remoteMpiRank[index(lvl,halo_dir::down)] = local_remoteMpiRank[index(lvl,halo_dir::up)];
+	local_remoteMpiRank[index(lvl,halo_dir::down)] = remote_remoteMpiRank[index(lvl,halo_dir::up)];
+
 }
 
 
@@ -245,56 +246,53 @@ void tausch_exchanger::set_level_spec_so(int lvl, int rank,
                                          std::vector<int> & local_remoteMpiRank)
 {
 	const int nx = topo.nlocal(0)+1;
-    const int ny = topo.nlocal(1)+1;
+	const int ny = topo.nlocal(1)+1;
 
 	// right
 
-    remote_spec[index(lvl,halo_dir::right)].push_back(std::array<int,4>{0, 1, ny-1, nx});
-    local_spec[index(lvl,halo_dir::right)].push_back(std::array<int,4>{nx-3, 1, ny-1, nx});
+	remote_spec[index(lvl,halo_dir::right)].push_back(std::array<int,4>{   0, 1, ny-1, nx});
+	local_spec [index(lvl,halo_dir::right)].push_back(std::array<int,4>{nx-3, 1, ny-1, nx});
 
-    if(topo.coord(0) == 0)
-        remote_remoteMpiRank[index(lvl,halo_dir::right)] = rank + topo.nproc(0) - 1;
-    else
-        remote_remoteMpiRank[index(lvl,halo_dir::right)] = rank - 1;
+	if(topo.coord(0) == 0)
+		remote_remoteMpiRank[index(lvl,halo_dir::right)] = rank + topo.nproc(0) - 1;
+	else
+		remote_remoteMpiRank[index(lvl,halo_dir::right)] = rank - 1;
 
-    if(((rank + 1) % topo.nproc(0) == 0))
-        local_remoteMpiRank[index(lvl,halo_dir::right)] = rank - topo.nproc(0) + 1;
-    else
-        local_remoteMpiRank[index(lvl,halo_dir::right)] = rank + 1;
+	if(((rank + 1) % topo.nproc(0) == 0))
+		local_remoteMpiRank[index(lvl,halo_dir::right)] = rank - topo.nproc(0) + 1;
+	else
+		local_remoteMpiRank[index(lvl,halo_dir::right)] = rank + 1;
 
 	// left
 
-    for(int y = 0; y < ny-1; ++y) {
-        remote_spec[index(lvl,halo_dir::left)].push_back(std::array<int,4>{y*nx + nx-2, 1, 2, 1});
-        local_spec[index(lvl,halo_dir::left)].push_back(std::array<int,4>{y*nx + 1, 1, 2, 1});
-    }
+	remote_spec[index(lvl,halo_dir::left)].push_back(std::array<int,4>{nx-2, 2, ny-1, nx});
+	local_spec [index(lvl,halo_dir::left)].push_back(std::array<int,4>{   1, 2, ny-1, nx});
 
-    remote_remoteMpiRank[index(lvl,halo_dir::left)] = local_remoteMpiRank[index(lvl,halo_dir::right)];
-    local_remoteMpiRank[index(lvl,halo_dir::left)] = remote_remoteMpiRank[index(lvl,halo_dir::right)];
+	remote_remoteMpiRank[index(lvl,halo_dir::left)] = local_remoteMpiRank[index(lvl,halo_dir::right)];
+	local_remoteMpiRank[index(lvl,halo_dir::left)] = remote_remoteMpiRank[index(lvl,halo_dir::right)];
 
 	// up
 
-    remote_spec[index(lvl,halo_dir::up)].push_back(std::array<int,4>{0, nx-1, 1, 1});
-    local_spec[index(lvl,halo_dir::up)].push_back(std::array<int,4>{(ny-3)*nx, nx-1, 1, 1});
+	remote_spec[index(lvl,halo_dir::up)].push_back(std::array<int,4>{        0, nx-1, 1, 1});
+	local_spec [index(lvl,halo_dir::up)].push_back(std::array<int,4>{(ny-3)*nx, nx-1, 1, 1});
 
-    if(topo.coord(1) == 0)
-        remote_remoteMpiRank[index(lvl,halo_dir::up)] = rank + topo.nproc(0)*topo.nproc(1) - topo.nproc(0);
-    else
-        remote_remoteMpiRank[index(lvl,halo_dir::up)] = rank - topo.nproc(0);
+	if(topo.coord(1) == 0)
+		remote_remoteMpiRank[index(lvl,halo_dir::up)] = rank + topo.nproc(0)*topo.nproc(1) - topo.nproc(0);
+	else
+		remote_remoteMpiRank[index(lvl,halo_dir::up)] = rank - topo.nproc(0);
 
-    if(topo.coord(1) == (topo.nproc(1) - 1))
-        local_remoteMpiRank[index(lvl,halo_dir::up)] = rank - topo.nproc(0)*topo.nproc(1) + topo.nproc(0);
-    else
-        local_remoteMpiRank[index(lvl,halo_dir::up)] = rank + topo.nproc(0);
+	if(topo.coord(1) == (topo.nproc(1) - 1))
+		local_remoteMpiRank[index(lvl,halo_dir::up)] = rank - topo.nproc(0)*topo.nproc(1) + topo.nproc(0);
+	else
+		local_remoteMpiRank[index(lvl,halo_dir::up)] = rank + topo.nproc(0);
 
 	// down
 
-    for(int y = 0; y < 2; ++y) {
-        remote_spec[index(lvl,halo_dir::down)].push_back(std::array<int,4>{(ny-2+y)*nx, nx-1, 1, 1});
-        local_spec[index(lvl,halo_dir::down)].push_back(std::array<int,4>{(1+y)*nx, nx-1, 1, 1});
-    }
-    remote_remoteMpiRank[index(lvl,halo_dir::down)] = local_remoteMpiRank[index(lvl,halo_dir::up)];
-    local_remoteMpiRank[index(lvl,halo_dir::down)] = remote_remoteMpiRank[index(lvl,halo_dir::up)];
+	remote_spec[index(lvl,halo_dir::down)].push_back(std::array<int,4>{(ny-2)*nx, nx-1, 2, nx});
+	local_spec [index(lvl,halo_dir::down)].push_back(std::array<int,4>{       nx, nx-1, 2, nx});
+
+	remote_remoteMpiRank[index(lvl,halo_dir::down)] = local_remoteMpiRank[index(lvl,halo_dir::up)];
+	local_remoteMpiRank[index(lvl,halo_dir::down)] = remote_remoteMpiRank[index(lvl,halo_dir::up)];
 }
 
 
