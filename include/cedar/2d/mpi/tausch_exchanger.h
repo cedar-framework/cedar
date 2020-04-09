@@ -63,21 +63,21 @@ public:
 	std::unique_ptr<line_pkg> line_data;
 
 protected:
-	std::unique_ptr<Tausch<real_t>> tausch;
-	std::unique_ptr<Tausch<real_t>> tausch_so;
+	std::unique_ptr<Tausch> tausch;
+	std::unique_ptr<Tausch> tausch_so;
 	std::vector<bool> send_active;
 	std::vector<bool> recv_active;
 
 	void set_level_spec(int lvl, int rank,
 	                    grid_topo & topo,
-	                    std::vector<std::vector<std::array<int, 3> > > & remote_spec,
-	                    std::vector<std::vector<std::array<int, 3> > > & local_spec,
+	                    std::vector<std::vector<std::array<int, 4> > > & remote_spec,
+	                    std::vector<std::vector<std::array<int, 4> > > & local_spec,
 	                    std::vector<int> & remote_remoteMpiRank,
 	                    std::vector<int> & local_remoteMpiRank);
 	void set_level_spec_so(int lvl, int rank,
 	                       grid_topo & topo,
-	                       std::vector<std::vector<std::array<int, 3> > > & remote_spec,
-	                       std::vector<std::vector<std::array<int, 3> > > & local_spec,
+	                       std::vector<std::vector<std::array<int, 4> > > & remote_spec,
+	                       std::vector<std::vector<std::array<int, 4> > > & local_spec,
 	                       std::vector<int> & remote_remoteMpiRank,
 	                       std::vector<int> & local_remoteMpiRank);
 	void init_gfunc(std::vector<topo_ptr> & topos);
