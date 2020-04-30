@@ -11,6 +11,6 @@ extern "C"
 		if (not confobj)
 			return CEDAR_ERR_CONFIG;
 
-		cedar::log::init(*confobj);
+		cedar::log::init_level(*confobj);
 	}
 }

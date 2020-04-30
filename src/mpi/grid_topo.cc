@@ -1,5 +1,7 @@
 #include <cedar/2d/ftn/mpi/BMG_workspace_c.h>
 
+#include <cedar/log.h>
+
 #include <cedar/mpi/grid_topo.h>
 
 using namespace cedar;

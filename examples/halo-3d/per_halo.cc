@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
 
 	config conf;
-	log::init(conf);
+    cedar::init(conf, MPI_COMM_WORLD);
 	log::status << "Beginning test" << std::endl;
 	auto grid = util::create_topo(conf);
 	std::vector<topo_ptr> topos{{grid}};

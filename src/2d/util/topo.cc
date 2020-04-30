@@ -3,6 +3,7 @@
 
 #include <cedar/mpi/block_partition.h>
 #include <cedar/decomp.h>
+#include <cedar/log.h>
 
 #include <cedar/2d/util/topo.h>
 

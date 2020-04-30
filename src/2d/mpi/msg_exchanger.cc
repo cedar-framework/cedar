@@ -1,4 +1,4 @@
-#include <cedar/util/timer.h>
+#include <cedar/timer.h>
 #include <cedar/types.h>
 #include <cedar/2d/ftn/mpi/BMG_workspace_c.h>
 #include <cedar/2d/ftn/mpi/BMG_parameters_c.h>

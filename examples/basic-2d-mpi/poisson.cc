@@ -97,9 +97,9 @@ int main(int argc, char *argv[])
 
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
 
-	timer_init(MPI_COMM_WORLD);
-
 	config conf;
+
+    cedar::init(conf, MPI_COMM_WORLD);
 
 	auto grid = util::create_topo(conf);
 

@@ -5,21 +5,6 @@ using namespace cedar;
 using namespace cedar::cdr3;
 
 
-grid_func & grid_func::operator=(grid_func &&gf)
-{
-	vec = std::move(gf.vec);
-	strides = std::move(gf.strides);
-	extents = std::move(gf.extents);
-	num_ghosts = gf.num_ghosts;
-	flat_len = gf.flat_len;
-	base_ptr = gf.base_ptr;
-	range_ = std::move(gf.range_);
-	grange_ = std::move(gf.grange_);
-
-	return *this;
-}
-
-
 grid_func::grid_func(len_t nx, len_t ny, len_t nz, unsigned int nghosts) :
 	array<real_t, 3>(nx+2*nghosts, ny+2*nghosts, nz+2*nghosts)
 {

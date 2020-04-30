@@ -1,3 +1,4 @@
+#include <cedar/log.h>
 #include <cedar/3d/util/io.h>
 
 namespace cedar { namespace cdr3 { namespace util {

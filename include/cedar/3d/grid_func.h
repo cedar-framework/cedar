@@ -23,9 +23,6 @@ public:
 	friend std::ostream & operator<<(std::ostream &os, const grid_func &obj);
 	template<int p> real_t lp_norm() const;
 	virtual real_t inf_norm() const;
-	grid_func & operator=(grid_func&& gf);
-	grid_func(const grid_func & gf) = default;
-	grid_func & operator=(const grid_func & gf) = default;
 	grid_func & operator -=(const grid_func & rhs);
 	friend grid_func operator-(grid_func lhs, const grid_func &rhs) { return lhs -= rhs; }
 };

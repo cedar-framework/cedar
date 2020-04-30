@@ -1,4 +1,6 @@
 #include <cedar/types.h>
+#include <cedar/cxx14.h>
+#include <cedar/log.h>
 #include <cedar/3d/mpi/plane_mpi.h>
 
 namespace cedar { namespace cdr3 { namespace mpi {

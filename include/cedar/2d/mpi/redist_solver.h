@@ -12,7 +12,7 @@
 #include "cedar/2d/ftn/mpi/BMG_workspace_c.h"
 #include <cedar/array.h>
 #include <cedar/mpi/block_partition.h>
-#include <cedar/util/timer.h>
+#include <cedar/timer.h>
 #include <cedar/2d/mpi/kernel_manager.h>
 
 

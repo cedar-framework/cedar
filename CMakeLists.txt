@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.12)
 project(cedar VERSION 0.1.0)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
@@ -25,7 +25,7 @@ include_directories(${CMAKE_BINARY_DIR}/include)
 ExternalProject_Add(
   tausch
   PREFIX ${CMAKE_BINARY_DIR}/tausch
-  GIT_REPOSITORY https://bitbucket.org/luspi/tausch.git
+  GIT_REPOSITORY https://github.com/luspi/tausch.git
   UPDATE_DISCONNECTED 1
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""

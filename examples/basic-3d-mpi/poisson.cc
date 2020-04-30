@@ -100,8 +100,8 @@ int main(int argc, char *argv[])
 
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
 
-	timer_init(MPI_COMM_WORLD);
 	auto conf = std::make_shared<config>("config.json");
+    cedar::init(*conf, MPI_COMM_WORLD);
 	auto grid = util::create_topo(*conf);
 
 	auto so = mpi::gallery::poisson(grid);
