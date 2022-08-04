@@ -26,6 +26,7 @@ ExternalProject_Add(
   tausch
   PREFIX ${CMAKE_BINARY_DIR}/tausch
   GIT_REPOSITORY https://github.com/luspi/tausch.git
+  GIT_TAG 425f062eb5661ea16696b2ffc0813a7e6d4eb4e4
   UPDATE_DISCONNECTED 1
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
@@ -70,6 +71,7 @@ target_compile_definitions(cedar PUBLIC
 target_compile_features(cedar PUBLIC cxx_std_11)
 target_compile_options(cedar PUBLIC
   $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
+  $<$<COMPILE_LANGUAGE:Fortran>:-fallow-argument-mismatch>
   $<$<CONFIG:DEBUG>:-O0;-Wall;-g>
   $<$<CONFIG:RELEASE>:-O3>)
 set_target_properties(cedar PROPERTIES POSITION_INDEPENDENT_CODE ON)
