@@ -1,5 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
-project(cedar VERSION 0.1.0)
+cmake_minimum_required(VERSION 3.12)
+project(cedar VERSION 0.1.0 LANGUAGES CXX C Fortran)
+
+set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
@@ -14,8 +18,6 @@ set(CEDAR_CMAKE_PROJECT_CONFIG_FILE "${CEDAR_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Co
 include(options)
 include(testing)
 include(ExternalProject)
-
-enable_language(C CXX Fortran)
 
 include_directories(include)
 install(DIRECTORY include/ DESTINATION include)
