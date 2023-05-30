@@ -1,5 +1,9 @@
-cmake_minimum_required(VERSION 3.1)
-project(cedar VERSION 0.1.0)
+cmake_minimum_required(VERSION 3.12)
+project(cedar VERSION 0.1.0 LANGUAGES CXX C Fortran)
+
+set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
@@ -15,8 +19,6 @@ include(options)
 include(testing)
 include(ExternalProject)
 
-enable_language(C CXX Fortran)
-
 include_directories(include)
 install(DIRECTORY include/ DESTINATION include)
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
@@ -26,6 +28,7 @@ ExternalProject_Add(
   tausch
   PREFIX ${CMAKE_BINARY_DIR}/tausch
   GIT_REPOSITORY https://github.com/luspi/tausch.git
+  GIT_TAG 425f062eb5661ea16696b2ffc0813a7e6d4eb4e4
   UPDATE_DISCONNECTED 1
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
@@ -70,6 +73,7 @@ target_compile_definitions(cedar PUBLIC
 target_compile_features(cedar PUBLIC cxx_std_11)
 target_compile_options(cedar PUBLIC
   $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
+  $<$<COMPILE_LANGUAGE:Fortran>:-fallow-argument-mismatch>
   $<$<CONFIG:DEBUG>:-O0;-Wall;-g>
   $<$<CONFIG:RELEASE>:-O3>)
 set_target_properties(cedar PROPERTIES POSITION_INDEPENDENT_CODE ON)

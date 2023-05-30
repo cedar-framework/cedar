@@ -10,14 +10,14 @@ subroutine BMG_get_bc(per_mask, ibc) BIND(C, NAME='BMG_get_bc')
 
   integer(C_INT) :: bcmap(0:7)
 
-  bcmap(b'000') = BMG_BCs_definite
-  bcmap(b'001') = BMG_BCs_def_per_x
-  bcmap(b'010') = BMG_BCs_def_per_y
-  bcmap(b'011') = BMG_BCs_def_per_xy
-  bcmap(b'100') = BMG_BCs_def_per_z
-  bcmap(b'101') = BMG_BCs_def_per_xz
-  bcmap(b'110') = BMG_BCs_def_per_yz
-  bcmap(b'111') = BMG_BCs_def_per_xyz
+  bcmap(0) = BMG_BCs_definite
+  bcmap(1) = BMG_BCs_def_per_x
+  bcmap(2) = BMG_BCs_def_per_y
+  bcmap(3) = BMG_BCs_def_per_xy
+  bcmap(4) = BMG_BCs_def_per_z
+  bcmap(5) = BMG_BCs_def_per_xz
+  bcmap(6) = BMG_BCs_def_per_yz
+  bcmap(7) = BMG_BCs_def_per_xyz
 
   ibc = bcmap(per_mask)
 
