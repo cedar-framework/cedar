@@ -167,8 +167,10 @@ TEST(SerialRelax2, LineY5) {
 
 int main(int argc, char *argv[])
 {
+	PyImport_AppendInittab("pyrelax", PyInit_pyrelax);
 	Py_Initialize();
-	initpyrelax();
+	PyInit_pyrelax();
+	PyImport_ImportModule("pyrelax");
 
 	::testing::InitGoogleTest(&argc, argv);
 	auto ret = RUN_ALL_TESTS();

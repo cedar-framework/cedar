@@ -264,8 +264,10 @@ TEST(SerialPlanes, YZ27) {
 
 int main(int argc, char *argv[])
 {
+	PyImport_AppendInittab("pyplanes", PyInit_pyplanes);
 	Py_Initialize();
-	initpyplanes();
+	PyInit_pyplanes();
+	PyImport_ImportModule("pyplanes");
 
 	::testing::InitGoogleTest(&argc, argv);
 	auto ret = RUN_ALL_TESTS();
