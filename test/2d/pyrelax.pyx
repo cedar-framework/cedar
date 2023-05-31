@@ -15,7 +15,7 @@ cdef public void gs_iter(int nx, int ny, int nsweeps, int npt_stencil, double *d
     b = np.zeros(nx*ny)
     x = np.ones(nx*ny)
 
-    inds = np.zeros(nx*ny, dtype=np.int)
+    inds = np.zeros(nx*ny, dtype=np.int32)
     cnt = 0
     if npt_stencil == 9:
         for j in range(0, ny, 2):
@@ -72,13 +72,13 @@ cdef public double get_high_freq(int nx, int ny, double *src):
     # ax = fig.gca(projection='3d')
     # surf = ax.plot_wireframe(X, Y, x)
     # plt.show()
-    freq0 = np.fft.fft(x[ny/4, :])
-    freq1 = np.fft.fft(x[:, nx/4])
+    freq0 = np.fft.fft(x[ny//4, :])
+    freq1 = np.fft.fft(x[:, nx//4])
     switch = 2
-    mx = np.max(np.abs(freq0[nx/(switch*2):nx/2]))
-    my = np.max(np.abs(freq1[ny/(switch*2):ny/2]))
+    mx = np.max(np.abs(freq0[nx//(switch*2):nx//2]))
+    my = np.max(np.abs(freq1[ny//(switch*2):ny//2]))
     return max(mx,my)
-    # plt.plot(np.abs(freq0[:nx/2]), label='0')
-    # plt.plot(np.abs(freq1[:ny/2]), label='1')
+    # plt.plot(np.abs(freq0[:nx//2]), label='0')
+    # plt.plot(np.abs(freq1[:ny//2]), label='1')
     # plt.legend(loc=0)
     # plt.show()

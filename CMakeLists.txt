@@ -136,7 +136,7 @@ if(ENABLE_EXAMPLES)
 endif()
 
 if(ENABLE_UNIT_TESTS)
-  find_package(PythonLibs 2.7 REQUIRED)
+  find_package(PythonLibs REQUIRED)
   find_package(NumPy REQUIRED)
   message(STATUS ${PYTHON_INCLUDE_DIR})
   list(APPEND cedar-deps ${PYTHON_LIBRARY})
