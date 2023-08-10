@@ -1,6 +1,6 @@
-      SUBROUTINE BMG2_SymStd_SETUP_ADD_GROUP_PTRS(&
-           nlines, comms, NOL, ptrs, mpool)&
-     BIND(C, NAME='BMG2_SymStd_SETUP_ADD_GROUP_PTRS')
+SUBROUTINE BMG2_SymStd_SETUP_ADD_GROUP_PTRS(&
+     & nlines, comms, NOL, ptrs, mpool)&
+     & BIND(C, NAME='BMG2_SymStd_SETUP_ADD_GROUP_PTRS')
 
          USE ModInterface
          use mempool
@@ -34,7 +34,7 @@
 
          DO kl = NOL, 2, -1
             if (comms(2, kl) .ne. MPI_COMM_NULL) then
-               call MPI_COMM_SIZE(comms(2, kl), gsize, ierr)
+               call MPI_Comm_size(comms(2, kl), gsize, ierr)
 
                nlcol(1) = nlines / 2 + mod(nlines, 2)
                nlcol(2) = nlines / 2
@@ -48,4 +48,4 @@
          END DO
 
       RETURN
-      END
+    END SUBROUTINE BMG2_SymStd_SETUP_ADD_GROUP_PTRS

@@ -17,6 +17,19 @@ set(sources
   ftn/BMG_get_bc.f90
   ftn/util.f90)
 
+set(ftl_sources
+  ftn/BMG2_SymStd_residual.f90
+  ftn/BMG2_SymStd_interp_add.f90
+  ftn/BMG2_SymStd_restrict.f90
+  ftn/BMG2_SymStd_relax_GS.f90
+  ftn/BMG2_SymStd_relax_lines_x.f90
+  ftn/BMG2_SymStd_relax_lines_y.f90
+  ftn/BMG2_SymStd_SETUP_interp_OI.f90
+  ftn/BMG2_SymStd_SETUP_ITLI_ex.f90
+  ftn/BMG2_SymStd_SETUP_recip.f90
+  ftn/BMG2_SymStd_SETUP_lines_x.f90
+  ftn/BMG2_SymStd_SETUP_lines_y.f90)
+
 if (ENABLE_MPI)
   list(APPEND sources
 	ftn/mpi/BMG2_SymStd_SETUP_nog.f90
@@ -37,11 +50,11 @@ if (ENABLE_MPI)
 	ftn/mpi/BMG2_SymStd_SETUP_lines_x.f90
 	ftn/mpi/BMG2_SymStd_SETUP_lines_y.f90
 	ftn/mpi/BMG2_SymStd_SETUP_cg_boxmg.f90
-	ftn/mpi/BMG2_SymStd_COPY_cg_WS_SO.f
+	ftn/mpi/BMG2_SymStd_COPY_cg_WS_SO.f90
 	ftn/mpi/BMG2_SymStd_SOLVE_cg_pack.f90
-	ftn/mpi/BMG2_SymStd_COPY_cg_WS_RHS.f
+	ftn/mpi/BMG2_SymStd_COPY_cg_WS_RHS.f90
 	ftn/mpi/BMG2_SymStd_SOLVE_cg_unpack.f90
-	ftn/mpi/BMG2_SymStd_COPY_cg_rV_G_L.f
+	ftn/mpi/BMG2_SymStd_COPY_cg_rV_G_L.f90
 	ftn/mpi/BMG2_SymStd_SETUP_ITLI_ex.f90
 	ftn/mpi/BMG2_SymStd_relax_GS.f90
 	ftn/mpi/BMG2_SymStd_relax_GS_plane.f90
@@ -74,7 +87,48 @@ if (ENABLE_MPI)
 	ftn/mpi/BMG2_SymStd_SETUP_cg_LU.f90
 	ftn/mpi/BMG2_SymStd_SOLVE_cg_LU.f90
 	ftn/mpi/BMG2_SymStd_SETUP_Tausch.f90
-	ftn/mpi/msg_util.f90)
+	ftn/mpi/msg_util.f90
+        ftn/mpi/comm_coarsen.f90)
+
+    list(APPEND ftl_sources
+    	ftn/mpi/BMG2_SymStd_SETUP_PtrMSG.f90
+	ftn/mpi/BMG2_SymStd_SETUP_PtrMSGSO.f90
+	ftn/mpi/BMG2_SymStd_SETUP_MSGGrid.f90
+	ftn/mpi/BMG2_SymStd_SETUP_MSGGridSO.f90
+	ftn/mpi/BMG2_SymStd_SETUP_MSG.f90
+	ftn/mpi/BMG2_SymStd_SETUP_LS.f90
+	ftn/mpi/BMG2_SymStd_SETUP_LSGrid.f90
+	ftn/mpi/BMG2_SymStd_SETUP_PtrLS.f90
+	ftn/mpi/BMG2_SymStd_SETUP_fine_stencil.f90
+	ftn/mpi/BMG2_SymStd_SETUP_interp_OI.f90
+	ftn/mpi/BMG2_SymStd_SETUP_recip.f90
+	ftn/mpi/BMG2_SymStd_SETUP_lines_x.f90
+	ftn/mpi/BMG2_SymStd_SETUP_lines_y.f90
+	ftn/mpi/BMG2_SymStd_SETUP_cg_boxmg.f90
+	ftn/mpi/BMG2_SymStd_SOLVE_cg_pack.f90
+	ftn/mpi/BMG2_SymStd_SOLVE_cg_unpack.f90
+	ftn/mpi/BMG2_SymStd_SETUP_ITLI_ex.f90
+	ftn/mpi/BMG2_SymStd_relax_GS.f90
+	ftn/mpi/BMG2_SymStd_SETUP_ADD_SOR_PTRS.f90
+	ftn/mpi/BMG2_SymStd_SETUP_ADD_GROUP_PTRS.f90
+	ftn/mpi/BMG2_SymStd_SETUP_comm.f90
+	ftn/mpi/BMG2_SymStd_SETUP_trisolve.f90
+	ftn/mpi/BMG2_SymStd_RWork_2_TDG.f90
+	ftn/mpi/BMG2_SymStd_TDG_2_RWork.f90
+	ftn/mpi/BMG2_SymStd_restrict.f90
+	ftn/mpi/BMG2_SymStd_residual.f90
+	ftn/mpi/BMG2_SymStd_interp_add.f90
+	ftn/mpi/BMG2_SymStd_UTILS_update_ghosts.f90
+	ftn/mpi/BMG2_SymStd_UTILS_update_stencil_ghosts.f90
+	ftn/mpi/BMG2_SymStd_UTILS_matvec.f90
+	ftn/mpi/BMG2_SymStd_SETUP_cg_LU.f90
+	ftn/mpi/BMG2_SymStd_SOLVE_cg_LU.f90
+	ftn/mpi/BMG2_SymStd_SETUP_Tausch.f90
+      	ftn/mpi/BMG2_SymStd_COPY_cg_WS_SO.f90
+      	ftn/mpi/BMG2_SymStd_COPY_cg_WS_RHS.f90
+      	ftn/mpi/BMG2_SymStd_COPY_cg_rV_G_L.f90
+        ftn/mpi/comm_coarsen.f90)
 endif()
 
 set(ftn_SOURCES ${sources} PARENT_SCOPE)
+set(ftn_FTL_SOURCES ${ftl_sources} PARENT_SCOPE)

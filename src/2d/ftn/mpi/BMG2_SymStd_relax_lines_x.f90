@@ -63,7 +63,7 @@
       integer(c_int), value :: IRELAX_SYM, K, UPDOWN
       integer, value :: MPICOMM
       integer(c_int), value :: XLINECOMM, YLINECOMM
-      integer(len_t) :: DATADIST(2,*)
+      integer(c_int) :: DATADIST(2,*)
       real(real_t) :: B(II,JJ), Q(II,JJ), QF(II,JJ), SO(II+1,JJ+1,NStncl), &
            SOR(II,JJ,2), RWORK(NMSGr)
       type(c_ptr) :: halof
@@ -94,11 +94,11 @@
 !     on the way up we relax in the opposite order
 !
 
-      call MPI_Comm_Rank(XLINECOMM,myid,ierror)
-      call MPI_Comm_Size(XLINECOMM,size,ierror)
+      call MPI_Comm_rank(XLINECOMM,myid,ierror)
+      call MPI_Comm_size(XLINECOMM,size,ierror)
 
-      call MPI_Comm_Rank(YLINECOMM,myidy,ierror)
-      call MPI_Comm_Size(YLINECOMM,sizey,ierror)
+      call MPI_Comm_rank(YLINECOMM,myidy,ierror)
+      call MPI_Comm_size(YLINECOMM,sizey,ierror)
 !
       IF ( UPDOWN.EQ.BMG_DOWN .OR. IRELAX_SYM.EQ.BMG_RELAX_NONSYM ) THEN
          !
@@ -160,12 +160,12 @@
 
          IF (SIZE.gt.1) THEN    ! if there is more than one processor in
             if (myid .eq. 0) then
-               CALL MPI_GATHER(MPI_IN_PLACE,NLINES*8,&
+               CALL MPI_Gather(MPI_IN_PLACE,NLINES*8,&
                     &           MPI_DOUBLE_PRECISION,&
                     &           RWORK,NLINES*8,MPI_DOUBLE_PRECISION,&
                     &           0, XLINECOMM, IERR)
             else
-               CALL MPI_GATHER(RWORK,NLINES*8,&
+               CALL MPI_Gather(RWORK,NLINES*8,&
                     &           MPI_DOUBLE_PRECISION,&
                     &           0.0d0,NLINES*8,MPI_DOUBLE_PRECISION,&
                     &           0, XLINECOMM, IERR)
@@ -192,11 +192,11 @@
 
          IF (SIZE.gt.1) THEN
             if (myid .eq. 0) then
-               CALL MPI_SCATTER(RWORK(MYID*NLINES*8+1),NLINES*8,&
+               CALL MPI_Scatter(RWORK(MYID*NLINES*8+1),NLINES*8,&
                     &           MPI_DOUBLE_PRECISION,MPI_IN_PLACE, NLINES*8, &
                     &           MPI_DOUBLE_PRECISION,0,XLINECOMM,IERR)
             else
-               CALL MPI_SCATTER(0.0d0,NLINES*8,&
+               CALL MPI_Scatter(0.0d0,NLINES*8,&
                     &           MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
                     &           MPI_DOUBLE_PRECISION,0,XLINECOMM,IERR)
             endif

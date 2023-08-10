@@ -197,7 +197,7 @@
             IF ( MyProc.EQ.1 ) THEN
                WRITE(*,*) 'BMG2_SymStd_SETUP_cg_LU: Unsupport BC', IBC
             ENDIF
-            CALL MPI_FINALIZE(MPICOMM)
+            CALL MPI_Finalize(MPICOMM)
             !
          ENDIF
       ELSE IF ( NStncl.EQ.3 ) THEN
@@ -228,7 +228,7 @@
             IF ( MyProc.EQ.1 ) THEN
                WRITE(*,*) 'BMG2_SymStd_SETUP_cg_LU: Unsupport BC', IBC
             ENDIF
-            CALL MPI_FINALIZE(MPICOMM)
+            CALL MPI_Finalize(MPICOMM)
             !
          ENDIF
       ELSE
@@ -249,7 +249,7 @@
 
       IF (cg_comm_type .eq. BMG_CG_ALLGATHER) THEN
 
-         CALL MPI_ALLGATHER ( &
+         CALL MPI_Allgather ( &
      &        WS(1), LARGESTNODES, MPI_DOUBLE_PRECISION,&
      &        WS(LARGESTNODES+1), LARGESTNODES, MPI_DOUBLE_PRECISION,&
      &        MPICOMM, IERR&
@@ -257,7 +257,7 @@
 
       ELSE
 
-         CALL MPI_GATHER ( &
+         CALL MPI_Gather ( &
      &        WS(1), LARGESTNODES, MPI_DOUBLE_PRECISION,&
      &        WS(LARGESTNODES+1), LARGESTNODES, MPI_DOUBLE_PRECISION,&
      &        iZERO, MPICOMM, IERR&

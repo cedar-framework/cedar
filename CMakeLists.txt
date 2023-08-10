@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.23)
 project(cedar VERSION 0.1.0 LANGUAGES CXX C Fortran)
 
 set(CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(GEN_2D_INSTALL ON)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
@@ -18,8 +19,9 @@ set(CEDAR_CMAKE_PROJECT_CONFIG_FILE "${CEDAR_CMAKE_CONFIG_DIR}/${PROJECT_NAME}Co
 include(options)
 include(testing)
 include(ExternalProject)
+include(FTLTranspile)
 
-include_directories(include)
+include_directories(include ${CMAKE_BINARY_DIR})
 install(DIRECTORY include/ DESTINATION include)
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
 include_directories(${CMAKE_BINARY_DIR}/include)
@@ -52,6 +54,21 @@ ExternalProject_Add(
 ExternalProject_Get_Property(json source_dir)
 set(json_location ${source_dir}/include)
 
+ExternalProject_Add(
+  ftl
+  PREFIX ${CMAKE_BINARY_DIR}/ftl
+  GIT_REPOSITORY git@github.com:cedar-framework/fortran-to-loopy.git
+  GIT_TAG origin/main
+  UPDATE_DISCONNECTED 1
+  INSTALL_COMMAND ""
+  LOG_DOWNLOAD ON
+)
+ExternalProject_Get_Property(ftl source_dir)
+set(ftl_includes ${source_dir}/include)
+ExternalProject_Get_Property(ftl binary_dir)
+set(ftl_bin ${binary_dir})
+set(ftl_exe ${ftl_bin}/ftl)
+
 FIND_PACKAGE(Boost 1.44 REQUIRED COMPONENTS system filesystem)
 
 FIND_PACKAGE(BLAS REQUIRED)
@@ -63,16 +80,33 @@ if (ENABLE_PLANE_AGG)
   find_package(Argobots REQUIRED)
 endif()
 
+find_package(OpenCL)
+if (${OpenCL_FOUND})
+  add_compile_definitions(FTL_COMPILE_OPENCL=1)
+  link_libraries(OpenCL::OpenCL)
+  message("Compiling with OpenCL support")
+endif()
+
+find_package(CUDAToolkit)
+if (${CUDAToolkit_FOUND})
+  add_compile_definitions(FTL_COMPILE_CUDA=1)
+  link_libraries(CUDA::cuda_driver CUDA::cudart CUDA::nvrtc)
+  message("Compiling with CUDA support")
+endif()
+
+find_package(Python REQUIRED COMPONENTS Interpreter Development)
+
 add_subdirectory(src)
+FTLTranspile(cedar_src cedar_ftl_src)
 add_library(cedar ${cedar_src})
-add_dependencies(cedar json tausch)
+add_dependencies(cedar json tausch ftl)
 target_compile_definitions(cedar PUBLIC
   MSG_DOUBLE
   NO_SECOND_UNDERSCORE
   $<$<CONFIG:DEBUG>:DEBUG;BOUNDS_CHECK>)
-target_compile_features(cedar PUBLIC cxx_std_11)
+target_compile_features(cedar PUBLIC cxx_std_17)
 target_compile_options(cedar PUBLIC
-  $<$<COMPILE_LANGUAGE:CXX>:-std=c++11>
+  $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>
   $<$<COMPILE_LANGUAGE:Fortran>:-fallow-argument-mismatch>
   $<$<CONFIG:DEBUG>:-O0;-Wall;-g>
   $<$<CONFIG:RELEASE>:-O3>)
@@ -87,6 +121,9 @@ target_link_libraries(cedar PUBLIC
   ${MPI_Fortran_LIBRARIES})
 include_directories(${json_location})
 include_directories(${tausch_location})
+include_directories(${ftl_includes})
+include_directories(${Python_INCLUDE_DIRS})
+target_link_libraries(cedar PUBLIC ${ftl_bin}/libftlcommon.a)
 target_compile_definitions(cedar PUBLIC WITH_TAUSCH)
 if (ENABLE_PLANE_AGG)
   target_link_libraries(cedar PUBLIC ${Argobots_LIBRARIES})

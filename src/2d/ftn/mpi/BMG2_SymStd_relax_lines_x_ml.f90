@@ -70,7 +70,7 @@
       integer :: XCOMM(2, 2:NOLX)
       integer(c_int) :: gptr(2, 2:NOLX), iface_ptrs(2)
       integer(c_int) :: TDSX_SOR_PTRS(NOLX)
-      integer(len_t) :: DATADIST(2,*)
+      integer(c_int) :: DATADIST(2,*)
       integer(c_int), value :: NOLX
       integer(c_int), value :: ngwork, niface
 
@@ -109,8 +109,8 @@
 !     on the way up we relax in the opposite order
 !
 
-      call MPI_Comm_Rank(XCOMM(1,NOLX),myid,ierror)
-      call MPI_Comm_Size(XCOMM(1,NOLX),size,ierror)
+      call MPI_Comm_rank(XCOMM(1,NOLX),myid,ierror)
+      call MPI_Comm_size(XCOMM(1,NOLX),size,ierror)
 
       IF ( UPDOWN.EQ.BMG_DOWN .OR. IRELAX_SYM.EQ.BMG_RELAX_NONSYM ) THEN
          !

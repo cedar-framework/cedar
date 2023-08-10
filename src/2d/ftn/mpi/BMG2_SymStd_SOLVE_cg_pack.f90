@@ -219,7 +219,7 @@
 !     Send/Receive information to/from everybody
 ! ------------------------------------------------
 
-      CALL MPI_ALLGATHER( &
+      CALL MPI_Allgather( &
            &        WS(1), LARGESTNODES, MPI_DOUBLE_PRECISION,&
            &        WS(LARGESTNODES+1), LARGESTNODES, MPI_DOUBLE_PRECISION,&
            &        MPICOMM, IERR&

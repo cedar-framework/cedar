@@ -1,4 +1,4 @@
-set(dirs 2d perf util interface services)
+set(dirs 2d perf util interface services ftl_interop)
 
 if (ENABLE_3D)
   list(APPEND dirs 3d)
@@ -11,7 +11,10 @@ endif()
 foreach(dir ${dirs})
   add_subdirectory(${dir})
   foreach(dsrc ${${dir}_SOURCES})
-	list(APPEND sources "src/${dir}/${dsrc}")
+    list(APPEND sources "src/${dir}/${dsrc}")
+  endforeach(dsrc)
+  foreach(dsrc ${${dir}_FTL_SOURCES})
+    list(APPEND ftl_sources "src/${dir}/${dsrc}")
   endforeach(dsrc)
 endforeach(dir)
 
@@ -21,3 +24,5 @@ set(cedar_src ${sources}
   src/multilevel_settings.cc
   src/malloc_pool.cc
   PARENT_SCOPE)
+
+set(cedar_ftl_src ${ftl_sources} PARENT_SCOPE)

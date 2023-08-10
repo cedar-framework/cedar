@@ -18,7 +18,7 @@
 
       INTEGER grank, IERR
 
-      CALL MPI_COMM_RANK(MPI_COMM_WORLD,grank,IERR)
+      CALL MPI_Comm_rank(MPI_COMM_WORLD,grank,IERR)
 
       PINCR = 8*NLines
       LINCR = 8

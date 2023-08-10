@@ -67,7 +67,7 @@
       integer(len_t), value :: iGs, jGs
       integer(c_int), value :: K, IRELAX_SYM, UPDOWN
       integer, value :: MPICOMM
-      integer(len_t) :: DATADIST(2,*)
+      integer(c_int) :: DATADIST(2,*)
       integer(c_int), value :: NOLY
 
       real(real_t) :: B(JJ,II), Q(II,JJ), QF(II,JJ), SO(II+1,JJ+1,NStncl)
@@ -105,8 +105,8 @@
       I1=II-1
 
 
-      call MPI_Comm_Rank(YCOMM(1,NOLY),myid,ierror)
-      call MPI_Comm_Size(YCOMM(1,NOLY),size,ierror)
+      call MPI_Comm_rank(YCOMM(1,NOLY),myid,ierror)
+      call MPI_Comm_size(YCOMM(1,NOLY),size,ierror)
 
       IF ( UPDOWN.EQ.BMG_DOWN .OR. IRELAX_SYM.EQ.BMG_RELAX_NONSYM ) THEN
          !
