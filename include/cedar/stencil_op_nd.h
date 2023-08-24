@@ -40,7 +40,7 @@ template<std::size_t nd, class stype, class = make_index_sequence<nd>>
 
 template <std::size_t nd, typename stype, std::size_t... Is>
 	class stencil_op_nd<nd, stype, index_sequence<Is...>> :
-	array<real_t, nd+1>,
+	public array<real_t, nd+1>,
 	public grid_quantity<len_t, nd>
 {
 public:

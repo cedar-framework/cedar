@@ -31,8 +31,8 @@ using len_t = cedar::len_t;
 
 template <typename int_type>
 void dpttrf(int N,
-            ftl::BufferView<real_t> D,
-            ftl::BufferView<real_t> E,
+            ftl::Buffer<real_t> D,
+            ftl::Buffer<real_t> E,
             int_type& info) {
     throw std::runtime_error("DPTTRF not implemented");
 }
@@ -41,9 +41,9 @@ void dpttrf(int N,
 template <typename int_type>
 void dpttrs(int N,
             int NRHS,
-            ftl::BufferView<real_t> D,
-            ftl::BufferView<real_t> E,
-            ftl::BufferView<real_t> B,
+            ftl::Buffer<real_t> D,
+            ftl::Buffer<real_t> E,
+            ftl::Buffer<real_t> B,
             int ldb,
             int_type& info) {
     throw std::runtime_error("DPTTRF not implemented");
@@ -55,9 +55,9 @@ void dpbtrs(const char* uplo,
             int N,
             int KD,
             int NRHS,
-            ftl::BufferView<real_t> AB,
+            ftl::Buffer<real_t> AB,
             int LDAB,
-            ftl::BufferView<real_t> B,
+            ftl::Buffer<real_t> B,
             int LDB,
             int_type& info) {
 
@@ -69,7 +69,7 @@ template <typename int_type>
 void dpbtrf(const char* uplo,
             int N,
             int KD,
-            ftl::BufferView<real_t> AB,
+            ftl::Buffer<real_t> AB,
             int LDAB,
             int_type& info) {
 
@@ -77,36 +77,15 @@ void dpbtrf(const char* uplo,
 }
 #define DPBTRF dpbtrf
 
-void halo_exchange(int k, ftl::BufferView<real_t> q, void* halof_void) {
-    auto* halof =
-        static_cast<cedar::services::halo_exchange_base*>(halof_void);
-    q->dev_to_host();
-    halof->exchange_func(k, q->data());
-}
+template <typename ...Us>
+void noop(Us&&... args) {}
 
-void halo_stencil_exchange(int k, ftl::BufferView<real_t> soc, void *halof_void) {
-    auto* halof =
-        static_cast<cedar::services::halo_exchange_base*>(halof_void);
-    soc->dev_to_host();
-    halof->exchange_sten(k, soc->data());
-}
-
+void halo_exchange(int k, ftl::Buffer<real_t> q, void* halof_void);
+void halo_stencil_exchange(int k, ftl::Buffer<real_t> soc, void *halof_void);
 void MSG_tp_setup(void* la_size, void* eid_s, void* gc_ld, void* gc_eid,
                   int numproc, int myproc, int nproc, void* proc, void* ipr, void* index,
-                  int sfa, int pfa, int& ier) {
-    throw std::runtime_error("MSG_tp_setup not implemented");
-}
-
-void cedar_mempool_pos(void* mp_void, int nbytes, int& pos) {
-    auto* mp =
-        static_cast<cedar::services::mempool*>(mp_void);
-    std::size_t nbytes_in = nbytes;
-    pos = mp->pos(nbytes_in);
-}
-
-void print_error(const char* str) {
-    std::cout << str << std::endl;
-    std::exit(1);
-}
+                  int sfa, int pfa, int& ier);
+void cedar_mempool_pos(void* mp_void, int nbytes, int& pos);
+void print_error(const char* str);
 
 #endif

@@ -25,47 +25,47 @@ void MSG_comm_type(bool t);
 void MSG_disable(int& ierror);
 
 void MSG_tbdx_send(
-	ftl::BufferView<real_t> x,
-	ftl::BufferView<real_t> y,
+	ftl::Buffer<real_t> x,
+	ftl::Buffer<real_t> y,
 	int nproc,
-	ftl::BufferView<len_t> proc,
-	ftl::BufferView<len_t> ipr,
-	ftl::BufferView<len_t> index,
+	ftl::Buffer<len_t> proc,
+	ftl::Buffer<len_t> ipr,
+	ftl::Buffer<len_t> index,
 	int ptrn,
-	int ierr);
+	int& ierr);
 
 void MSG_tbdx_close(
-	ftl::BufferView<real_t> x,
-	ftl::BufferView<real_t> y,
+	ftl::Buffer<real_t> x,
+	ftl::Buffer<real_t> y,
 	int nproc,
-	ftl::BufferView<len_t> proc,
-	ftl::BufferView<len_t> ipr,
-	ftl::BufferView<len_t> index,
+	ftl::Buffer<len_t> proc,
+	ftl::Buffer<len_t> ipr,
+	ftl::Buffer<len_t> index,
 	int ptrn,
-	int ierr);
+	int& ierr);
 
 void MSG_tbdx_receive(
-	ftl::BufferView<real_t> x,
-	ftl::BufferView<real_t> y,
+	ftl::Buffer<real_t> x,
+	ftl::Buffer<real_t> y,
 	int nproc,
-	ftl::BufferView<len_t> proc,
-	ftl::BufferView<len_t> ipr,
-	ftl::BufferView<len_t> index,
+	ftl::Buffer<len_t> proc,
+	ftl::Buffer<len_t> ipr,
+	ftl::Buffer<len_t> index,
 	int ptrn,
-	int ierr);
+	int& ierr);
 
 void MSG_tbdx_gather(
-	ftl::BufferView<real_t> x,
-	ftl::BufferView<real_t> y,
+	ftl::Buffer<real_t> x,
+	ftl::Buffer<real_t> y,
 	int iproc,
-	ftl::BufferView<len_t> ipr,
-	ftl::BufferView<len_t> index);
+	ftl::Buffer<len_t> ipr,
+	ftl::Buffer<len_t> index);
 
 void MSG_tbdx_scatter(
-	ftl::BufferView<real_t> x,
-	ftl::BufferView<real_t> y,
+	ftl::Buffer<real_t> x,
+	ftl::Buffer<real_t> y,
 	int iproc,
-	ftl::BufferView<len_t> ipr,
-	ftl::BufferView<len_t> index);
+	ftl::Buffer<len_t> ipr,
+	ftl::Buffer<len_t> index);
 
 #endif /* FTL_CONVERTED_MPI_MSG_INC_*/

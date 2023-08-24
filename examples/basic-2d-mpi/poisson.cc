@@ -11,6 +11,7 @@
 
 #include <cedar/util/time_log.h>
 
+#include <ftl/Cedar.hpp>
 
 static void set_problem(cedar::cdr2::mpi::grid_func & b)
 {
@@ -88,6 +89,21 @@ static void set_solution(cedar::cdr2::mpi::grid_func & q)
 }
 
 
+template <typename dtype, unsigned short ND>
+ftl::Buffer<dtype> to_buffer(cedar::array<dtype, ND>& array) {
+    std::vector<int32_t> shape(ND);
+
+    for (std::size_t i = 0; i < ND; ++i) {
+        const int32_t dim = array.len(i);
+        shape[i] = dim;
+    }
+
+    ftl::Buffer<dtype> buf(array.data(), shape);
+
+    return buf;
+}
+
+
 int main(int argc, char *argv[])
 {
 	using namespace cedar;
@@ -96,6 +112,10 @@ int main(int argc, char *argv[])
 	int provided;
 
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
+
+    int rank, size;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
 
 	timer_init(MPI_COMM_WORLD);
 
@@ -106,24 +126,68 @@ int main(int argc, char *argv[])
 	auto so = mpi::gallery::poisson(grid);
 	mpi::grid_func b(grid);
 
+        // auto* scp = so.data();
+        // for (std::size_t i = 0; i < 7 * 7 * 3; ++i) {
+        //     std::cerr << scp[i] << " ";
+        // }
+        // std::cerr << std::endl;
+
 	set_problem(b);
 
 	mpi::solver<five_pt> bmg(so);
+        const std::size_t levels = bmg.nlevels();
+        std::cout << "Solver has " << levels << " levels." << std::endl;
+
+        for (std::size_t i = 0; i < levels; ++i) {
+            if (i == 0) {
+                auto level = bmg.levels.get<five_pt>(i);
+                auto so = level.A;
+                std::cerr << i << " " << so.len(0) << " " << so.len(1) << std::endl;
+            } else {
+                auto level = bmg.levels.get<nine_pt>(i);
+                auto so = level.A;
+                std::cerr << i << " " << so.len(0) << " " << so.len(1) << std::endl;
+            }
+        }
+
+        // auto ci_buf = to_buffer(ci);
+        // std::cout << ci_buf << std::endl;
+
+        MPI_Barrier(MPI_COMM_WORLD);
+
+        auto level = bmg.levels.get<five_pt>(0);
+        auto ci = level.P;
+        std::cout << ci.len(0) << " " << ci.len(1) << " " << ci.len(2) << std::endl;
+
 
 	MPI_Barrier(MPI_COMM_WORLD); // synchronize before timing solve
 	auto sol = bmg.solve(b);
 
+        // auto level = bmg.levels.get<five_pt>(0);
+        // auto ci = level.P;
+        ci = level.P;
+        std::cout << ci.len(0) << " " << ci.len(1) << " " << ci.len(2) << std::endl;
 
-	mpi::grid_func exact_sol(sol.grid_ptr());
-	set_solution(exact_sol);
 
-	mpi::grid_func diff = exact_sol - sol;
+	// mpi::grid_func exact_sol(sol.grid_ptr());
+	// set_solution(exact_sol);
 
-	log::status << "Solution norm: " << diff.inf_norm() << std::endl;
+	// mpi::grid_func diff = exact_sol - sol;
 
-	timer_save("timings.json");
+	//log::status << "Solution norm: " << diff.inf_norm() << std::endl;
 
-	log::status << "Finished Test" << std::endl;
+	//timer_save("timings.json");
+
+	//log::status << "Finished Test" << std::endl;
+
+        if (rank == size - 1) {
+            std::cout << std::endl << "Press enter to exit..." << std::endl;
+            std::cin.get();
+        } else {
+            std::cout << std::endl << std::endl;
+        }
+
+        MPI_Barrier(MPI_COMM_WORLD);
 
 	MPI_Finalize();
 	return 0;

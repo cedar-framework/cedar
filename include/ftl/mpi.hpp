@@ -19,16 +19,21 @@ void MPI_Recv(void* buf, int count, MPI_Datatype datatype, int source,
 
 void MPI_Recv_init(void* buf, int count, MPI_Datatype datatype, int source,
                    int tag, int32_t comm, MPI_Request& request, int32_t& ierr);
+void MPI_Recv_init(void* buf, int count, MPI_Datatype datatype, int source,
+                   int tag, int32_t comm, int32_t& request, int32_t& ierr);
 
 void MPI_Send(void* buf, int count, MPI_Datatype datatype, int dest,
               int tag, int32_t comm, int32_t& ierr);
 
 void MPI_Send_init(void* buf, int count, MPI_Datatype datatype, int dest,
                    int tag, int32_t comm, MPI_Request& request, int32_t& ierr);
+void MPI_Send_init(void* buf, int count, MPI_Datatype datatype, int dest,
+                   int tag, int32_t comm, int32_t& request, int32_t& ierr);
 
 void MPI_Wait(MPI_Request& request, MPI_Status& status, int32_t& ierr);
-
 void MPI_Wait(MPI_Request& request, void* status, int32_t& ierr);
+void MPI_Wait(int32_t& request, MPI_Status& status, int32_t& ierr);
+void MPI_Wait(int32_t& request, void* status, int32_t& ierr);
 
 void MPI_Sendrecv(void* sendbuf, int sendcount, MPI_Datatype sendtype, int dest, int sendtag,
                   void* recvbuf, int recvcount, MPI_Datatype recvtype, int source, int recvtag,
@@ -59,8 +64,10 @@ void MPI_Comm_free(int32_t comm, int32_t& ierr);
 void MPI_Comm_size(int32_t comm, int32_t& size, int32_t& ierr);
 
 void MPI_Request_free(MPI_Request& request, int32_t& ierr);
+void MPI_Request_free(int32_t& request, int32_t& ierr);
 
 void MPI_Start(MPI_Request& request, int32_t& ierr);
+void MPI_Start(int32_t& request, int32_t& ierr);
 
 void MPI_Barrier(int32_t comm, int32_t& ierr);
 

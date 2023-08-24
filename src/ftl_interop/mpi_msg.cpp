@@ -6,23 +6,78 @@
 
 #define MAX_PROCS 27
 #define MAX_PATTERNS 6
+#define MPI_STATUS_SIZE (sizeof(MPI_Status))
 
-static MPI_Status sendstatus, recvstatus;
-static int32_t msg_comm;
-static int32_t msg_comm_parent;
-static int msg_comm_parent_flag = -1;
-static int msg_blocking;
-
-static int msg_myproc;
-static int msg_nproc;
 static int msg_version;
 
-static double msg_timer;
+template <typename T, int ndim>
+struct FortranArrayView {
+    T* base;
+    int strides[ndim];
 
-MPI_Request msg_sendid[MAX_PROCS][MAX_PATTERNS];
-MPI_Request msg_recvid[MAX_PROCS][MAX_PATTERNS];
-long msgsegment[MAX_PATTERNS];
-long msg_transfer_type[MAX_PATTERNS];
+    template <typename U>
+    void unroll_stride(int i, int running_stride, U&& u) {
+        strides[i] = running_stride;
+    }
+
+    template <typename U, typename ...Us>
+    void unroll_stride(int i, int running_stride, U&& u, Us&&... us) {
+        strides[i] = running_stride;
+        unroll_stride(i + 1, running_stride * u, us...);
+    }
+
+    template <typename ...Us>
+    FortranArrayView(T* base, Us&&... us): base(base) {
+        unroll_stride(0, 1, us...);
+    }
+
+    template <typename U>
+    int unroll_idx(int i, U&& u) {
+        return u * strides[i];
+    }
+
+    template <typename U, typename ...Us>
+    int unroll_idx(int i, U&& u, Us&&... us) {
+        return u * strides[i] + unroll_idx(i + 1, us...);
+    }
+
+    template <typename ...Us>
+    T& operator()(Us&&... us) {
+        const int idx = unroll_idx(0, us...);
+        return base[idx];
+    }
+
+    /* Playing fast and loose with the automatic conversions :-) */
+    operator MPI_Status&() {
+        return *((MPI_Status*) base);
+    }
+};
+
+extern "C" {
+    extern struct {
+        int32_t MSG_sendid[MAX_PROCS * MAX_PATTERNS];
+        int32_t MSG_recvid[MAX_PROCS * MAX_PATTERNS];
+        int32_t SendStatus[MPI_STATUS_SIZE];
+        int32_t RecvStatus[MPI_STATUS_SIZE];
+        int32_t MSGSegment[MAX_PATTERNS];
+        int32_t MSG_COMM;
+        int32_t MSG_COMM_PARENT;
+        int32_t MSG_COMM_PARENT_FLAG;
+        int32_t MSG_TRANSFER_TYPE[MAX_PATTERNS];
+        int32_t MSG_BLOCKING;
+    } msg_sendrec_;
+}
+
+static FortranArrayView<int32_t, 2> msg_recvid(msg_sendrec_.MSG_recvid, MAX_PROCS, MAX_PATTERNS);
+static FortranArrayView<int32_t, 2> msg_sendid(msg_sendrec_.MSG_sendid, MAX_PROCS, MAX_PATTERNS);
+static FortranArrayView<int32_t, 1> msgsegment(msg_sendrec_.MSGSegment, MAX_PATTERNS);
+static FortranArrayView<int32_t, 1> recvstatus(msg_sendrec_.RecvStatus, MPI_STATUS_SIZE);
+static FortranArrayView<int32_t, 1> sendstatus(msg_sendrec_.SendStatus, MPI_STATUS_SIZE);
+static FortranArrayView<int32_t, 1> msg_transfer_type(msg_sendrec_.MSG_TRANSFER_TYPE, MAX_PATTERNS);
+static int32_t& msg_blocking = msg_sendrec_.MSG_BLOCKING;
+static int32_t& msg_comm = msg_sendrec_.MSG_COMM;
+static int32_t& msg_comm_parent = msg_sendrec_.MSG_COMM_PARENT;
+static int32_t& msg_comm_parent_flag = msg_sendrec_.MSG_COMM_PARENT_FLAG;
 
 void MSG_enable(int myproc, int numproc) {
     int ierror;
@@ -73,14 +128,14 @@ void MSG_disable(int& ierror) {
 }
 
 void MSG_tbdx_send(
-	ftl::BufferView<real_t> x,
-	ftl::BufferView<real_t> y,
+	ftl::Buffer<real_t> x,
+	ftl::Buffer<real_t> y,
 	int nproc,
-	ftl::BufferView<len_t> proc,
-	ftl::BufferView<len_t> ipr,
-	ftl::BufferView<len_t> index,
+	ftl::Buffer<len_t> proc,
+	ftl::Buffer<len_t> ipr,
+	ftl::Buffer<len_t> index,
 	int ptrn,
-	int ierr) {
+	int& ierr) {
 
     static bool first_call = true;
 
@@ -159,21 +214,21 @@ void MSG_tbdx_send(
         }
         if (first_call) {
             for (iproc = 1; iproc <= MAX_PATTERNS; ++iproc) {
-                msg_sendid[0][iproc - 1] = 0;
-                msg_recvid[0][iproc - 1] = 0;
+                msg_sendid(0, iproc - 1) = 0;
+                msg_recvid(0, iproc - 1) = 0;
             }
             first_call = false;
         }
-        if (msg_sendid[0, ptrn - 1]==0 && msg_recvid[0, ptrn - 1]==0) {
+        if (msg_sendid(0, ptrn - 1)==0 && msg_recvid(0, ptrn - 1)==0) {
             /*
              Open the communications channels, set the type of data transfer
              for this pattern
              */
             if (proc(0)<0) {
-                msg_transfer_type[ptrn - 1] = 1;
+                msg_transfer_type(ptrn - 1) = 1;
                 proc(0) = -proc(0);
             } else {
-                msg_transfer_type[ptrn - 1] = 0;
+                msg_transfer_type(ptrn - 1) = 0;
             }
 
             /*
@@ -181,14 +236,14 @@ void MSG_tbdx_send(
               "safe" place within the array y to put the buffer for the incoming
               data
             */
-            msgsegment[ptrn - 1] = 0;
+            msgsegment(ptrn - 1) = 0;
             for (iproc = 1; iproc <= nproc; ++iproc) {
                 outsegmentsize = (ipr((2*iproc) - 1)-ipr(((2*iproc)-1) - 1));
-                if (msgsegment[ptrn - 1] < outsegmentsize) {
-                    msgsegment[ptrn - 1] = outsegmentsize;
+                if (msgsegment(ptrn - 1) < outsegmentsize) {
+                    msgsegment(ptrn - 1) = outsegmentsize;
                 }
             }
-            msgsegment[ptrn - 1] = msgsegment[ptrn];
+            msgsegment(ptrn - 1) = msgsegment(ptrn);
 
             /* Open up channels */
             for (iproc = 1; iproc <= nproc; ++iproc) {
@@ -197,13 +252,13 @@ void MSG_tbdx_send(
                 if (outsegmentsize>0) {
                     if (index((outsegmentstart) - 1)>=0) {
                         /* Noncontiguous memory segment: give the buffer's address */
-                        MPI_Send_init(y(0), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_sendid[iproc - 1][ptrn - 1], ierr);
+                        MPI_Send_init(y(0), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_sendid(iproc - 1, ptrn - 1), ierr);
                         if (ierr!=MPI_SUCCESS) {
                             return;
                         }
                     } else {
                         /* Contiguous memory segment: give the data address */
-                        MPI_Send_init(x((-index((outsegmentstart) - 1)) - 1), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_sendid[iproc - 1][ptrn - 1], ierr);
+                        MPI_Send_init(x((-index((outsegmentstart) - 1)) - 1), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_sendid(iproc - 1, ptrn - 1), ierr);
                         if (ierr!=MPI_SUCCESS) {
                             return;
                         }
@@ -214,12 +269,12 @@ void MSG_tbdx_send(
                 insegmentstart = ipr((2*iproc) - 1);
                 if (insegmentsize>0) {
                     if (index((insegmentstart) - 1)>=0) {
-                        MPI_Recv_init(y((msgsegment[ptrn - 1]) - 1), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_recvid[iproc - 1][ptrn - 1], ierr);
+                        MPI_Recv_init(y((msgsegment(ptrn - 1)) - 1), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_recvid(iproc - 1, ptrn - 1), ierr);
                         if (ierr!=MPI_SUCCESS) {
                             return;
                         }
                     } else {
-                        MPI_Recv_init(x((-index((insegmentstart) - 1)) - 1), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_recvid[iproc - 1][ptrn - 1], ierr);
+                        MPI_Recv_init(x((-index((insegmentstart) - 1)) - 1), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_recvid(iproc - 1, ptrn - 1), ierr);
                         if (ierr!=MPI_SUCCESS) {
                             return;
                         }
@@ -228,7 +283,7 @@ void MSG_tbdx_send(
             }
         }
 
-        if (msg_transfer_type[ptrn - 1]==1) {
+        if (msg_transfer_type(ptrn - 1)==1) {
             /* Exchange data through the channels using all to all
                Send all messages out one by one */
 
@@ -239,11 +294,11 @@ void MSG_tbdx_send(
                     MSG_tbdx_gather(x, y, iproc, ipr, index);
 
                     /* Start sending the outgoing data to iproc */
-                    MPI_Start(msg_sendid[iproc - 1][ptrn - 1], ierr);
+                    MPI_Start(msg_sendid(iproc - 1, ptrn - 1), ierr);
                     if (ierr!=MPI_SUCCESS) {
                         return;
                     }
-                    MPI_Wait(msg_sendid[iproc - 1][ptrn - 1], sendstatus, ierr);
+                    MPI_Wait(msg_sendid(iproc - 1, ptrn - 1), sendstatus, ierr);
                     if (ierr!=MPI_SUCCESS) {
                         return;
                     }
@@ -259,27 +314,27 @@ void MSG_tbdx_send(
                     /* Start receiving the incoming data from iproc */
 
                     if (insegmentsize>0) {
-                        MPI_Start(msg_recvid[iproc - 1][ptrn - 1], ierr);
+                        MPI_Start(msg_recvid(iproc - 1, ptrn - 1), ierr);
                         if (ierr!=MPI_SUCCESS) {
                             return;
                         }
                     }
                     if (outsegmentsize>0) {
                         MSG_tbdx_gather(x, y, iproc, ipr, index);
-                        MPI_Start(msg_sendid[iproc - 1][ptrn - 1], ierr);
+                        MPI_Start(msg_sendid(iproc - 1, ptrn - 1), ierr);
                         if (ierr!=MPI_SUCCESS) {
                             return;
                         }
                     }
                     if (insegmentsize>0) {
-                        MPI_Wait(msg_recvid[iproc - 1][ptrn - 1], recvstatus, ierr);
+                        MPI_Wait(msg_recvid(iproc - 1, ptrn - 1), recvstatus, ierr);
                         if (ierr!=MPI_SUCCESS) {
                             return;
                         }
-                        MSG_tbdx_scatter(x, y(msgsegment[ptrn - 1] - 1), iproc, ipr, index);
+                        MSG_tbdx_scatter(x, y(msgsegment(ptrn - 1) - 1), iproc, ipr, index);
                     }
                     if (outsegmentsize>0) {
-                        MPI_Wait(msg_sendid[iproc - 1][ptrn - 1], sendstatus, ierr);
+                        MPI_Wait(msg_sendid(iproc - 1, ptrn - 1), sendstatus, ierr);
                         if (ierr!=MPI_SUCCESS) {
                             return;
                         }
@@ -292,14 +347,14 @@ void MSG_tbdx_send(
 
             /* Start receiving the incoming data from nproc */
             if (insegmentsize>0) {
-                MPI_Start(msg_recvid[iproc - 1][ptrn - 1], ierr);
+                MPI_Start(msg_recvid(iproc - 1, ptrn - 1), ierr);
                 if (ierr!=MPI_SUCCESS) {
                     return;
                 }
             }
             if (outsegmentsize>0) {
                 MSG_tbdx_gather(x, y, iproc, ipr, index);
-                MPI_Start(msg_sendid[iproc - 1][ptrn - 1], ierr);
+                MPI_Start(msg_sendid(iproc - 1, ptrn - 1), ierr);
                 if (ierr!=MPI_SUCCESS) {
                     return;
                 }
@@ -309,12 +364,12 @@ void MSG_tbdx_send(
 }
 
 void MSG_tbdx_close(
-	ftl::BufferView<real_t> x,
-	ftl::BufferView<real_t> y,
+	ftl::Buffer<real_t> x,
+	ftl::Buffer<real_t> y,
 	int nproc,
-	ftl::BufferView<len_t> proc,
-	ftl::BufferView<len_t> ipr,
-	ftl::BufferView<len_t> index,
+	ftl::Buffer<len_t> proc,
+	ftl::Buffer<len_t> ipr,
+	ftl::Buffer<len_t> index,
 	int ptrn,
         int& ierr) {
 
@@ -325,34 +380,34 @@ void MSG_tbdx_close(
             return;
         }
         for (ii = 1; ii <= nproc; ++ii) {
-            if (msg_sendid[ii - 1, ptrn - 1] != 0) {
-                MPI_Request_free(msg_sendid[ii - 1][ptrn - 1], ierr);
+            if (msg_sendid(ii - 1, ptrn - 1) != 0) {
+                MPI_Request_free(msg_sendid(ii - 1, ptrn - 1), ierr);
                 if (ierr!=MPI_SUCCESS) {
                     return;
                 }
             }
-            if (msg_recvid[ii - 1, ptrn - 1] != 0) {
-                MPI_Request_free(msg_recvid[ii - 1][ptrn - 1], ierr);
+            if (msg_recvid(ii - 1, ptrn - 1) != 0) {
+                MPI_Request_free(msg_recvid(ii - 1, ptrn - 1), ierr);
                 if (ierr!=MPI_SUCCESS) {
                     return;
                 }
             }
         }
-        msg_sendid[0][ptrn - 1] = nullptr;
-        msg_recvid[0][ptrn - 1] = nullptr;
+        msg_sendid(0, ptrn - 1) = 0;
+        msg_recvid(0, ptrn - 1) = 0;
         ierr = 0;
     }
 }
 
 void MSG_tbdx_receive(
-	ftl::BufferView<real_t> x,
-	ftl::BufferView<real_t> y,
+	ftl::Buffer<real_t> x,
+	ftl::Buffer<real_t> y,
 	int nproc,
-	ftl::BufferView<len_t> proc,
-	ftl::BufferView<len_t> ipr,
-	ftl::BufferView<len_t> index,
+	ftl::Buffer<len_t> proc,
+	ftl::Buffer<len_t> ipr,
+	ftl::Buffer<len_t> index,
 	int ptrn,
-	int ierr) {
+	int& ierr) {
 
     int outsegmentsize, insegmentsize, iproc;
     ierr = 0;
@@ -360,24 +415,24 @@ void MSG_tbdx_receive(
         if (nproc==0) {
             return;
         }
-        if (msg_transfer_type[ptrn - 1] == 1) {
+        if (msg_transfer_type(ptrn - 1) == 1) {
             for (iproc = 1; iproc <= nproc; ++iproc) {
                 insegmentsize = (ipr(((2*iproc)+1) - 1)-ipr((2*iproc) - 1));
                 if (insegmentsize>0) {
-                    MPI_Start(msg_recvid[iproc - 1][ptrn - 1], ierr);
-                    MPI_Wait(msg_recvid[iproc - 1][ptrn - 1], recvstatus, ierr);
-                    MSG_tbdx_scatter(x, y(msgsegment[ptrn - 1] - 1), iproc, ipr, index);
+                    MPI_Start(msg_recvid(iproc - 1, ptrn - 1), ierr);
+                    MPI_Wait(msg_recvid(iproc - 1, ptrn - 1), recvstatus, ierr);
+                    MSG_tbdx_scatter(x, y(msgsegment(ptrn - 1) - 1), iproc, ipr, index);
                 }
             }
         } else {
             outsegmentsize = (ipr((2*nproc) - 1)-ipr(((2*nproc)-1) - 1));
             insegmentsize = (ipr(((2*nproc)+1) - 1)-ipr((2*nproc) - 1));
             if (insegmentsize>0) {
-                MPI_Wait(msg_recvid[nproc - 1][ptrn - 1], recvstatus, ierr);
-                MSG_tbdx_scatter(x, y(msgsegment[ptrn - 1] - 1), nproc, ipr, index);
+                MPI_Wait(msg_recvid(nproc - 1, ptrn - 1), recvstatus, ierr);
+                MSG_tbdx_scatter(x, y(msgsegment(ptrn - 1) - 1), nproc, ipr, index);
             }
             if (outsegmentsize>0) {
-                MPI_Wait(msg_sendid[nproc - 1][ptrn - 1], sendstatus, ierr);
+                MPI_Wait(msg_sendid(nproc - 1, ptrn - 1), sendstatus, ierr);
                 if (ierr!=MPI_SUCCESS) {
                     return;
                 }
@@ -387,11 +442,11 @@ void MSG_tbdx_receive(
 }
 
 void MSG_tbdx_gather(
-	ftl::BufferView<real_t> x,
-	ftl::BufferView<real_t> y,
+	ftl::Buffer<real_t> x,
+	ftl::Buffer<real_t> y,
 	int iproc,
-	ftl::BufferView<int> ipr,
-	ftl::BufferView<int> index) {
+	ftl::Buffer<len_t> ipr,
+	ftl::Buffer<len_t> index) {
 
     int outsegmentstart, outsegmentend, outsegmentsize, j, k;
     outsegmentstart = ipr(((2*iproc)-1) - 1);
@@ -408,11 +463,11 @@ void MSG_tbdx_gather(
 }
 
 void MSG_tbdx_scatter(
-	ftl::BufferView<real_t> x,
-	ftl::BufferView<real_t> y,
+	ftl::Buffer<real_t> x,
+	ftl::Buffer<real_t> y,
 	int iproc,
-	ftl::BufferView<int> ipr,
-	ftl::BufferView<int> index) {
+	ftl::Buffer<len_t> ipr,
+	ftl::Buffer<len_t> index) {
 
     int insegmentsize, insegmentstart, insegmentend, j, k;
     insegmentstart = ipr((2*iproc) - 1);

@@ -68,6 +68,16 @@ class setup_interp_f90 : public kernels::setup_interp<stypes>
 		                                fop.len(0), fop.len(1), cop.len(0), cop.len(1),
 		                                nog, nog, topo.IGRD(), ifd, nstencil, jpn,
 		                                services->fortran_handle<mpi::halo_exchange>());
+
+                std::cerr << "MPI_BMG2_SymStd_SETUP_interp_OI(" << kf << ", " << kc << ", fopd, P, " << fop.len(0) << ", " << fop.len(1) << ", " <<
+                    cop.len(0) << ", " << cop.len(1) << ", " << nog << ", " << nog << ", igrd, " << ifd << ", " << nstencil << ", " << jpn <<
+                    ", halof)" << std::endl;
+
+                auto Pdata = P.data();
+                for (std::size_t i = 0; i < fop.len(0) * fop.len(1) * 8; ++i) {
+                    std::cerr << Pdata[i] << " ";
+                }
+                std::cerr << std::endl;
 	}
 
 

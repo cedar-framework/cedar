@@ -24,6 +24,15 @@ void MPI_Recv_init(void* buf, int count, MPI_Datatype datatype, int source,
     ierr = MPI_Recv_init(buf, count, datatype, source, tag, comm_ptr, &request);
 }
 
+void MPI_Recv_init(void* buf, int count, MPI_Datatype datatype, int source,
+                   int tag, int32_t comm, int32_t& request, int32_t& ierr) {
+
+    MPI_Comm comm_ptr = MPI_Comm_f2c(comm);
+    MPI_Request request_ptr = MPI_Request_f2c(request);
+    ierr = MPI_Recv_init(buf, count, datatype, source, tag, comm_ptr, &request_ptr);
+    request = MPI_Request_c2f(request_ptr);
+}
+
 void MPI_Send(void* buf, int count, MPI_Datatype datatype, int dest,
               int tag, int32_t comm, int32_t& ierr) {
 
@@ -38,12 +47,33 @@ void MPI_Send_init(void* buf, int count, MPI_Datatype datatype, int dest,
     ierr = MPI_Send_init(buf, count, datatype, dest, tag, comm_ptr, &request);
 }
 
+void MPI_Send_init(void* buf, int count, MPI_Datatype datatype, int dest,
+                   int tag, int32_t comm, int32_t& request, int32_t& ierr) {
+
+    MPI_Comm comm_ptr = MPI_Comm_f2c(comm);
+    MPI_Request request_ptr = MPI_Request_f2c(request);
+    ierr = MPI_Send_init(buf, count, datatype, dest, tag, comm_ptr, &request_ptr);
+    request = MPI_Request_c2f(request_ptr);
+}
+
 void MPI_Wait(MPI_Request& request, MPI_Status& status, int32_t& ierr) {
     ierr = MPI_Wait(&request, &status);
 }
 
 void MPI_Wait(MPI_Request& request, void* status, int32_t& ierr) {
     ierr = MPI_Wait(&request, static_cast<MPI_Status*>(status));
+}
+
+void MPI_Wait(int32_t& request, MPI_Status& status, int32_t& ierr) {
+    MPI_Request request_ptr = MPI_Request_f2c(request);
+    ierr = MPI_Wait(&request_ptr, &status);
+    request = MPI_Request_c2f(request_ptr);
+}
+
+void MPI_Wait(int32_t& request, void* status, int32_t& ierr) {
+    MPI_Request request_ptr = MPI_Request_f2c(request);
+    ierr = MPI_Wait(&request_ptr, static_cast<MPI_Status*>(status));
+    request = MPI_Request_c2f(request_ptr);
 }
 
 void MPI_Sendrecv(void* sendbuf, int sendcount, MPI_Datatype sendtype, int dest, int sendtag,
@@ -126,8 +156,20 @@ void MPI_Request_free(MPI_Request& request, int32_t& ierr) {
     ierr = MPI_Request_free(&request);
 }
 
+void MPI_Request_free(int32_t& request, int32_t& ierr) {
+    MPI_Request request_ptr = MPI_Request_f2c(request);
+    ierr = MPI_Request_free(&request_ptr);
+    request = MPI_Request_c2f(request_ptr);
+}
+
 void MPI_Start(MPI_Request& request, int32_t& ierr) {
     ierr = MPI_Start(&request);
+}
+
+void MPI_Start(int32_t& request, int32_t& ierr) {
+    MPI_Request request_ptr = MPI_Request_f2c(request);
+    ierr = MPI_Start(&request_ptr);
+    request = MPI_Request_c2f(request_ptr);
 }
 
 void MPI_Barrier(int32_t comm, int32_t& ierr) {

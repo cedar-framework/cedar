@@ -1,3 +1,5 @@
+find_package(CUDAToolkit)
+
 add_executable(ser-poisson-2d basic-2d-ser/poisson.cc)
 target_link_libraries(ser-poisson-2d cedar)
 
@@ -7,6 +9,12 @@ target_link_libraries(ser-periodic-2d cedar)
 if (ENABLE_MPI)
   add_executable(mpi-poisson-2d basic-2d-mpi/poisson.cc)
   target_link_libraries(mpi-poisson-2d cedar)
+
+  add_executable(mpi-poisson-2d-gpu basic-2d-mpi/poisson_gpu.cc)
+  target_link_libraries(mpi-poisson-2d-gpu cedar)
+
+  add_executable(mpi-poisson-2d-gpu-test basic-2d-mpi/test.cc)
+  target_link_libraries(mpi-poisson-2d-gpu-test cedar)
 
   add_executable(mpi-periodic-2d basic-2d-mpi/periodic.cc)
   target_link_libraries(mpi-periodic-2d cedar)
