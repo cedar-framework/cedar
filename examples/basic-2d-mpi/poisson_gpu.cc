@@ -182,24 +182,24 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Set up problem" << std::endl;
 
-    VCycle solver(conf, so, exact_sol, b, grid);
+    //VCycle solver(conf, so, exact_sol, b, grid);
 
     std::cout << "Created solver object" << std::endl;
 
-    solver.initialize();
+    //solver.initialize();
 
     std::cout << "Initialized solver" << std::endl;
 
-    std::cout << solver << std::endl;
+    ///td::cout << solver << std::endl;
 
-    ftl::Buffer<real_t>& soln = solver.gen_x0(0);
+    // ftl::Buffer<real_t>& soln = solver.gen_x0(0);
 
-    std::cout << "Generated x0" << std::endl;
+    // std::cout << "Generated x0" << std::endl;
 
     // for (int i = 0; i < 10; ++i) {
     //     solver.solve(soln);
     // }
-    solver.solve(soln);
+    // solver.solve(soln);
 
     std::cout << "Ran solver" << std::endl;
 
@@ -208,8 +208,8 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Finished" << std::endl;
 
-    save_file(soln, "soln_" + std::to_string(rank) + ".txt");
-    save_file(b, "rhs_" + std::to_string(rank) + ".txt");
+    // save_file(soln, "soln_" + std::to_string(rank) + ".txt");
+    // save_file(b, "rhs_" + std::to_string(rank) + ".txt");
 
     return 0;
 }

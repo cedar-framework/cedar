@@ -7,7 +7,7 @@ using namespace cedar::cdr3;
 
 grid_func & grid_func::operator=(grid_func &&gf)
 {
-	vec = std::move(gf.vec);
+	base_buffer = std::move(gf.base_buffer);
 	strides = std::move(gf.strides);
 	extents = std::move(gf.extents);
 	num_ghosts = gf.num_ghosts;

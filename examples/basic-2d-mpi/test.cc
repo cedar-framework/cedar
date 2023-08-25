@@ -8,6 +8,7 @@
 #include <cedar/2d/util/topo.h>
 #include <cedar/2d/mpi/solver.h>
 #include <cedar/2d/mpi/gallery.h>
+#include <cedar/2d/mpi/tausch_exchanger.h>
 
 #include <cedar/util/time_log.h>
 #include "vcycle.hpp"
@@ -294,7 +295,10 @@ int main(int argc, char *argv[]) {
     auto sman = kman->services();
     auto halo_exchange = sman.fortran_handle<cedar::cdr2::mpi::halo_exchange>();
     auto& halo_service = sman.get<cedar::cdr2::mpi::halo_exchange>();
-    auto msg_service = dynamic_cast<cedar::cdr2::mpi::msg_exchanger*>(&halo_service);
+    auto tausch_service = dynamic_cast<cedar::cdr2::mpi::tausch_exchanger*>(&halo_service);
+    if (tausch_service == nullptr) {
+        throw std::runtime_error("tausch service is null");
+    }
     std::vector<cedar::topo_ptr> topos;
     topos.push_back(fgrid);
     topos.push_back(cgrid);
@@ -307,14 +311,14 @@ int main(int argc, char *argv[]) {
     auto so_cedar = mpi::gallery::poisson(fgrid);
     ftl::Buffer<real_t> so = so_to_buffer<five_pt>(so_cedar);
     int kf = 2;
-    auto ctx = msg_service->context();
+    // auto ctx = tausch_service->context();
 
-    std::cout << "ctx msg_geom (" << ctx.msg_geom.size() << ")" << std::endl;
-    auto msg_geom_ptr = ctx.msg_geom.data();
-    for (std::size_t i = 0; i < ctx.msg_geom.size(); ++i) {
-        std::cout << msg_geom_ptr[i] << " ";
-    }
-    std::cout << std::endl;
+    // std::cout << "ctx msg_geom (" << ctx.msg_geom.size() << ")" << std::endl;
+    // auto msg_geom_ptr = ctx.msg_geom.data();
+    // for (std::size_t i = 0; i < ctx.msg_geom.size(); ++i) {
+    //     std::cout << msg_geom_ptr[i] << " ";
+    // }
+    // std::cout << std::endl;
 
     /* On rank zero, we get values like...
        0 0 0 0 0 0 0 0 0 0 4294967271 26 27 28 29 30 4294967265 32 33 34 35 36 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
@@ -324,13 +328,16 @@ int main(int argc, char *argv[]) {
                            On rank one this is causing indexing out of bounds issues.
     */
 
-    /* I assume we need to do a halo exchange on the fine grid stencil? */
-    int fcomm = MPI_Comm_c2f(MPI_COMM_WORLD);
-    BMG2_SymStd_SETUP_fine_stencil(kf, so, nx, ny, 3,
-                                   ftl::Buffer<unsigned int>(ctx.msg_geom.data(), ctx.msg_geom.size()), ctx.msg_geom.size(),
-                                   to_buffer(ctx.pMSGSO),
-                                   ftl::Buffer<real_t>(ctx.msg_buffer.data(), ctx.msg_buffer.size()), ctx.msg_buffer.size(),
-                                   fcomm);
+    // I assume we need to do a halo exchange on the fine grid stencil?
+    // int fcomm = MPI_Comm_c2f(MPI_COMM_WORLD);
+    // BMG2_SymStd_SETUP_fine_stencil(kf, so, nx, ny, 3,
+    //                                ftl::Buffer<unsigned int>(ctx.msg_geom.data(), ctx.msg_geom.size()), ctx.msg_geom.size(),
+    //                                to_buffer(ctx.pMSGSO),
+    //                                ftl::Buffer<real_t>(ctx.msg_buffer.data(), ctx.msg_buffer.size()), ctx.msg_buffer.size(),
+    //                                fcomm);
+
+
+    tausch_service->run(so_cedar);
 
     /* Setup RHS */
     mpi::grid_func b_cedar(fgrid);

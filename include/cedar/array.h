@@ -6,6 +6,7 @@
 #include <array>
 #include <cedar/types.h>
 #include <cedar/array_base.h>
+#include <ftl/Buffer.hpp>
 
 namespace cedar {
 
@@ -24,11 +25,12 @@ template <typename len_type, typename data_type, unsigned short ND>
 class aarray : public virtual array_base<len_type>
 {
 protected:
-	AlignedVector<data_type> vec;     /** Vector where the data is stored. */
-	data_type *base_ptr;
-	len_type flat_len;
-	std::array<len_type, ND> strides; /** Strides of each dimension, e.g., first index is stride 1. */
-	std::array<len_type, ND> extents; /** Lengths of each dimension. */
+    ftl::FlatBuffer<data_type, len_type> base_buffer;
+
+    data_type *base_ptr;
+    len_type flat_len;
+    std::array<len_type, ND> strides; /** Strides of each dimension, e.g., first index is stride 1. */
+    std::array<len_type, ND> extents; /** Lengths of each dimension. */
 
 public:
 
@@ -48,12 +50,25 @@ public:
 	}
 
 	aarray() {};
-	template <typename... T> aarray(data_type *ext, T... args)
+
+        template <typename... T> aarray(data_type *ext, T... args)
+	{
+		reshape(ext, std::forward<decltype(args)>(args)...);
+	}
+
+        template <typename... T> aarray(const ftl::BufferAllocateDevice device, data_type *ext, T... args):
+        base_buffer(device)
 	{
 		reshape(ext, std::forward<decltype(args)>(args)...);
 	}
 
 	template <typename... T> aarray(T... args)
+	{
+		reshape(std::forward<decltype(args)>(args)...);
+	}
+
+        template <typename... T> aarray(const ftl::BufferAllocateDevice device, T... args):
+        base_buffer(device)
 	{
 		reshape(std::forward<decltype(args)>(args)...);
 	}
@@ -69,9 +84,9 @@ public:
 		len_type len = 1;
 		for (unsigned short i = 0; i < ND; i++)
 			len *= extents[i];
-		vec.resize(len);
+                base_buffer.resize(len);
 		flat_len = len;
-		base_ptr = vec.data();
+		base_ptr = base_buffer.data();
 
 		strides[0] = 1;
 		for (unsigned short i = 1; i < ND; i++) {
@@ -210,6 +225,12 @@ public:
 	}
 
 	data_type * data() { return base_ptr; }
+
+    operator ftl::Buffer<data_type, len_type>() {
+        ftl::Buffer<data_type, len_type> buf(base_buffer);
+        buf.reshape(std::vector<len_t>(extents.cbegin(), extents.cend()));
+        return buf;
+    }
 };
 
 template<typename data_type, unsigned short ND>

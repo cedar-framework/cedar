@@ -32,6 +32,7 @@ using grid_dim = std::tuple<int, int>;
 template <typename T, typename Device=ftl::device::GPU, bool timing=true>
 class VCycle {
 public:
+    using five_pt = cedar::cdr2::five_pt;
     std::vector<ftl::Buffer<T>> so_hierarchy;
     std::vector<ftl::Buffer<T>> sor_hierarchy;
     std::vector<ftl::Buffer<T>> interp_hierarchy;
@@ -39,6 +40,8 @@ public:
     std::vector<cedar::topo_ptr> topos;
 
 private:
+
+    cedar::cdr2::mpi::stencil_op<five_pt>* so_fine_cedar;
 
     /* Pre-allocate space for rhs and soln for v-cycle */
     std::vector<ftl::Buffer<T>> x_store;
@@ -205,8 +208,8 @@ public:
 
 	setup_halo();
 
-        auto service = kman->services().fortran_handle<cedar::cdr2::mpi::halo_exchange>();
-        service->exchange_sten(1, so_hierarchy[0].data());
+        //auto service = kman->services().fortran_handle<cedar::cdr2::mpi::halo_exchange>();
+        //service->exchange_sten(1, so_hierarchy[0].data());
     }
 
     void initialize() {
@@ -398,7 +401,7 @@ public:
         cycle(b_store[0], x0, 0);
     }
 
-    VCycle(cedar::config& conf, ftl::Buffer<T>& fine_grid, ftl::Buffer<T>& u_fine, ftl::Buffer<T>& f_fine, cedar::topo_ptr grid):
+    VCycle(cedar::config& conf, cedar::cdr2::mpi::stencil_op<five_pt>* fine_grid, ftl::Buffer<T>& u_fine, ftl::Buffer<T>& f_fine, cedar::topo_ptr grid):
         jpn(BMG_BCs_definite), irelax(0), u_fine(u_fine), smoothing(2), num_levels(1) {
         kman = cedar::cdr2::mpi::build_kernel_manager(conf);
 
