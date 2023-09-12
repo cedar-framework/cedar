@@ -127,6 +127,7 @@ if (ENABLE_MPI)
       	ftn/mpi/BMG2_SymStd_COPY_cg_WS_SO.f90
       	ftn/mpi/BMG2_SymStd_COPY_cg_WS_RHS.f90
       	ftn/mpi/BMG2_SymStd_COPY_cg_rV_G_L.f90
+        ftn/mpi/BMG2_SymStd_GS_solve_cg.f90
         ftn/mpi/comm_coarsen.f90)
 endif()
 

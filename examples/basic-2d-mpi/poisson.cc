@@ -12,6 +12,7 @@
 #include <cedar/util/time_log.h>
 
 #include <ftl/Cedar.hpp>
+#include <ftl/Runtime.hpp>
 
 static void set_problem(cedar::cdr2::mpi::grid_func & b)
 {
@@ -113,6 +114,8 @@ int main(int argc, char *argv[])
 
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_SINGLE, &provided);
 
+        ftl::runtime_parse_args(argc, argv);
+
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -134,21 +137,12 @@ int main(int argc, char *argv[])
 
 	set_problem(b);
 
+        auto so_buf = so.to_buffer();
+        // std::cout << "Fine operator:" << std::endl << "====" << std::endl << so << std::endl << "====" << std::endl;
+
 	mpi::solver<five_pt> bmg(so);
         const std::size_t levels = bmg.nlevels();
         std::cout << "Solver has " << levels << " levels." << std::endl;
-
-        for (std::size_t i = 0; i < levels; ++i) {
-            if (i == 0) {
-                auto level = bmg.levels.get<five_pt>(i);
-                auto so = level.A;
-                std::cerr << i << " " << so.len(0) << " " << so.len(1) << std::endl;
-            } else {
-                auto level = bmg.levels.get<nine_pt>(i);
-                auto so = level.A;
-                std::cerr << i << " " << so.len(0) << " " << so.len(1) << std::endl;
-            }
-        }
 
         // auto ci_buf = to_buffer(ci);
         // std::cout << ci_buf << std::endl;
@@ -157,7 +151,7 @@ int main(int argc, char *argv[])
 
         auto level = bmg.levels.get<five_pt>(0);
         auto ci = level.P;
-        std::cout << ci.len(0) << " " << ci.len(1) << " " << ci.len(2) << std::endl;
+        // std::cout << ci.len(0) << " " << ci.len(1) << " " << ci.len(2) << std::endl;
 
 
 	MPI_Barrier(MPI_COMM_WORLD); // synchronize before timing solve
@@ -166,7 +160,7 @@ int main(int argc, char *argv[])
         // auto level = bmg.levels.get<five_pt>(0);
         // auto ci = level.P;
         ci = level.P;
-        std::cout << ci.len(0) << " " << ci.len(1) << " " << ci.len(2) << std::endl;
+        // std::cout << ci.len(0) << " " << ci.len(1) << " " << ci.len(2) << std::endl;
 
 
 	// mpi::grid_func exact_sol(sol.grid_ptr());

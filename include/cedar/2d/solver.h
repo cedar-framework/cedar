@@ -93,6 +93,11 @@ solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 				len_t nxc = (nx-1)/2. + 1;
 				len_t nyc = (ny-1)/2. + 1;
 
+                                if (params->use_gpu) {
+                                    std::cerr << "Ensuring fop is on GPU" << std::endl;
+                                    fop.ensure_gpu();
+                                }
+
 				this->levels.add(sman.get<mempool>(), nxc, nyc);
 
 				log::debug << "Created coarse grid with dimensions: " << nxc
@@ -105,6 +110,11 @@ solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 				len_t nyc = (ny-1)/2. + 1;
 
 				this->levels.add(sman.get<mempool>(), nxc, nyc);
+
+                                if (params->use_gpu) {
+                                    std::cerr << "Ensuring fop is on GPU" << std::endl;
+                                    fop.ensure_gpu();
+                                }
 
 				log::debug << "Created coarse grid with dimensions: " << nxc
 				           << ", " << nyc << std::endl;

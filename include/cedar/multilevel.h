@@ -9,6 +9,11 @@
 #include <cedar/cycle/fcycle.h>
 #include <cedar/multilevel_settings.h>
 
+#include <ftl/Base.hpp>
+#include <ftl/Runtime.hpp>
+#include <ftl/Device.hpp>
+#include <ftl/KernelRegistry.hpp>
+
 namespace cedar {
 
 
@@ -242,6 +247,17 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 
 	void setup(stencil_op<fsten> & fop)
 	{
+            if (conf->get("gpu", false)) {
+                ftl::device::autodetect();
+                log::status << "Running on " << ftl::device::get_name() << std::endl;
+
+                /* Load kernels */
+                if (!ftl::load_kernels(true)) {
+                    throw std::runtime_error("FTL: Failed to load kernels.");
+                }
+                log::status << "Loaded and compiled all GPU kernels" << std::endl;
+            }
+
 		this->cycle->set_kernels(this->kman);
 		auto num_levels = compute_num_levels(fop);
 		auto nlevels_conf = settings.num_levels;

@@ -5,6 +5,10 @@
 #include <cedar/2d/types.h>
 #include <cedar/2d/ftn/BMG_parameters_c.h>
 
+using real_t = cedar::real_t;
+using len_t = cedar::len_t;
+#include <src/2d/ftn/BMG2_SymStd_SETUP_ITLI_ex.f90.hpp>
+
 extern "C" {
 	using namespace cedar;
 	void BMG2_SymStd_SETUP_ITLI_ex(real_t *so, real_t *soc, real_t *ci,
@@ -56,8 +60,21 @@ class galerkin : public kernels::coarsen_op<stypes>
 
 		BMG_get_bc(params->per_mask(), &ipn);
 
-		BMG2_SymStd_SETUP_ITLI_ex(fopd.data(), cop.data(), Pd.data(),
-		                          iif, jjf, iic, jjc, ifd, nstencil, ipn);
+                if (Pd.has_gpu() || fopd.has_gpu() || cop.has_gpu()) {
+                    fopd.ensure_gpu();
+                    cop.ensure_gpu();
+                    Pd.ensure_gpu();
+
+                    BMG2_SymStd_SETUP_ITLI_ex<ftl::device::GPU>
+                        (fopd.to_buffer(), cop.to_buffer(), Pd.to_buffer(), iif, jjf, iic, jjc, ifd, nstencil, ipn);
+                } else {
+                    fopd.ensure_cpu();
+                    cop.ensure_cpu();
+                    Pd.ensure_cpu();
+
+                    BMG2_SymStd_SETUP_ITLI_ex(fopd.data(), cop.data(), Pd.data(),
+                                              iif, jjf, iic, jjc, ifd, nstencil, ipn);
+                }
 	}
 
 

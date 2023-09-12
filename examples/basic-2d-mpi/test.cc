@@ -96,10 +96,10 @@ static void set_solution(cedar::cdr2::mpi::grid_func & q) {
 
 template <typename dtype, unsigned short ND>
 ftl::Buffer<dtype> to_buffer(cedar::array<dtype, ND>& array) {
-    std::vector<int32_t> shape(ND);
+    std::vector<uint32_t> shape(ND);
 
     for (std::size_t i = 0; i < ND; ++i) {
-        const int32_t dim = array.len(i);
+        const uint32_t dim = array.len(i);
         shape[i] = dim;
     }
 
@@ -111,10 +111,10 @@ ftl::Buffer<dtype> to_buffer(cedar::array<dtype, ND>& array) {
 
 template <typename len_t, typename dtype, unsigned short ND>
 ftl::Buffer<dtype> to_buffer(cedar::aarray<len_t, dtype, ND>& array) {
-    std::vector<int32_t> shape(ND);
+    std::vector<uint32_t> shape(ND);
 
     for (std::size_t i = 0; i < ND; ++i) {
-        const int32_t dim = array.len(i);
+        const uint32_t dim = array.len(i);
         shape[i] = dim;
     }
 
@@ -126,7 +126,7 @@ ftl::Buffer<dtype> to_buffer(cedar::aarray<len_t, dtype, ND>& array) {
 
 template <typename stencil_type>
 ftl::Buffer<real_t> so_to_buffer(cedar::cdr2::mpi::stencil_op<stencil_type>& array) {
-    std::vector<int32_t> shape = {array.len(0) + 1, array.len(1) + 1, array.len(2)};
+    std::vector<uint32_t> shape = {array.len(0) + 1, array.len(1) + 1, array.len(2)};
     ftl::Buffer<real_t> buf(array.data(), shape);
 
     return buf;

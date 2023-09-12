@@ -51,6 +51,27 @@ public:
 
 	aarray() {};
 
+    // aarray(const aarray<len_type, data_type, ND>& other):
+    //     base_buffer(other.base_buffer.get_numel()) {
+
+    //     data_type* host_ptr = other.base_buffer.get_host_impl()->get_host_pointer();
+    //     base_buffer.set_data(host_ptr, host_ptr + other.flat_len);
+
+    //     reshape_array(other.extents);
+    //     flat_len = other.flat_len;q
+    // }
+
+    // aarray& operator=(const aarray<len_type, data_type, ND>& other) {
+    //     base_buffer.resize(other.base_buffer.get_numel());
+    //     data_type* host_ptr = other.base_buffer.get_host_impl()->get_host_pointer();
+    //     base_buffer.set_data(host_ptr, host_ptr + other.flat_len);
+
+    //     reshape_array(other.extents);
+    //     flat_len = other.flat_len;
+
+    //     return *this;
+    // }
+
         template <typename... T> aarray(data_type *ext, T... args)
 	{
 		reshape(ext, std::forward<decltype(args)>(args)...);
@@ -78,6 +99,26 @@ public:
 		reshape(std::forward<decltype(args)>(args)...);
 	}
 
+    void reshape_array(const std::array<len_type, ND>& new_extents) {
+		len_type len = 1;
+		for (unsigned short i = 0; i < ND; i++) {
+                    extents[i] = new_extents[i];
+                    len *= extents[i];
+                }
+                base_buffer.resize(len);
+		flat_len = len;
+		base_ptr = base_buffer.data();
+
+		strides[0] = 1;
+		for (unsigned short i = 1; i < ND; i++) {
+			strides[i] = 1;
+			for (unsigned short j = 0; j < i; j++) {
+				strides[i] *= extents[j];
+			}
+
+		}
+	}
+
 	template <typename... T> void reshape(T... args)
 	{
 		unpack_extents(std::forward<decltype(args)>(args)...);
@@ -101,13 +142,15 @@ public:
 
 	template <typename... T> void reshape(data_type *ext, T... args)
 	{
-		base_ptr = ext;
 		unpack_extents(std::forward<decltype(args)>(args)...);
 		len_type len = 1;
 		for (unsigned short i = 0; i < ND; i++)
 			len *= extents[i];
 
 		flat_len = len;
+                base_buffer.set_ext_host_data(ext, flat_len);
+                base_ptr = base_buffer.data();
+
 		strides[0] = 1;
 		for (unsigned short i = 1; i < ND; i++) {
 			strides[i] = 1;
@@ -215,6 +258,8 @@ public:
 	{
 		for (len_type i = 0; i < flat_len; i++)
 			base_ptr[i] = v;
+
+                base_buffer.mark_host_dirty();
 	}
 
 
@@ -222,14 +267,63 @@ public:
 	{
 		for (len_type i = 0; i < flat_len; i++)
 			base_ptr[i] *= scalar;
+
+                base_buffer.mark_host_dirty();
 	}
 
-	data_type * data() { return base_ptr; }
+	data_type * data() {
+            base_buffer.dev_to_host();
+            return base_ptr;
+        }
 
-    operator ftl::Buffer<data_type, len_type>() {
+    ftl::Buffer<data_type, len_type> to_buffer() const {
         ftl::Buffer<data_type, len_type> buf(base_buffer);
         buf.reshape(std::vector<len_t>(extents.cbegin(), extents.cend()));
         return buf;
+    }
+
+    operator ftl::Buffer<data_type, len_type>() const {
+        return to_buffer();
+    }
+
+    bool has_cpu() const {
+        return base_buffer.has_cpu();
+    }
+
+    bool has_gpu() const {
+        return base_buffer.has_gpu();
+    }
+
+    /**
+     * Ensure that data is up-to-date on CPU, allocating buffers
+     * and transferring data from GPU if necessary.
+     */
+    void ensure_cpu() {
+        base_buffer.dev_to_host();
+    }
+
+    /**
+     * Ensure that data is up-to-date on GPU, allocating buffers
+     * and transferring data from GPU if necessary.
+     */
+    void ensure_gpu() {
+        base_buffer.host_to_dev();
+    }
+
+    void mark_cpu_dirty(bool dirty) {
+        base_buffer.mark_host_dirty(dirty);
+    }
+
+    void mark_gpu_dirty(bool dirty) {
+        base_buffer.mark_device_dirty(dirty);
+    }
+
+    bool is_cpu_dirty() const {
+        return base_buffer.is_host_dirty();
+    }
+
+    bool is_gpu_dirty() const {
+        return base_buffer.is_dev_dirty();
     }
 };
 

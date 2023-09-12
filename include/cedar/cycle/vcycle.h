@@ -101,7 +101,7 @@ public:
 		timer_up();
 
 		timer_begin("interp-add");
-		kman->template run<interp_add>(levels.get(lvl+1).P, coarse_x, level.res, x);
+		kman->template run<interp_add>(levels.get(lvl+1).P, coarse_x, res, x);
 		timer_end("interp-add");
 
 		timer_begin("relaxation");

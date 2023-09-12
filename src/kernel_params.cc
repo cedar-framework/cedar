@@ -96,6 +96,8 @@ std::shared_ptr<kernel_params> build_kernel_params(config & conf)
 	else
 		log::error << "invalid halo-exchange: " << halo_exchange_name << std::endl;
 
+        params->use_gpu = conf.get<bool>("gpu", false);
+
 	return params;
 }
 

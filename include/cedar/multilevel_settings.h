@@ -47,6 +47,7 @@ namespace cedar {
 		int min_coarse;
 
 		redist_settings rsettings;
+            bool use_gpu;
 	};
 
 }

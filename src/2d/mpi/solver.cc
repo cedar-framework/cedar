@@ -145,6 +145,28 @@ void solver<fsten>::setup_space(std::size_t nlevels)
 		auto & halo_service = kman->services().template get<halo_exchange>();
 		halo_service.run(sop);
 	}
+
+        /* Allocate GPU memory for everything if we have a device */
+        if (this->settings.use_gpu) {
+            std::cerr << "Moving everything over to GPU" << std::endl;
+            for (std::size_t i = 0; i < this->nlevels(); i++) {
+                if (i == 0) {
+                    auto& level = this->levels.template get<fsten>(i);
+                    level.A.ensure_gpu();
+                    level.P.ensure_gpu();
+                    level.x.ensure_gpu();
+                    level.res.ensure_gpu();
+                    level.b.ensure_gpu();
+                } else {
+                    auto& level = this->levels.get(i);
+                    level.A.ensure_gpu();
+                    level.P.ensure_gpu();
+                    level.x.ensure_gpu();
+                    level.res.ensure_gpu();
+                    level.b.ensure_gpu();
+                }
+            }
+        }
 }
 template void solver<five_pt>::setup_space(std::size_t nlevels);
 template void solver<nine_pt>::setup_space(std::size_t nlevels);

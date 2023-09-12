@@ -31,6 +31,7 @@ namespace cedar
 		ml_relax_params ml_relax;
 		std::shared_ptr<config> plane_config;
 		bool plane_agg;
+            bool use_gpu;
 
 		int per_mask() const {
 			int mask = 0;
