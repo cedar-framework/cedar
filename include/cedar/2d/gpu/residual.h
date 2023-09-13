@@ -62,17 +62,23 @@ class residual_f90 : public kernels::residual<stypes>
 
 		int32_t fcomm = MPI_Comm_c2f(topo.comm);
 
-                Ad.ensure_cpu();
-                xd.ensure_cpu();
-                bd.ensure_cpu();
-                r.ensure_cpu();
+                Ad.ensure_gpu();
+                xd.ensure_gpu();
+                bd.ensure_gpu();
+                r.ensure_gpu();
 
 		MPI_BMG2_SymStd_residual<ftl::device::GPU>(
                     k, kf, nog, Ad, bd, xd, r, r.len(0), r.len(1),
                     ifd, nstencil, irelax, irelax_sym, fcomm);
 		services->get<halo_exchange>().run(r);
 
-                r.mark_cpu_dirty(true);
+                //r.mark_cpu_dirty(true);
+
+                // std::cerr << "residual" << std::endl;
+                // std::cerr << "has cpu: " << r.has_cpu() << std::endl;
+                // std::cerr << "has gpu: " << r.has_gpu() << std::endl;
+                // std::cerr << "cpu ptr: " << r.to_flat_buffer().get_host_impl()->get_host_pointer() << std::endl;
+                // std::cerr << "dev ptr: " << r.to_flat_buffer().get_dev_impl().get() << std::endl;
 
 		// MPI_BMG2_SymStd_residual(k, kf, nog,
 		//                          Ad.data(), bd.data(), xd.data(), r.data(),
@@ -85,6 +91,7 @@ class residual_f90 : public kernels::residual<stypes>
                 std::cerr << " == Residual == " << std::endl;
                 std::cerr << "Soln: " << std::endl << xb << std::endl;
                 std::cerr << "Residual: " << std::endl << rb << std::endl;
+                std::cerr << "Res ptr: " << r.data() << std::endl;
                 std::cerr << " =================== " << std::endl;
 	}
 };

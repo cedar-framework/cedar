@@ -1,6 +1,8 @@
 #include <cedar/2d/ftn/BMG_parameters_c.h>
 #include <cedar/2d/gpu/restrict.h>
 
+#include <typeinfo>
+
 using real_t = cedar::real_t;
 using len_t = cedar::len_t;
 
@@ -71,9 +73,22 @@ namespace cedar::cdr2::gpu::mpi {
         // conditionally zero periodic entries
         update_periodic(fined, fine_topo, coarse_topo, params->periodic);
 
-        fined.ensure_cpu();
-        coarse.ensure_cpu();
-        P.ensure_cpu();
+        fined.ensure_gpu();
+        coarse.ensure_gpu();
+        P.ensure_gpu();
+
+        // std::cerr << "coarse residual" << std::endl;
+        // std::cerr << "has cpu: " << coarse.has_cpu() << std::endl;
+        // std::cerr << "has gpu: " << coarse.has_gpu() << std::endl;
+        // std::cerr << "cpu ptr: " << coarse.to_flat_buffer().get_host_impl()->get_host_pointer() << std::endl;
+        // std::cerr << "dev ptr: " << coarse.to_flat_buffer().get_dev_impl().get() << std::endl;
+
+        auto coarseb = coarse.to_buffer();
+        std::cerr << " == Restriction == " << std::endl;
+        std::cerr << "Coarse residual before restriction: " << std::endl << coarseb << std::endl;
+        std::cerr << coarse.to_flat_buffer().tostr_unformatted() << std::endl;
+
+        std::cerr << "Host implementation type: " << typeid(*coarse.to_flat_buffer().get_host_impl().get()).name() << std::endl;
 
         MPI_BMG2_SymStd_restrict<ftl::device::GPU>(
             kf, kc, nog, fined, coarse, P,
@@ -81,13 +96,21 @@ namespace cedar::cdr2::gpu::mpi {
             coarse.len(0), coarse.len(1),
             fine_topo.is(0), fine_topo.is(1));
 
-        coarse.mark_cpu_dirty(true);
+        // MPI_BMG2_SymStd_restrict(kf, kc, nog,
+        //                          fined.data(), coarse.data(), P.data(),
+        //                          fined.len(0), fined.len(1),
+        //                          coarse.len(0), coarse.len(1),
+        //                          fine_topo.is(0), fine_topo.is(1));
+
+        // coarse.mark_cpu_dirty(true);
 
         auto fineb = fined.to_buffer();
-        auto coarseb = coarse.to_buffer();
-        std::cerr << " == Restriction == " << std::endl;
+        auto Pb = P.to_buffer();
+
         std::cerr << "Residual: " << std::endl << fineb << std::endl;
         std::cerr << "Restricted residual: " << std::endl << coarseb << std::endl;
+        std::cerr << coarse.to_flat_buffer().tostr_unformatted() << std::endl;
+        std::cerr << coarse.data() << std::endl;
         std::cerr << " ================= " << std::endl;
     }
 

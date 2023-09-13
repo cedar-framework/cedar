@@ -58,7 +58,7 @@ public:
     //     base_buffer.set_data(host_ptr, host_ptr + other.flat_len);
 
     //     reshape_array(other.extents);
-    //     flat_len = other.flat_len;q
+    //     flat_len = other.flat_len;
     // }
 
     // aarray& operator=(const aarray<len_type, data_type, ND>& other) {
@@ -275,6 +275,14 @@ public:
             base_buffer.dev_to_host();
             return base_ptr;
         }
+
+    ftl::FlatBuffer<data_type, len_type> to_flat_buffer() const {
+        return base_buffer;
+    }
+
+    ftl::FlatBuffer<data_type, len_type>& to_flat_buffer() {
+        return base_buffer;
+    }
 
     ftl::Buffer<data_type, len_type> to_buffer() const {
         ftl::Buffer<data_type, len_type> buf(base_buffer);

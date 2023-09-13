@@ -76,6 +76,11 @@ class galerkin : public kernels::coarsen_op<stypes>
 
                     cop.mark_cpu_dirty(true);
 
+                // std::cerr << "coarse operator" << std::endl;
+                // std::cerr << "has cpu: " << cop.has_cpu() << std::endl;
+                // std::cerr << "has gpu: " << cop.has_gpu() << std::endl;
+                // std::cerr << "cpu ptr: " << cop.to_flat_buffer().get_host_impl()->get_host_pointer() << std::endl;
+                // std::cerr << "dev ptr: " << cop.to_flat_buffer().get_dev_impl().get() << std::endl;
 
                 auto fopb = fopd.to_buffer();
                 fopb.reshape({ fopb.len(0) + 1, fopb.len(1) + 1, fopb.len(2) });
@@ -85,7 +90,11 @@ class galerkin : public kernels::coarsen_op<stypes>
 
                 std::cerr << " == Galerkin product == " << std::endl;
                 std::cerr << "Fine operator: " << std::endl << fopb << std::endl;
+                std::cerr << "Fine ptr: " << fopb.data() << std::endl;
+                std::cerr << "Fine obj ptr: " << (&fop) << std::endl;
                 std::cerr << "Coarse operator: " << std::endl << copb << std::endl;
+                std::cerr << "Coarse ptr: " << copb.data() << std::endl;
+                std::cerr << "Coarse obj ptr: " << (&cop) << std::endl;
                 std::cerr << " ====================== " << std::endl;
 	}
 

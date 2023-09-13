@@ -87,11 +87,11 @@
       ENDIF
 
 
-      !!#LOOPY_START(assume="nxc>=3")
+      !#LOOPY_START
       DO jc=2, Nyc-1
          DO ic=2, Nxc-1
-            j = jstart + (jc-1)*2
             i = istart + (ic-1)*2
+            j = jstart + (jc-1)*2
             QC(ic,jc) = Ci(ic,jc,LNE)*Q(i-1,j-1)&
      &                + Ci(ic,jc,LA)*Q(i,j-1)&
      &                + Ci(ic+1,jc,LNW)*Q(i+1,j-1)&
@@ -103,7 +103,7 @@
      &                + Ci(ic+1,jc+1,LSW)*Q(i+1,j+1)
           ENDDO
        ENDDO
-      !!#LOOPY_END
+      !#LOOPY_END
 
       ! Note: no update of the ghost bdry of QC is necessary
 

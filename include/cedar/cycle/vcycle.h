@@ -74,6 +74,7 @@ public:
 		auto & coarse_b = levels.get(lvl+1).b;
 		auto & coarse_x = levels.get(lvl+1).x;
 		timer_begin("restrict");
+
 		kman->template run<restriction>(levels.get(lvl+1).R, res, coarse_b);
 		timer_end("restrict");
 		coarse_x.set(0.0);

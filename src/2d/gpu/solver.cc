@@ -164,6 +164,9 @@ namespace cedar::cdr2::gpu::mpi {
                 level.x.ensure_gpu();
                 level.res.ensure_gpu();
                 level.b.ensure_gpu();
+                auto resb = level.res.to_flat_buffer();
+                std::cerr << level.res.data() << std::endl;
+                std::cerr << "res: " << resb.tostr_unformatted() << std::endl;
             } else {
                 auto& level = this->levels.get(i);
                 level.A.ensure_gpu();
@@ -171,6 +174,9 @@ namespace cedar::cdr2::gpu::mpi {
                 level.x.ensure_gpu();
                 level.res.ensure_gpu();
                 level.b.ensure_gpu();
+                auto resb = level.res.to_flat_buffer();
+                std::cerr << level.res.data() << std::endl;
+                std::cerr << "res: " << resb.tostr_unformatted() << std::endl;
             }
         }
     }

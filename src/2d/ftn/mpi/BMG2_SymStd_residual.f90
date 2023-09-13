@@ -91,7 +91,7 @@
          !
          !  9-point stencil
          !
-
+         !#LOOPY_START
          DO J=2,J1
             DO I=2,I1
                RES(I,J) = QF(I,J)&
@@ -106,12 +106,13 @@
      &                  - SO(I  ,J  ,KO )*Q(I  ,J)
             ENDDO
          ENDDO
-
+         !#LOOPY_END
          !
       ELSE
          !
          !  5-point stencil
          !
+         !#LOOPY_START
          DO J=2,J1
             DO I=2,I1
                RES(I,J) = QF(I,J)&
@@ -122,7 +123,7 @@
      &                  - SO(I  ,J  ,KO)*Q(I  ,J)
             ENDDO
          ENDDO
-         !
+         !#LOOPY_END
       ENDIF
 
 

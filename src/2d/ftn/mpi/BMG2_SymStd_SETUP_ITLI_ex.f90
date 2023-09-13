@@ -122,13 +122,12 @@
 !******************************
 !     begin computation of grid kc difference operator when kf differenc
 !     operator is nine point unless kc. ge. NOG
-!
-         J=JSTART
+         !
+         !#LOOPY_START
          DO JC=2,JJC1
-            J=J+2
-            I=ISTART
             DO IC=2,IIC1
-               I=I+2
+               i = jstart + (ic - 1) * 2
+               j = jstart + (jc - 1) * 2
                CO = SO(I,J+1,KNW)*CI(IC,JC+1,LSW)&
      &              + SO(I,J,KW)*CI(IC,JC,LL)&
      &              + SO(I,J,KSW)*CI(IC,JC,LNW)
@@ -194,12 +193,12 @@
 
             ENDDO
          ENDDO
-         J=JSTART
+         !#LOOPY_END
+         !#LOOPY_START
          DO JC=2,JJC1
-            J=J+2
-            I=ISTART
             DO IC=2,IIC1
-               I=I+2
+               i = jstart + (ic - 1) * 2
+               j = jstart + (jc - 1) * 2
                CO=SO(I,J,KW)*CI(IC,JC,LR)+SO(I,J+1,KNW)&
      &              *CI(IC,JC+1,LSE)+SO(I,J+1,KS)*CI(IC,JC+1,LB)&
      &              +SO(I+1,J+1,KSW)*CI(IC+1,JC+1,LSW)+SO(I+1,J,KW)&
@@ -240,6 +239,7 @@
      &              -CI(IC,JC,LA)*CS-CI(IC+1,JC,LNW)*CSE
             ENDDO
          ENDDO
+         !#LOOPY_END
 
 
 !     end of computation of kc difference operator when kf difference
@@ -251,13 +251,12 @@
 !******************************
 !   begin computation of kc difference operator when kf difference
 !   operator is five point unless kc.ge.NOG
-!
-         J=JSTART
+         !
+         !#LOOPY_START
          DO JC=2,JJC1
-            J=J+2
-            I=ISTART
             DO IC=2,IIC1
-               I=I+2
+               i = jstart + (ic - 1) * 2
+               j = jstart + (jc - 1) * 2
                CO=SO(I,J,KW)*CI(IC,JC,LL)
                CS=SO(I,J-1,KW)*CI(IC,JC,LNW)
                CSW=-SO(I-1,J-1,KO)*CI(IC,JC,LNW)+SO(I-1,J-1,KW)&
@@ -326,7 +325,7 @@
      &              -CI(IC,JC,LA)*CS-CI(IC+1,JC,LNW)*CSE
             ENDDO
          ENDDO
-
+         !#LOOPY_END
 
       ENDIF
 

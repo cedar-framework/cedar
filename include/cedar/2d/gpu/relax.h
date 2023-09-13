@@ -114,25 +114,29 @@ class rbgs : public kernels::point_relax<stypes>
                 auto xb = x.to_buffer();
 
                 std::cerr << " == Relaxation == " << std::endl;
-                // std::cerr << "Operator: " << sob << std::endl;
-                // std::cerr << "SOR: " << std::endl << sorb << std::endl;q
                 std::cerr << "RHS: " << std::endl << bb << std::endl;
                 std::cerr << "Pre-relaxation solution: " << std::endl << xb << std::endl;
-
-		// MPI_BMG2_SymStd_relax_GS<ftl::device::GPU>(
-                //     k, sod, bd, x, sord, so.len(0), so.len(1), kf, ifd, nstencil, BMG_RELAX_SYM, updown, topo.is(0), topo.is(1), halof);
 
                 sod.ensure_cpu();
                 x.ensure_cpu();
                 bd.ensure_cpu();
                 sord.ensure_cpu();
 
-		MPI_BMG2_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
-		                         so.len(0), so.len(1), kf, ifd, nstencil, BMG_RELAX_SYM,
-		                         updown, topo.is(0), topo.is(1),
-		                         this->services->fortran_handle<halo_exchange>());
+		MPI_BMG2_SymStd_relax_GS<ftl::device::GPU>(
+                    k, sod, bd, x, sord, so.len(0), so.len(1), kf, ifd, nstencil, BMG_RELAX_SYM, updown, topo.is(0), topo.is(1), halof);
 
-                x.mark_cpu_dirty(true);
+		// MPI_BMG2_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
+		//                          so.len(0), so.len(1), kf, ifd, nstencil, BMG_RELAX_SYM,
+		//                          updown, topo.is(0), topo.is(1),
+		//                          this->services->fortran_handle<halo_exchange>());
+
+                // x.mark_cpu_dirty(true);
+
+                // std::cerr << "solution" << std::endl;
+                // std::cerr << "has cpu: " << x.has_cpu() << std::endl;
+                // std::cerr << "has gpu: " << x.has_gpu() << std::endl;
+                // std::cerr << "cpu ptr: " << x.to_flat_buffer().get_host_impl()->get_host_pointer() << std::endl;
+                // std::cerr << "dev ptr: " << x.to_flat_buffer().get_dev_impl().get() << std::endl;
 
                 std::cerr << "Post-relaxation solution: " << std::endl << xb << std::endl;
                 std::cerr << " ================ " << std::endl;

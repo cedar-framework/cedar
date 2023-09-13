@@ -73,9 +73,9 @@ class setup_interp_f90 : public kernels::setup_interp<stypes>
                 auto igrd_vec = topo.get_igrd();
                 ftl::FlatBuffer<len_t, len_t> igrd(igrd_vec->data(), igrd_vec->size());
 
-                fopd.ensure_cpu();
-                const_cast<stencil_op<nine_pt>&>(cop).ensure_cpu();
-                P.ensure_cpu();
+                fopd.ensure_gpu();
+                const_cast<stencil_op<nine_pt>&>(cop).ensure_gpu();
+                P.ensure_gpu();
 
 		// MPI_BMG2_SymStd_SETUP_interp_OI(kf, kc, fopd.data(), P.data(),
 		//                                 fop.len(0), fop.len(1), cop.len(0), cop.len(1),
@@ -87,8 +87,11 @@ class setup_interp_f90 : public kernels::setup_interp<stypes>
                     fop.len(0), fop.len(1), cop.len(0), cop.len(1),
                     nog, nog, igrd, ifd, nstencil, jpn, halof);
 
-                P.mark_cpu_dirty(true);
-
+                // std::cerr << "interpolation operator" << std::endl;
+                // std::cerr << "has cpu: " << P.has_cpu() << std::endl;
+                // std::cerr << "has gpu: " << P.has_gpu() << std::endl;
+                // std::cerr << "cpu ptr: " << P.to_flat_buffer().get_host_impl()->get_host_pointer() << std::endl;
+                // std::cerr << "dev ptr: " << P.to_flat_buffer().get_dev_impl().get() << std::endl;
 
                 auto Pb = P.to_buffer();
                 std::cerr << " == Form Interpolation == " << std::endl;
