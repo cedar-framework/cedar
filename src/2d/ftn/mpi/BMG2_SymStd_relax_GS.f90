@@ -68,7 +68,7 @@
 ! ----------------------------
 !     Local Declarations
 !
-      INTEGER I, I1, I2, IBEG, J, J1, J2
+      INTEGER I, I1, I2, IBEG, J, J1, J2, ioff, joff
       INTEGER IB(4), JB(4), pts
 
       INTEGER ptstart, ptend, ptstride, ILSTART
@@ -111,8 +111,11 @@
 
 
          DO pts=ptstart,ptend,ptstride
-            DO  J=JB(pts),J1,2
-               DO  I=IB(pts),I1,2
+            ioff = ib(pts)
+            joff = jb(pts)
+            !#LOOPY_START(name="gs_def_9pt")
+            DO  J=ioff,J1,2
+               DO  I=joff,I1,2
                   Q(I,J)=(QF(I,J)+SO(I,J,KW)*Q(I-1,J)+SO(I+1,J,KW)&
      &                 *Q(I+1,J)+SO(I,J,KS)*Q(I,J-1)+SO(I,J+1,KS)&
      &                 *Q(I,J+1)+SO(I,J,KSW)*Q(I-1,J-1)&
@@ -122,7 +125,7 @@
 
                ENDDO
             ENDDO
-
+            !#LOOPY_END
             call halo_exchange(K, Q, halof)
 
          ENDDO
@@ -152,22 +155,25 @@
 
 
          DO pts=ptstart, ptend, ptstride
-!         DO pts=0,1,1
+            !#LOOPY_START(name="gs_def_5pt")
             DO j = 2, j1
+               DO  I=2,I1,2
 
-               IF (mod(pts+j,2).eq.0) THEN
-                  IBEG = ILSTART
-               ELSE
-                  IBEG = mod(ILSTART+1,2)+2
-               ENDIF
+                  IF (mod(pts+j,2).eq.0) THEN
+                     ioff = ILSTART - 2
+                  ENDIF
+                  if (mod(pts+j,2).ne.0) THEN
+                     ioff = mod(ILSTART+1,2)
+                  ENDIF
 
-               DO  I=IBEG,I1,2
-                  Q(I,J)=(QF(I,J)+SO(I,J,KW)*Q(I-1,J)+SO(I+1,J,KW)&
-     &                 *Q(I+1,J)+SO(I,J,KS)*Q(I,J-1)+SO(I,J+1,KS)&
-     &                 *Q(I,J+1))*SOR(I,J,MSOR)
+                  if ((i + ioff) .le. i1) then
+                     Q(I + ioff,J)=(QF(I + ioff,J)+SO(I + ioff,J,KW)*Q(I-1 + ioff,J)+SO(I+1 + ioff,J,KW)&
+                          & *Q(I+1 + ioff,J)+SO(I + ioff,J,KS)*Q(I + ioff,J-1)+SO(I + ioff,J+1,KS)&
+                          & *Q(I + ioff,J+1))*SOR(I + ioff,J,MSOR)
+                  end if
                ENDDO
             ENDDO
-
+            !#LOOPY_END
             call halo_exchange(K, Q, halof)
 
          ENDDO

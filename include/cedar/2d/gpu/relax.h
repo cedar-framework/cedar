@@ -117,10 +117,10 @@ class rbgs : public kernels::point_relax<stypes>
                 std::cerr << "RHS: " << std::endl << bb << std::endl;
                 std::cerr << "Pre-relaxation solution: " << std::endl << xb << std::endl;
 
-                sod.ensure_cpu();
-                x.ensure_cpu();
-                bd.ensure_cpu();
-                sord.ensure_cpu();
+                sod.ensure_gpu();
+                x.ensure_gpu();
+                bd.ensure_gpu();
+                sord.ensure_gpu();
 
 		MPI_BMG2_SymStd_relax_GS<ftl::device::GPU>(
                     k, sod, bd, x, sord, so.len(0), so.len(1), kf, ifd, nstencil, BMG_RELAX_SYM, updown, topo.is(0), topo.is(1), halof);

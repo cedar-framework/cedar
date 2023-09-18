@@ -83,7 +83,7 @@ namespace cedar::cdr2::gpu::mpi {
 
         auto kernels = this->get_kernels();
         this->coarse_solver = [&, kernels](grid_func &x, const grid_func & b) {
-            for (int i = 0; i < 1; ++i) {
+            for (int i = 0; i < 10; ++i) {
                 //kernels->template run<point_relax>(cop, x, b, copr, cycle::Dir::DOWN);
                 kernels->template run<point_relax>(level.A, x, b, level.SOR[0], cycle::Dir::DOWN);
             }
