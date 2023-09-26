@@ -14,45 +14,10 @@ extern "C" {
 	                              len_t iGs, len_t jGs);
 }
 
-
-template <typename T>
-static void print_cuda_buffer(ftl::Buffer<T> buf) {
-    const long numel = buf.get_numel();
-    const long bytes = sizeof(T) * numel;
-    auto cuda_buffer =
-        std::dynamic_pointer_cast<ftl::CUDABaseBuffer<double, unsigned int>>(
-            buf.get_dev_impl());
-    assert(cuda_buffer != nullptr);
-    double* device_pointer = cuda_buffer->get_device_pointer();
-    std::unique_ptr<double[]> host_buffer = std::make_unique<double[]>(numel);
-
-    cudaMemcpy(host_buffer.get(), device_pointer, bytes, cudaMemcpyDeviceToHost);
-
-    for (std::size_t i = 0; i < numel; ++i) {
-        std::cerr << host_buffer[i] << " ";
-    }
-    std::cerr << std::endl;
-}
-
-template <typename T>
-static void print_host_buffer(ftl::Buffer<T> buf) {
-    const long numel = buf.get_numel();
-    const long bytes = sizeof(T) * numel;
-    auto host_buffer =
-        std::dynamic_pointer_cast<ftl::BaseHostBufferType<double, unsigned int>>(
-            buf.get_host_impl());
-    assert(host_buffer != nullptr);
-    double* host_pointer = host_buffer->get_host_pointer();
-
-    for (std::size_t i = 0; i < numel; ++i) {
-        std::cerr << host_pointer[i] << " ";
-    }
-    std::cerr << std::endl;
-}
-
 namespace cedar { namespace cdr2 { namespace mpi {
 
-	void restrict_f90::update_periodic(mpi::grid_func & q,
+        template <typename device>
+	void restrict_f90<device>::update_periodic(mpi::grid_func & q,
 	                            const grid_topo & topof,
 	                            const grid_topo & topoc,
 	                            std::array<bool, 3> periodic)
@@ -60,9 +25,8 @@ namespace cedar { namespace cdr2 { namespace mpi {
 		std::array<len_t, 2> ngf({topof.nglobal(0), topof.nglobal(1)});
 		std::array<len_t, 2> ngc({topoc.nglobal(0), topoc.nglobal(1)});
 
-                q.ensure_cpu();
-
 		if (periodic[0] and ((ngf[0]/2 + 1) != ngc[0])) {
+                    q.ensure_cpu();
 			if (topof.coord(0) == 0) {
 				for (auto j : q.grange(1)) {
 					q(0,j) = 0;
@@ -73,9 +37,11 @@ namespace cedar { namespace cdr2 { namespace mpi {
 					q(q.len(0)-1,j) = 0;
 				}
 			}
+                        q.mark_cpu_dirty(true);
 		}
 
 		if (periodic[1] and ((ngf[1]/2 + 1) != ngc[1])) {
+                    q.ensure_cpu();
 			if (topof.coord(1) == 0) {
 				for (auto i : q.grange(0)) {
 					q(i,0) = 0;
@@ -86,13 +52,20 @@ namespace cedar { namespace cdr2 { namespace mpi {
 					q(i,q.len(1)-1) = 0;
 				}
 			}
+                        q.mark_cpu_dirty(true);
 		}
-
-                q.mark_cpu_dirty(true);
 	}
 
+        template
+        void restrict_f90<cedar::cpu>::update_periodic(
+            mpi::grid_func &, const grid_topo &, const grid_topo &, std::array<bool, 3>);
 
-	void restrict_f90::run(const restrict_op & R,
+        template
+        void restrict_f90<cedar::gpu>::update_periodic(
+            mpi::grid_func &, const grid_topo &, const grid_topo &, std::array<bool, 3>);
+
+        template <typename device>
+	void restrict_f90<device>::run(const restrict_op & R,
                        const grid_func & fine,
                        grid_func & coarse)
 	{
@@ -110,36 +83,31 @@ namespace cedar { namespace cdr2 { namespace mpi {
 		// conditionally zero periodic entries
 		update_periodic(fined, fine_topo, coarse_topo, params->periodic);
 
-                if (fined.has_gpu() || coarse.has_gpu() || P.has_gpu()) {
-                    fined.mark_cpu_dirty(true);
-                    fined.ensure_gpu();
-                    coarse.ensure_gpu();
-                    P.ensure_gpu();
+                fined.template ensure<device>();
+                coarse.template ensure<device>();
+                P.template ensure<device>();
 
-                    MPI_BMG2_SymStd_restrict<ftl::device::GPU>(
+                if (device::is_gpu()) {
+                    MPI_BMG2_SymStd_restrict<cedar::gpu>(
                         kf, kc, nog, fined, coarse, P,
                         fined.len(0), fined.len(1),
                         coarse.len(0), coarse.len(1),
                         fine_topo.is(0), fine_topo.is(1));
-
-                    coarse.ensure_cpu();
-                    std::cerr << "GPU: " << std::endl << coarse << std::endl;
-                } //else {
-                {
-                    fined.ensure_cpu();
-                    coarse.ensure_cpu();
-                    P.ensure_cpu();
-
+                } else {
                     MPI_BMG2_SymStd_restrict(kf, kc, nog,
                                              fined.data(), coarse.data(), P.data(),
                                              fined.len(0), fined.len(1),
                                              coarse.len(0), coarse.len(1),
                                              fine_topo.is(0), fine_topo.is(1));
-
-                    coarse.mark_cpu_dirty(true);
-
-                    std::cerr << "CPU: " << std::endl << coarse << std::endl;
+                    coarse.template mark_dirty<device>();
                 }
 	}
 
+        template
+        void restrict_f90<cedar::cpu>::run(
+            const restrict_op &, const grid_func &, grid_func &);
+
+        template
+        void restrict_f90<cedar::gpu>::run(
+            const restrict_op &, const grid_func &, grid_func &);
 }}}

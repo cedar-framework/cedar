@@ -64,12 +64,18 @@ public:
 		level.presmoother(A, x, b);
 		timer_end("relaxation");
 
+                auto xb = x.to_buffer();
+                std::cerr << "pre relaxation: " << std::endl << xb << std::endl;
+
 		grid_func & res = level.res;
 		timer_begin("residual");
 		kman->template run<residual>(A, x, b, res);
 		timer_end("residual");
 
 		log_residual(lvl, res);
+
+                auto resb = res.to_buffer();
+                std::cerr << "residual" << std::endl << resb << std::endl;
 
 		auto & coarse_b = levels.get(lvl+1).b;
 		auto & coarse_x = levels.get(lvl+1).x;
@@ -78,6 +84,9 @@ public:
 		kman->template run<restriction>(levels.get(lvl+1).R, res, coarse_b);
 		timer_end("restrict");
 		coarse_x.set(0.0);
+
+                auto coarsebb = coarse_b.to_buffer();
+                std::cerr << "coarse b" << std::endl << coarsebb << std::endl;
 
 		timer_down();
 
@@ -100,14 +109,25 @@ public:
 		}
 
 		timer_up();
+                auto coarsexb = coarse_x.to_buffer();
+                std::cerr << "coarse x: " << std::endl << coarsexb << std::endl;
 
 		timer_begin("interp-add");
 		kman->template run<interp_add>(levels.get(lvl+1).P, coarse_x, res, x);
 		timer_end("interp-add");
 
+                auto xb2 = x.to_buffer();
+                std::cerr << "interp-add: " << std::endl << xb2 << std::endl;
+
 		timer_begin("relaxation");
 		level.postsmoother(A, x, b);
 		timer_end("relaxation");
+
+                auto xb3 = x.to_buffer();
+                std::cerr << "post relaxation: " << std::endl << xb3 << std::endl;
+
+                // auto xb = x.to_buffer();
+                // std::cerr << xb << std::endl;
 
 		if (log::info.active()) {
 			kman->template run<residual>(A, x, b, res);

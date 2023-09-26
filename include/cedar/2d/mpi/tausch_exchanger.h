@@ -46,6 +46,8 @@ public:
 		auto lvl = so.grid().level();
 		lvl = nlevels - lvl - 1;
 
+                so.ensure_cpu();
+
 		for (int dir = 0; dir < halo_dir::count; dir++) {
 			if (send_active[index(lvl, dir)]) {
 				for (int sdir = 0; sdir < stencil_ndirs<sten>::value; sdir++)
@@ -59,6 +61,8 @@ public:
 					tausch_so->unpackRecvBuffer(index(lvl,dir), sdir, so.data() + so.index(0,0,sdir));
 			}
 		}
+
+                so.mark_cpu_dirty();
 	}
 	std::unique_ptr<line_pkg> line_data;
 

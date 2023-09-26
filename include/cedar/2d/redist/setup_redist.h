@@ -31,11 +31,15 @@ wrap_redist_ptr(config & conf, kman_ptr kman, std::shared_ptr<mpi::redist_solver
 
 	auto coarse_solver = [=](mpi::grid_func & x, const mpi::grid_func & b)
 	{
-		cg_bmg->solve(x, b);
-		if (params->per_mask()) {
-			auto & halo_service = kman->services().get<halo_exchange>();
-			halo_service.run(x);
-		}
+            auto& bd = const_cast<grid_func&>(b);
+            x.ensure_cpu();
+            bd.ensure_cpu();
+            cg_bmg->solve(x, b);
+            x.mark_cpu_dirty();
+            if (params->per_mask()) {
+                auto & halo_service = kman->services().get<halo_exchange>();
+                halo_service.run(x);
+            }
 	};
 
 	return coarse_solver;

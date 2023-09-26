@@ -29,22 +29,31 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 
 	auto kman = std::make_shared<kernel_manager<klist<stypes, exec_mode::mpi>,
 	                                            stypes>>(params);
-	kman->add<point_relax, rbgs>("system");
+        /* CPU kernels */
+	kman->add<point_relax, rbgs<cedar::cpu>>("system");
 	kman->add<line_relax<relax_dir::x>, lines<relax_dir::x>>("two-level");
 	kman->add<line_relax<relax_dir::y>, lines<relax_dir::y>>("two-level");
 	kman->add<line_relax<relax_dir::x>, ml_line_relax<relax_dir::x>>("n-level");
 	kman->add<line_relax<relax_dir::y>, ml_line_relax<relax_dir::y>>("n-level");
 	kman->add<line_relax<relax_dir::x>, ml_line_relax<relax_dir::x>>("n-level-elim", false);
 	kman->add<line_relax<relax_dir::y>, ml_line_relax<relax_dir::y>>("n-level-elim", false);
-	kman->add<coarsen_op, galerkin>("system");
-	kman->add<interp_add, interp_f90>("system");
-	kman->add<restriction, restrict_f90>("system");
-	kman->add<residual, residual_f90>("system");
-	kman->add<setup_interp, setup_interp_f90>("system");
+	kman->add<coarsen_op, galerkin<cedar::cpu>>("system");
+	kman->add<interp_add, interp_f90<cedar::cpu>>("system");
+	kman->add<restriction, restrict_f90<cedar::cpu>>("system");
+	kman->add<residual, residual_f90<cedar::cpu>>("system");
+	kman->add<setup_interp, setup_interp_f90<cedar::cpu>>("system");
 	kman->add<setup_nog, setup_nog_f90>("system");
-	kman->add<matvec, matvec_f90>("system");
+	kman->add<matvec, matvec_f90<cedar::cpu>>("system");
 
-	kman->set<point_relax>("system");
+        /* GPU kernels */
+        kman->add<point_relax, rbgs<cedar::gpu>>("gpu");
+	kman->add<coarsen_op, galerkin<cedar::gpu>>("gpu");
+	kman->add<interp_add, interp_f90<cedar::gpu>>("gpu");
+	kman->add<restriction, restrict_f90<cedar::gpu>>("gpu");
+	kman->add<residual, residual_f90<cedar::gpu>>("gpu");
+	kman->add<setup_interp, setup_interp_f90<cedar::gpu>>("gpu");
+	kman->add<matvec, matvec_f90<cedar::gpu>>("gpu");
+
 	std::string line_relax_name("two-level");
 	if (params->ml_relax.enabled) {
 		if (params->ml_relax.factorize)
@@ -55,15 +64,19 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	log::debug << "Using <" << line_relax_name << "> for line relaxation" << std::endl;
 	kman->set<line_relax<relax_dir::x>>(line_relax_name);
 	kman->set<line_relax<relax_dir::y>>(line_relax_name);
-	kman->set<coarsen_op>("system");
-	kman->set<interp_add>("system");
-	kman->set<restriction>("system");
-	kman->set<residual>("system");
-	kman->set<setup_interp>("system");
-	kman->set<setup_nog>("system");
-	kman->set<matvec>("system");
 
-	// retister services
+        /* Select between CPU and GPU kernels */
+        const std::string kernels = (params->use_gpu ? "gpu" : "system");
+        kman->set<point_relax>(kernels);
+	kman->set<coarsen_op>(kernels);
+	kman->set<interp_add>(kernels);
+	kman->set<restriction>(kernels);
+	kman->set<residual>(kernels);
+	kman->set<setup_interp>(kernels);
+	kman->set<setup_nog>("system");
+	kman->set<matvec>(kernels);
+
+	// register services
 	auto & services = kman->services();
 	services.add<mempool, malloc_pool>("malloc");
 	services.add<message_passing, mpi_wrapper>("mpi");

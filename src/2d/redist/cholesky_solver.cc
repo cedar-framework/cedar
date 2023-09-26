@@ -35,7 +35,11 @@ cholesky_solver::~cholesky_solver()
 
 void cholesky_solver::cycle(grid_func & x, const grid_func & b)
 {
-	kman->run<solve_cg>(x, b, ABD, bbd);
+    auto& bd = const_cast<grid_func&>(b);
+    x.ensure_cpu();
+    bd.ensure_cpu();
+    kman->run<solve_cg>(x, b, ABD, bbd);
+    x.mark_cpu_dirty();
 }
 
 }}

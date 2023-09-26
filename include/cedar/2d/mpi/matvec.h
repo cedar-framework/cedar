@@ -3,6 +3,11 @@
 
 #include <cedar/2d/mpi/types.h>
 #include <cedar/kernels/matvec.h>
+#include <cedar/device.h>
+
+using real_t = cedar::real_t;
+using len_t = cedar::len_t;
+#include <src/2d/ftn/mpi/BMG2_SymStd_UTILS_matvec.f90.hpp>
 
 extern "C" {
 	using namespace cedar;
@@ -13,6 +18,7 @@ extern "C" {
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
+template <typename device=cedar::cpu>
 class matvec_f90 : public kernels::matvec<stypes>
 {
 	void run(const stencil_op<five_pt> & so,
@@ -46,9 +52,20 @@ class matvec_f90 : public kernels::matvec<stypes>
 		else
 			ifd = 0;
 
-		BMG2_SymStd_UTILS_matvec(k, sod.data(), y.data(),
-		                         xd.data(), so.len(0),
-		                         so.len(1), kf, ifd, nstencil);
+                sod.template ensure<device>();
+                xd.template ensure<device>();
+                y.template ensure<device>();
+
+                if (device::is_gpu()) {
+                    BMG2_SymStd_UTILS_matvec<cedar::gpu>(
+                        k, sod, y, xd, so.len(0), so.len(1), kf, ifd, nstencil);
+                } else {
+                    BMG2_SymStd_UTILS_matvec(k, sod.data(), y.data(),
+                                             xd.data(), so.len(0),
+                                             so.len(1), kf, ifd, nstencil);
+                }
+
+                y.template mark_dirty<device>();
 	}
 };
 

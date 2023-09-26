@@ -3,9 +3,11 @@
 
 #include <cedar/kernels/restrict.h>
 #include <cedar/2d/mpi/types.h>
+#include <cedar/device.h>
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
+template <typename device=cedar::cpu>
 class restrict_f90 : public kernels::restriction<stypes>
 {
 	void run(const restrict_op & R,

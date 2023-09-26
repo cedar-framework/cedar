@@ -6,6 +6,11 @@
 #include <cedar/kernels/setup_interp.h>
 #include <cedar/2d/mpi/kernel_manager.h>
 
+using real_t = cedar::real_t;
+using len_t = cedar::len_t;
+
+#include <src/2d/ftn/mpi/BMG2_SymStd_SETUP_interp_OI.f90.hpp>
+
 extern "C" {
 	using namespace cedar;
 	void MPI_BMG2_SymStd_SETUP_interp_OI(int kf, int kc, real_t *so, real_t *ci,
@@ -18,6 +23,7 @@ extern "C" {
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
+template <typename device=cedar::cpu>
 class interp_f90 : public kernels::interp_add<stypes>
 {
 	void run(const prolong_op & P,
@@ -27,7 +33,7 @@ class interp_f90 : public kernels::interp_add<stypes>
 
 };
 
-
+template <typename device=cedar::cpu>
 class setup_interp_f90 : public kernels::setup_interp<stypes>
 {
 	void run(const stencil_op<five_pt> & fop,
@@ -46,6 +52,7 @@ class setup_interp_f90 : public kernels::setup_interp<stypes>
 		int kf, kc, nog;
 
 		auto & fopd = const_cast<mpi::stencil_op<sten>&>(fop);
+                auto & copd = const_cast<mpi::stencil_op<nine_pt>&>(cop);
 		grid_topo & topo = fopd.grid();
 
 		store_fine_op(fopd, P);
@@ -64,10 +71,27 @@ class setup_interp_f90 : public kernels::setup_interp<stypes>
 
 		BMG_get_bc(params->per_mask(), &jpn);
 
-		MPI_BMG2_SymStd_SETUP_interp_OI(kf, kc, fopd.data(), P.data(),
-		                                fop.len(0), fop.len(1), cop.len(0), cop.len(1),
-		                                nog, nog, topo.IGRD(), ifd, nstencil, jpn,
-		                                services->fortran_handle<mpi::halo_exchange>());
+                void* halof = services->fortran_handle<mpi::halo_exchange>();
+
+                fopd.template ensure<device>();
+                P.template ensure<device>();
+                copd.template ensure<device>();
+
+                if (device::is_gpu()) {
+                    auto igrd_vec = topo.get_igrd();
+                    ftl::FlatBuffer<len_t, len_t> igrd(igrd_vec->data(), igrd_vec->size());
+
+                    MPI_BMG2_SymStd_SETUP_interp_OI<cedar::gpu>(
+                        kf, kc, fopd, P,
+                        fop.len(0), fop.len(1), cop.len(0), cop.len(1),
+                        nog, nog, igrd, ifd, nstencil, jpn, halof);
+                } else {
+                    MPI_BMG2_SymStd_SETUP_interp_OI(
+                        kf, kc, fopd.data(), P.data(),
+                        fop.len(0), fop.len(1), cop.len(0), cop.len(1),
+                        nog, nog, topo.IGRD(), ifd, nstencil, jpn, halof);
+                    copd.template mark_dirty<device>();
+                }
 	}
 
 

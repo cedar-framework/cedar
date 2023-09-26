@@ -41,7 +41,7 @@ namespace cedar {
 		this->maxiter = conf.get<int>("solver.max-iter", 10);
 		this->tol = conf.get<real_t>("solver.tol", 1e-8);
 		this->min_coarse = conf.get<int>("solver.min_coarse", 3);
-                this->use_gpu = conf.get<bool>("gpu", false);
+                this->use_gpu = conf.get<bool>("solver.gpu", false);
 
 		auto cg_solver_str = conf.get<std::string>("solver.cg-solver", "LU");
 		if (cg_solver_str == "LU")

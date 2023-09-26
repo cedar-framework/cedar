@@ -77,11 +77,6 @@ class setup_interp_f90 : public kernels::setup_interp<stypes>
                 const_cast<stencil_op<nine_pt>&>(cop).ensure_gpu();
                 P.ensure_gpu();
 
-		// MPI_BMG2_SymStd_SETUP_interp_OI(kf, kc, fopd.data(), P.data(),
-		//                                 fop.len(0), fop.len(1), cop.len(0), cop.len(1),
-		//                                 nog, nog, topo.IGRD(), ifd, nstencil, jpn,
-		//                                 services->fortran_handle<mpi::halo_exchange>());
-
 		MPI_BMG2_SymStd_SETUP_interp_OI<ftl::device::GPU>(
                     kf, kc, fopd, P,
                     fop.len(0), fop.len(1), cop.len(0), cop.len(1),

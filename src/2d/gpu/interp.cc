@@ -28,9 +28,8 @@ namespace cedar::cdr2::gpu::mpi {
         grid_func & res = const_cast<grid_func&>(residual);
         grid_topo & topo = Pd.grid();
 
-        topo_ptr topof;
-
         ftl::Buffer<real_t, len_t> fop_data;
+        topo_ptr topof;
 
         if (Pd.fine_is_five) {
             nstencil = 3;

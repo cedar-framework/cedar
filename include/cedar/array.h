@@ -6,7 +6,9 @@
 #include <array>
 #include <cedar/types.h>
 #include <cedar/array_base.h>
+
 #include <ftl/Buffer.hpp>
+#include <cedar/device.h>
 
 namespace cedar {
 
@@ -318,12 +320,36 @@ public:
         base_buffer.host_to_dev();
     }
 
-    void mark_cpu_dirty(bool dirty) {
+    template <typename device>
+    typename std::enable_if<std::is_same<device, cedar::cpu>::value>::type
+    ensure() {
+        ensure_cpu();
+    }
+
+    template <typename device>
+    typename std::enable_if<std::is_same<device, cedar::gpu>::value>::type
+    ensure() {
+        ensure_gpu();
+    }
+
+    void mark_cpu_dirty(bool dirty=true) {
         base_buffer.mark_host_dirty(dirty);
     }
 
-    void mark_gpu_dirty(bool dirty) {
+    void mark_gpu_dirty(bool dirty=true) {
         base_buffer.mark_device_dirty(dirty);
+    }
+
+    template <typename device>
+    typename std::enable_if<std::is_same<device, cedar::cpu>::value>::type
+    mark_dirty(bool dirty=true) {
+        mark_cpu_dirty(dirty);
+    }
+
+    template <typename device>
+    typename std::enable_if<std::is_same<device, cedar::gpu>::value>::type
+    mark_dirty(bool dirty=true) {
+        mark_gpu_dirty(dirty);
     }
 
     bool is_cpu_dirty() const {

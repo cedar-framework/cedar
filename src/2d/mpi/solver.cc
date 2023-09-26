@@ -1,4 +1,5 @@
 #include <cedar/2d/mpi/solver.h>
+#include <ftl/Device.hpp>
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
@@ -146,9 +147,18 @@ void solver<fsten>::setup_space(std::size_t nlevels)
 		halo_service.run(sop);
 	}
 
-        /* Allocate GPU memory for everything if we have a device */
+        /* Do GPU setup if it's enabled */
         if (this->settings.use_gpu) {
-            std::cerr << "Moving everything over to GPU" << std::endl;
+            ftl::device::autodetect();
+            log::status << "Running on " << ftl::device::get_name() << std::endl;
+
+            /* Load kernels */
+            if (!ftl::load_kernels(true)) {
+                throw std::runtime_error("FTL layer: Failed to load kernels.");
+            }
+            log::status << "Loaded and compiled all GPU kernels" << std::endl;
+
+            log::status << "Allocating GPU memory" << std::endl;
             for (std::size_t i = 0; i < this->nlevels(); i++) {
                 if (i == 0) {
                     auto& level = this->levels.template get<fsten>(i);

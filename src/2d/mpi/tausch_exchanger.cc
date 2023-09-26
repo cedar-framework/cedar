@@ -347,6 +347,8 @@ void tausch_exchanger::run(mpi::grid_func & f, unsigned short dmask)
 	auto lvl = f.grid().level();
 	lvl = nlevels - lvl - 1;
 
+        f.ensure_cpu();
+
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (send_active[index(lvl, dir)]) {
 			tausch->packSendBuffer(index(lvl,dir), 0, f.data());
@@ -358,6 +360,8 @@ void tausch_exchanger::run(mpi::grid_func & f, unsigned short dmask)
 			tausch->unpackRecvBuffer(index(lvl,dir), 0, f.data());
 		}
 	}
+
+        f.mark_cpu_dirty();
 }
 
 

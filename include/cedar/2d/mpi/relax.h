@@ -3,11 +3,17 @@
 
 #include <cedar/2d/ftn/mpi/BMG_parameters_c.h>
 #include <cedar/2d/ftn/mpi/BMG_workspace_c.h>
+#include <cedar/device.h>
 
 #include <cedar/2d/mpi/types.h>
 #include <cedar/kernels/point_relax.h>
 #include <cedar/kernels/line_relax.h>
 #include <cedar/2d/mpi/kernel_manager.h>
+
+using real_t = cedar::real_t;
+using len_t = cedar::len_t;
+#include <src/2d/ftn/mpi/BMG2_SymStd_SETUP_recip.f90.hpp>
+#include <src/2d/ftn/mpi/BMG2_SymStd_relax_GS.f90.hpp>
 
 extern "C" {
 	using namespace cedar;
@@ -35,6 +41,7 @@ extern "C" {
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
+template <typename device=cedar::cpu>
 class rbgs : public kernels::point_relax<mpi::stypes>
 {
 	void setup(const stencil_op<five_pt> & so,
@@ -70,7 +77,16 @@ class rbgs : public kernels::point_relax<mpi::stypes>
 	{
 		int nstencil = stencil_ndirs<sten>::value;
 		auto & sod = const_cast<stencil_op<sten>&>(so);
-		MPI_BMG2_SymStd_SETUP_recip(sod.data(), sor.data(), so.len(0), so.len(1), nstencil);
+
+                sod.template ensure<device>();
+                sor.template ensure<device>();
+
+                if (device::is_gpu()) {
+                    MPI_BMG2_SymStd_SETUP_recip<ftl::device::GPU>(sod, sor, so.len(0), so.len(1), nstencil);
+                } else {
+                    MPI_BMG2_SymStd_SETUP_recip(sod.data(), sor.data(), so.len(0), so.len(1), nstencil);
+                    sor.template mark_dirty<device>();
+                }
 	}
 
 	template<class sten>
@@ -102,10 +118,23 @@ class rbgs : public kernels::point_relax<mpi::stypes>
 
 		// ibc = BMG_BCs_definite;
 
-		MPI_BMG2_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
-		                         so.len(0), so.len(1), kf, ifd, nstencil, BMG_RELAX_SYM,
-		                         updown, topo.is(0), topo.is(1),
-		                         this->services->fortran_handle<halo_exchange>());
+                sod.template ensure<device>();
+                x.template ensure<device>();
+                bd.template ensure<device>();
+                sord.template ensure<device>();
+
+                void* halof = this->services->fortran_handle<halo_exchange>();
+
+                if (device::is_gpu()) {
+                    MPI_BMG2_SymStd_relax_GS<cedar::gpu>(
+                        k, sod, bd, x, sord, so.len(0), so.len(1), kf, ifd, nstencil,
+                        BMG_RELAX_SYM, updown, topo.is(0), topo.is(1), halof);
+                } else {
+                    MPI_BMG2_SymStd_relax_GS(k, sod.data(), bd.data(), x.data(), sord.data(),
+                                             so.len(0), so.len(1), kf, ifd, nstencil, BMG_RELAX_SYM,
+                                             updown, topo.is(0), topo.is(1), halof);
+                    x.template mark_dirty<device>();
+                }
 	}
 };
 

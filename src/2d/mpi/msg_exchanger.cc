@@ -66,7 +66,7 @@ MsgCtx::MsgCtx(grid_topo & topo) :
 	// !
 	// !  Need to fix the this bound!!
 	// !
-	// !  - MSG real buffer space 
+	// !  - MSG real buffer space
 	// !  - Workspace for coarse-grid solve communication.
 	// !
 	// NMSGr = std::max(2*std::max(topo.nproc(0)+6, topo.nproc(1)+6),
@@ -167,11 +167,13 @@ void msg_exchanger::run(mpi::stencil_op<five_pt> & sop)
 	MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
 	timer_begin("halo-stencil");
+        sop.ensure_cpu();
 	BMG2_SymStd_SETUP_fine_stencil(topo.level()+1, sop.data(),
 	                               sop.len(0), sop.len(1), nstencil,
 	                               ctx->msg_geom.data(), ctx->msg_geom.size(),
 	                               ctx->pMSGSO.data(), ctx->msg_buffer.data(),
 	                               ctx->msg_buffer.size(), fcomm);
+        sop.mark_cpu_dirty();
 	timer_end("halo-stencil");
 }
 
@@ -186,11 +188,13 @@ void msg_exchanger::run(mpi::stencil_op<nine_pt> & sop)
 	MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
 	timer_begin("halo-stencil");
+        sop.ensure_cpu();
 	BMG2_SymStd_SETUP_fine_stencil(topo.level()+1, sop.data(),
 	                               sop.len(0), sop.len(1), nstencil,
 	                               ctx->msg_geom.data(), ctx->msg_geom.size(),
 	                               ctx->pMSGSO.data(), ctx->msg_buffer.data(),
 	                               ctx->msg_buffer.size(), fcomm);
+        sop.mark_cpu_dirty();
 	timer_end("halo-stencil");
 }
 
@@ -202,9 +206,11 @@ void msg_exchanger::run(mpi::grid_func & f, unsigned short dmask)
 	MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
 
 	timer_begin("halo");
+        f.ensure_cpu();
 	BMG2_SymStd_UTILS_update_ghosts(topo.level()+1, f.data(), f.len(0), f.len(1), ctx->msg_geom.data(),
 	                                ctx->msg_geom.size(), ctx->pMSG.data(), ctx->msg_buffer.data(),
 	                                ctx->msg_buffer.size(), topo.nlevel(), fcomm);
+        f.mark_cpu_dirty();
 	timer_end("halo");
 }
 

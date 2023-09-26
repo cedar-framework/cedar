@@ -3,6 +3,11 @@
 
 #include <cedar/kernels/residual.h>
 #include <cedar/2d/mpi/types.h>
+#include <cedar/device.h>
+
+using real_t = cedar::real_t;
+using len_t = cedar::len_t;
+#include <src/2d/ftn/mpi/BMG2_SymStd_residual.f90.hpp>
 
 extern "C" {
 	using namespace cedar;
@@ -15,6 +20,7 @@ extern "C" {
 
 namespace cedar { namespace cdr2 { namespace mpi {
 
+template <typename device=cedar::cpu>
 class residual_f90 : public kernels::residual<stypes>
 {
 	void run(const stencil_op<five_pt> & so,
@@ -56,11 +62,25 @@ class residual_f90 : public kernels::residual<stypes>
 		nog = kf = topo.nlevel();
 		k = topo.level()+1;
 
-		MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
-		MPI_BMG2_SymStd_residual(k, kf, nog,
-		                         Ad.data(), bd.data(), xd.data(), r.data(),
-		                         r.len(0), r.len(1), ifd, nstencil,
-		                         irelax, irelax_sym, fcomm);
+                Ad.template ensure<device>();
+                xd.template ensure<device>();
+                bd.template ensure<device>();
+                r.template ensure<device>();
+
+                if (device::is_gpu()) {
+                    int32_t fcomm = MPI_Comm_c2f(topo.comm);
+                    MPI_BMG2_SymStd_residual<ftl::device::GPU>(
+                        k, kf, nog, Ad, bd, xd, r, r.len(0), r.len(1),
+                        ifd, nstencil, irelax, irelax_sym, fcomm);
+                } else {
+                    MPI_Fint fcomm = MPI_Comm_c2f(topo.comm);
+                    MPI_BMG2_SymStd_residual(k, kf, nog,
+                                             Ad.data(), bd.data(), xd.data(), r.data(),
+                                             r.len(0), r.len(1), ifd, nstencil,
+                                             irelax, irelax_sym, fcomm);
+                    r.mark_cpu_dirty();
+                }
+
 		services->get<halo_exchange>().run(r);
 	}
 };
