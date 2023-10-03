@@ -26,8 +26,9 @@ jobs:
           sudo pip install numpy pyamg
       - name: build Cedar setup
         run: |
+          mpirun -version
           mkdir build
           cd build
-          cmake --debug-find -DENABLE_UNIT_TESTS=yes -DCMAKE_CXX_COMPILER=clang++ ..
+          cmake -DENABLE_UNIT_TESTS=yes -DCMAKE_CXX_COMPILER=clang++ ..
       - name: make and test Cedar
         run: make && make test
