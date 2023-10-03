@@ -75,19 +75,6 @@ class galerkin : public kernels::coarsen_op<stypes>
                         topo.is(0), topo.is(1), nog, ifd, nstencil, halof);
                     cop.template mark_dirty<device>();
                 }
-
-
-
-                // cop.ensure_cpu();
-                // auto copb = cop.to_buffer();
-                // copb.dev_to_host();
-                // auto copb = cop.to_buffer();
-                // copb.reshape({
-                //         copb.get_shape()[0] + 1,
-                //         copb.get_shape()[1] + 1,
-                //         copb.get_shape()[2]
-                //     });
-                // std::cerr << "Coarse operator: " << std::endl << copb << std::endl;
 	}
 
 };

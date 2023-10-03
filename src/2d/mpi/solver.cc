@@ -67,6 +67,7 @@ void solver<fsten>::setup_cg_solve()
 
 	log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " cores" << std::endl;
 	if (this->settings.coarse_solver == ml_settings::cg_type::lu) {
+            std::cerr << "create_redist_solver<cholesky_solver>" << std::endl;
 		this->coarse_solver = create_redist_solver<cholesky_solver>(kman,
 		                                                            *this->conf,
 		                                                            cop,

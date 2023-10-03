@@ -59,6 +59,13 @@ public:
 		                   std::size_t lvl, grid_func & x, const grid_func & b, int n)
 	{
 		auto & A = level.A;
+                // auto Ab = A.to_buffer();
+
+                std::cerr << "Top of v-cycle" << std::endl;
+                // std::cerr << "stencil operator: " << std::endl << Ab << std::endl;
+
+                auto xbm1 = x.to_buffer();
+                std::cerr << "input soln: " << std::endl << xbm1 << std::endl;
 
 		timer_begin("relaxation");
 		level.presmoother(A, x, b);
@@ -93,6 +100,7 @@ public:
 		std::size_t coarse_lvl = levels.size() - 1;
 		if (lvl+1 == coarse_lvl) {
 			timer_begin("coarse-solve");
+                        std::cerr << "Calling coarse solve" << std::endl;
 			coarse_solver(coarse_x, coarse_b);
 			timer_end("coarse-solve");
 			if (log::info.active()) {

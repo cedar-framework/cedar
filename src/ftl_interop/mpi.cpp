@@ -108,6 +108,21 @@ void MPI_Allgather(void* sendbuf, int sendcount, MPI_Datatype sendtype,
                          comm_ptr);
 }
 
+void MPI_Allgather(ftl::Buffer<real_t> sendbuf, int sendcount, MPI_Datatype sendtype,
+                   ftl::Buffer<real_t> recvbuf, int recvcount, MPI_Datatype recvtype,
+                   int32_t comm, int32_t& ierr) {
+
+    sendbuf.dev_to_host();
+    recvbuf.mark_device_dirty(false);
+    MPI_Comm comm_ptr = MPI_Comm_f2c(comm);
+
+    ierr = MPI_Allgather(sendbuf.data(), sendcount, sendtype,
+                         recvbuf.data(), recvcount, recvtype,
+                         comm_ptr);
+
+    recvbuf.mark_host_dirty(true);
+}
+
 void MPI_Scatter(void* sendbuf, int sendcount, MPI_Datatype sendtype,
                  void* recvbuf, int recvcount, MPI_Datatype recvtype, int root,
                  int32_t comm, int32_t& ierr) {
@@ -128,6 +143,21 @@ void MPI_Gather(void* sendbuf, int sendcount, MPI_Datatype sendtype,
                       recvbuf, recvcount, recvtype,
                       root, comm_ptr);
 
+}
+
+void MPI_Gather(ftl::Buffer<real_t> sendbuf, int sendcount, MPI_Datatype sendtype,
+                ftl::Buffer<real_t> recvbuf, int recvcount, MPI_Datatype recvtype, int root,
+                int32_t comm, int32_t& ierr) {
+
+    sendbuf.dev_to_host();
+    recvbuf.mark_device_dirty(false);
+
+    MPI_Comm comm_ptr = MPI_Comm_f2c(comm);
+    ierr = MPI_Gather(sendbuf.data(), sendcount, sendtype,
+                      recvbuf.data(), recvcount, recvtype,
+                      root, comm_ptr);
+
+    recvbuf.mark_host_dirty(true);
 }
 
 void MPI_Comm_rank(int32_t comm, int32_t& rank, int32_t& ierr) {
@@ -182,6 +212,15 @@ void MPI_Bcast(void *buffer, int count, MPI_Datatype datatype,
 
     MPI_Comm comm_ptr = MPI_Comm_f2c(comm);
     ierr = MPI_Bcast(buffer, count, datatype, root, comm_ptr);
+}
+
+void MPI_Bcast(ftl::Buffer<real_t> buffer, int count, MPI_Datatype datatype,
+               int root, int32_t comm, int32_t& ierr) {
+
+    buffer.dev_to_host();
+
+    MPI_Comm comm_ptr = MPI_Comm_f2c(comm);
+    ierr = MPI_Bcast(buffer.data(), count, datatype, root, comm_ptr);
 }
 
 void MPI_Finalize(int32_t comm) {

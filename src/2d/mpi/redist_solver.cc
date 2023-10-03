@@ -19,6 +19,8 @@ template<>
 template<class inner_solver>
 void redist_solver<inner_solver>::solve(grid_func & x, const grid_func & b)
 {
+    std::cerr << ":: Performing redist solve" << std::endl;
+
 	timer_begin("agglomerate");
 	gather_rhs(b);
 	timer_end("agglomerate");
@@ -52,6 +54,8 @@ redist_solver<inner_solver>::redist_solver(const stencil_op<nine_pt> & so,
                                            std::array<int, 2> nblock) :
 	redundant(false), nblock(nblock), active(true), recv_id(-1), services(services)
 {
+    std::cerr << " :: Setting up redist solver" << std::endl;
+
 	// Split communicator into collective processor blocks
 	auto & topo = so.grid();
 	auto & halo_service = services->template get<halo_exchange>();
@@ -75,6 +79,7 @@ redist_solver<inner_solver>::redist_solver(const stencil_op<nine_pt> & so,
 		MSG_pause(&parent_comm);
 		log::push_level("redist", *conf);
 		slv = std::make_unique<inner_solver>(*so_redist, conf, *services);
+                std::cerr << ":: Redist solver made inner solver" << std::endl;
 		log::pop_level();
 		MSG_pause(&msg_comm);
 		MSG_play(parent_comm);
@@ -88,6 +93,10 @@ template redist_solver<multilevel_wrapper<cdr2::solver<nine_pt>>>::redist_solver
 template<class inner_solver>
 void redist_solver<inner_solver>::redist_operator(const stencil_op<nine_pt> & so, topo_ptr topo)
 {
+    auto& sod = const_cast<stencil_op<nine_pt>&>(so);
+    sod.ensure_cpu();
+    std::cerr << "Moved SO operator from GPU to CPU" << std::endl;
+
 	so_redist = create_operator<typename inner_solver::stencil_op>(topo);
 
 	auto & rop = *so_redist;
@@ -96,11 +105,11 @@ void redist_solver<inner_solver>::redist_operator(const stencil_op<nine_pt> & so
 	int idx = 0;
 	for (auto j : so.grange(1)) {
 		for (auto i : so.grange(0)) {
-			sbuf(idx) = so(i,j,nine_pt::c);
-			sbuf(idx+1) = so(i,j,nine_pt::w);
-			sbuf(idx+2) = so(i,j,nine_pt::nw);
-			sbuf(idx+3) = so(i,j,nine_pt::s);
-			sbuf(idx+4) = so(i,j,nine_pt::sw);
+			sbuf(idx) = sod(i,j,nine_pt::c);
+			sbuf(idx+1) = sod(i,j,nine_pt::w);
+			sbuf(idx+2) = sod(i,j,nine_pt::nw);
+			sbuf(idx+3) = sod(i,j,nine_pt::s);
+			sbuf(idx+4) = sod(i,j,nine_pt::sw);
 			idx += 5;
 		}
 	}
@@ -152,6 +161,7 @@ void redist_solver<inner_solver>::redist_operator(const stencil_op<nine_pt> & so
 			jgs += ny;
 		}
 	}
+
 }
 template void redist_solver<cholesky_solver>::redist_operator(const stencil_op<nine_pt> & so, topo_ptr topo);
 template void redist_solver<multilevel_wrapper<mpi::solver<nine_pt>>>::redist_operator(const stencil_op<nine_pt> & so, topo_ptr topo);
@@ -286,11 +296,14 @@ template std::shared_ptr<grid_topo> redist_solver<multilevel_wrapper<cdr2::solve
 template<class inner_solver>
 void redist_solver<inner_solver>::gather_rhs(const grid_func & b)
 {
+    auto& bd = const_cast<grid_func&>(b);
+    bd.ensure_cpu();
+
 	array<real_t,1> sbuf(b.shape(0)*b.shape(1));
 	int idx = 0;
 	for (auto j : b.range(1)) {
 		for (auto i : b.range(0)) {
-			sbuf(idx) = b(i,j);
+			sbuf(idx) = bd(i,j);
 			idx++;
 		}
 	}
@@ -349,6 +362,7 @@ template void redist_solver<multilevel_wrapper<cdr2::solver<nine_pt>>>::gather_r
 template<class inner_solver>
 void redist_solver<inner_solver>::scatter_sol(grid_func & x)
 {
+    x.ensure_cpu();
 	if (not redundant) {
 		len_t sbuf_len = 0;
 		for (auto j : range(nby.len(0))) {
@@ -450,6 +464,7 @@ void redist_solver<inner_solver>::scatter_sol(grid_func & x)
 
 		MPI_Recv(x.data(), x.len(0)*x.len(1), MPI_DOUBLE, recv_id, 0, rcomms.pblock_comm, MPI_STATUS_IGNORE);
 	}
+        x.mark_cpu_dirty();
 }
 template void redist_solver<cholesky_solver>::scatter_sol(grid_func & x);
 template void redist_solver<multilevel_wrapper<mpi::solver<nine_pt>>>::scatter_sol(grid_func & x);

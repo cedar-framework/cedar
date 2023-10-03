@@ -90,8 +90,11 @@ class setup_interp_f90 : public kernels::setup_interp<stypes>
                         kf, kc, fopd.data(), P.data(),
                         fop.len(0), fop.len(1), cop.len(0), cop.len(1),
                         nog, nog, topo.IGRD(), ifd, nstencil, jpn, halof);
-                    copd.template mark_dirty<device>();
+                    P.template mark_dirty<device>();
                 }
+
+                auto Pd = P.to_buffer();
+                std::cerr << "Interpolation operator: " << std::endl << Pd << std::endl;
 	}
 
 

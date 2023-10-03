@@ -82,8 +82,8 @@ void noop(Us&&... args) {}
 
 void halo_exchange(int k, ftl::Buffer<real_t> q, void* halof_void);
 void halo_stencil_exchange(int k, ftl::Buffer<real_t> soc, void *halof_void);
-void MSG_tp_setup(void* la_size, void* eid_s, void* gc_ld, void* gc_eid,
-                  int numproc, int myproc, int nproc, void* proc, void* ipr, void* index,
+void MSG_tp_setup(ftl::Buffer<len_t> la_size, ftl::Buffer<len_t> eid_s, ftl::Buffer<len_t> gc_ld, ftl::Buffer<len_t> gc_eid,
+                  int numproc, int myproc, int nproc, ftl::Buffer<len_t> proc, ftl::Buffer<len_t> ipr, ftl::Buffer<len_t> index,
                   int sfa, int pfa, int& ier);
 void cedar_mempool_pos(void* mp_void, int nbytes, int& pos);
 void print_error(const char* str);

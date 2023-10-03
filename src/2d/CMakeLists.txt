@@ -38,20 +38,5 @@ if(ENABLE_MPI)
     mpi/tausch_exchanger.cc)
 endif()
 
-list(APPEND sources
-  gpu/grid_func.cc
-  gpu/stencil_op.cc
-  gpu/prolong_op.cc
-  gpu/restrict_op.cc
-  gpu/setup_nog.cc
-  gpu/restrict.cc
-  gpu/interp.cc
-  gpu/kernel_manager.cc
-  gpu/redist_solver.cc
-  gpu/solver.cc
-  gpu/gallery.cc
-  gpu/tausch_exchanger.cc
-  gpu/msg_exchanger.cc)
-
 set(2d_SOURCES ${sources} PARENT_SCOPE)
 set(2d_FTL_SOURCES ${ftn_FTL_SOURCES} PARENT_SCOPE)

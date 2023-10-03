@@ -36,6 +36,7 @@ template<class sten>
 		this->res = grid_func(resaddr, topo);
 		this->res.set(0.0);
 		this->b = grid_func(baddr, topo);
+                this->b.set(0.0);
 		this->SOR = {{relax_stencil(topo->nlocal(0)-2, topo->nlocal(1)-2),
 		              relax_stencil(topo->nlocal(0)-2, topo->nlocal(1)-2)}};
 		this->R.associate(&this->P);

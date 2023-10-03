@@ -157,46 +157,46 @@ void MSG_tbdx_send(
             if (myproc<proc((iproc) - 1)) {
                 if (index((outsegmentstart) - 1)>=0) {
                     MSG_tbdx_gather(x, y, iproc, ipr, index);
-                    MPI_Send(y(0), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, ierr);
+                    MPI_Send(static_cast<void*>(y(0)), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, ierr);
                     if (ierr!=MPI_SUCCESS) {
                         return;
                     }
                 } else {
-                    MPI_Send(x((-index((outsegmentstart) - 1)) - 1), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, ierr);
+                    MPI_Send(static_cast<void*>(x((-index((outsegmentstart) - 1)) - 1)), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, ierr);
                 }
                 if (index((insegmentstart) - 1)>=0) {
-                    MPI_Recv(y(0), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, recvstatus, ierr);
+                    MPI_Recv(static_cast<void*>(y(0)), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, recvstatus, ierr);
                     if (ierr!=MPI_SUCCESS) {
                         return;
                     }
                     MSG_tbdx_scatter(x, y, iproc, ipr, index);
                 } else {
-                    MPI_Recv(x((-index((insegmentstart) - 1)) - 1), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, recvstatus, ierr);
+                    MPI_Recv(static_cast<void*>(x((-index((insegmentstart) - 1)) - 1)), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, recvstatus, ierr);
                     if (ierr!=MPI_SUCCESS) {
                         return;
                     }
                 }
             } else {
                 if (index((insegmentstart) - 1)>=0) {
-                    MPI_Recv(y(0), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, recvstatus, ierr);
+                    MPI_Recv(static_cast<void*>(y(0)), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, recvstatus, ierr);
                     if (ierr!=MPI_SUCCESS) {
                         return;
                     }
                     MSG_tbdx_scatter(x, y, iproc, ipr, index);
                 } else {
-                    MPI_Recv(x((-index((insegmentstart) - 1)) - 1), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, recvstatus, ierr);
+                    MPI_Recv(static_cast<void*>(x((-index((insegmentstart) - 1)) - 1)), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, recvstatus, ierr);
                     if (ierr!=MPI_SUCCESS) {
                         return;
                     }
                 }
                 if (index((outsegmentstart) - 1)>=0) {
                     MSG_tbdx_gather(x, y, iproc, ipr, index);
-                    MPI_Send(y(0), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, ierr);
+                    MPI_Send(static_cast<void*>(y(0)), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, ierr);
                     if (ierr!=MPI_SUCCESS) {
                         return;
                     }
                 } else {
-                    MPI_Send(x((-index((outsegmentstart) - 1)) - 1), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, ierr);
+                    MPI_Send(static_cast<void*>(x((-index((outsegmentstart) - 1)) - 1)), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, ierr);
                 }
             }
         }
@@ -252,13 +252,13 @@ void MSG_tbdx_send(
                 if (outsegmentsize>0) {
                     if (index((outsegmentstart) - 1)>=0) {
                         /* Noncontiguous memory segment: give the buffer's address */
-                        MPI_Send_init(y(0), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_sendid(iproc - 1, ptrn - 1), ierr);
+                        MPI_Send_init(static_cast<void*>(y(0)), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_sendid(iproc - 1, ptrn - 1), ierr);
                         if (ierr!=MPI_SUCCESS) {
                             return;
                         }
                     } else {
                         /* Contiguous memory segment: give the data address */
-                        MPI_Send_init(x((-index((outsegmentstart) - 1)) - 1), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_sendid(iproc - 1, ptrn - 1), ierr);
+                        MPI_Send_init(static_cast<void*>(x((-index((outsegmentstart) - 1)) - 1)), outsegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_sendid(iproc - 1, ptrn - 1), ierr);
                         if (ierr!=MPI_SUCCESS) {
                             return;
                         }
@@ -269,12 +269,12 @@ void MSG_tbdx_send(
                 insegmentstart = ipr((2*iproc) - 1);
                 if (insegmentsize>0) {
                     if (index((insegmentstart) - 1)>=0) {
-                        MPI_Recv_init(y((msgsegment(ptrn - 1)) - 1), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_recvid(iproc - 1, ptrn - 1), ierr);
+                        MPI_Recv_init(static_cast<void*>(y((msgsegment(ptrn - 1)) - 1)), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_recvid(iproc - 1, ptrn - 1), ierr);
                         if (ierr!=MPI_SUCCESS) {
                             return;
                         }
                     } else {
-                        MPI_Recv_init(x((-index((insegmentstart) - 1)) - 1), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_recvid(iproc - 1, ptrn - 1), ierr);
+                        MPI_Recv_init(static_cast<void*>(x((-index((insegmentstart) - 1)) - 1)), insegmentsize, MPI_DOUBLE, (proc((iproc) - 1)-1), ptrn, msg_comm, msg_recvid(iproc - 1, ptrn - 1), ierr);
                         if (ierr!=MPI_SUCCESS) {
                             return;
                         }

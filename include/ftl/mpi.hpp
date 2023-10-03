@@ -47,6 +47,10 @@ void MPI_Allgather(void* sendbuf, int sendcount, MPI_Datatype sendtype,
                    void* recvbuf, int recvcount, MPI_Datatype recvtype,
                    int32_t comm, int32_t& ierr);
 
+void MPI_Allgather(ftl::Buffer<real_t> sendbuf, int sendcount, MPI_Datatype sendtype,
+                   ftl::Buffer<real_t> recvbuf, int recvcount, MPI_Datatype recvtype,
+                   int32_t comm, int32_t& ierr);
+
 void MPI_Scatter(void* sendbuf, int sendcount, MPI_Datatype sendtype,
                  void* recvbuf, int recvcount, MPI_Datatype recvtype,
                  int root, int32_t comm, int32_t& ierr);
@@ -54,6 +58,10 @@ void MPI_Scatter(void* sendbuf, int sendcount, MPI_Datatype sendtype,
 void MPI_Gather(void* sendbuf, int sendcount, MPI_Datatype sendtype,
                 void* recvbuf, int recvcount, MPI_Datatype recvtype,
                 int root, int32_t comm, int32_t& ierr);
+
+void MPI_Gather(ftl::Buffer<real_t> sendbuf, int sendcount, MPI_Datatype sendtype,
+                ftl::Buffer<real_t> recvbuf, int recvcount, MPI_Datatype recvtype, int root,
+                int32_t comm, int32_t& ierr);
 
 void MPI_Comm_rank(int32_t comm, int32_t& rank, int32_t& ierr);
 
@@ -72,6 +80,9 @@ void MPI_Start(int32_t& request, int32_t& ierr);
 void MPI_Barrier(int32_t comm, int32_t& ierr);
 
 void MPI_Bcast(void *buffer, int count, MPI_Datatype datatype,
+               int root, int32_t comm, int32_t& ierr);
+
+void MPI_Bcast(ftl::Buffer<real_t> buffer, int count, MPI_Datatype datatype,
                int root, int32_t comm, int32_t& ierr);
 
 void MPI_Finalize(int32_t comm);
