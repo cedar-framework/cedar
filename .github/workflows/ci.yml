@@ -28,6 +28,6 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake -DENABLE_UNIT_TESTS=yes -DCMAKE_CXX_COMPILER=clang++ ..
+          cmake --debug-find -DENABLE_UNIT_TESTS=yes -DCMAKE_CXX_COMPILER=clang++ ..
       - name: make and test Cedar
         run: make && make test
