@@ -14,5 +14,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Report
-        run: echo running...
+      - name: Unset CC and CXX
+        run: |
+          test -n $CC  && unset CC
+          test -n $CXX && unset CXX
+
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install cmake3 mpich2 liblapack-dev libboost-filesystem-dev libboost-system-dev python-numpy clang
+          sudo pip install pyamg
+      - name: build Cedar setup
+        run: |
+          mkdir build
+          cd build
+          cmake -DENABLE_UNIT_TESTS=yes -DCMAKE_CXX_COMPILER=clang++ ..
+      - name: make and test Cedar
+        run: make && make test
