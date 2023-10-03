@@ -4,6 +4,7 @@ project(cedar VERSION 0.1.0 LANGUAGES CXX C Fortran)
 set(CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(MPI_LANGUAGE C Fortran)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
@@ -59,6 +60,8 @@ FIND_PACKAGE(LAPACK REQUIRED)
 
 find_package(MPI REQUIRED)
 
+find_package(MPI COMPONENTS C Fortran REQUIRED)
+
 if (ENABLE_PLANE_AGG)
   find_package(Argobots REQUIRED)
 endif()
@@ -82,9 +85,8 @@ target_link_libraries(cedar PUBLIC
   ${Boost_LIBRARIES}
   ${LAPACK_LIBRARIES}
   ${BLAS_LIBRARIES}
-  ${MPI_C_LIBRARIES}
-  ${MPI_CXX_LIBRARIES}
-  ${MPI_Fortran_LIBRARIES})
+  PUBLIC MPI::MPI_C
+  MPI::MPI_Fortran)
 include_directories(${json_location})
 include_directories(${tausch_location})
 target_compile_definitions(cedar PUBLIC WITH_TAUSCH)
