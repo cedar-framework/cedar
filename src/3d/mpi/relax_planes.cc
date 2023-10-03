@@ -105,6 +105,7 @@ void planes<rdir>::setup_impl(const stencil_op<sten3> & so, std::vector<slv2_ptr
 	teams[0].threads = threads[0].get_threads();
 	teams[1].threads = threads[1].get_threads();
 	#else
+	(void)threads; // avoid warning
 	this->aggregate = false;
 	#endif
 	int nplanes = so.shape(2);

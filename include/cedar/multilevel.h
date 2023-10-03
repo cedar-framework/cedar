@@ -132,7 +132,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 	}
 
 	template<class sten>
-		void setup_relax_helper(level_t<sten> & level, std::size_t lvl)
+	void setup_relax_helper(level_t<sten> & level, std::size_t /* lvl */)
 	{
 		auto & sop = level.A;
 

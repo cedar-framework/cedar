@@ -58,7 +58,7 @@ static void set_solution(grid_func & q)
 }
 
 
-int main(int argc, char *argv[])
+int main()
 {
 	config conf;
 	auto ndofs = conf.getvec<len_t>("grid.n");

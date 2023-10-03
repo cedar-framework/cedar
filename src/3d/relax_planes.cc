@@ -13,7 +13,7 @@ int log_begin(bool log_planes, int ipl, const std::string & suff)
 }
 
 
-void log_end(bool log_planes, int ipl, int lvl)
+void log_end(bool log_planes, int /*ipl*/, int lvl)
 {
 	if (log_planes)
 		log::set_header_msg("");

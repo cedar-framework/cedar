@@ -23,7 +23,7 @@ template<class sten>
 struct level2 : public level<sten, stypes>
 {
 	using parent = level<sten, stypes>;
-	level2(services::mempool & mpool, len_t nx, len_t ny) : parent::level(nx, ny)
+	level2(services::mempool &, len_t nx, len_t ny) : parent::level(nx, ny)
 	{
 		this->x = grid_func(nx, ny);
 		this->res = grid_func(nx, ny);
@@ -33,7 +33,7 @@ struct level2 : public level<sten, stypes>
 		              relax_stencil(nx, ny)}};
 		this->R.associate(&this->P);
 	}
-	level2(services::mempool & mpool, stencil_op<sten> & A) : parent::level(A)
+	level2(services::mempool &, stencil_op<sten> & A) : parent::level(A)
 	{
 		this->res = grid_func(A.shape(0), A.shape(1));
 		this->res.set(0.0);

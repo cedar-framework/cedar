@@ -18,7 +18,7 @@ namespace cedar { namespace cdr3 {
 template<template<class> class level, class fsten>
 	struct get_helper<level, fsten, seven_pt>
 {
-	static level<seven_pt> & get(std::vector<level<xxvii_pt>> & lvls_xxvii,
+	static level<seven_pt> & get(std::vector<level<xxvii_pt>> &,
 	                            std::vector<level<seven_pt>> & lvls_seven,
 	                            std::size_t i)
 	{
@@ -53,7 +53,7 @@ template<template<class> class level>
 	struct get_helper<level, xxvii_pt, xxvii_pt>
 {
 	static level<xxvii_pt> & get(std::vector<level<xxvii_pt>> & lvls_xxvii,
-	                            std::vector<level<seven_pt>> & lvls_seven,
+	                            std::vector<level<seven_pt>> &,
 	                            std::size_t i)
 	{
 		#ifdef BOUNDS_CHECK
@@ -94,7 +94,7 @@ template<template<class> class stencil_op, template<class> class level>
 	{
 		static void init(stencil_op<xxvii_pt> & fine_op,
 		                 std::vector<level<xxvii_pt>> & lvls_xxvii,
-		                 std::vector<level<seven_pt>> & lvls_seven,
+		                 std::vector<level<seven_pt>> &,
 		                 std::size_t nlevels)
 			{
 				lvls_xxvii.reserve(nlevels);

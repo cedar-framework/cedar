@@ -35,7 +35,7 @@ public:
 	aarray<int, len_t, 2> & leveldims(int k) override {
 		return dims[k];
 	}
-	len_t * datadist(int k, int grid) override {
+	len_t * datadist(int k, int /*grid*/) override {
 		return line_data->datadist[k].data();
 	}
 	std::vector<real_t> & linebuf() override {

@@ -65,7 +65,7 @@ static void set_solution(grid_func & q)
 }
 
 
-int main(int argc, char *argv[])
+int main()
 {
 	log::status << "Beginning test" << std::endl;
 

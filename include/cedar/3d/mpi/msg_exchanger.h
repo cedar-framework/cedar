@@ -83,7 +83,7 @@ namespace mpi {
 			else
 				return ctx->dimz;
 		}
-		len_t * datadist(int k, int grid) override {
+		len_t * datadist(int, int) override {
 			// placeholder
 			return ctx->msg_geom.data();
 		}

@@ -29,7 +29,7 @@ int plane_setup_mpi::comm_split(MPI_Comm comm, int color, int key, MPI_Comm *new
 		comms.push_back(std::move(comm_ptr));
 		MPI_Comm_set_attr(comm, kvkey, comms.back().get());
 	} else {
-		if (currind >= keys->size()) {
+		if (currind >= static_cast<int>(keys->size())) {
 			log::error << "master has not split communicator" << std::endl;
 			return 1;
 		}

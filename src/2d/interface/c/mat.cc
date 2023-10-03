@@ -20,7 +20,7 @@ template<class T> void dump2(cedar::grid_topo & grid, T & so)
 }
 
 
-template<class T> void dump3(cedar::grid_topo & grid, T & so)
+template<class T> void dump3(cedar::grid_topo &, T & so)
 {
 	cedar::cdr3::util::writeascii(so);
 }

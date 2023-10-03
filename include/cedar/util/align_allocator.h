@@ -56,7 +56,7 @@ public:
 		p->~T();
 	}
 
-	bool operator==(const AlignAllocator& other) const
+	bool operator==(const AlignAllocator&) const
 	{
 		return true;
 	}
@@ -94,7 +94,7 @@ public:
 		return static_cast<T *>(pv);
 	}
 
-	void deallocate(T * const p, const std::size_t n) const
+	void deallocate(T * const p, const std::size_t) const
 	{
 		cedar::log::memory << "Freeing: " << p << std::endl;
 		free(p);

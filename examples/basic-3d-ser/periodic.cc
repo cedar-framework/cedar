@@ -222,7 +222,7 @@ static void set_solution(grid_func & q, std::array<bool, 3> periodic)
 }
 
 
-int main(int argc, char *argv[])
+int main()
 {
 	auto conf = std::make_shared<config>();
 	auto params = build_kernel_params(*conf);

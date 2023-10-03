@@ -12,5 +12,7 @@ extern "C"
 			return CEDAR_ERR_CONFIG;
 
 		cedar::log::init(*confobj);
+
+		return CEDAR_SUCCESS;
 	}
 }

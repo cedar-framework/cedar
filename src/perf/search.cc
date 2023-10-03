@@ -33,7 +33,7 @@ perf_state perf_problem::result(perf_state & state, std::array<int,2> action)
 }
 
 
-float perf_problem::step_cost(perf_state & state, std::array<int,2> act)
+float perf_problem::step_cost(perf_state & state, std::array<int,2> /*act*/)
 {
 	auto model = state.model;
 
