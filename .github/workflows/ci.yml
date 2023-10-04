@@ -30,4 +30,6 @@ jobs:
           cd build
           cmake -DENABLE_UNIT_TESTS=yes -DCMAKE_CXX_COMPILER=clang++ ..
       - name: make and test Cedar
-        run: make && make test
+        run: |
+          cd build
+          make && make test
