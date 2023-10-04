@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.19)
 project(cedar VERSION 0.1.0 LANGUAGES CXX C Fortran)
 
 set(CXX_STANDARD_REQUIRED ON)
@@ -136,8 +136,7 @@ if(ENABLE_EXAMPLES)
 endif()
 
 if(ENABLE_UNIT_TESTS)
-  find_package(PythonLibs REQUIRED)
-  find_package(NumPy REQUIRED)
+  find_package(Python3 COMPONENTS Interpreter Development NumPy)
   message(STATUS ${PYTHON_INCLUDE_DIR})
   list(APPEND cedar-deps ${PYTHON_LIBRARY})
   include_directories(${PYTHON_INCLUDE_DIR} ${PYTHON_NUMPY_INCLUDE_DIR})
