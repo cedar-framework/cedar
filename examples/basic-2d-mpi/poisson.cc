@@ -125,54 +125,21 @@ int main(int argc, char *argv[])
 	config conf;
 
 	auto grid = util::create_topo(conf);
-
 	auto so = mpi::gallery::poisson(grid);
 	mpi::grid_func b(grid);
 
-        // auto* scp = so.data();
-        // for (std::size_t i = 0; i < 7 * 7 * 3; ++i) {
-        //     std::cerr << scp[i] << " ";
-        // }
-        // std::cerr << std::endl;
-
 	set_problem(b);
-
-        auto so_buf = so.to_buffer();
-        // std::cout << "Fine operator:" << std::endl << "====" << std::endl << so << std::endl << "====" << std::endl;
 
 	mpi::solver<five_pt> bmg(so);
         const std::size_t levels = bmg.nlevels();
-        std::cout << "Solver has " << levels << " levels." << std::endl;
-
-        // auto ci_buf = to_buffer(ci);
-        // std::cout << ci_buf << std::endl;
 
         MPI_Barrier(MPI_COMM_WORLD);
 
         auto level = bmg.levels.get<five_pt>(0);
         auto ci = level.P;
-        // std::cout << ci.len(0) << " " << ci.len(1) << " " << ci.len(2) << std::endl;
-
 
 	MPI_Barrier(MPI_COMM_WORLD); // synchronize before timing solve
 	auto sol = bmg.solve(b);
-
-        // auto level = bmg.levels.get<five_pt>(0);
-        // auto ci = level.P;
-        ci = level.P;
-        // std::cout << ci.len(0) << " " << ci.len(1) << " " << ci.len(2) << std::endl;
-
-
-	// mpi::grid_func exact_sol(sol.grid_ptr());
-	// set_solution(exact_sol);
-
-	// mpi::grid_func diff = exact_sol - sol;
-
-	//log::status << "Solution norm: " << diff.inf_norm() << std::endl;
-
-	//timer_save("timings.json");
-
-	//log::status << "Finished Test" << std::endl;
 
         if (rank == size - 1) {
             std::cout << std::endl << "Press enter to exit..." << std::endl;
@@ -180,6 +147,8 @@ int main(int argc, char *argv[])
         } else {
             std::cout << std::endl << std::endl;
         }
+ 
+        timer_save("timings.json");
 
         MPI_Barrier(MPI_COMM_WORLD);
 

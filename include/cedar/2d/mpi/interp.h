@@ -94,7 +94,6 @@ class setup_interp_f90 : public kernels::setup_interp<stypes>
                 }
 
                 auto Pd = P.to_buffer();
-                std::cerr << "Interpolation operator: " << std::endl << Pd << std::endl;
 	}
 
 

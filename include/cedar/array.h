@@ -10,6 +10,8 @@
 #include <ftl/Buffer.hpp>
 #include <cedar/device.h>
 
+struct Tausch;
+
 namespace cedar {
 
 /**
@@ -358,6 +360,14 @@ public:
 
     bool is_gpu_dirty() const {
         return base_buffer.is_dev_dirty();
+    }
+
+    void tausch_pack(Tausch* t, const size_t halo_id, const size_t buffer_id, const size_t offset=0) {
+        base_buffer.tausch_pack(t, halo_id, buffer_id, offset);
+    }
+
+    void tausch_unpack(Tausch* t, const size_t halo_id, const size_t buffer_id, const size_t offset=0) {
+        base_buffer.tausch_unpack(t, halo_id, buffer_id, offset);
     }
 };
 

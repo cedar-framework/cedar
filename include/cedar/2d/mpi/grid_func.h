@@ -31,7 +31,7 @@ public:
 	static grid_func like(const grid_func &likeable);
 	static grid_func zeros_like(const grid_func &likeable);
 	static grid_func ones_like(const grid_func &likeable);
-	template<int p> real_t lp_norm() const;
+    template<int p> real_t lp_norm();
 	real_t inf_norm() const;
 	grid_func & operator-=(const grid_func & rhs);
 	friend grid_func operator-(grid_func lhs, const grid_func &rhs) { return lhs -= rhs; }
@@ -39,8 +39,10 @@ public:
 };
 
 
-template<int p> real_t grid_func::lp_norm() const
+template<int p> real_t grid_func::lp_norm()
 {
+    ensure_cpu();
+
 	real_t result = 0;
 
 	for (auto j : this->range(1)) {

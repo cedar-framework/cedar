@@ -30,7 +30,7 @@ ExternalProject_Add(
   tausch
   PREFIX ${CMAKE_BINARY_DIR}/tausch
   GIT_REPOSITORY https://github.com/luspi/tausch.git
-  GIT_TAG 425f062eb5661ea16696b2ffc0813a7e6d4eb4e4
+  GIT_TAG 57320ee
   UPDATE_DISCONNECTED 1
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
@@ -62,6 +62,7 @@ ExternalProject_Add(
   UPDATE_DISCONNECTED 1
   INSTALL_COMMAND ""
   LOG_DOWNLOAD ON
+  CMAKE_ARGS "-D ENABLE_TAUSCH_SUPPORT=true"
 )
 ExternalProject_Get_Property(ftl source_dir)
 set(ftl_includes ${source_dir}/include)
@@ -112,6 +113,7 @@ include_directories(${Python_INCLUDE_DIRS})
 target_link_libraries(cedar PUBLIC ${ftl_bin}/libftlcommon.a)
 target_link_libraries(cedar PUBLIC Python3::Python)
 target_compile_definitions(cedar PUBLIC WITH_TAUSCH)
+target_compile_definitions(cedar PUBLIC FTL_TAUSCH_EXCHANGE)
 if (ENABLE_PLANE_AGG)
   target_link_libraries(cedar PUBLIC ${Argobots_LIBRARIES})
   target_include_directories(cedar PUBLIC ${Argobots_INCLUDE_DIRS})

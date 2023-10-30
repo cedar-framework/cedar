@@ -72,7 +72,6 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->set<interp_add>(kernels);
 	kman->set<restriction>(kernels);
 	kman->set<residual>(kernels);
-	//kman->set<setup_interp>("system");
         kman->set<setup_interp>(kernels);
 	kman->set<setup_nog>("system");
 	kman->set<matvec>(kernels);

@@ -1,5 +1,8 @@
 #include <cedar/2d/mpi/tausch_exchanger.h>
 
+// #define addSendHaloInfos addSendHaloInfo
+// #define addRecvHaloInfos addRecvHaloInfo
+
 extern "C" {
 	using namespace cedar;
 	void BMG2_SymStd_SETUP_Tausch(int nog, len_t *dimx, len_t *dimy,
@@ -137,13 +140,11 @@ void tausch_exchanger::init_gfunc(std::vector<topo_ptr> & topos)
 		               remote_remoteMpiRank, local_remoteMpiRank);
 	}
 
-	int nbuf = 1;
-
 	tausch = std::make_unique<Tausch>(topos[0]->comm);
 
 	for (std::size_t i = 0; i < halo_dir::count * nlevels; i++) {
-		tausch->addSendHaloInfo(local_spec[i], sizeof(real_t), nbuf, local_remoteMpiRank[i]);
-		tausch->addRecvHaloInfo(remote_spec[i], sizeof(real_t), nbuf, remote_remoteMpiRank[i]);
+            tausch->addSendHaloInfos(local_spec[i], sizeof(real_t), 1, local_remoteMpiRank[i]);
+            tausch->addRecvHaloInfos(remote_spec[i], sizeof(real_t), 1, remote_remoteMpiRank[i]);
 	}
 }
 
@@ -173,8 +174,8 @@ void tausch_exchanger::init_so(std::vector<topo_ptr> & topos)
 	tausch_so = std::make_unique<Tausch>(topos[0]->comm);
 
 	for (std::size_t i = 0; i < halo_dir::count * nlevels; i++) {
-		tausch_so->addSendHaloInfo(local_spec[i], sizeof(real_t), nbuf, local_remoteMpiRank[i]);
-		tausch_so->addRecvHaloInfo(remote_spec[i], sizeof(real_t), nbuf, remote_remoteMpiRank[i]);
+            tausch_so->addSendHaloInfos(local_spec[i], sizeof(real_t), nbuf, local_remoteMpiRank[i]);
+            tausch_so->addRecvHaloInfos(remote_spec[i], sizeof(real_t), nbuf, remote_remoteMpiRank[i]);
 	}
 }
 
@@ -188,6 +189,13 @@ void tausch_exchanger::set_level_spec(int lvl, int rank,
 {
 	const int nx = topo.nlocal(0);
 	const int ny = topo.nlocal(1);
+
+        /* Tausch region:
+           0 (start)
+           1 (width)
+           2 (height)
+           3 (row stride)
+        */
 
 	// right
 
@@ -214,8 +222,8 @@ void tausch_exchanger::set_level_spec(int lvl, int rank,
 
 	// up
 
-	remote_spec[index(lvl,halo_dir::up)].push_back(std::array<int,4>{        0, nx, 1, 1});
-	local_spec [index(lvl,halo_dir::up)].push_back(std::array<int,4>{(ny-2)*nx, nx, 1, 1});
+	remote_spec[index(lvl,halo_dir::up)].push_back(std::array<int,4>{        0, nx, 1, nx});
+	local_spec [index(lvl,halo_dir::up)].push_back(std::array<int,4>{(ny-2)*nx, nx, 1, nx});
 
 	if(topo.coord(1) == 0)
 		remote_remoteMpiRank[index(lvl,halo_dir::up)] = rank + topo.nproc(0)*topo.nproc(1) - topo.nproc(0);
@@ -229,8 +237,8 @@ void tausch_exchanger::set_level_spec(int lvl, int rank,
 
 	// down
 
-	remote_spec[index(lvl,halo_dir::down)].push_back(std::array<int,4>{(ny-1)*nx, nx, 1, 1});
-	local_spec [index(lvl,halo_dir::down)].push_back(std::array<int,4>{       nx, nx, 1, 1});
+	remote_spec[index(lvl,halo_dir::down)].push_back(std::array<int,4>{(ny-1)*nx, nx, 1, nx});
+	local_spec [index(lvl,halo_dir::down)].push_back(std::array<int,4>{       nx, nx, 1, nx});
 
 	remote_remoteMpiRank[index(lvl,halo_dir::down)] = local_remoteMpiRank[index(lvl,halo_dir::up)];
 	local_remoteMpiRank[index(lvl,halo_dir::down)] = remote_remoteMpiRank[index(lvl,halo_dir::up)];
@@ -273,8 +281,8 @@ void tausch_exchanger::set_level_spec_so(int lvl, int rank,
 
 	// up
 
-	remote_spec[index(lvl,halo_dir::up)].push_back(std::array<int,4>{        0, nx-1, 1, 1});
-	local_spec [index(lvl,halo_dir::up)].push_back(std::array<int,4>{(ny-3)*nx, nx-1, 1, 1});
+	remote_spec[index(lvl,halo_dir::up)].push_back(std::array<int,4>{        0, nx-1, 1, nx});
+	local_spec [index(lvl,halo_dir::up)].push_back(std::array<int,4>{(ny-3)*nx, nx-1, 1, nx});
 
 	if(topo.coord(1) == 0)
 		remote_remoteMpiRank[index(lvl,halo_dir::up)] = rank + topo.nproc(0)*topo.nproc(1) - topo.nproc(0);
@@ -300,6 +308,8 @@ void tausch_exchanger::exchange_func(int k, real_t * gf)
 {
 	int lvl = nlevels - k;
 
+        std::cerr << "exchange_func real_t* so" << std::endl;
+
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (send_active[index(lvl, dir)]) {
 			tausch->packSendBuffer(index(lvl,dir), 0, gf);
@@ -323,11 +333,62 @@ void tausch_exchanger::exchange_sten(int k, real_t * so)
 	len_t II = dimx(coord[0], k-1) + 2;
 	len_t JJ = dimy(coord[1], k-1) + 2;
 
+        std::cerr << "exchange_sten real_t* so" << std::endl;
+
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (send_active[index(lvl, dir)]) {
 			for (int sdir = 0; sdir < stencil_ndirs<nine_pt>::value; sdir++) {
 				len_t offset = (JJ+1)*(II+1)*sdir;
-				tausch_so->packSendBuffer(index(lvl,dir), sdir, so + offset);
+				tausch_so->packSendBuffer(index(lvl, dir), sdir, so + offset);
+			}
+			tausch_so->send(index(lvl, dir), index(lvl, dir));
+
+		}
+		if (recv_active[index(lvl, dir)]) {
+			tausch_so->recv(index(lvl,dir), index(lvl,dir));
+			for (int sdir = 0; sdir < stencil_ndirs<nine_pt>::value; sdir++) {
+				len_t offset = (JJ+1)*(II+1)*sdir;
+				tausch_so->unpackRecvBuffer(index(lvl, dir), sdir, so + offset);
+			}
+		}
+	}
+}
+
+void tausch_exchanger::exchange_func(int k, ftl::Buffer<real_t> gf)
+{
+	int lvl = nlevels - k;
+
+	for (int dir = 0; dir < halo_dir::count; dir++) {
+		if (send_active[index(lvl, dir)]) {
+                    //tausch->packSendBuffer(index(lvl,dir), 0, gf.data());
+                    gf.tausch_pack(tausch.get(), index(lvl, dir), 0);
+                    tausch->send(index(lvl,dir), index(lvl,dir));
+
+		}
+		if (recv_active[index(lvl, dir)]) {
+			tausch->recv(index(lvl,dir), index(lvl,dir));
+			//tausch->unpackRecvBuffer(index(lvl,dir), 0, gf.data());
+                        gf.tausch_unpack(tausch.get(), index(lvl, dir), 0);
+		}
+	}
+}
+
+void tausch_exchanger::exchange_sten(int k, ftl::Buffer<real_t> so)
+{
+	int lvl = nlevels - k;
+
+	auto & dimx = leveldims(0);
+	auto & dimy = leveldims(1);
+
+	len_t II = dimx(coord[0], k-1) + 2;
+	len_t JJ = dimy(coord[1], k-1) + 2;
+
+	for (int dir = 0; dir < halo_dir::count; dir++) {
+		if (send_active[index(lvl, dir)]) {
+			for (int sdir = 0; sdir < stencil_ndirs<nine_pt>::value; sdir++) {
+                            len_t offset = (JJ+1)*(II+1)*sdir;
+                            so.tausch_pack(tausch_so.get(), index(lvl, dir), sdir, offset);
+                            //tausch_so->packSendBuffer(index(lvl,dir), sdir, so.data() + offset);
 			}
 			tausch_so->send(index(lvl,dir), index(lvl,dir));
 
@@ -335,8 +396,9 @@ void tausch_exchanger::exchange_sten(int k, real_t * so)
 		if (recv_active[index(lvl, dir)]) {
 			tausch_so->recv(index(lvl,dir), index(lvl,dir));
 			for (int sdir = 0; sdir < stencil_ndirs<nine_pt>::value; sdir++) {
-				len_t offset = (JJ+1)*(II+1)*sdir;
-				tausch_so->unpackRecvBuffer(index(lvl,dir), sdir, so + offset);
+                            len_t offset = (JJ+1)*(II+1)*sdir;
+                            so.tausch_unpack(tausch_so.get(), index(lvl, dir), sdir, offset);
+                            //tausch_so->unpackRecvBuffer(index(lvl,dir), sdir, so.data() + offset);
 			}
 		}
 	}
@@ -344,24 +406,23 @@ void tausch_exchanger::exchange_sten(int k, real_t * so)
 
 void tausch_exchanger::run(mpi::grid_func & f, unsigned short dmask)
 {
+    std::cerr << "Tausch exchanger run" << std::endl;
+
 	auto lvl = f.grid().level();
 	lvl = nlevels - lvl - 1;
 
-        f.ensure_cpu();
-
-	for (int dir = 0; dir < halo_dir::count; dir++) {
-		if (send_active[index(lvl, dir)]) {
-			tausch->packSendBuffer(index(lvl,dir), 0, f.data());
-			tausch->send(index(lvl,dir), index(lvl,dir));
-
-		}
-		if (recv_active[index(lvl, dir)]) {
-			tausch->recv(index(lvl,dir), index(lvl,dir));
-			tausch->unpackRecvBuffer(index(lvl,dir), 0, f.data());
-		}
-	}
-
-        f.mark_cpu_dirty();
+        for (int dir = 0; dir < halo_dir::count; dir++) {
+            if (send_active[index(lvl, dir)]) {
+                //tausch->packSendBuffer(index(lvl, dir), 0, f.data());
+                f.tausch_pack(tausch.get(), index(lvl, dir), 0);
+                tausch->send(index(lvl, dir), index(lvl, dir));
+            }
+            if (recv_active[index(lvl, dir)]) {
+                tausch->recv(index(lvl, dir), index(lvl, dir));
+                //tausch->unpackRecvBuffer(index(lvl, dir), 0, f.data());
+                f.tausch_unpack(tausch.get(), index(lvl, dir), 0);
+            }
+        }
 }
 
 

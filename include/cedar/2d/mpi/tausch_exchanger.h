@@ -1,7 +1,7 @@
 #ifndef CEDAR_2D_TAUSCH_EXCHANGER_H
 #define CEDAR_2D_TAUSCH_EXCHANGER_H
 
-#include <tausch.h>
+#include <ftl/Buffer.hpp>
 
 #include <cedar/services/halo_exchange.h>
 #include <cedar/2d/mpi/stencil_op.h>
@@ -30,6 +30,8 @@ public:
 	void run(grid_func & gf, unsigned short dmask=7) override;
 	void exchange_func(int k, real_t * gf) override;
 	void exchange_sten(int k, real_t * so) override;
+    void exchange_func(int k, ftl::Buffer<real_t> gf) override;
+    void exchange_sten(int k, ftl::Buffer<real_t> so) override;
 	aarray<int, len_t, 2> & leveldims(int k) override {
 		return dims[k];
 	}
@@ -46,23 +48,23 @@ public:
 		auto lvl = so.grid().level();
 		lvl = nlevels - lvl - 1;
 
-                so.ensure_cpu();
-
 		for (int dir = 0; dir < halo_dir::count; dir++) {
 			if (send_active[index(lvl, dir)]) {
-				for (int sdir = 0; sdir < stencil_ndirs<sten>::value; sdir++)
-					tausch_so->packSendBuffer(index(lvl,dir), sdir, so.data() + so.index(0,0,sdir));
+                            for (int sdir = 0; sdir < stencil_ndirs<sten>::value; sdir++) {
+                                so.tausch_pack(tausch_so.get(), index(lvl, dir), sdir, so.index(0, 0, sdir));
+                            }
+
 				tausch_so->send(index(lvl,dir), index(lvl,dir));
 
 			}
 			if (recv_active[index(lvl, dir)]) {
 				tausch_so->recv(index(lvl,dir), index(lvl, dir));
-				for (int sdir = 0; sdir < stencil_ndirs<sten>::value; sdir++)
-					tausch_so->unpackRecvBuffer(index(lvl,dir), sdir, so.data() + so.index(0,0,sdir));
+				for (int sdir = 0; sdir < stencil_ndirs<sten>::value; sdir++) {
+                                    so.tausch_unpack(tausch_so.get(), index(lvl, dir), sdir, so.index(0,0,sdir));
+                                }
+
 			}
 		}
-
-                so.mark_cpu_dirty();
 	}
 	std::unique_ptr<line_pkg> line_data;
 

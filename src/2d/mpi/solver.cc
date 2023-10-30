@@ -67,7 +67,6 @@ void solver<fsten>::setup_cg_solve()
 
 	log::status << "Redistributing to " << choice[0] << " x " << choice[1] << " cores" << std::endl;
 	if (this->settings.coarse_solver == ml_settings::cg_type::lu) {
-            std::cerr << "create_redist_solver<cholesky_solver>" << std::endl;
 		this->coarse_solver = create_redist_solver<cholesky_solver>(kman,
 		                                                            *this->conf,
 		                                                            cop,
@@ -158,8 +157,8 @@ void solver<fsten>::setup_space(std::size_t nlevels)
                 throw std::runtime_error("FTL layer: Failed to load kernels.");
             }
             log::status << "Loaded and compiled all GPU kernels" << std::endl;
-
             log::status << "Allocating GPU memory" << std::endl;
+
             for (std::size_t i = 0; i < this->nlevels(); i++) {
                 if (i == 0) {
                     auto& level = this->levels.template get<fsten>(i);

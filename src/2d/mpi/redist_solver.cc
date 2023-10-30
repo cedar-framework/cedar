@@ -19,8 +19,6 @@ template<>
 template<class inner_solver>
 void redist_solver<inner_solver>::solve(grid_func & x, const grid_func & b)
 {
-    std::cerr << ":: Performing redist solve" << std::endl;
-
 	timer_begin("agglomerate");
 	gather_rhs(b);
 	timer_end("agglomerate");
@@ -54,8 +52,6 @@ redist_solver<inner_solver>::redist_solver(const stencil_op<nine_pt> & so,
                                            std::array<int, 2> nblock) :
 	redundant(false), nblock(nblock), active(true), recv_id(-1), services(services)
 {
-    std::cerr << " :: Setting up redist solver" << std::endl;
-
 	// Split communicator into collective processor blocks
 	auto & topo = so.grid();
 	auto & halo_service = services->template get<halo_exchange>();
@@ -79,7 +75,6 @@ redist_solver<inner_solver>::redist_solver(const stencil_op<nine_pt> & so,
 		MSG_pause(&parent_comm);
 		log::push_level("redist", *conf);
 		slv = std::make_unique<inner_solver>(*so_redist, conf, *services);
-                std::cerr << ":: Redist solver made inner solver" << std::endl;
 		log::pop_level();
 		MSG_pause(&msg_comm);
 		MSG_play(parent_comm);
@@ -95,7 +90,6 @@ void redist_solver<inner_solver>::redist_operator(const stencil_op<nine_pt> & so
 {
     auto& sod = const_cast<stencil_op<nine_pt>&>(so);
     sod.ensure_cpu();
-    std::cerr << "Moved SO operator from GPU to CPU" << std::endl;
 
 	so_redist = create_operator<typename inner_solver::stencil_op>(topo);
 

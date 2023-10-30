@@ -59,20 +59,10 @@ public:
 		                   std::size_t lvl, grid_func & x, const grid_func & b, int n)
 	{
 		auto & A = level.A;
-                // auto Ab = A.to_buffer();
-
-                std::cerr << "Top of v-cycle" << std::endl;
-                // std::cerr << "stencil operator: " << std::endl << Ab << std::endl;
-
-                auto xbm1 = x.to_buffer();
-                std::cerr << "input soln: " << std::endl << xbm1 << std::endl;
 
 		timer_begin("relaxation");
 		level.presmoother(A, x, b);
 		timer_end("relaxation");
-
-                auto xb = x.to_buffer();
-                std::cerr << "pre relaxation: " << std::endl << xb << std::endl;
 
 		grid_func & res = level.res;
 		timer_begin("residual");
@@ -80,9 +70,6 @@ public:
 		timer_end("residual");
 
 		log_residual(lvl, res);
-
-                auto resb = res.to_buffer();
-                std::cerr << "residual" << std::endl << resb << std::endl;
 
 		auto & coarse_b = levels.get(lvl+1).b;
 		auto & coarse_x = levels.get(lvl+1).x;
@@ -92,15 +79,11 @@ public:
 		timer_end("restrict");
 		coarse_x.set(0.0);
 
-                auto coarsebb = coarse_b.to_buffer();
-                std::cerr << "coarse b" << std::endl << coarsebb << std::endl;
-
 		timer_down();
 
 		std::size_t coarse_lvl = levels.size() - 1;
 		if (lvl+1 == coarse_lvl) {
 			timer_begin("coarse-solve");
-                        std::cerr << "Calling coarse solve" << std::endl;
 			coarse_solver(coarse_x, coarse_b);
 			timer_end("coarse-solve");
 			if (log::info.active()) {
@@ -117,29 +100,19 @@ public:
 		}
 
 		timer_up();
-                auto coarsexb = coarse_x.to_buffer();
-                std::cerr << "coarse x: " << std::endl << coarsexb << std::endl;
 
 		timer_begin("interp-add");
 		kman->template run<interp_add>(levels.get(lvl+1).P, coarse_x, res, x);
 		timer_end("interp-add");
 
-                auto xb2 = x.to_buffer();
-                std::cerr << "interp-add: " << std::endl << xb2 << std::endl;
-
 		timer_begin("relaxation");
 		level.postsmoother(A, x, b);
 		timer_end("relaxation");
 
-                auto xb3 = x.to_buffer();
-                std::cerr << "post relaxation: " << std::endl << xb3 << std::endl;
-
-                // auto xb = x.to_buffer();
-                // std::cerr << xb << std::endl;
-
 		if (log::info.active()) {
 			kman->template run<residual>(A, x, b, res);
 			log_residual(lvl, res);
+                        std::cerr << "residual: " << std::endl << res.to_buffer() << std::endl;
 		}
 	}
 };

@@ -14,13 +14,11 @@ std::shared_ptr<mpi::redist_solver<inner_solver>> create_redist_ptr(kman_ptr kma
                                                                     std::array<int, 2> & choice)
 {
 
-    std::cerr << "create_redist_ptr" << std::endl;
 	using rsolver = mpi::redist_solver<inner_solver>;
 	auto cg_bmg = std::make_shared<rsolver>(cop,
 	                                        kman->services_ptr(),
 	                                        cg_conf,
 	                                        choice);
-        std::cerr << "cg_bmg type: " << typeid(*(cg_bmg.get())).name() << std::endl;
 
 	return cg_bmg;
 }

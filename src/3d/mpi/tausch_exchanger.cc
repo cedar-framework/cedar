@@ -163,13 +163,11 @@ void tausch_exchanger::init_gfunc(std::vector<topo_ptr> & topos)
 		               remote_remoteMpiRank, local_remoteMpiRank);
 	}
 
-	int nbuf = 1;
-
 	tausch = std::make_unique<Tausch>(topos[0]->comm);
 
 	for (std::size_t i = 0; i < halo_dir::count * nlevels; i++) {
-		tausch->addSendHaloInfo(local_spec[i], sizeof(real_t), nbuf, local_remoteMpiRank[i]);
-		tausch->addRecvHaloInfo(remote_spec[i], sizeof(real_t), nbuf, remote_remoteMpiRank[i]);
+		tausch->addSendHaloInfo(local_spec[i], sizeof(real_t), local_remoteMpiRank[i]);
+		tausch->addRecvHaloInfo(remote_spec[i], sizeof(real_t),remote_remoteMpiRank[i]);
 	}
 }
 
@@ -195,13 +193,11 @@ void tausch_exchanger::init_so(std::vector<topo_ptr> & topos)
 
 	}
 
-	int nbuf = stencil_ndirs<xxvii_pt>::value;
-
 	tausch_so = std::make_unique<Tausch>(topos[0]->comm);
 
 	for (std::size_t i = 0; i < halo_dir::count * nlevels; i++) {
-		tausch_so->addSendHaloInfo(local_spec[i], sizeof(real_t), nbuf, local_remoteMpiRank[i]);
-		tausch_so->addRecvHaloInfo(remote_spec[i], sizeof(real_t), nbuf, remote_remoteMpiRank[i]);
+		tausch_so->addSendHaloInfo(local_spec[i], sizeof(real_t), local_remoteMpiRank[i]);
+		tausch_so->addRecvHaloInfo(remote_spec[i], sizeof(real_t), remote_remoteMpiRank[i]);
 	}
 }
 

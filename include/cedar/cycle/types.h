@@ -29,7 +29,7 @@ public:
 	{
 		if (log::info.active()) {
 			log::info << "Level " << (levels.size() - lvl - 1) << " residual norm: "
-			          << res.template lp_norm<2>() << std::endl;
+			          << const_cast<grid_func&>(res).template lp_norm<2>() << std::endl;
 		}
 	}
 

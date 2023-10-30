@@ -296,16 +296,18 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 		auto & level = levels.template get<fsten>(0);
 		int maxiter = settings.maxiter;
 		real_t tol = settings.tol;
+
 		kman->template run<residual>(level.A,x,b,level.res);
 		real_t res0_l2 = level.res.template lp_norm<2>();
-		log::info << "Initial residual l2 norm: " << res0_l2 << std::endl;
 
 		timer_begin("solve");
 
 		for (auto i: range(maxiter)) {
 			cycle->run(x, b);
 			kman->template run<residual>(level.A,x,b,level.res);
-			real_t res_l2 = level.res.template lp_norm<2>();
+
+                        auto& res = const_cast<grid_func&>(level.res);
+			real_t res_l2 = res.template lp_norm<2>();
 			real_t rel_l2 = res_l2 / res0_l2;
 			log::status << "Iteration " << i << " relative l2 norm: " << rel_l2 << std::endl;
 			if (rel_l2 < tol) break;

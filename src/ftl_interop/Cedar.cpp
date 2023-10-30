@@ -4,16 +4,12 @@
 
 void halo_exchange(int k, ftl::Buffer<real_t> q, void* halof_void) {
     auto halof = static_cast<cedar::services::halo_exchange_base*>(halof_void);
-    q.dev_to_host();
-    halof->exchange_func(k, q.data());
-    q.mark_host_dirty();
+    halof->exchange_func(k, q);
 }
 
 void halo_stencil_exchange(int k, ftl::Buffer<real_t> soc, void *halof_void) {
     auto halof = static_cast<cedar::services::halo_exchange_base*>(halof_void);
-    soc.dev_to_host();
-    halof->exchange_sten(k, soc.data());
-    soc.mark_host_dirty();
+    halof->exchange_sten(k, soc);
 }
 
 void cedar_mempool_pos(void* mp_void, int nbytes, int& pos) {

@@ -12,6 +12,16 @@ class halo_exchange_base : public service
 public:
 	virtual void exchange_func(int k, real_t *gf) = 0;
 	virtual void exchange_sten(int k, real_t *so) = 0;
+
+    virtual void exchange_func(int k, ftl::Buffer<real_t> gf) {
+        exchange_func(k, gf.data());
+        gf.mark_host_dirty(true);
+    }
+
+    virtual void exchange_sten(int k, ftl::Buffer<real_t> so) {
+        exchange_sten(k, so.data());
+        so.mark_host_dirty(true);
+    }
 };
 
 

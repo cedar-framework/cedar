@@ -22,8 +22,6 @@ void cholesky_solver::setup(stencil_op & sop)
 	this->ABD = grid_func(abd_len_0, nxc*nyc, 0);
 	this->bbd = new real_t[this->ABD.len(1)];
 
-        std::cerr << " :: Setting up Cholesky solver." << std::endl;
-
         sop.ensure_cpu();
 	kman->setup<solve_cg>(sop, ABD);
 }
@@ -38,7 +36,6 @@ cholesky_solver::~cholesky_solver()
 
 void cholesky_solver::cycle(grid_func & x, const grid_func & b)
 {
-    std::cerr << " :: Calling Cholesky solve" << std::endl;
     auto& bd = const_cast<grid_func&>(b);
     x.ensure_cpu();
     bd.ensure_cpu();
