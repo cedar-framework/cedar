@@ -19,8 +19,6 @@ using len_t = cedar::len_t;
 
 #include <src/2d/ftn/mpi/BMG2_SymStd_SETUP_PtrMSGSO.f90.hpp>
 #include <src/2d/ftn/mpi/BMG2_SymStd_SETUP_PtrMSG.f90.hpp>
-#include <src/2d/ftn/mpi/BMG2_SymStd_SETUP_MSGGrid.f90.hpp>
-#include <src/2d/ftn/mpi/BMG2_SymStd_SETUP_MSGGridSO.f90.hpp>
 #include <src/2d/ftn/mpi/BMG2_SymStd_SETUP_PtrLS.f90.hpp>
 #include <src/2d/ftn/mpi/BMG2_SymStd_SETUP_LSGrid.f90.hpp>
 #include <src/2d/ftn/mpi/BMG2_SymStd_SETUP_cg_boxmg.f90.hpp>

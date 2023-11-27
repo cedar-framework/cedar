@@ -1,8 +1,5 @@
 #include <cedar/2d/mpi/tausch_exchanger.h>
 
-// #define addSendHaloInfos addSendHaloInfo
-// #define addRecvHaloInfos addRecvHaloInfo
-
 extern "C" {
 	using namespace cedar;
 	void BMG2_SymStd_SETUP_Tausch(int nog, len_t *dimx, len_t *dimy,
@@ -308,8 +305,6 @@ void tausch_exchanger::exchange_func(int k, real_t * gf)
 {
 	int lvl = nlevels - k;
 
-        std::cerr << "exchange_func real_t* so" << std::endl;
-
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (send_active[index(lvl, dir)]) {
 			tausch->packSendBuffer(index(lvl,dir), 0, gf);
@@ -332,8 +327,6 @@ void tausch_exchanger::exchange_sten(int k, real_t * so)
 
 	len_t II = dimx(coord[0], k-1) + 2;
 	len_t JJ = dimy(coord[1], k-1) + 2;
-
-        std::cerr << "exchange_sten real_t* so" << std::endl;
 
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (send_active[index(lvl, dir)]) {
@@ -360,14 +353,12 @@ void tausch_exchanger::exchange_func(int k, ftl::Buffer<real_t> gf)
 
 	for (int dir = 0; dir < halo_dir::count; dir++) {
 		if (send_active[index(lvl, dir)]) {
-                    //tausch->packSendBuffer(index(lvl,dir), 0, gf.data());
                     gf.tausch_pack(tausch.get(), index(lvl, dir), 0);
                     tausch->send(index(lvl,dir), index(lvl,dir));
 
 		}
 		if (recv_active[index(lvl, dir)]) {
 			tausch->recv(index(lvl,dir), index(lvl,dir));
-			//tausch->unpackRecvBuffer(index(lvl,dir), 0, gf.data());
                         gf.tausch_unpack(tausch.get(), index(lvl, dir), 0);
 		}
 	}
@@ -388,7 +379,6 @@ void tausch_exchanger::exchange_sten(int k, ftl::Buffer<real_t> so)
 			for (int sdir = 0; sdir < stencil_ndirs<nine_pt>::value; sdir++) {
                             len_t offset = (JJ+1)*(II+1)*sdir;
                             so.tausch_pack(tausch_so.get(), index(lvl, dir), sdir, offset);
-                            //tausch_so->packSendBuffer(index(lvl,dir), sdir, so.data() + offset);
 			}
 			tausch_so->send(index(lvl,dir), index(lvl,dir));
 
@@ -398,7 +388,6 @@ void tausch_exchanger::exchange_sten(int k, ftl::Buffer<real_t> so)
 			for (int sdir = 0; sdir < stencil_ndirs<nine_pt>::value; sdir++) {
                             len_t offset = (JJ+1)*(II+1)*sdir;
                             so.tausch_unpack(tausch_so.get(), index(lvl, dir), sdir, offset);
-                            //tausch_so->unpackRecvBuffer(index(lvl,dir), sdir, so.data() + offset);
 			}
 		}
 	}
@@ -406,20 +395,16 @@ void tausch_exchanger::exchange_sten(int k, ftl::Buffer<real_t> so)
 
 void tausch_exchanger::run(mpi::grid_func & f, unsigned short dmask)
 {
-    std::cerr << "Tausch exchanger run" << std::endl;
-
 	auto lvl = f.grid().level();
 	lvl = nlevels - lvl - 1;
 
         for (int dir = 0; dir < halo_dir::count; dir++) {
             if (send_active[index(lvl, dir)]) {
-                //tausch->packSendBuffer(index(lvl, dir), 0, f.data());
                 f.tausch_pack(tausch.get(), index(lvl, dir), 0);
                 tausch->send(index(lvl, dir), index(lvl, dir));
             }
             if (recv_active[index(lvl, dir)]) {
                 tausch->recv(index(lvl, dir), index(lvl, dir));
-                //tausch->unpackRecvBuffer(index(lvl, dir), 0, f.data());
                 f.tausch_unpack(tausch.get(), index(lvl, dir), 0);
             }
         }

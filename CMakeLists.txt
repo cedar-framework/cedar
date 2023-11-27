@@ -81,7 +81,7 @@ if (ENABLE_PLANE_AGG)
   find_package(Argobots REQUIRED)
 endif()
 
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+find_package(Python3 3.11 EXACT REQUIRED COMPONENTS Interpreter Development)
 
 add_subdirectory(src)
 FTLTranspile(cedar_src cedar_ftl_src)
@@ -94,7 +94,6 @@ target_compile_definitions(cedar PUBLIC
 target_compile_features(cedar PUBLIC cxx_std_17)
 target_compile_options(cedar PUBLIC
   $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>
-  $<$<COMPILE_LANGUAGE:Fortran>:-fallow-argument-mismatch>
   $<$<CONFIG:DEBUG>:-O0;-Wall;-g>
   $<$<CONFIG:RELEASE>:-O3>)
 set_target_properties(cedar PROPERTIES POSITION_INDEPENDENT_CODE ON)
@@ -133,7 +132,7 @@ endif()
 find_package(CUDAToolkit)
 if (${CUDAToolkit_FOUND})
   target_compile_definitions(cedar PUBLIC FTL_COMPILE_CUDA=1)
-  target_link_libraries(cedar PUBLIC CUDA::cuda_driver CUDA::cudart CUDA::nvrtc)
+  target_link_libraries(cedar PUBLIC CUDA::cuda_driver CUDA::cudart CUDA::nvrtc CUDA::cublas)
   message("Compiling with CUDA support")
 endif()
 
@@ -184,5 +183,3 @@ if(ENABLE_UNIT_TESTS)
 
   add_subdirectory(test)
 endif()
-
-# add_subdirectory(app)

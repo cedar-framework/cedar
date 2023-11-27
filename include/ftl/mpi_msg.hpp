@@ -12,9 +12,7 @@ void MSG_enable(
 	int myproc,
 	int numproc);
 
-void MSG_set_comm_parent(MPI_Comm comm);
-
-void MSG_set_comm_parent(std::intptr_t comm);
+void MSG_set_comm_parent(int32_t comm);
 
 int MSG_myproc();
 

@@ -62,7 +62,7 @@
 
       DO j = 2, Ny-1
          DO i = 2, Nx-1
-            SOR(i,j,msor)=rONE/SO(i,j,ko)
+            SOR(i,j,msor)=1.0/SO(i,j,ko)
          ENDDO
       ENDDO
 

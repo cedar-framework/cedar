@@ -159,6 +159,7 @@ void solver<fsten>::setup_space(std::size_t nlevels)
             log::status << "Loaded and compiled all GPU kernels" << std::endl;
             log::status << "Allocating GPU memory" << std::endl;
 
+            std::cerr << "Ensuring solver variables are on gpu...";
             for (std::size_t i = 0; i < this->nlevels(); i++) {
                 if (i == 0) {
                     auto& level = this->levels.template get<fsten>(i);
@@ -176,6 +177,7 @@ void solver<fsten>::setup_space(std::size_t nlevels)
                     level.b.ensure_gpu();
                 }
             }
+            std::cerr << " ...done" << std::endl;
         }
 }
 template void solver<five_pt>::setup_space(std::size_t nlevels);

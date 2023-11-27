@@ -26,6 +26,7 @@ namespace cedar { namespace cdr2 { namespace mpi {
 		std::array<len_t, 2> ngc({topoc.nglobal(0), topoc.nglobal(1)});
 
 		if (periodic[0] and ((ngf[0]/2 + 1) != ngc[0])) {
+                    std::cerr << "Ensuring CPU for periodic restriction" << std::endl;
                     q.ensure_cpu();
 			if (topof.coord(0) == 0) {
 				for (auto j : q.grange(1)) {
@@ -41,6 +42,7 @@ namespace cedar { namespace cdr2 { namespace mpi {
 		}
 
 		if (periodic[1] and ((ngf[1]/2 + 1) != ngc[1])) {
+                    std::cerr << "Ensuring CPU for periodic restriction" << std::endl;
                     q.ensure_cpu();
 			if (topof.coord(1) == 0) {
 				for (auto i : q.grange(0)) {

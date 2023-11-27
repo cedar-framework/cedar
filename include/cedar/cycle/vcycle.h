@@ -60,6 +60,8 @@ public:
 	{
 		auto & A = level.A;
 
+                // std::cerr << "Before smoothing: " << std::endl << x.to_buffer() << std::endl;
+
 		timer_begin("relaxation");
 		level.presmoother(A, x, b);
 		timer_end("relaxation");
@@ -68,6 +70,9 @@ public:
 		timer_begin("residual");
 		kman->template run<residual>(A, x, b, res);
 		timer_end("residual");
+
+                // std::cerr << "Post smoothing: " << std::endl << x.to_buffer() << std::endl;
+                // std::cerr << "Residual: " << std::endl << res.to_buffer() << std::endl;
 
 		log_residual(lvl, res);
 
@@ -78,6 +83,9 @@ public:
 		kman->template run<restriction>(levels.get(lvl+1).R, res, coarse_b);
 		timer_end("restrict");
 		coarse_x.set(0.0);
+
+                // std::cerr << "Coarse solution: " << std::endl << coarse_x.to_buffer() << std::endl;
+                // std::cerr << "coarse rhs: " << std::endl << coarse_b.to_buffer() << std::endl;
 
 		timer_down();
 
@@ -101,8 +109,11 @@ public:
 
 		timer_up();
 
+                // std::cerr << "Coarse solution after solve: " << std::endl << coarse_x.to_buffer() << std::endl;
+
 		timer_begin("interp-add");
 		kman->template run<interp_add>(levels.get(lvl+1).P, coarse_x, res, x);
+                // std::cerr << "Interpolated solution: " << std::endl << x.to_buffer() << std::endl;
 		timer_end("interp-add");
 
 		timer_begin("relaxation");

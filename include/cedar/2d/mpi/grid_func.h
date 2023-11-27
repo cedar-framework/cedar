@@ -8,6 +8,8 @@
 #include <cedar/mpi/par_object.h>
 #include <iostream>
 
+#include <ftl/Blas.hpp>
+
 namespace cedar { namespace cdr2 { namespace inter { namespace mpi {
 				class prolong_op;
 			}
@@ -41,19 +43,25 @@ public:
 
 template<int p> real_t grid_func::lp_norm()
 {
-    ensure_cpu();
+    real_t result;
+    if (p == 2) {
+        result = ftl::blas::norm_two(base_buffer);
+        result *= result;
+    } else {
+        ensure_cpu();
 
-	real_t result = 0;
+        result = 0;
 
-	for (auto j : this->range(1)) {
-		for (auto i : this->range(0)) {
-			result += std::pow((*this)(i,j), p);
-		}
-	}
+        for (auto j : this->range(1)) {
+        	for (auto i : this->range(0)) {
+        		result += std::pow((*this)(i,j), p);
+        	}
+        }
+    }
 
-	MPI_Allreduce(MPI_IN_PLACE, &result, 1, MPI_DOUBLE, MPI_SUM, grid_->comm);
+    MPI_Allreduce(MPI_IN_PLACE, &result, 1, MPI_DOUBLE, MPI_SUM, grid_->comm);
 
-	return std::pow(result, 1./p);
+    return std::pow(result, 1./p);
 }
 
 }}}

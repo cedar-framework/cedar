@@ -260,15 +260,22 @@ public:
 
 	void set(data_type v)
 	{
+            if (v == 0) {
+                base_buffer.zero();
+            } else {
+
 		for (len_type i = 0; i < flat_len; i++)
 			base_ptr[i] = v;
 
                 base_buffer.mark_host_dirty();
+            }
 	}
 
 
 	void scale(data_type scalar)
 	{
+            base_buffer.dev_to_host();
+
 		for (len_type i = 0; i < flat_len; i++)
 			base_ptr[i] *= scalar;
 

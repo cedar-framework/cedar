@@ -10,8 +10,8 @@
 
 
 namespace cedar { namespace cdr2 { namespace inter {
-class prolong_op;
-}}}
+            class prolong_op;
+        }}}
 
 
 namespace cedar { namespace cdr2 {
@@ -19,42 +19,47 @@ namespace cedar { namespace cdr2 {
 	class grid_func : public array<real_t, 2>, public grid_quantity<len_t, 2>
 	{
 	public:
-		using array<real_t, 2>::operator();
-		grid_func(real_t *ext_data, len_t nx, len_t ny, unsigned int nghosts=1);
-		grid_func(len_t nx, len_t ny, unsigned int nghosts=1);
-		grid_func() {}
-		grid_func & operator=(grid_func&& gf);
-		grid_func(const grid_func & gf) = default;
-		grid_func & operator=(const grid_func & gf) = default;
-		static grid_func ones(len_t nx, len_t ny);
-		static grid_func zeros(len_t nx, len_t ny);
-		static grid_func random(len_t nx, len_t ny);
-		static grid_func like(const grid_func &likeable);
-		static grid_func zeros_like(const grid_func &likeable);
-		static grid_func ones_like(const grid_func &likeable);
-		virtual real_t inf_norm() const;
-		template<int p> real_t lp_norm();
-		grid_func & operator-=(const grid_func & rhs);
-		friend grid_func operator-(grid_func lhs, const grid_func &rhs) { return lhs -= rhs; }
-		friend std::ostream & operator<<(std::ostream &os, const grid_func & obj);
+            using array<real_t, 2>::operator();
+            grid_func(real_t *ext_data, len_t nx, len_t ny, unsigned int nghosts=1);
+            grid_func(len_t nx, len_t ny, unsigned int nghosts=1);
+            grid_func() {}
+            grid_func & operator=(grid_func&& gf);
+            grid_func(const grid_func & gf) = default;
+            grid_func & operator=(const grid_func & gf) {
+                return static_cast<grid_func&>(
+                    array<real_t, 2>::operator=(const_cast<grid_func&>(gf))
+                    );
+            }
+            static grid_func ones(len_t nx, len_t ny);
+            static grid_func zeros(len_t nx, len_t ny);
+            static grid_func random(len_t nx, len_t ny);
+            static grid_func like(const grid_func &likeable);
+            static grid_func zeros_like(const grid_func &likeable);
+            static grid_func ones_like(const grid_func &likeable);
+            virtual real_t inf_norm() const;
+            template<int p> real_t lp_norm();
+            grid_func & operator-=(const grid_func & rhs);
+            friend grid_func operator-(grid_func lhs, const grid_func &rhs) { return lhs -= rhs; }
+            friend std::ostream & operator<<(std::ostream &os, const grid_func & obj);
 	};
 
 
 	template<int p> real_t grid_func::lp_norm()
 	{
+            std::cerr << "Grid function: ensuring on CPU to take norm" << std::endl;
             ensure_cpu();
 
-		real_t result = 0;
+            real_t result = 0;
 
-		for (auto j : this->range(1)) {
-			for (auto i : this->range(0)) {
-				result += std::pow((*this)(i,j), p);
-			}
-		}
+            for (auto j : this->range(1)) {
+                for (auto i : this->range(0)) {
+                    result += std::pow((*this)(i,j), p);
+                }
+            }
 
-		return std::pow(result, 1./p);
+            return std::pow(result, 1./p);
 	}
 
-}}
+    }}
 
 #endif

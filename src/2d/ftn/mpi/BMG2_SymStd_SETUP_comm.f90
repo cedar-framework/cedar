@@ -77,8 +77,6 @@
 
          END IF
 
-20    CONTINUE
-
       END IF
 
       !
@@ -87,6 +85,7 @@
       ! linesolve.
       !
 
+20    CONTINUE
       COMM(2,2) = COMM(1,2)
 
     END subroutine BMG2_SymStd_SETUP_comm

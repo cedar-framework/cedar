@@ -93,9 +93,9 @@ if (ENABLE_MPI)
     list(APPEND ftl_sources
     	ftn/mpi/BMG2_SymStd_SETUP_PtrMSG.f90
 	ftn/mpi/BMG2_SymStd_SETUP_PtrMSGSO.f90
-	ftn/mpi/BMG2_SymStd_SETUP_MSGGrid.f90
-	ftn/mpi/BMG2_SymStd_SETUP_MSGGridSO.f90
-	ftn/mpi/BMG2_SymStd_SETUP_MSG.f90
+	# ftn/mpi/BMG2_SymStd_SETUP_MSGGrid.f90
+	# ftn/mpi/BMG2_SymStd_SETUP_MSGGridSO.f90
+	# ftn/mpi/BMG2_SymStd_SETUP_MSG.f90
 	ftn/mpi/BMG2_SymStd_SETUP_LS.f90
 	ftn/mpi/BMG2_SymStd_SETUP_LSGrid.f90
 	ftn/mpi/BMG2_SymStd_SETUP_PtrLS.f90
@@ -111,8 +111,8 @@ if (ENABLE_MPI)
 	ftn/mpi/BMG2_SymStd_relax_GS.f90
 	ftn/mpi/BMG2_SymStd_SETUP_ADD_SOR_PTRS.f90
 	ftn/mpi/BMG2_SymStd_SETUP_ADD_GROUP_PTRS.f90
-	ftn/mpi/BMG2_SymStd_SETUP_comm.f90
-	ftn/mpi/BMG2_SymStd_SETUP_trisolve.f90
+	# ftn/mpi/BMG2_SymStd_SETUP_comm.f90
+	# ftn/mpi/BMG2_SymStd_SETUP_trisolve.f90
 	ftn/mpi/BMG2_SymStd_RWork_2_TDG.f90
 	ftn/mpi/BMG2_SymStd_TDG_2_RWork.f90
 	ftn/mpi/BMG2_SymStd_restrict.f90
