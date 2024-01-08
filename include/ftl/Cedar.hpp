@@ -16,6 +16,7 @@ using len_t = cedar::len_t;
 
 #include <ftl/Buffer.hpp>
 #include <ftl/mpi.hpp>
+#include <ftl/Blas.hpp>
 
 #include <src/2d/ftn/mpi/BMG2_SymStd_SETUP_PtrMSGSO.f90.hpp>
 #include <src/2d/ftn/mpi/BMG2_SymStd_SETUP_PtrMSG.f90.hpp>
@@ -85,5 +86,9 @@ void MSG_tp_setup(ftl::Buffer<len_t> la_size, ftl::Buffer<len_t> eid_s, ftl::Buf
                   int sfa, int pfa, int& ier);
 void cedar_mempool_pos(void* mp_void, int nbytes, int& pos);
 void print_error(const char* str);
+
+void dpotrf_gpu(const char* uplo, int n, ftl::Buffer<real_t> abd, int nabd, int& info);
+void dpotrs_gpu(const char* uplo, int n, int nrhs, ftl::Buffer<real_t> A, int lda,
+                ftl::FlatBuffer<real_t> B, int ldb, int& info);
 
 #endif

@@ -161,10 +161,10 @@
                     &           RWORK,NLINES*8,MPI_DOUBLE_PRECISION,&
                     &           0, YLINECOMM, IERR)
             else
-               CALL MPI_Gather(RWORK,NLINES*8,&
-                    &           MPI_DOUBLE_PRECISION,&
-                    &           0.0d0,NLINES*8,MPI_DOUBLE_PRECISION,&
-                    &           0, YLINECOMM, IERR)
+               ! CALL MPI_Gather(RWORK,NLINES*8,&
+               !      &           MPI_DOUBLE_PRECISION,&
+               !      &           0.0d0,NLINES*8,MPI_DOUBLE_PRECISION,&
+               !      &           0, YLINECOMM, IERR)
             endif
          ENDIF
 
@@ -194,9 +194,9 @@
                     &           MPI_DOUBLE_PRECISION,MPI_IN_PLACE,NLINES*8, &
                     &           MPI_DOUBLE_PRECISION,0,YLINECOMM,IERR)
             else
-               CALL MPI_Scatter(0.0d0,NLINES*8,&
-                    &           MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
-                    &           MPI_DOUBLE_PRECISION,0,YLINECOMM,IERR)
+               ! CALL MPI_Scatter(0.0d0,NLINES*8,&
+               !      &           MPI_DOUBLE_PRECISION,RWORK, NLINES*8, &
+               !      &           MPI_DOUBLE_PRECISION,0,YLINECOMM,IERR)
             endif
          ENDIF
 
