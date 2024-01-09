@@ -25,7 +25,7 @@ namespace cedar { namespace kernels {
 		virtual void run(grid_func & x,
 		                 const grid_func & b,
 		                 const grid_func &ABD,
-		                 real_t *bbd) = 0;
+		                 array<real_t, 1>& bbd) = 0;
 	};
 }}
 

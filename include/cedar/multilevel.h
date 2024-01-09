@@ -332,7 +332,7 @@ protected:
 	std::shared_ptr<kern_manager> kman;
 	ml_settings settings;
 	grid_func ABD;
-	real_t *bbd;
+        array<real_t, 1> bbd;
 };
 
 }

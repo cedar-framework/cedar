@@ -29,7 +29,7 @@ public:
 protected:
 	kman_ptr kman;
 	grid_func ABD;
-	real_t *bbd;
+        array<real_t, 1> bbd;
 	std::shared_ptr<config> conf;
 	void setup(stencil_op & sop);
 };

@@ -47,7 +47,7 @@ public:
 	void run(grid_func & x,
 	         const grid_func & b,
 	         const grid_func & ABD,
-	         real_t * bbd) override;
+	         array<real_t, 1>& bbd) override;
 };
 
 }}

@@ -20,18 +20,16 @@ void cholesky_solver::setup(stencil_op & sop)
 	if (params->periodic[0] or params->periodic[1])
 		abd_len_0 = nxc*nyc;
 	this->ABD = grid_func(abd_len_0, nxc*nyc, 0);
-	this->bbd = new real_t[this->ABD.len(1)];
+        this->bbd = array<real_t, 1>(
+            params->use_gpu ? ftl::BufferAllocateDevice::Buffer_GPU : ftl::BufferAllocateDevice::Buffer_CPU,
+            this->ABD.len(1));
 
         sop.ensure_cpu();
 	kman->setup<solve_cg>(sop, ABD);
 }
 
 
-cholesky_solver::~cholesky_solver()
-{
-	if (bbd)
-		delete[] bbd;
-}
+cholesky_solver::~cholesky_solver() {}
 
 
 void cholesky_solver::cycle(grid_func & x, const grid_func & b)

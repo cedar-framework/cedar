@@ -27,7 +27,9 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->add<restriction, restrict_f90>("system");
 	kman->add<residual, residual_f90>("system");
 	kman->add<setup_interp, setup_interp_f90>("system");
-	kman->add<solve_cg, solve_cg_f90>("system");
+
+	kman->add<solve_cg, solve_cg_f90<cedar::cpu>>("system");
+	kman->add<solve_cg, solve_cg_f90<cedar::gpu>>("gpu");
 
 	kman->set<point_relax>("system");
 	kman->set<line_relax<relax_dir::x>>("system");
@@ -37,7 +39,9 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->set<restriction>("system");
 	kman->set<residual>("system");
 	kman->set<setup_interp>("system");
-	kman->set<solve_cg>("system");
+
+        const std::string device_kernels = (params->use_gpu ? "gpu" : "system");
+	kman->set<solve_cg>(device_kernels);
 
 	// register services
 	auto & services = kman->services();

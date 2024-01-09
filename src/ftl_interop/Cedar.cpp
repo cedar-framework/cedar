@@ -1,4 +1,5 @@
 #include <ftl/Cedar.hpp>
+#include <ftl/Blas.hpp>
 #include <iostream>
 #include <cedar/services/mempool.h>
 
@@ -15,6 +16,27 @@ void halo_stencil_exchange(int k, ftl::Buffer<real_t> soc, void *halof_void) {
 void cedar_mempool_pos(void* mp_void, int nbytes, int& pos) {
     auto mp = static_cast<cedar::services::mempool*>(mp_void);
     pos = mp->pos(nbytes);
+}
+
+void dpotrf_gpu(const char* uplo, int n, ftl::Buffer<real_t>& abd, int nabd, int& info) {
+    ftl::blas::TriangularFillMode fill_mode =
+        (uplo[0] == 'U' ?
+         ftl::blas::TriangularFillMode::Upper :
+         ftl::blas::TriangularFillMode::Lower);
+
+    ftl::blas::cholesky_factorize(fill_mode, abd);
+    info = 0;
+}
+
+void dpotrs_gpu(const char* uplo, int n, int nrhs, ftl::Buffer<real_t>& A, int lda,
+                ftl::FlatBuffer<real_t>& B, int ldb, int& info) {
+    ftl::blas::TriangularFillMode fill_mode =
+        (uplo[0] == 'U' ?
+         ftl::blas::TriangularFillMode::Upper :
+         ftl::blas::TriangularFillMode::Lower);
+
+    ftl::blas::cholesky_solve(fill_mode, A, nrhs, B);
+    info = 0;
 }
 
 void print_error(const char* str) {

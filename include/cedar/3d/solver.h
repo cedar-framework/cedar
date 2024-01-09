@@ -55,7 +55,6 @@ solver(stencil_op<fsten> & fop,
 		this->kman = build_kernel_manager(*this->conf);
 		parent::setup(fop);
 	}
-	~solver() { delete[] this->bbd; }
 	std::size_t compute_num_levels(stencil_op<fsten> & fop)
 	{
 		float nxc, nyc, nzc;
@@ -124,7 +123,9 @@ solver(stencil_op<fsten> & fop,
 		if (params->periodic[0] or params->periodic[1] or params->periodic[2])
 			abd_len_0 = nxc*nyc*nzc;
 		this->ABD = grid_func(abd_len_0, nxc*nyc*nzc, 0);
-		this->bbd = new real_t[this->ABD.len(1)];
+                this->bbd = array<real_t, 1>(
+                    params->use_gpu ? ftl::BufferAllocateDevice::Buffer_GPU : ftl::BufferAllocateDevice::Buffer_CPU,
+                    this->ABD.len(1));
 	}
 	void give_op(std::unique_ptr<stencil_op<fsten>> fop) {fop_ref = std::move(fop);}
 
@@ -136,4 +137,3 @@ protected:
 }}
 
 #endif
-

@@ -4,16 +4,23 @@
 #include <cedar/2d/types.h>
 #include <cedar/kernels/solve_cg.h>
 
+using real_t = cedar::real_t;
+using len_t = cedar::len_t;
+
+#include <src/2d/ftn/BMG2_SymStd_SETUP_cg_LU_gpu.f90.hpp>
+#include <src/2d/ftn/BMG2_SymStd_SOLVE_cg_gpu.f90.hpp>
 
 extern "C" {
 	using namespace cedar;
 	void BMG2_SymStd_SETUP_cg_LU(real_t*, len_t*, len_t*, int*, real_t*, len_t*,len_t*,int*);
+	void BMG2_SymStd_SOLVE_cg(real_t*, real_t*, len_t, len_t, real_t*, real_t*, len_t, len_t, int);
 	void BMG_get_bc(int, int*);
 }
 
 
 namespace cedar { namespace cdr2 {
 
+template <typename device=cedar::cpu>
 class solve_cg_f90 : public kernels::solve_cg<stypes>
 {
 public:
@@ -33,6 +40,8 @@ public:
 	void setup_impl(const stencil_op<sten> & so,
 	                grid_func & ABD)
 	{
+            std::cerr << "Running coarse grid setup on " << device::to_string() << std::endl;
+
 		len_t nx, ny;
 		int nstencil;
 		len_t nabd1, nabd2;
@@ -50,17 +59,48 @@ public:
 
 		BMG_get_bc(params->per_mask(), &ibc);
 
-		BMG2_SymStd_SETUP_cg_LU(sod.data(), &nx, &ny, &nstencil,
-		                        ABD.data(), &nabd1, &nabd2, &ibc);
+                sod.template ensure<device>();
+                ABD.template ensure<device>();
+
+                if (device::is_gpu()) {
+                    BMG2_SymStd_SETUP_cg_LU_gpu(sod, nx, ny, nstencil,
+                                                ABD, nabd1, nabd2, ibc);
+                } else {
+                    BMG2_SymStd_SETUP_cg_LU(sod.data(), &nx, &ny, &nstencil,
+                                            ABD.data(), &nabd1, &nabd2, &ibc);
+                }
 	}
 
-	void run(grid_func & x,
-	         const grid_func & b,
-	         const grid_func & ABD,
-	         real_t * bbd) override;
+        void run(grid_func & x,
+                 const grid_func & b,
+                 const grid_func & ABD,
+                 array<real_t, 1>& bbd) override
+        {
+            std::cerr << "Running coarse grid solve on " << device::to_string() << std::endl;
+
+            int ibc;
+
+            grid_func & bd = const_cast<grid_func&>(b);
+            grid_func & abd_data = const_cast<grid_func&>(ABD);
+
+            BMG_get_bc(params->per_mask(), &ibc);
+
+            bd.template ensure<device>();
+            abd_data.template ensure<device>();
+
+            auto nabd1 = ABD.len(0);
+            auto nabd2 = ABD.len(1);
+
+            if (device::is_gpu()) {
+                BMG2_SymStd_SOLVE_cg_gpu(x, bd, x.len(0), x.len(1),
+                                         abd_data, bbd, nabd1, nabd2, ibc);
+            } else {
+                BMG2_SymStd_SOLVE_cg(x.data(), bd.data(), x.len(0), x.len(1),
+                                     abd_data.data(), bbd.data(), ABD.len(0), ABD.len(1), ibc);
+            }
+        }
 };
 
 }}
 
 #endif
-

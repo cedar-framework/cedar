@@ -16,7 +16,7 @@ namespace cedar { namespace cdr3 {
 void solve_cg_f90::run(grid_func & x,
                        const grid_func & b,
                        const grid_func & ABD,
-                       real_t *bbd)
+                       array<real_t, 1>& bbd)
 {
 		int ibc;
 
@@ -26,7 +26,7 @@ void solve_cg_f90::run(grid_func & x,
 		BMG_get_bc(params->per_mask(), &ibc);
 
 		BMG3_SymStd_SOLVE_cg(x.data(), bd.data(), x.len(0), x.len(1), x.len(2),
-		                     abd_data.data(), &bbd[0], ABD.len(0), ABD.len(1), ibc);
+		                     abd_data.data(), bbd.data(), ABD.len(0), ABD.len(1), ibc);
 }
 
 }}

@@ -132,7 +132,7 @@ endif()
 find_package(CUDAToolkit)
 if (${CUDAToolkit_FOUND})
   target_compile_definitions(cedar PUBLIC FTL_COMPILE_CUDA=1)
-  target_link_libraries(cedar PUBLIC CUDA::cuda_driver CUDA::cudart CUDA::nvrtc CUDA::cublas)
+  target_link_libraries(cedar PUBLIC CUDA::cuda_driver CUDA::cudart CUDA::nvrtc CUDA::cublas CUDA::cusolver)
   message("Compiling with CUDA support")
 endif()
 
