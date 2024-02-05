@@ -140,14 +140,8 @@ void solver<fsten>::setup_space(std::size_t nlevels)
 		this->levels.add(sman.get<mempool>(),
 		                 cgrid);
 	}
-	setup_halo();
-	{
-		auto & sop = this->levels.template get<fsten>(0).A;
-		auto & halo_service = kman->services().template get<halo_exchange>();
-		halo_service.run(sop);
-	}
 
-        /* Do GPU setup if it's enabled */
+        /* Initialize GPU runtime if enabled.  This should be done before halo service, as Tausch will use CUDA calls. */
         if (this->settings.use_gpu) {
             ftl::device::autodetect();
             log::status << "Running on " << ftl::device::get_name() << std::endl;
@@ -157,6 +151,17 @@ void solver<fsten>::setup_space(std::size_t nlevels)
                 throw std::runtime_error("FTL layer: Failed to load kernels.");
             }
             log::status << "Loaded and compiled all GPU kernels" << std::endl;
+        }
+
+	setup_halo();
+	{
+		auto & sop = this->levels.template get<fsten>(0).A;
+		auto & halo_service = kman->services().template get<halo_exchange>();
+		halo_service.run(sop);
+	}
+
+        /* Allocate memory on the GPU, if we are using it. */
+        if (this->settings.use_gpu) {
             log::status << "Allocating GPU memory" << std::endl;
 
             std::cerr << "Ensuring solver variables are on gpu...";

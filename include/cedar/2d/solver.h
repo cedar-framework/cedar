@@ -125,11 +125,13 @@ solver(stencil_op<fsten> & fop) : parent::multilevel(fop)
 		auto nyc = cop.shape(1);
 
 		len_t abd_len_0 = nxc+2;
-		if (params->periodic[0] or params->periodic[1])
+		if (params->periodic[0] ||
+                    params->periodic[1] ||
+                    params->use_gpu_cholesky)
 			abd_len_0 = nxc*nyc;
 		this->ABD = grid_func(abd_len_0, nxc*nyc, 0);
                 this->bbd = array<real_t, 1>(
-                    params->use_gpu ? ftl::BufferAllocateDevice::Buffer_GPU : ftl::BufferAllocateDevice::Buffer_CPU,
+                    params->use_gpu_cholesky ? ftl::BufferAllocateDevice::Buffer_GPU : ftl::BufferAllocateDevice::Buffer_CPU,
                     this->ABD.len(1));
 	}
 

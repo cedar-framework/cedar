@@ -134,6 +134,10 @@ int main(int argc, char *argv[])
             conf.set<bool>("solver.gpu", true);
         } else if (!strcmp(argv[i], "--cpu")) {
             conf.set<bool>("solver.gpu", false);
+        } else if (!strcmp(argv[i], "--cpu-cholesky")) {
+            conf.set<bool>("solver.gpu-coarse-solve", false);
+        } else if (!strcmp(argv[i], "--gpu-cholesky")) {
+            conf.set<bool>("solver.gpu-coarse-solve", true);
         } else if (!strcmp(argv[i], "--local")) {
             conf.set<bool>("grid.local", true);
         } else if (!strcmp(argv[i], "--global")) {
@@ -158,6 +162,13 @@ int main(int argc, char *argv[])
 
     auto level = bmg.levels.get<five_pt>(0);
     auto ci = level.P;
+
+    for (std::size_t i = 0; i < levels; ++i) {
+        if (i == 0)
+            std::cerr << bmg.levels.get<five_pt>(i).P.len(0) << std::endl;
+        else
+            std::cerr << bmg.levels.get(i).P.len(0) << std::endl;
+    }
 
     MPI_Barrier(MPI_COMM_WORLD); // synchronize before timing solve
     auto sol = bmg.solve(b);

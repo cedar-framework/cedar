@@ -156,6 +156,8 @@ void redist_solver<inner_solver>::redist_operator(const stencil_op<nine_pt> & so
 		}
 	}
 
+        rop.mark_cpu_dirty(true);
+
 }
 template void redist_solver<cholesky_solver>::redist_operator(const stencil_op<nine_pt> & so, topo_ptr topo);
 template void redist_solver<multilevel_wrapper<mpi::solver<nine_pt>>>::redist_operator(const stencil_op<nine_pt> & so, topo_ptr topo);
@@ -347,6 +349,7 @@ void redist_solver<inner_solver>::gather_rhs(const grid_func & b)
 			jgs += ny;
 		}
 	}
+        b_redist.mark_cpu_dirty();
 }
 template void redist_solver<cholesky_solver>::gather_rhs(const grid_func & b);
 template void redist_solver<multilevel_wrapper<mpi::solver<nine_pt>>>::gather_rhs(const grid_func & b);
@@ -356,6 +359,7 @@ template void redist_solver<multilevel_wrapper<cdr2::solver<nine_pt>>>::gather_r
 template<class inner_solver>
 void redist_solver<inner_solver>::scatter_sol(grid_func & x)
 {
+    x_redist.ensure_cpu();
     x.ensure_cpu();
 	if (not redundant) {
 		len_t sbuf_len = 0;

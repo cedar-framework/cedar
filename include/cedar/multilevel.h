@@ -247,16 +247,16 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 
 	void setup(stencil_op<fsten> & fop)
 	{
-            if (conf->get("gpu", false)) {
-                ftl::device::autodetect();
-                log::status << "Running on " << ftl::device::get_name() << std::endl;
+            // if (conf->get("gpu", false) || conf->get("solver.gpu-coarse-solve", false)) {
+            //     ftl::device::autodetect();
+            //     log::status << "Running on " << ftl::device::get_name() << std::endl;
 
-                /* Load kernels */
-                if (!ftl::load_kernels(true)) {
-                    throw std::runtime_error("FTL: Failed to load kernels.");
-                }
-                log::status << "Loaded and compiled all GPU kernels" << std::endl;
-            }
+            //     /* Load kernels */
+            //     if (!ftl::load_kernels(true)) {
+            //         throw std::runtime_error("FTL: Failed to load kernels.");
+            //     }
+            //     log::status << "Loaded and compiled all GPU kernels" << std::endl;
+            // }
 
 		this->cycle->set_kernels(this->kman);
 		auto num_levels = compute_num_levels(fop);
@@ -268,7 +268,7 @@ multilevel(stencil_op<fsten> & fop, conf_ptr cfg): levels(fop), conf(cfg) {
 				num_levels = nlevels_conf;
 			}
 		}
-		log::debug << "Using a " << num_levels << " level heirarchy" << std::endl;
+		log::debug << "Using a " << num_levels << " level hierarchy" << std::endl;
 		setup_space(num_levels);
 		timer_begin("setup");
 		for (std::size_t i = 0; i < num_levels - 1; ++i) {

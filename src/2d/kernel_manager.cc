@@ -40,7 +40,7 @@ kman_ptr build_kernel_manager(std::shared_ptr<kernel_params> params)
 	kman->set<residual>("system");
 	kman->set<setup_interp>("system");
 
-        const std::string device_kernels = (params->use_gpu ? "gpu" : "system");
+        const std::string device_kernels = (params->use_gpu_cholesky ? "gpu" : "system");
 	kman->set<solve_cg>(device_kernels);
 
 	// register services

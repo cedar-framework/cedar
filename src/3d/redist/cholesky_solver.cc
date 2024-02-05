@@ -13,7 +13,7 @@ cholesky_solver::cholesky_solver(stencil_op & sop,
 	auto nzc = sop.shape(2);
 	this->ABD = mpi::grid_func(nxc*(nyc+1)+2, nxc*nyc*nzc, 0);
         this->bbd = array<real_t, 1>(
-            params->use_gpu ? ftl::BufferAllocateDevice::Buffer_GPU : ftl::BufferAllocateDevice::Buffer_CPU,
+            params->use_gpu_cholesky ? ftl::BufferAllocateDevice::Buffer_GPU : ftl::BufferAllocateDevice::Buffer_CPU,
             this->ABD.len(1));
 
 	kman->setup<solve_cg>(sop, ABD);

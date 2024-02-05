@@ -19,6 +19,8 @@ void cedar_mempool_pos(void* mp_void, int nbytes, int& pos) {
 }
 
 void dpotrf_gpu(const char* uplo, int n, ftl::Buffer<real_t>& abd, int nabd, int& info) {
+    abd.host_to_dev();
+
     ftl::blas::TriangularFillMode fill_mode =
         (uplo[0] == 'U' ?
          ftl::blas::TriangularFillMode::Upper :
@@ -26,10 +28,15 @@ void dpotrf_gpu(const char* uplo, int n, ftl::Buffer<real_t>& abd, int nabd, int
 
     ftl::blas::cholesky_factorize(fill_mode, abd);
     info = 0;
+
+    abd.mark_device_dirty();
 }
 
 void dpotrs_gpu(const char* uplo, int n, int nrhs, ftl::Buffer<real_t>& A, int lda,
                 ftl::FlatBuffer<real_t>& B, int ldb, int& info) {
+    A.host_to_dev();
+    B.host_to_dev();
+
     ftl::blas::TriangularFillMode fill_mode =
         (uplo[0] == 'U' ?
          ftl::blas::TriangularFillMode::Upper :
@@ -37,6 +44,8 @@ void dpotrs_gpu(const char* uplo, int n, int nrhs, ftl::Buffer<real_t>& A, int l
 
     ftl::blas::cholesky_solve(fill_mode, A, nrhs, B);
     info = 0;
+
+    B.mark_device_dirty();
 }
 
 void print_error(const char* str) {

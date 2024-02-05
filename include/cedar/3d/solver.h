@@ -124,7 +124,7 @@ solver(stencil_op<fsten> & fop,
 			abd_len_0 = nxc*nyc*nzc;
 		this->ABD = grid_func(abd_len_0, nxc*nyc*nzc, 0);
                 this->bbd = array<real_t, 1>(
-                    params->use_gpu ? ftl::BufferAllocateDevice::Buffer_GPU : ftl::BufferAllocateDevice::Buffer_CPU,
+                    params->use_gpu_cholesky ? ftl::BufferAllocateDevice::Buffer_GPU : ftl::BufferAllocateDevice::Buffer_CPU,
                     this->ABD.len(1));
 	}
 	void give_op(std::unique_ptr<stencil_op<fsten>> fop) {fop_ref = std::move(fop);}

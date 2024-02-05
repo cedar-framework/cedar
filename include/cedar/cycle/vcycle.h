@@ -91,6 +91,19 @@ public:
 
 		std::size_t coarse_lvl = levels.size() - 1;
 		if (lvl+1 == coarse_lvl) {
+
+                    // auto& bd = coarse_b;
+                    // auto rhs_buf = std::static_pointer_cast<ftl::CUDABaseBuffer<real_t, len_t>>(bd.to_flat_buffer().get_dev_impl())->get_device_pointer();
+                    // const std::size_t numel = bd.to_flat_buffer().get_numel();
+                    // std::vector<real_t> rhs(numel);
+                    // cudaMemcpy(rhs.data(), rhs_buf, numel * sizeof(real_t), cudaMemcpyDeviceToHost);
+
+                    // std::cerr << "GPU RHS for coarse solve (in vcycle.h)" << std::endl;
+                    // for (std::size_t i = 0; i < rhs.size(); ++i) {
+                    //     std::cerr << rhs[i] << " ";
+                    // }
+                    // std::cerr << std::endl;
+
 			timer_begin("coarse-solve");
 			coarse_solver(coarse_x, coarse_b);
 			timer_end("coarse-solve");

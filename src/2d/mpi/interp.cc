@@ -52,6 +52,7 @@ void interp_f90<device>::run(const prolong_op & P,
                 Pd.template ensure<device>();
                 coarsed.template ensure<device>();
                 fine.template ensure<device>();
+                res.template ensure<device>();
 
                 if (device::is_gpu()) {
                     MPI_BMG2_SymStd_interp_add<cedar::gpu>(

@@ -32,6 +32,7 @@ namespace cedar
 		std::shared_ptr<config> plane_config;
 		bool plane_agg;
             bool use_gpu;
+            bool use_gpu_cholesky;
 
 		int per_mask() const {
 			int mask = 0;

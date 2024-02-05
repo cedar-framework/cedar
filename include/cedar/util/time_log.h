@@ -16,6 +16,8 @@
 #include <cedar/mpi/redist_comms.h>
 #include <cedar/util/timer_util.h>
 
+#include <cuda_runtime.h>
+
 namespace cedar {
 
 	template<machine_mode mmode>
@@ -93,6 +95,7 @@ namespace cedar {
 	}
 	inline void timer_end(std::string label) {
 		if (active) {
+                    cudaDeviceSynchronize();
 			if (serial_timers)
 				tlog_ser.end(label);
 			else

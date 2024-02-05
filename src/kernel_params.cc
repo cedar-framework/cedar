@@ -97,6 +97,7 @@ std::shared_ptr<kernel_params> build_kernel_params(config & conf)
 		log::error << "invalid halo-exchange: " << halo_exchange_name << std::endl;
 
         params->use_gpu = conf.get<bool>("solver.gpu", false);
+        params->use_gpu_cholesky = conf.get<bool>("solver.gpu-coarse-solve", params->use_gpu);
 
 	return params;
 }
