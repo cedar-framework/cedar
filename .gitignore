@@ -4,3 +4,4 @@ build/
 .ipynb_checkpoints
 .cache
 compile_commands.json
+src/2d/ftn/mpi/FC.h
