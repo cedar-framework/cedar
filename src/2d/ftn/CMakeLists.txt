@@ -18,6 +18,9 @@ set(sources
   ftn/util.f90)
 
 if (ENABLE_MPI)
+  include(FortranCInterface)
+  FortranCInterface_HEADER(${CMAKE_CURRENT_SOURCE_DIR}/mpi/FC.h MACRO_NAMESPACE "FC_" SYMBOLS msg_tsetup msg_tsetup_int msg_tp_setup msg_tp_setup_int msg_timer_clear msg_timer_start msg_timer_stop msg_timer msg_save_array msg_restore_array)
+
   list(APPEND sources
 	ftn/mpi/BMG2_SymStd_SETUP_nog.f90
 	ftn/mpi/mpi_msg.F

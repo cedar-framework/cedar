@@ -16,7 +16,7 @@ class Cedar(CMakePackage):
 
     depends_on('blas')
     depends_on('lapack')
-    depends_on('boost: cxxstd=11 +program_options')
+    depends_on('boost cxxstd=11 +program_options')
     depends_on('mpi', when='+mpi')
 
     def cmake_args(self):

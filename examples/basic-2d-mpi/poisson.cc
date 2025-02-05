@@ -100,6 +100,7 @@ int main(int argc, char *argv[])
 	timer_init(MPI_COMM_WORLD);
 
 	config conf;
+	log::init(conf);
 
 	auto grid = util::create_topo(conf);
 
