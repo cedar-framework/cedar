@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.19)
 project(cedar VERSION 0.1.0 LANGUAGES CXX C Fortran)
 
 set(CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(MPI_LANGUAGE C Fortran)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
@@ -57,7 +58,7 @@ FIND_PACKAGE(Boost 1.44 REQUIRED COMPONENTS system filesystem)
 FIND_PACKAGE(BLAS REQUIRED)
 FIND_PACKAGE(LAPACK REQUIRED)
 
-find_package(MPI REQUIRED)
+find_package(MPI COMPONENTS C Fortran REQUIRED)
 
 if (ENABLE_PLANE_AGG)
   find_package(Argobots REQUIRED)
@@ -82,9 +83,8 @@ target_link_libraries(cedar PUBLIC
   ${Boost_LIBRARIES}
   ${LAPACK_LIBRARIES}
   ${BLAS_LIBRARIES}
-  ${MPI_C_LIBRARIES}
-  ${MPI_CXX_LIBRARIES}
-  ${MPI_Fortran_LIBRARIES})
+  PUBLIC MPI::MPI_C
+  MPI::MPI_Fortran)
 include_directories(${json_location})
 include_directories(${tausch_location})
 target_compile_definitions(cedar PUBLIC WITH_TAUSCH)
@@ -136,8 +136,7 @@ if(ENABLE_EXAMPLES)
 endif()
 
 if(ENABLE_UNIT_TESTS)
-  find_package(PythonLibs REQUIRED)
-  find_package(NumPy REQUIRED)
+  find_package(Python3 COMPONENTS Interpreter Development NumPy)
   message(STATUS ${PYTHON_INCLUDE_DIR})
   list(APPEND cedar-deps ${PYTHON_LIBRARY})
   include_directories(${PYTHON_INCLUDE_DIR} ${PYTHON_NUMPY_INCLUDE_DIR})
